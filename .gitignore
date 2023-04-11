@@ -1,0 +1,5 @@
+.zephir
+ext
+compile-errors.log
+compile.log
+ui.php
