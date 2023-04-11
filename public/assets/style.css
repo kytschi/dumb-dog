@@ -1,0 +1,38 @@
+:root {
+    /* Body */
+	--body-background-colour: #92ddd6;
+    --body-text-colour: #030202;
+
+    /* Box */
+    --box-background-colour: #fff;
+    --box-border-colour: #030202;
+    --box-title-background-colour: #EB9691;
+    --box-title-border-colour: #030202;
+    --box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+
+    /* Buttons */
+    --button-background-colour: #EB9691;
+    --button-hover-background-colour: #fca8a4;
+    --button-border-colour: #030202;
+    --button-svg-fill-colour: #030202;
+    --button-text-colour: #030202;
+    --button-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+
+    /* Inputs */
+    --input-border-colour: #fca8a4;
+
+    /* Text */
+    --text-heading-background-colour: #fff;
+    --text-heading-border-colour: #030202;
+    --text-heading-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+}
+
+/* Fonts */
+@font-face {
+    font-family: 'heading';
+    src: url("heading.ttf") format("truetype");
+}
+@font-face {
+    font-family: 'subheading';
+    src: url("body.ttf") format("truetype");
+}
