@@ -26,7 +26,9 @@ namespace DumbDog;
 
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Pages;
+use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
+use DumbDog\Controllers\Themes;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
@@ -76,6 +78,18 @@ class DumbDog
                 } elseif (strpos(path, "/templates") !== false) {
                     let controller = new Templates(cfg);
                     let output = controller->index();
+                } elseif (strpos(path, "/themes/add") !== false) {
+                    let controller = new Themes(cfg);
+                    let output = controller->add();
+                } elseif (strpos(path, "/themes/edit") !== false) {
+                    let controller = new Themes(cfg);
+                    let output = controller->edit(path);
+                } elseif (strpos(path, "/themes") !== false) {
+                    let controller = new Themes(cfg);
+                    let output = controller->index();
+                } elseif (strpos(path, "/settings") !== false) {
+                    let controller = new Settings(cfg);
+                    let output = controller->index();
                 } else {
                     let code = 404;
                     let output = this->notFound();
@@ -92,8 +106,10 @@ class DumbDog
 
                 let page = database->get("SELECT pages.*, file FROM pages JOIN templates ON templates.id=pages.template_id WHERE url=:url", data);
                 if (page) {
+                    var settings;
+                    let settings = database->get("SELECT * FROM settings LIMIT 1");
                     if (file_exists("./website/" . page->file)) {                        
-                        eval("$page=json_decode('" . json_encode(page) . "');");
+                        eval("$dd_site=json_decode('" . json_encode(settings) . "');$dd_page=json_decode('" . json_encode(page) . "');");
                         require_once("./website/" . page->file);
                     } else {
                         throw new Exception("template not found");
@@ -132,6 +148,12 @@ class DumbDog
             </a>
             <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
                 <img src='/assets/templates.png'>
+            </a>
+            <a href='/dumb-dog/themes' class='button' title='Managing the themes'>
+                <img src='/assets/themes.png'>
+            </a>
+            <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
+                <img src='/assets/settings.png'>
             </a>
         </div>
         <div id='quick-menu-button' onclick='showQuickMenu()'>

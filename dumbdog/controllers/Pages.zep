@@ -72,7 +72,7 @@ class Pages extends Controller
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the page");
-                        let html .= "<script type='text/javascript'>console.log(JSON.parse(" . json_encode(status) . "));</script>";
+                        let html .= this->consoleLogError(status);
                     } else {
                         let html .= this->saveSuccess("I've saved the page");
                     }
@@ -178,17 +178,17 @@ class Pages extends Controller
                 <div class='input-group'>
                     <span>template</span>
                     <select name='template_id'>";
-            let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
-            var iLoop = 0;
-            while (iLoop < count(data)) {
-                let html .= "<option value='" . data[iLoop]->id . "'";
-                if (data[iLoop]->id == page->template_id) {
-                    let html .= " selected='selected'";
-                }
-                let html .= ">" . data[iLoop]->name . "</option>";
-                let iLoop = iLoop + 1;
+        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
+        var iLoop = 0;
+        while (iLoop < count(data)) {
+            let html .= "<option value='" . data[iLoop]->id . "'";
+            if (data[iLoop]->id == page->template_id) {
+                let html .= " selected='selected'";
             }
-            let html .= "
+            let html .= ">" . data[iLoop]->name . "</option>";
+            let iLoop = iLoop + 1;
+        }
+        let html .= "
                     </select>
                 </div>
             </div>
