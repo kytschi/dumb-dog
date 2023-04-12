@@ -86,17 +86,12 @@ class Database
     {
         var statement, status, errors;
 
-        // Temporarily turn the error reporting off.
-        //let errors = error_reporting();
-        //error_reporting(0);
         ob_start();
         let statement = this->db->prepare(query);
         let status = statement->execute(data);
         let errors = ob_get_contents();
         ob_end_clean();
 
-        // Turn the error handling backon.
-        //error_reporting(errors);
         if (!status) {
             return errors;
         }

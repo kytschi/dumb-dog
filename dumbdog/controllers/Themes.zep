@@ -1,7 +1,7 @@
 /**
- * Dumb Dog templates builder
+ * Dumb Dog themes builder
  *
- * @package     DumbDog\Controllers\Templates
+ * @package     DumbDog\Controllers\Themes
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -31,7 +31,7 @@ use DumbDog\Exceptions\SaveException;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
 
-class Templates extends Controller
+class Themes extends Controller
 {
     private cfg;
 
@@ -44,37 +44,37 @@ class Templates extends Controller
     {
         var titles, html;
         let titles = new Titles();
-        let html = titles->page("Add a template", "/assets/add-page.png");
+        let html = titles->page("Add a theme", "/assets/add-page.png");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
                 var database, data = [], status = false;
 
-                if (!this->validate(_POST, ["name", "file"])) {
+                if (!this->validate(_POST, ["name", "folder"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
-                    let data["file"] = _POST["file"];
+                    let data["folder"] = _POST["folder"];
                     let data["default"] = 0;
-                    let data["created_at"] = date("Y-m-d H:i:s");
+                    //let data["created_at"] = date("Y-m-d H:i:s");
                     let data["created_by"] = this->getUserId();
-                    let data["updated_at"] = date("Y-m-d H:i:s");
+                    //let data["updated_at"] = date("Y-m-d H:i:s");
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
-                        "INSERT INTO templates 
-                            (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
+                        "INSERT INTO themes 
+                            (id, name, folder, `default`, created_at, created_by, updated_at, updated_by, status) 
                         VALUES 
-                            (UUID(), :name, :file, :default, :created_at, :created_by, :updated_at, :updated_by)",
+                            (UUID(), :name, :folder, :default, NOW(), :created_by, NOW(), :updated_by, 'active')",
                         data
                     );
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to save the template");
+                        let html .= this->saveFailed("Failed to save the theme");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've saved the template");
+                        let html .= this->saveSuccess("I've saved the theme");
                     }
                 }
             }
@@ -82,7 +82,7 @@ class Templates extends Controller
 
         let html .= "<form method='post'><div class='box wfull'>
             <div class='box-title'>
-                <span>the template</span>
+                <span>the theme</span>
             </div>
             <div class='box-body'>
                 <div class='input-group'>
@@ -90,12 +90,12 @@ class Templates extends Controller
                     <input type='text' name='name' placeholder='give me a name' value=''>
                 </div>
                 <div class='input-group'>
-                    <span>file<span class='required'>*</span></span>
-                    <input type='text' name='file' placeholder='where am I located and with what file?' value=''>
+                    <span>folder<span class='required'>*</span></span>
+                    <input type='text' name='folder' placeholder='where am I located?' value=''>
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/templates' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/themes' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -113,13 +113,13 @@ class Templates extends Controller
 
         let database = new Database(this->cfg);
         let data["id"] = id;
-        let page = database->get("SELECT * FROM templates WHERE id=:id", data);
+        let page = database->get("SELECT * FROM themes WHERE id=:id", data);
 
         if (empty(page)) {
-            throw new NotFoundException("Template page not found");
+            throw new NotFoundException("Theme page not found");
         }
 
-        let html = titles->page("Edit the template", "/assets/edit-page.png");
+        let html = titles->page("Edit the theme", "/assets/edit-page.png");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -129,24 +129,24 @@ class Templates extends Controller
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
-                    let data["file"] = _POST["file"];
+                    let data["folder"] = _POST["folder"];
                     let data["default"] = 0;
                     let data["updated_at"] = date("Y-m-d H:i:s");
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
-                        "UPDATE templates SET 
-                            name=:name, file=:file, `default`=:default, updated_at=:updated_at, updated_by=:updated_by
+                        "UPDATE themes SET 
+                            name=:name, folder=:folder, `default`=:default, updated_at=:updated_at, updated_by=:updated_by
                         WHERE id=:id",
                         data
                     );
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to update the template");
+                        let html .= this->saveFailed("Failed to update the theme");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've updated the template");
+                        let html .= this->saveSuccess("I've updated the theme");
                     }
                 }
             }
@@ -154,7 +154,7 @@ class Templates extends Controller
 
         let html .= "<form method='post'><div class='box wfull'>
             <div class='box-title'>
-                <span>the page</span>
+                <span>the theme</span>
             </div>
             <div class='box-body'>
                 <div class='input-group'>
@@ -162,12 +162,12 @@ class Templates extends Controller
                     <input type='text' name='name' placeholder='make sure to set a name' value='" . page->name . "'>
                 </div>
                 <div class='input-group'>
-                    <span>file<span class='required'>*</span></span>
-                    <input type='text' name='file' placeholder='where am I located and with what file?' value='" . page->file . "'>
+                    <span>folder<span class='required'>*</span></span>
+                    <input type='text' name='folder' placeholder='where am I located?' value='" . page->folder . "'>
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/templates' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/themes' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -180,9 +180,9 @@ class Templates extends Controller
         var titles, tiles, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Templates", "/assets/templates.png");
+        let html = titles->page("Themes", "/assets/templates.png");
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/templates/add' class='button' title='Add a template'>
+            <a href='/dumb-dog/themes/add' class='button' title='Add a theme'>
                 <img src='/assets/add-page.png'>
             </a>
         </div>";
@@ -191,8 +191,8 @@ class Templates extends Controller
 
         let tiles = new Tiles();
         let html = html . tiles->build(
-            database->all("SELECT * FROM templates"),
-            "/dumb-dog/templates/edit/"
+            database->all("SELECT * FROM themes"),
+            "/dumb-dog/themes/edit/"
         );
 
         return html;
