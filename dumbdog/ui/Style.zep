@@ -88,12 +88,12 @@ class Style
             font-family: 'subheading', Helvetica, sans-serif;
             line-height: 44pt;
         }
-        input {
+        input, textarea, select {
             font-family: Helvetica, sans-serif;
             font-size: 14pt;
             padding: 10px;
         }
-        input:focus {
+        input:focus, textarea:focus, select:focus {
             border:1px solid var(--input-border-colour);
             box-shadow: none;
             -moz-box-shadow: none;
@@ -108,13 +108,23 @@ class Style
             line-height: 34pt;
             padding: 10px 40px;
         }
-        #quick-menu .button, #quick-menu-button .button, button {
+        .button, button, .button-blank {
             background-color: var(--button-background-colour);
             border: 3px solid var(--button-border-colour);
             cursor: pointer;
         }
-        button:hover, #quick-menu .button:hover, #quick-menu-button .button:hover {
+        .button-blank {
+            background: none !important;
+            border: 0 !important;
+        }
+        button:hover, .button:hover {
             background-color: var(--button-hover-background-colour);
+        }
+        .button-blank:hover {
+            color: var(--button-hover-background-colour);
+        }
+        .page-toolbar {
+            margin-bottom: 20px;
         }
 
         /* Box */
@@ -124,15 +134,26 @@ class Style
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
+            margin-bottom: 40px;
         }
         .box-body {
-            padding: 20px;
+            padding: 40px 40px;
         }
         .box-footer {
-            padding: 20px;
+            padding: 0 40px 40px 40px;
             display: flex;
-            align-content: flex-end;
-            flex-flow: column wrap;
+            justify-content: flex-end;
+        }
+        .box-footer a {
+            text-decoration: none;
+            color: var(--button-text-colour);
+            font-family: 'subheading', Helvetica, sans-serif;
+            font-size: 44pt;
+            line-height: 34pt;
+            padding: 10px 40px;
+        }
+        .box-footer a, .box-footer button {
+            margin-left: 5px;
         }
         .box-title {
             background-color: var(--box-title-background-colour);
@@ -148,24 +169,30 @@ class Style
             width: 80px;
             margin-right: 10px;
         }
+        .error .box-body, .success .box-body {
+            font-family: 'subheading', Helvetica, sans-serif;
+            text-transform: uppercase;
+        }
+        .error .box-body p, .success .box-body p {
+            padding: 0;
+            margin: 0;
+        }
 
         /* Quick menu */
         #quick-menu-button {                
             position: fixed;
             right: 30px;
-            bottom: 30px;
+            top: 30px;
             z-index: 100;
-            overflow: hidden;
         }
         #quick-menu {
             position: fixed;
             right: 55px;
-            bottom: 140px;
+            top: 140px;
             width: 80px;
-            /*display: none;*/
             z-index: 101;
         }
-        #quick-menu .button, #quick-menu-button .button {
+        #quick-menu .button, #quick-menu-button .button, .page-toolbar .button {
             display: block;
             height: 100px;
             width: 100px;
@@ -175,10 +202,10 @@ class Style
             overflow: hidden;
             box-shadow: var(--button-shadow);
         }
-        #quick-menu .button {
+        #quick-menu .button, .page-toolbar .button  {
             margin-bottom: 10px;
         }
-        #quick-menu img {
+        #quick-menu img, .page-toolbar img {
             margin-top: 20px;
             width: 60px;
         }
@@ -200,15 +227,20 @@ class Style
             font-size: 56pt;
             line-height: 56pt;
         }
-        .page-title span, .no-results span {
+        .page-title span, .no-results span {                
             background-color: var(--text-heading-background-colour);
             border: 3px solid var(--text-heading-border-colour);
             padding: 10px 40px 0 40px;
             box-shadow: var(--text-heading-shadow);
+            background-repeat: no-repeat;
+            background-position: 20px 20px;
         }
-
         .page-title span {
-            padding: 10px 40px 10px 40px;
+            padding: 0px 40px 10px 100px;
+        }
+        .required {
+            padding-top: 10px;
+            color: var(--text-required-colour);
         }
 
         /* Sizes */
@@ -250,7 +282,6 @@ class Style
             break-inside: avoid-column;
             margin: 0 0 40px 0;
             width: 100%;
-            box-shadow: var(--box-shadow);
         }
         </style>";
     }

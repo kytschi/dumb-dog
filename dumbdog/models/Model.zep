@@ -1,7 +1,7 @@
 /**
- * Dumb Dog page model
+ * Dumb Dog model
  *
- * @package     DumbDog\Models\Page
+ * @package     DumbDog\Models\Model
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -24,12 +24,10 @@
 */
 namespace DumbDog\Models;
 
-class Page
+class Model
 {
-    public url;
-    public title;
-    public content;
-    public status;
+    public id;
+    public name;
     public created_at;
     public created_by;
     public updated_at;

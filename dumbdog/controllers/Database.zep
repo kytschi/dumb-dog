@@ -74,11 +74,41 @@ class Database
         let this->db = new \PDO(connection, username, password);
     }
 
-    public function all(string query)
+    public function all(string query, array data = [])
     {
         var statement;
         let statement = this->db->prepare(query);
-        statement->execute();
-        return statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Page");
+        statement->execute(data);
+        return statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Model");
+    }
+
+    public function execute(string query, array data = [])
+    {
+        var statement, status, errors;
+
+        // Temporarily turn the error reporting off.
+        //let errors = error_reporting();
+        //error_reporting(0);
+        ob_start();
+        let statement = this->db->prepare(query);
+        let status = statement->execute(data);
+        let errors = ob_get_contents();
+        ob_end_clean();
+
+        // Turn the error handling backon.
+        //error_reporting(errors);
+        if (!status) {
+            return errors;
+        }
+
+        return status;
+    }
+
+    public function get(string query, array data = [])
+    {
+        var statement;
+        let statement = this->db->prepare(query);
+        statement->execute(data);
+        return statement->fetchObject("DumbDog\\Models\\Model");
     }
 }

@@ -1,7 +1,7 @@
 /**
- * Dumb Dog titles builder
+ * Validation exception
  *
- * @package     DumbDog\Ui\Gfx\Titles
+ * @package     DumbDog\Exceptions\ValidationException
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -21,18 +21,18 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
-*/
-namespace DumbDog\Ui\Gfx;
+ */
+namespace DumbDog\Exceptions;
 
-class Titles
-{
-    public function noResults()
-    {
-        return "<h2 class='no-results'><span>no results</span></h2>";
-    }
+use DumbDog\Exceptions\Exception;
 
-    public function page(string title, string image)
-    {
-        return "<h1 class='page-title'><span style='background-image: url(" . image . ");'>" . title . "</span></h1>";
+class ValidationException extends Exception
+{    
+	public function __construct(string message, int code = 400)
+	{
+        //Trigger the parent construct.
+        parent::__construct(message, code);
+
+        let this->code = code;
     }
 }

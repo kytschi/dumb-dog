@@ -21,12 +21,16 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
- */
- namespace DumbDog;
+*/
+namespace DumbDog;
 
+use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Pages;
+use DumbDog\Controllers\Templates;
+use DumbDog\Exceptions\Exception;
+use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
-use DumbDog\Controllers\Pages;
 
 class DumbDog
 {
@@ -42,32 +46,70 @@ class DumbDog
         let this->cfg = cfg;
         define("VERSION", this->version);
 
-        var parsed, path, controller, output, code;
+        var parsed, path, controller, output, code, backend = false, err;
         let parsed = parse_url(_SERVER["REQUEST_URI"]);
         let path = "/" . trim(parsed["path"], "/");
 
         let code = 200;
 
-        if (strpos(path, "/dumb-dog") !== false) {
-            let path = "/" . ltrim(parsed["path"], "/dumb-dog/");
-            if (path == "/") {
-                let output = this->dashboard();
-            } elseif (strpos(path, "/pages/add") !== false) {
-                let controller = new Pages(cfg);
-                let output = controller->add();
-            } elseif (strpos(path, "/pages") !== false) {
-                let controller = new Pages(cfg);
-                let output = controller->index();
+        try {
+            if (strpos(path, "/dumb-dog") !== false) {
+                let backend = true;
+                let path = "/" . ltrim(parsed["path"], "/dumb-dog/");
+                if (path == "/") {
+                    let output = this->dashboard();
+                } elseif (strpos(path, "/pages/add") !== false) {
+                    let controller = new Pages(cfg);
+                    let output = controller->add();
+                } elseif (strpos(path, "/pages/edit") !== false) {
+                    let controller = new Pages(cfg);
+                    let output = controller->edit(path);
+                } elseif (strpos(path, "/pages") !== false) {
+                    let controller = new Pages(cfg);
+                    let output = controller->index();
+                } elseif (strpos(path, "/templates/add") !== false) {
+                    let controller = new Templates(cfg);
+                    let output = controller->add();
+                } elseif (strpos(path, "/templates/edit") !== false) {
+                    let controller = new Templates(cfg);
+                    let output = controller->edit(path);
+                } elseif (strpos(path, "/templates") !== false) {
+                    let controller = new Templates(cfg);
+                    let output = controller->index();
+                } else {
+                    let code = 404;
+                    let output = this->notFound();
+                }
+                this->ddHead(code);
+                echo output;
+                this->ddFooter();
+                //this->login();
             } else {
-                let code = 404;
-                let output = this->notFound();
+                var database, data = [], page;
+
+                let database = new Database(this->cfg);
+                let data["url"] = path;
+
+                let page = database->get("SELECT pages.*, file FROM pages JOIN templates ON templates.id=pages.template_id WHERE url=:url", data);
+                if (page) {
+                    if (file_exists("./website/" . page->file)) {                        
+                        eval("$page=json_decode('" . json_encode(page) . "');");
+                        require_once("./website/" . page->file);
+                    } else {
+                        throw new Exception("template not found");
+                    }
+                } else {
+                    this->ddHead(404);
+                    echo this->notFound(false, err->getMessage());
+                    this->ddFooter();
+                }
             }
-            this->ddHead(code);
-            echo output;
+        } catch NotFoundException, err {
+            this->ddHead(404);
+            echo this->notFound(backend, err->getMessage());
             this->ddFooter();
-            //this->login();
-        } else {
-            echo "front end";
+        } catch \Exception, err {
+            throw err;
         }
     }
     
@@ -88,6 +130,9 @@ class DumbDog
             <a href='/dumb-dog/pages' class='button' title='Managing the pages'>
                 <img src='/assets/pages.png'>
             </a>
+            <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
+                <img src='/assets/templates.png'>
+            </a>
         </div>
         <div id='quick-menu-button' onclick='showQuickMenu()'>
             <div class='button'>
@@ -102,10 +147,12 @@ class DumbDog
             header("HTTP/1.1 404 Not Found");
         }
 
-        var head;
-        let head = new Head(this->cfg);
+        var head, javascript;
+        let head = new Head(this->cfg);        
+        let javascript = new Javascript();
 
         echo "<!DOCTYPE html><html lang='en'>" . head->build() . "<body><div id='bk'><img src='/assets/bk.png'></div><main>";
+        echo javascript->logo();
     }
 
     private function login()
@@ -135,7 +182,7 @@ class DumbDog
         ";
     }
 
-    private function notFound(bool backend = true)
+    private function notFound(bool backend = true, string message = "page is not found")
     {
         if (backend) {
             return "
@@ -145,10 +192,10 @@ class DumbDog
                     <span>dang it!</span>
                 </div>
                 <div class='box-body'>
-                    <h1>page is not found</h1>
+                    <h1>" . message . "</h1>
                 </div>
                 <div class='box-footer'>
-                    <button type='button'>back</button>
+                    <button type='button' onclick='window.history.back()'>back</button>
                 </div>
             </div>
             ";

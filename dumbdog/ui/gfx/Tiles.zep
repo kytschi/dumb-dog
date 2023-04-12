@@ -28,7 +28,7 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Tiles
 {
-    public function build(array data)
+    public function build(array data, string url = "")
     {
         var titles, html;
         
@@ -40,9 +40,12 @@ class Tiles
                 let html .= "<div class='tile'>
                     <div class='box wfull'>
                         <div class='box-title'>
-                            <span>" . data[iLoop]->title . "</span>
+                            <span>" . data[iLoop]->name . "</span>
                         </div>
                         <div class='box-body'>
+                        </div>
+                        <div class='box-footer'>
+                            <a href='" . url . data[iLoop]->id . "' class='button'>EDIT</a>
                         </div>
                     </div>
                 </div>";
