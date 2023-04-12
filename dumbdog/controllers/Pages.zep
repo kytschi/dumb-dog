@@ -173,7 +173,7 @@ class Pages extends Controller
                 </div>
                 <div class='input-group'>
                     <span>content</span>
-                    <textarea name='content' rows='7' placeholder='the page content'>" . page->content . "</textarea>
+                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'>" . page->content . "</textarea>
                 </div>
                 <div class='input-group'>
                     <span>template</span>
