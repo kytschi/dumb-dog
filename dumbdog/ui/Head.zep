@@ -40,6 +40,9 @@ class Head
         var html, style;
         let style = new Style(this->cfg);
         let html = style->build();
+        let html .= "<link rel='stylesheet' type='text/css' href='/assets/trumbowyg/ui/trumbowyg.min.css'>";
+        let html .= "<script src='/assets/jquery.min.js'></script>";
+        let html .= "<script src='/assets/trumbowyg/trumbowyg.min.js'></script>";
         return "<head><link rel='icon' type='image/png' sizes='64x64' href='/assets/dumbdog.png'>" . html . "</head>";
     }
 }
