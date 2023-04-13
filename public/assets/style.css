@@ -12,6 +12,7 @@
 
     /* Buttons */
     --button-background-colour: #EB9691;
+    --button-background-colour-disabled: #c9c9c9;
     --button-hover-background-colour: #fca8a4;
     --button-border-colour: #030202;
     --button-svg-fill-colour: #030202;
@@ -19,7 +20,8 @@
     --button-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
 
     /* Inputs */
-    --input-border-colour: #fca8a4;
+    --input-border-colour: #030202;
+    --input-border-focus-colour: #fca8a4;
 
     /* Text */
     --text-heading-background-colour: #fff;

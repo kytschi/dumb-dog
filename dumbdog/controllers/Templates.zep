@@ -55,10 +55,8 @@ class Templates extends Controller
                 } else {
                     let data["name"] = _POST["name"];
                     let data["file"] = _POST["file"];
-                    let data["default"] = 0;
-                    let data["created_at"] = date("Y-m-d H:i:s");
+                    let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["created_by"] = this->getUserId();
-                    let data["updated_at"] = date("Y-m-d H:i:s");
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
@@ -66,7 +64,7 @@ class Templates extends Controller
                         "INSERT INTO templates 
                             (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
                         VALUES 
-                            (UUID(), :name, :file, :default, :created_at, :created_by, :updated_at, :updated_by)",
+                            (UUID(), :name, :file, :default, NOW(), :created_by, NOW(), :updated_by)",
                         data
                     );
 
@@ -92,6 +90,18 @@ class Templates extends Controller
                 <div class='input-group'>
                     <span>file<span class='required'>*</span></span>
                     <input type='text' name='file' placeholder='where am I located and with what file?' value=''>
+                </div>
+                <div class='input-group'>
+                    <span>default</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='default' value='1'>
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class='box-footer'>
@@ -130,14 +140,20 @@ class Templates extends Controller
                 } else {
                     let data["name"] = _POST["name"];
                     let data["file"] = _POST["file"];
-                    let data["default"] = 0;
-                    let data["updated_at"] = date("Y-m-d H:i:s");
+                    let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
+                    if (data["default"]) {
+                        let status = database->execute(
+                            "UPDATE templates SET `default`=0, updated_at=NOW(), updated_by=:updated_by",
+                            data
+                        );
+                    }
+
                     let status = database->execute(
                         "UPDATE templates SET 
-                            name=:name, file=:file, `default`=:default, updated_at=:updated_at, updated_by=:updated_by
+                            name=:name, file=:file, `default`=:default, updated_at=NOW(), updated_by=:updated_by
                         WHERE id=:id",
                         data
                     );
@@ -146,10 +162,14 @@ class Templates extends Controller
                         let html .= this->saveFailed("Failed to update the template");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've updated the template");
+                        this->redirect("/dumb-dog/templates/edit/" . page->id . "?saved=true");
                     }
                 }
             }
+        }
+
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("I've updated the template");
         }
 
         let html .= "<form method='post'><div class='box wfull'>
@@ -164,6 +184,24 @@ class Templates extends Controller
                 <div class='input-group'>
                     <span>file<span class='required'>*</span></span>
                     <input type='text' name='file' placeholder='where am I located and with what file?' value='" . page->file . "'>
+                </div>
+                <div class='input-group'>
+                    <span>default</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='default' value='1'";
+
+                if (page->{"default"} == 1) {
+                    let html .= " checked='checked'";
+                }
+                
+                let html .= ">
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class='box-footer'>

@@ -41,32 +41,60 @@ class Pages extends Controller
 
     public function add()
     {
-        var titles, html;
+        var titles, html, data, database;
         let titles = new Titles();
+        let database = new Database(this->cfg);
 
         let html = titles->page("Create a page", "/assets/add-page.png");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, data = [], status = false;
+                var status = false;
+                let data = [];
 
                 if (!this->validate(_POST, ["name", "file"])) {
                     let html .= this->missingRequired();
                 } else {
+                    let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
                     let data["url"] = _POST["url"];
                     let data["content"] = _POST["content"];
-                    let data["created_at"] = date("Y-m-d H:i:s");
+                    let data["template_id"] = _POST["template_id"];
+                    let data["meta_keywords"] = _POST["meta_keywords"];
+                    let data["meta_author"] = _POST["meta_author"];
+                    let data["meta_description"] = _POST["meta_description"];
                     let data["created_by"] = this->getUserId();
-                    let data["updated_at"] = date("Y-m-d H:i:s");
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
                     let status = database->execute(
                         "INSERT INTO pages 
-                            (id, name, url, content, created_at, created_by, updated_at, updated_by) 
+                            (id,
+                            status,
+                            name,
+                            url,
+                            content,
+                            template_id,
+                            meta_keywords,
+                            meta_author,
+                            meta_description,
+                            created_at,
+                            created_by,
+                            updated_at,
+                            updated_by) 
                         VALUES 
-                            (UUID(), :name, :url, :content, :created_at, :created_by, :updated_at, :updated_by)",
+                            (UUID(),
+                            :status,
+                            :name,
+                            :url,
+                            :content,
+                            :template_id,
+                            :meta_keywords,
+                            :meta_author,
+                            :meta_description,
+                            NOW(),
+                            :created_by,
+                            NOW(),
+                            :updated_by)",
                         data
                     );
 
@@ -86,12 +114,52 @@ class Pages extends Controller
             </div>
             <div class='box-body'>
                 <div class='input-group'>
+                    <span>live</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='status' value='1'>
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class='input-group'>
                     <span>name<span class='required'>*</span></span>
                     <input type='text' name='name' placeholder='give me a name' value=''>
                 </div>
                 <div class='input-group'>
                     <span>url<span class='required'>*</span></span>
                     <input type='text' name='url' placeholder='how will I be reached' value=''>
+                </div>
+                <div class='input-group'>
+                    <span>template</span>
+                    <select name='template_id'>";
+        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
+        var iLoop = 0;
+        while (iLoop < count(data)) {
+            let html .= "<option value='" . data[iLoop]->id . "'";
+            if (data[iLoop]->{"default"}) {
+                let html .= " selected='selected'";
+            }
+            let html .= ">" . data[iLoop]->name . "</option>";
+            let iLoop = iLoop + 1;
+        }
+        let html .= "
+                    </select>
+                </div>
+                <div class='input-group'>
+                    <span>meta keywords</span>
+                    <input type='text' name='meta_keywords' placeholder='add some keywords if you like'>
+                </div>
+                <div class='input-group'>
+                    <span>meta author</span>
+                    <input type='text' name='meta_author' placeholder='add an author'>
+                </div>
+                <div class='input-group'>
+                    <span>meta description</span>
+                    <textarea rows='4' name='meta_description' placeholder='add a description'></textarea>
                 </div>
             </div>
             <div class='box-footer'>
@@ -133,17 +201,29 @@ class Pages extends Controller
                 if (!this->validate(_POST, ["name", "url", "template_id"])) {
                     let html .= this->missingRequired();
                 } else {
+                    let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
                     let data["url"] = _POST["url"];
                     let data["content"] = _POST["content"];
                     let data["template_id"] = _POST["template_id"];
-                    let data["updated_at"] = date("Y-m-d H:i:s");
+                    let data["meta_keywords"] = _POST["meta_keywords"];
+                    let data["meta_author"] = _POST["meta_author"];
+                    let data["meta_description"] = _POST["meta_description"];
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
                         "UPDATE pages SET 
-                            name=:name, url=:url, template_id=:template_id, content=:content, updated_at=:updated_at, updated_by=:updated_by
+                            status=:status,
+                            name=:name,
+                            url=:url,
+                            template_id=:template_id,
+                            content=:content,
+                            meta_keywords=:meta_keywords,
+                            meta_author=:meta_author,
+                            meta_description=:meta_description,
+                            updated_at=NOW(),
+                            updated_by=:updated_by
                         WHERE id=:id",
                         data
                     );
@@ -152,10 +232,14 @@ class Pages extends Controller
                         let html .= this->saveFailed("Failed to update the page");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've updated the page");
+                        this->redirect("/dumb-dog/pages/edit/" . page->id . "?saved=true");
                     }
                 }
             }
+        }
+
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("I've updated the page");
         }
 
         let html .= "<form method='post'><div class='box wfull'>
@@ -163,6 +247,23 @@ class Pages extends Controller
                 <span>the page</span>
             </div>
             <div class='box-body'>
+                <div class='input-group'>
+                    <span>live</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='status' value='1'";
+                if (page->{"status"} == "live") {
+                    let html .= " checked='checked'";
+                }
+                
+                let html .= ">
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
                 <div class='input-group'>
                     <span>url<span class='required'>*</span></span>
                     <input type='text' name='url' placeholder='the page url' value='" . page->url . "'>
@@ -190,6 +291,18 @@ class Pages extends Controller
         }
         let html .= "
                     </select>
+                </div>
+                <div class='input-group'>
+                    <span>meta keywords</span>
+                    <input type='text' name='meta_keywords' placeholder='add some keywords if you like' value='" . page->meta_keywords . "'>
+                </div>
+                <div class='input-group'>
+                    <span>meta author</span>
+                    <input type='text' name='meta_author' placeholder='add an author' value='" . page->meta_author . "'>
+                </div>
+                <div class='input-group'>
+                    <span>meta description</span>
+                    <textarea rows='4' name='meta_description' placeholder='add a description'>" . page->meta_descrption . "</textarea>
                 </div>
             </div>
             <div class='box-footer'>

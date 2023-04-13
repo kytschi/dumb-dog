@@ -1,7 +1,7 @@
 /**
- * Dumb Dog titles builder
+ * Dumb Dog dashboard
  *
- * @package     DumbDog\Ui\Gfx\Titles
+ * @package     DumbDog\Controllers\Dashboard
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -22,22 +22,31 @@
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
 */
-namespace DumbDog\Ui\Gfx;
+namespace DumbDog\Controllers;
 
-class Titles
+use DumbDog\Controllers\Controller;
+use DumbDog\Controllers\Database;
+use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Exceptions\SaveException;
+use DumbDog\Ui\Gfx\Tiles;
+use DumbDog\Ui\Gfx\Titles;
+
+class Dashboard extends Controller
 {
-    public function noResults()
+    private cfg;
+
+    public function __construct(array cfg)
     {
-        return "<h2 class='no-results'><span>no results</span></h2>";
+        let this->cfg = cfg;    
     }
 
-    public function page(string title, string image = "")
+    public function index()
     {
-        var html;
-        let html = "<h1 class='page-title'><span";
-        if (image) {
-            let html .= " style='background-image: url(" . image . ");'";
-        }
-        return html . ">" . title . "</span></h1>";
+        var titles, html;
+        let titles = new Titles();
+
+        let html = titles->page("Dashboard", "/assets/dashboard.png");
+
+        return html;
     }
 }
