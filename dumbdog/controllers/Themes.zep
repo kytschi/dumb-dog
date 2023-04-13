@@ -40,7 +40,7 @@ class Themes extends Controller
         let this->cfg = cfg;    
     }
 
-    public function add()
+    public function add(string path)
     {
         var titles, html;
         let titles = new Titles();
@@ -126,7 +126,7 @@ class Themes extends Controller
         let page = database->get("SELECT * FROM themes WHERE id=:id", data);
 
         if (empty(page)) {
-            throw new NotFoundException("Theme page not found");
+            throw new NotFoundException("Theme not found");
         }
 
         let html = titles->page("Edit the theme", "/assets/edit-page.png");
@@ -135,7 +135,7 @@ class Themes extends Controller
             if (isset(_POST["save"])) {
                 var database, status = false;
 
-                if (!this->validate(_POST, ["name", "file"])) {
+                if (!this->validate(_POST, ["name", "folder"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
@@ -206,7 +206,7 @@ class Themes extends Controller
         return html;
     }
 
-    public function index()
+    public function index(string path)
     {
         var titles, tiles, database, html;
         let titles = new Titles();

@@ -39,7 +39,7 @@ class Pages extends Controller
         let this->cfg = cfg;    
     }
 
-    public function add()
+    public function add(string path)
     {
         var titles, html, data, database;
         let titles = new Titles();
@@ -314,7 +314,7 @@ class Pages extends Controller
         return html;
     }
 
-    public function index()
+    public function index(string path)
     {
         var titles, tiles, database, html;
         let titles = new Titles();

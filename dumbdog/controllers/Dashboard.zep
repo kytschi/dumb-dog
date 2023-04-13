@@ -40,7 +40,7 @@ class Dashboard extends Controller
         let this->cfg = cfg;    
     }
 
-    public function index()
+    public function index(string path)
     {
         var titles, html;
         let titles = new Titles();

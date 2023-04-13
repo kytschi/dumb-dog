@@ -40,7 +40,7 @@ class Settings extends Controller
         let this->cfg = cfg;    
     }
 
-    public function index()
+    public function index(string path)
     {
         var titles, html, database, page, data = [];
         let titles = new Titles();

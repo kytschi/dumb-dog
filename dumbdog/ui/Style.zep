@@ -55,7 +55,7 @@ class Style
             display: flex;
             flex-direction: row;
             align-items: flex-start;
-            width: calc(100% - 40px);
+            width:100%;
             overflow-x: hidden;
         }
         #bk {
@@ -69,12 +69,12 @@ class Style
             width: 100%;
         }
         main {
-            position: absolute;
-            width: calc(100% - 40px);
-            top: 0;
-            left: 0;
+            position: relative;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
             z-index: 2;
-            padding: 60px 20px 20px 20px;
+            padding: 60px 0px;
         }
 
         /* Inputs */
@@ -178,8 +178,7 @@ class Style
 
         /* Box */
         .box {
-            min-width: 500px;
-            min-height: 300px;
+            width: 100%;
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
