@@ -53,6 +53,14 @@ class Settings extends Controller
         }
 
         let html = titles->page("Site settings", "/assets/settings.png");
+        let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/themes' class='button' title='Managing the themes'>
+                <img src='/assets/themes.png'>
+            </a>
+            <a href='/dumb-dog/users' class='button' title='Manage the users'>
+                <img src='/assets/users.png'>
+            </a>
+        </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
