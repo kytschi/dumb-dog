@@ -30,6 +30,7 @@ use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
+use DumbDog\Controllers\Users;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
@@ -40,10 +41,6 @@ class DumbDog
 {
     private cfg = [];
     private version = "0.0.1 alpha";
-
-    private routes = [
-        "/dumb-dog"
-    ];
 
     public function __construct(array cfg = [])
     {
@@ -58,57 +55,111 @@ class DumbDog
 
         try {
             if (strpos(path, "/dumb-dog") !== false) {
-                var location;
+                var location, url, route;
                 let backend = true;
-                let path = "/" . ltrim(parsed["path"], "/dumb-dog/");
+                let path = "/" . str_replace("/dumb-dog/", "", parsed["path"]);
+
                 if (path == "/") {
-                    let controller = new Dashboard(cfg);
-                    let output = controller->index();
-                    let location = "dashboard";
-                } elseif (strpos(path, "/pages/add") !== false) {
-                    let controller = new Pages(cfg);
-                    let output = controller->add();
-                    let location = "create a page";
-                } elseif (strpos(path, "/pages/edit") !== false) {
-                    let controller = new Pages(cfg);
-                    let output = controller->edit(path);
-                    let location = "edit the page";
-                } elseif (strpos(path, "/pages") !== false) {
-                    let controller = new Pages(cfg);
-                    let output = controller->index();
-                    let location = "pages";
-                } elseif (strpos(path, "/templates/add") !== false) {
-                    let controller = new Templates(cfg);
-                    let output = controller->add();
-                    let location = "add a template";
-                } elseif (strpos(path, "/templates/edit") !== false) {
-                    let controller = new Templates(cfg);
-                    let output = controller->edit(path);
-                    let location = "edit the template";
-                } elseif (strpos(path, "/templates") !== false) {
-                    let controller = new Templates(cfg);
-                    let output = controller->index();
-                    let location = "templates";
-                } elseif (strpos(path, "/themes/add") !== false) {
-                    let controller = new Themes(cfg);
-                    let output = controller->add();
-                    let location = "add a theme";
-                } elseif (strpos(path, "/themes/edit") !== false) {
-                    let controller = new Themes(cfg);
-                    let output = controller->edit(path);
-                    let location = "edit the theme";
-                } elseif (strpos(path, "/themes") !== false) {
-                    let controller = new Themes(cfg);
-                    let output = controller->index();
-                    let location = "themes";
-                } elseif (strpos(path, "/settings") !== false) {
-                    let controller = new Settings(cfg);
-                    let output = controller->index();
-                    let location = "settings";
-                } else {
+                    let path = "/dashboard";
+                }
+
+                var controllers = [
+                    "Dashboard": new Dashboard(cfg),
+                    "Pages": new Pages(cfg),
+                    "Settings": new Settings(cfg),
+                    "Templates": new Templates(cfg),
+                    "Themes": new Themes(cfg),
+                    "Users": new Users(cfg)
+                ];
+
+                var routes = [
+                    "/dashboard": [
+                        "Dashboard",
+                        "index",
+                        "dashboard"
+                    ],
+                    "/pages/add": [
+                        "Pages",
+                        "add",
+                        "create a page"
+                    ],
+                    "/pages/edit": [
+                        "Pages",
+                        "edit",
+                        "edit the page"
+                    ],
+                    "/pages": [
+                        "Pages",
+                        "index",
+                        "pages"
+                    ],
+                    "/templates/add": [
+                        "Templates",
+                        "add",
+                        "add a template"
+                    ],
+                    "/templates/edit": [
+                        "Templates",
+                        "edit",
+                        "edit the template"
+                    ],
+                    "/templates": [
+                        "Templates",
+                        "index",
+                        "templates"
+                    ],
+                    "/themes/add": [
+                        "Themes",
+                        "add",
+                        "add a theme"
+                    ],
+                    "/themes/edit": [
+                        "Themes",
+                        "edit",
+                        "edit the theme"
+                    ],
+                    "/themes": [
+                        "Themes",
+                        "index",
+                        "themes"
+                    ],
+                    "/settings": [
+                        "Settings",
+                        "index",
+                        "settings"
+                    ],
+                    "/users/add": [
+                        "Users",
+                        "add",
+                        "add a user"
+                    ],
+                    "/users/edit": [
+                        "Users",
+                        "edit",
+                        "edit the user"
+                    ],
+                    "/users": [
+                        "Users",
+                        "index",
+                        "users"
+                    ]
+                ];                                
+
+                for url, route in routes {
+                    if (strpos(path, url) !== false) {
+                        let controller = controllers[route[0]];
+                        let location = route[1];
+                        let output = controller->{location}(path);
+                        let location = route[2];
+                        break;
+                    }
+                }
+
+                if (empty(location)) {
                     let code = 404;
                     let output = this->notFound();
                 }
+
                 this->ddHead(code, location);
                 echo output;
                 this->ddFooter();
@@ -247,6 +298,9 @@ class DumbDog
             </a>
             <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
                 <img src='/assets/settings.png'>
+            </a>
+            <a href='/dumb-dog/users' class='button' title='Manage the users'>
+                <img src='/assets/users.png'>
             </a>
         </div>
         <div id='quick-menu-button' onclick='showQuickMenu()'>

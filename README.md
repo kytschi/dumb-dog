@@ -1,5 +1,5 @@
 # Dumb Dog
-Super lightweight CMS built as a PHP module.
+The dumbest dog on the block CMS you'll ever see!
 
 ## Credits
 Many thanks to LOVEISSIMPLE for the art work.

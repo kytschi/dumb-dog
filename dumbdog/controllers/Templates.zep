@@ -40,7 +40,7 @@ class Templates extends Controller
         let this->cfg = cfg;    
     }
 
-    public function add()
+    public function add(string path)
     {
         var titles, html;
         let titles = new Titles();
@@ -126,7 +126,7 @@ class Templates extends Controller
         let page = database->get("SELECT * FROM templates WHERE id=:id", data);
 
         if (empty(page)) {
-            throw new NotFoundException("Template page not found");
+            throw new NotFoundException("Template not found");
         }
 
         let html = titles->page("Edit the template", "/assets/edit-page.png");
@@ -213,7 +213,7 @@ class Templates extends Controller
         return html;
     }
 
-    public function index()
+    public function index(string path)
     {
         var titles, tiles, database, html;
         let titles = new Titles();
