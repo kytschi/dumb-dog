@@ -173,7 +173,11 @@ class Style
             color: var(--button-hover-background-colour);
         }
         .page-toolbar {
+            display: flex;
             margin-bottom: 20px;
+        }
+        .page-toolbar .button {
+            margin-right: 20px;
         }
 
         /* Box */

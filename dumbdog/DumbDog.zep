@@ -57,7 +57,7 @@ class DumbDog
             if (strpos(path, "/dumb-dog") !== false) {
                 var location, url, route;
                 let backend = true;
-                let path = "/" . str_replace("/dumb-dog/", "", parsed["path"]);
+                let path = "/" . trim(str_replace("/dumb-dog", "", parsed["path"]), "/");
 
                 if (path == "/") {
                     let path = "/dashboard";
@@ -290,17 +290,8 @@ class DumbDog
             <a href='/dumb-dog' class='button' title='Go to the dashboard'>
                 <img src='/assets/dashboard.png'>
             </a>
-            <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
-                <img src='/assets/templates.png'>
-            </a>
-            <a href='/dumb-dog/themes' class='button' title='Managing the themes'>
-                <img src='/assets/themes.png'>
-            </a>
             <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
                 <img src='/assets/settings.png'>
-            </a>
-            <a href='/dumb-dog/users' class='button' title='Manage the users'>
-                <img src='/assets/users.png'>
             </a>
         </div>
         <div id='quick-menu-button' onclick='showQuickMenu()'>

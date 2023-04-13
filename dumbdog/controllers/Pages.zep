@@ -324,6 +324,9 @@ class Pages extends Controller
             <a href='/dumb-dog/pages/add' class='button' title='Add a page'>
                 <img src='/assets/add-page.png'>
             </a>
+            <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
+                <img src='/assets/templates.png'>
+            </a>
         </div>";
 
         let database = new Database(this->cfg);
