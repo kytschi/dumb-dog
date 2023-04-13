@@ -55,10 +55,8 @@ class Themes extends Controller
                 } else {
                     let data["name"] = _POST["name"];
                     let data["folder"] = _POST["folder"];
-                    let data["default"] = 0;
-                    //let data["created_at"] = date("Y-m-d H:i:s");
+                    let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["created_by"] = this->getUserId();
-                    //let data["updated_at"] = date("Y-m-d H:i:s");
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
@@ -92,6 +90,18 @@ class Themes extends Controller
                 <div class='input-group'>
                     <span>folder<span class='required'>*</span></span>
                     <input type='text' name='folder' placeholder='where am I located?' value=''>
+                </div>
+                <div class='input-group'>
+                    <span>default</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='default' value='1'>
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class='box-footer'>
@@ -130,14 +140,13 @@ class Themes extends Controller
                 } else {
                     let data["name"] = _POST["name"];
                     let data["folder"] = _POST["folder"];
-                    let data["default"] = 0;
-                    let data["updated_at"] = date("Y-m-d H:i:s");
+                    let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
                         "UPDATE themes SET 
-                            name=:name, folder=:folder, `default`=:default, updated_at=:updated_at, updated_by=:updated_by
+                            name=:name, folder=:folder, `default`=:default, updated_at=NOW(), updated_by=:updated_by
                         WHERE id=:id",
                         data
                     );
@@ -146,10 +155,14 @@ class Themes extends Controller
                         let html .= this->saveFailed("Failed to update the theme");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've updated the theme");
+                        this->redirect("/dumb-dog/themes/edit/" . page->id . "?saved=true");
                     }
                 }
             }
+        }
+
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("I've updated the theme");
         }
 
         let html .= "<form method='post'><div class='box wfull'>
@@ -164,6 +177,24 @@ class Themes extends Controller
                 <div class='input-group'>
                     <span>folder<span class='required'>*</span></span>
                     <input type='text' name='folder' placeholder='where am I located?' value='" . page->folder . "'>
+                </div>
+                <div class='input-group'>
+                    <span>default</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='default' value='1'";
+
+                if (page->{"default"} == 1) {
+                    let html .= " checked='checked'";
+                }
+                
+                let html .= ">
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class='box-footer'>

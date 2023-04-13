@@ -94,14 +94,63 @@ class Style
             padding: 10px;
         }
         input:focus, textarea:focus, select:focus {
-            border:1px solid var(--input-border-colour);
+            border:1px solid var(--input-border-focus-colour);
+            outline: none;
             box-shadow: none;
             -moz-box-shadow: none;
             -webkit-box-shadow: none;
         }
+        .switcher {
+            font-size: 0pt !important;
+        }
+        .switcher label * {
+            vertical-align: middle;
+            overflow: hidden;
+        }
+        .switcher input {
+            display: none;
+        }
+        .switcher label input + span {
+            position: relative;
+            display: inline-block;
+            margin-right: 10px;
+            width: 100px;
+            height: 38.2px;
+            background-color: #fff;
+            border:1px solid var(--input-border-colour);
+            transition: all 0.3s ease-in-out;
+        }
+        .switcher label input + span small {
+            position: absolute;
+            display: block;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            cursor: pointer;
+            background-color: var(--button-background-colour-disabled);
+            transition: all .15s ease;
+            box-shadow: none;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            user-select: none;
+        }
+        .switcher label input:checked + span {
+            background-color: #fff;
+        }
+        .switcher label input:checked + span small {
+            background-color: var(--button-background-colour);
+            left: 50%;
+        }
+        .switcher label input:checked + span .switcher-off {
+            display: none;
+        }
+        .switcher label input:checked + span .switcher-on {
+            display: block;
+        }
 
         /* Buttons */
-        button {
+        button, .default-item {
             color: var(--button-text-colour);
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 44pt;

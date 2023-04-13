@@ -44,8 +44,13 @@ class Tiles
                         </div>
                         <div class='box-body'>
                         </div>
-                        <div class='box-footer'>
-                            <a href='" . url . data[iLoop]->id . "' class='button'>EDIT</a>
+                        <div class='box-footer'>";
+                if (property_exists(data[iLoop], "default")) {
+                    if (data[iLoop]->{"default"}) {
+                        let html .= "<span class='default-item'>*default*</span>";
+                    }
+                }
+                let html .="<a href='" . url . data[iLoop]->id . "' class='button'>EDIT</a>
                         </div>
                     </div>
                 </div>";

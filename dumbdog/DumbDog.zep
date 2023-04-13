@@ -24,6 +24,7 @@
 */
 namespace DumbDog;
 
+use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Settings;
@@ -33,6 +34,7 @@ use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
+use DumbDog\Ui\Gfx\Titles;
 
 class DumbDog
 {
@@ -56,45 +58,58 @@ class DumbDog
 
         try {
             if (strpos(path, "/dumb-dog") !== false) {
+                var location;
                 let backend = true;
                 let path = "/" . ltrim(parsed["path"], "/dumb-dog/");
                 if (path == "/") {
-                    let output = this->dashboard();
+                    let controller = new Dashboard(cfg);
+                    let output = controller->index();
+                    let location = "dashboard";
                 } elseif (strpos(path, "/pages/add") !== false) {
                     let controller = new Pages(cfg);
                     let output = controller->add();
+                    let location = "create a page";
                 } elseif (strpos(path, "/pages/edit") !== false) {
                     let controller = new Pages(cfg);
                     let output = controller->edit(path);
+                    let location = "edit the page";
                 } elseif (strpos(path, "/pages") !== false) {
                     let controller = new Pages(cfg);
                     let output = controller->index();
+                    let location = "pages";
                 } elseif (strpos(path, "/templates/add") !== false) {
                     let controller = new Templates(cfg);
                     let output = controller->add();
+                    let location = "add a template";
                 } elseif (strpos(path, "/templates/edit") !== false) {
                     let controller = new Templates(cfg);
                     let output = controller->edit(path);
+                    let location = "edit the template";
                 } elseif (strpos(path, "/templates") !== false) {
                     let controller = new Templates(cfg);
                     let output = controller->index();
+                    let location = "templates";
                 } elseif (strpos(path, "/themes/add") !== false) {
                     let controller = new Themes(cfg);
                     let output = controller->add();
+                    let location = "add a theme";
                 } elseif (strpos(path, "/themes/edit") !== false) {
                     let controller = new Themes(cfg);
                     let output = controller->edit(path);
+                    let location = "edit the theme";
                 } elseif (strpos(path, "/themes") !== false) {
                     let controller = new Themes(cfg);
                     let output = controller->index();
+                    let location = "themes";
                 } elseif (strpos(path, "/settings") !== false) {
                     let controller = new Settings(cfg);
                     let output = controller->index();
+                    let location = "settings";
                 } else {
                     let code = 404;
                     let output = this->notFound();
                 }
-                this->ddHead(code);
+                this->ddHead(code, location);
                 echo output;
                 this->ddFooter();
                 //this->login();
@@ -104,20 +119,23 @@ class DumbDog
                 let database = new Database(this->cfg);
                 let data["url"] = path;
 
-                let page = database->get("SELECT pages.*, file FROM pages JOIN templates ON templates.id=pages.template_id WHERE url=:url", data);
+                let page = database->get("SELECT
+                        pages.*, file 
+                    FROM pages 
+                    JOIN templates ON templates.id=pages.template_id 
+                    WHERE url=:url AND status='live'", data);
                 if (page) {
                     var settings;
-                    let settings = database->get("SELECT * FROM settings LIMIT 1");
-                    if (file_exists("./website/" . page->file)) {                        
+                    let settings = database->get("SELECT settings.*,themes.folder AS theme FROM settings JOIN themes ON themes.id=settings.theme_id LIMIT 1");
+                    if (file_exists("./website/" . page->file)) {
+                        let settings->theme = "/website/themes/" . settings->theme . "/theme.css";
                         eval("$dd_site=json_decode('" . json_encode(settings) . "');$dd_page=json_decode('" . json_encode(page) . "');");
                         require_once("./website/" . page->file);
                     } else {
                         throw new Exception("template not found");
                     }
                 } else {
-                    this->ddHead(404);
-                    echo this->notFound(false, err->getMessage());
-                    this->ddFooter();
+                    this->notFound(false);
                 }
             }
         } catch NotFoundException, err {
@@ -129,41 +147,19 @@ class DumbDog
         }
     }
     
-    private function dashboard()
-    {
-        return "<p>Dashboard</p>";
-    }
-
-    private function ddFooter()
+    private function ddFooter(bool menu = true)
     {
         var javascript;
         let javascript = new Javascript();
 
-        echo "</main><div id='quick-menu' style='display: none'>
-            <a href='/dumb-dog/pages/add' class='button' title='Add a page'>
-                <img src='/assets/add-page.png'>
-            </a>
-            <a href='/dumb-dog/pages' class='button' title='Managing the pages'>
-                <img src='/assets/pages.png'>
-            </a>
-            <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
-                <img src='/assets/templates.png'>
-            </a>
-            <a href='/dumb-dog/themes' class='button' title='Managing the themes'>
-                <img src='/assets/themes.png'>
-            </a>
-            <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
-                <img src='/assets/settings.png'>
-            </a>
-        </div>
-        <div id='quick-menu-button' onclick='showQuickMenu()'>
-            <div class='button'>
-                <img src='/assets/dumbdog.png'>
-            </div>
-        </div></body>" . javascript->common() . "</html>";
+        echo "</main>";
+        if (menu) {
+            this->quickMenu();
+        }
+        echo "</body>" . javascript->common() . "</html>";
     }
 
-    private function ddHead(int code = 200)
+    private function ddHead(int code = 200, string location)
     {
         if (code == 404) {
             header("HTTP/1.1 404 Not Found");
@@ -173,7 +169,7 @@ class DumbDog
         let head = new Head(this->cfg);        
         let javascript = new Javascript();
 
-        echo "<!DOCTYPE html><html lang='en'>" . head->build() . "<body><div id='bk'><img src='/assets/bk.png'></div><main>";
+        echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body><div id='bk'><img src='/assets/bk.png'></div><main>";
         echo javascript->logo();
     }
 
@@ -222,7 +218,41 @@ class DumbDog
             </div>
             ";
         } else {
-            return "not found";
+            var titles;
+            let titles = new Titles();
+
+            this->ddHead(404, "page not found");
+            echo titles->page("page not found");
+            this->ddFooter(false);
         }
+    }
+
+    private function quickMenu()
+    {
+        echo "<div id='quick-menu' style='display: none'>
+            <a href='/dumb-dog/pages/add' class='button' title='Add a page'>
+                <img src='/assets/add-page.png'>
+            </a>
+            <a href='/dumb-dog/pages' class='button' title='Managing the pages'>
+                <img src='/assets/pages.png'>
+            </a>
+            <a href='/dumb-dog' class='button' title='Go to the dashboard'>
+                <img src='/assets/dashboard.png'>
+            </a>
+            <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
+                <img src='/assets/templates.png'>
+            </a>
+            <a href='/dumb-dog/themes' class='button' title='Managing the themes'>
+                <img src='/assets/themes.png'>
+            </a>
+            <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
+                <img src='/assets/settings.png'>
+            </a>
+        </div>
+        <div id='quick-menu-button' onclick='showQuickMenu()'>
+            <div class='button'>
+                <img src='/assets/dumbdog.png'>
+            </div>
+        </div>";
     }
 }

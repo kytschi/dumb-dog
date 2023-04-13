@@ -35,11 +35,12 @@ class Head
         let this->cfg = cfg;    
     }
 
-    public function build()
+    public function build(string location)
     {
         var html, style;
         let style = new Style(this->cfg);
         let html = style->build();
+        let html .= "<title>" . location . " | dumb dog</title>";
         let html .= "<link rel='stylesheet' type='text/css' href='/assets/trumbowyg/ui/trumbowyg.min.css'>";
         let html .= "<script src='/assets/jquery.min.js'></script>";
         let html .= "<script src='/assets/trumbowyg/trumbowyg.min.js'></script>";

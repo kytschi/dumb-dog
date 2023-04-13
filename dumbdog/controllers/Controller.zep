@@ -51,6 +51,12 @@ class Controller
         </div></div>";
     }
 
+    public function redirect(string url)
+    {
+        header("Location: " . url);
+        die();
+    }
+
     public function saveFailed(string message)
     {
         return "<div class='error box wfull'>
