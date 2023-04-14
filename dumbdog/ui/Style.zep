@@ -279,7 +279,7 @@ class Style
             font-size: 56pt;
             line-height: 56pt;
         }
-        .page-title span, .no-results span {                
+        .page-title span, .no-results span, .page-sub-title span {                
             background-color: var(--text-heading-background-colour);
             border: 3px solid var(--text-heading-border-colour);
             padding: 10px 40px 0 40px;
@@ -289,6 +289,9 @@ class Style
         }
         .page-title span {
             padding: 0px 40px 10px 100px;
+        }
+        .page-sub-title span {
+            padding: 20px 40px;
         }
         .required {
             padding-top: 10px;

@@ -164,29 +164,30 @@ class Users extends Controller
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, status = false;
+                var database, status = false, query;
 
-                if (!this->validate(_POST, ["username", "nickname"])) {
+                if (!this->validate(_POST, ["name", "nickname"])) {
                     let html .= this->missingRequired();
                 } else {
+                    let query = "UPDATE users SET  name=:name, nickname=:nickname, updated_at=NOW(), updated_by=:updated_by";
+                
                     if (isset(_POST["password"]) && isset(_POST["password_check"])) {
                         if (_POST["password"] != _POST["password_check"]) {
                             throw new \Exception("passwords do not match!");
                         }
+                        let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
+                        let query .= ", password=:password";
                     }
 
                     let data["name"] = _POST["name"];
                     let data["nickname"] = _POST["nickname"];
                     let data["updated_by"] = this->getUserId();
 
+                    let query .= " WHERE id=:id";
+
                     let database = new Database(this->cfg);
                     let status = database->execute(
-                        "UPDATE users SET 
-                            name=:name,
-                            nickname=:nickname,
-                            updated_at=NOW(),
-                            updated_by=:updated_by
-                        WHERE id=:id",
+                        query,
                         data
                     );
 
@@ -218,11 +219,11 @@ class Users extends Controller
                     <input type='text' name='nickname' placeholder='what shall I call them?' value='" . page->nickname . "'>
                 </div>
                 <div class='input-group'>
-                    <span>password<span class='required'>*</span></span>
+                    <span>password</span>
                     <input type='password' name='password' placeholder='sssh, it's our secret!' value=''>
                 </div>
                 <div class='input-group'>
-                    <span>password check<span class='required'>*</span></span>
+                    <span>password check</span>
                     <input type='password' name='password_check' placeholder='same again please!' value=''>
                 </div>
             </div>

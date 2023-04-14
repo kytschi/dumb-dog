@@ -78,6 +78,16 @@ class DumbDog
                         "index",
                         "dashboard"
                     ],
+                    "/the-pound": [
+                        "Dashboard",
+                        "login",
+                        "login"
+                    ],
+                    "/give-up": [
+                        "Dashboard",
+                        "logout",
+                        "logout"
+                    ],
                     "/pages/add": [
                         "Pages",
                         "add",
@@ -160,10 +170,11 @@ class DumbDog
                     let output = this->notFound();
                 }
 
+                this->secure(path);
+
                 this->ddHead(code, location);
                 echo output;
-                this->ddFooter();
-                //this->login();
+                this->ddFooter(isset(_SESSION["dd"]) ? true : false);
             } else {
                 var database, data = [], page;
 
@@ -224,33 +235,6 @@ class DumbDog
         echo javascript->logo();
     }
 
-    private function login()
-    {
-        return "
-        <div class='box'>
-            <div class='box-title'>
-                <img src='/assets/dumbdog.png'>
-                <span>Welcome to Dumb Dog</span>
-            </div>
-            <form>
-                <div class='box-body'>
-                    <div class='input-group'>
-                        <span>username</span>
-                        <input type='text' placeholder='your username doopy'>
-                    </div>
-                    <div class='input-group'>
-                        <span>password</span>
-                        <input type='text' placeholder='your secret password...sssshhh!'>
-                    </div>
-                </div>
-                <div class='box-footer'>
-                    <button type='submit' name='go'>login</button>
-                </div>
-            </form>
-        </div>
-        ";
-    }
-
     private function notFound(bool backend = true, string message = "page is not found")
     {
         if (backend) {
@@ -293,11 +277,24 @@ class DumbDog
             <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
                 <img src='/assets/settings.png'>
             </a>
+            <a href='/dumb-dog/give-up' class='button' title='Log me out'>
+                <img src='/assets/logout.png'>
+            </a>
         </div>
         <div id='quick-menu-button' onclick='showQuickMenu()'>
             <div class='button'>
                 <img src='/assets/dumbdog.png'>
             </div>
         </div>";
+    }
+
+    public function secure(string path)
+    {
+        if (!isset(_SESSION["dd"])) {
+            if (path != "/the-pound") {
+                header("Location: /dumb-dog/the-pound");
+                die();
+            }
+        }
     }
 }
