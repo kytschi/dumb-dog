@@ -169,7 +169,7 @@ class DumbDog
                     let code = 404;
                     let output = this->notFound();
                 }
-
+   
                 this->secure(path);
 
                 this->ddHead(code, location);
