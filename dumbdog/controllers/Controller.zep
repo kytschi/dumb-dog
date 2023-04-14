@@ -40,14 +40,14 @@ class Controller
         return this->system_uuid;
     }
 
-    public function missingRequired()
+    public function missingRequired(string message = "Missing required fields")
     {
         return "<div class='error box wfull'>
         <div class='box-title'>
             <span>double check your inputs</span>
         </div>
         <div class='box-body'>
-            <p>Missing required fields</p>
+            <p>" . message . "</p>
         </div></div>";
     }
 
