@@ -1,7 +1,7 @@
-<?php
 /**
- * DumbDog example index
+ * Access exception
  *
+ * @package     DumbDog\Exceptions\AccessException
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -22,32 +22,17 @@
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
  */
-use DumbDog\DumbDog;
+namespace DumbDog\Exceptions;
+
 use DumbDog\Exceptions\Exception;
 
-try {
-    /**
-     * I'm needed for the session handling for logins etc.
-     */
-    if (session_status() === PHP_SESSION_NONE) {
-        session_name("dd");
-        session_start();
+class AccessException extends Exception
+{    
+	public function __construct(string message, int code = 403)
+	{
+        //Trigger the parent construct.
+        parent::__construct(message, code);
+
+        let this->code = code;
     }
-    /**
-     * database => the database cfg.
-     */
-    new DumbDog(
-        [
-            'database' => [
-                'type' => 'mysql',
-                'host' => 'localhost',
-                'port' => '3306',
-                'db' => 'dumb_dog',
-                'username' => 'dumbdog',
-                'password' => 'dumbdog'
-            ]
-        ]
-    );
-} catch (\Exception $err) {
-    (new Exception($err->getMessage()))->fatal();
 }
