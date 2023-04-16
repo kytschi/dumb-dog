@@ -50,7 +50,10 @@ class Tiles
                         let html .= "<span class='default-item'>*default*</span>";
                     }
                 }
-                let html .="<a href='" . url . data[iLoop]->id . "' class='button'>EDIT</a>
+                if (property_exists(data[iLoop], "url")) {
+                    let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='round' title='View me live'><img src='/assets/web.png'></a>";
+                }
+                let html .="<a href='" . url . data[iLoop]->id . "' class='round' title='edit the page'><img src='/assets/edit-page.png' alt='edit'></a>
                         </div>
                     </div>
                 </div>";

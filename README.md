@@ -2,7 +2,8 @@
 The dumbest dog on the block CMS you'll ever see!
 
 ## Credits
-Many thanks to LOVEISSIMPLE for the art work.
+Many thanks to laimuilin18 for the art work.
+https://www.vecteezy.com/members/laimuilin18
 
 Moon Flower font
 FONT BY DENISE BENTULAN (c) 2013
