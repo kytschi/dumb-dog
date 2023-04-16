@@ -1,6 +1,11 @@
 # Dumb Dog
 The dumbest dog on the block CMS you'll ever see!
 
+## Some screens of it
+![Snapshot](https://github.com/kytschi/dumb-dog/blob/main/screen-1.jpg)
+![Snapshot](https://github.com/kytschi/dumb-dog/blob/main/screen-2.jpg)
+![Snapshot](https://github.com/kytschi/dumb-dog/blob/main/screen-3.jpg)
+
 ## Credits
 Many thanks to laimuilin18 for the art work.
 https://www.vecteezy.com/members/laimuilin18

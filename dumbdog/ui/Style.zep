@@ -59,10 +59,10 @@ class Style
         }
         #bk {
             background-color: #92ddd6;
-            background-image: url('/assets/bk.png');
+            background-image: url('/assets/dashboard-bk.jpg');
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: bottom -100px right -240px;
+            background-position: bottom -370px right -10px;
         }
         #page-bk {
             background-color: #C3C4C6;
@@ -76,7 +76,7 @@ class Style
             background-image: url('/assets/dashboard-bk.jpg');
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: bottom -220px right -140px;
+            background-position: bottom -370px right -10px;
         }
         #settings-bk {
             background-color: #C7D9E5;
@@ -104,7 +104,7 @@ class Style
             background-image: url('/assets/users-bk.jpg');
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: bottom -220px right -140px;
+            background-position: bottom -260px right -10px;
         }
         main {
             position: relative;
