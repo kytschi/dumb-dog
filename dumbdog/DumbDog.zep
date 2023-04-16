@@ -227,11 +227,26 @@ class DumbDog
             header("HTTP/1.1 404 Not Found");
         }
 
-        var head, javascript;
+        var head, javascript, id;
         let head = new Head(this->cfg);        
         let javascript = new Javascript();
 
-        echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body><div id='bk'><img src='/assets/bk.png'></div><main>";
+        let id = "bk";
+        if (strpos(location, "page") !== false) {
+            let id = "page-bk";
+        } elseif (strpos(location, "dashboard") !== false) {
+            let id = "dashboard-bk";
+        } elseif (strpos(location, "settings") !== false) {
+            let id = "settings-bk";
+        } elseif (strpos(location, "theme") !== false) {
+            let id = "themes-bk";
+        } elseif (strpos(location, "template") !== false) {
+            let id = "templates-bk";
+        } elseif (strpos(location, "user") !== false) {
+            let id = "users-bk";
+        }
+
+        echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><main>";
         echo javascript->logo();
     }
 

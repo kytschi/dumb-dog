@@ -41,7 +41,6 @@ class Style
         return "<style>
         @import url('/assets/style.css');
         html, body {
-            background-color: var(--body-background-colour);
             color: var(--body-text-colour);
             font-family: Helvetica, sans-serif;
             font-size: 56pt;
@@ -59,14 +58,53 @@ class Style
             overflow-x: hidden;
         }
         #bk {
-            position: fixed;
-            z-index: 1;
-            right: -20%;
-            bottom: -20%;
-            width: 70%;
+            background-color: #92ddd6;
+            background-image: url('/assets/bk.png');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -100px right -240px;
         }
-        #bk img {
-            width: 100%;
+        #page-bk {
+            background-color: #C3C4C6;
+            background-image: url('/assets/pages-bk.jpg?sds');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -220px right -140px;
+        }
+        #dashboard-bk {
+            background-color: #92ddd6;
+            background-image: url('/assets/dashboard-bk.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -220px right -140px;
+        }
+        #settings-bk {
+            background-color: #C7D9E5;
+            background-image: url('/assets/settings-bk.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -220px right -140px;
+        }
+        #templates-bk {
+            background-color: #597566;
+            background-image: url('/assets/templates-bk.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -220px right -140px;
+        }
+        #themes-bk {
+            background-color: #B4B5BA;
+            background-image: url('/assets/themes-bk.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -220px right -140px;
+        }
+        #users-bk {
+            background-color: #f5ded6;
+            background-image: url('/assets/users-bk.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -220px right -140px;
         }
         main {
             position: relative;
@@ -150,17 +188,24 @@ class Style
         }
 
         /* Buttons */
-        button, .default-item {
+        button, .default-item, .button-blank  {
             color: var(--button-text-colour);
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 44pt;
             line-height: 34pt;
+        }
+        button, .button-blank {
             padding: 10px 40px;
+        }
+        .default-item {
+            vertical-align: middle;
+            padding: 30px 0px 0px 0px;
         }
         .button, button, .button-blank {
             background-color: var(--button-background-colour);
             border: 3px solid var(--button-border-colour);
             cursor: pointer;
+            text-decoration: none;
         }
         .button-blank {
             background: none !important;
@@ -179,6 +224,22 @@ class Style
         .page-toolbar .button {
             margin-right: 20px;
         }
+        .round {
+            height: 100px !important;
+            width: 100px !important;
+            border-radius: 50%;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0 !important;
+            font-size: 0pt !important;
+            background-color: var(--button-background-colour);
+            border: 3px solid var(--button-border-colour);
+            cursor: pointer;
+        }
+        .round img {
+            margin-top: 20px;
+            width: 60px;
+        }
 
         /* Box */
         .box {
@@ -196,16 +257,8 @@ class Style
             display: flex;
             justify-content: flex-end;
         }
-        .box-footer a {
-            text-decoration: none;
-            color: var(--button-text-colour);
-            font-family: 'subheading', Helvetica, sans-serif;
-            font-size: 44pt;
-            line-height: 34pt;
-            padding: 10px 40px;
-        }
         .box-footer a, .box-footer button {
-            margin-left: 5px;
+            margin-left: 20px;
         }
         .box-title {
             background-color: var(--box-title-background-colour);
