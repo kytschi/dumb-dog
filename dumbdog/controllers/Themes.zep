@@ -59,18 +59,14 @@ class Themes extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
-                        let status = database->execute(
-                            "INSERT INTO themes 
-                                (id, name, folder, `default`, created_at, created_by, updated_at, updated_by, status) 
-                            VALUES 
-                                (UUID(), :name, :folder, :default, NOW(), :created_by, NOW(), :updated_by, 'active')",
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
+                    let database = new Database(this->cfg);
+                    let status = database->execute(
+                        "INSERT INTO themes 
+                            (id, name, folder, `default`, created_at, created_by, updated_at, updated_by, status) 
+                        VALUES 
+                            (UUID(), :name, :folder, :default, NOW(), :created_by, NOW(), :updated_by, 'active')",
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the theme");
@@ -134,13 +130,9 @@ class Themes extends Controller
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
                 var status = false, err;
-                try {
-                    if (this->cfg->save_mode == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE themes SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                try {                    
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE themes SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to delete the theme");
@@ -214,17 +206,13 @@ class Themes extends Controller
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
-                        let status = database->execute(
-                            "UPDATE themes SET 
-                                name=:name, folder=:folder, `default`=:default, updated_at=NOW(), updated_by=:updated_by
-                            WHERE id=:id",
-                            data
-                        );
-                    } else {
-                        let status =  true;
-                    }
+                    let database = new Database(this->cfg);
+                    let status = database->execute(
+                        "UPDATE themes SET 
+                            name=:name, folder=:folder, `default`=:default, updated_at=NOW(), updated_by=:updated_by
+                        WHERE id=:id",
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the theme");
@@ -331,12 +319,9 @@ class Themes extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg->save_mode == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE themes SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE themes SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to recover the theme");
                         let html .= this->consoleLogError(status);

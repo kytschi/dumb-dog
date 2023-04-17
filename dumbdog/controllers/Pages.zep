@@ -67,43 +67,39 @@ class Pages extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg->save_mode == true) {
-                        let status = database->execute(
-                            "INSERT INTO pages 
-                                (id,
-                                status,
-                                name,
-                                url,
-                                content,
-                                menu_item,
-                                template_id,
-                                meta_keywords,
-                                meta_author,
-                                meta_description,
-                                created_at,
-                                created_by,
-                                updated_at,
-                                updated_by) 
-                            VALUES 
-                                (UUID(),
-                                :status,
-                                :name,
-                                :url,
-                                :content,
-                                :menu_item,
-                                :template_id,
-                                :meta_keywords,
-                                :meta_author,
-                                :meta_description,
-                                NOW(),
-                                :created_by,
-                                NOW(),
-                                :updated_by)",
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
+                    let status = database->execute(
+                        "INSERT INTO pages 
+                            (id,
+                            status,
+                            name,
+                            url,
+                            content,
+                            menu_item,
+                            template_id,
+                            meta_keywords,
+                            meta_author,
+                            meta_description,
+                            created_at,
+                            created_by,
+                            updated_at,
+                            updated_by) 
+                        VALUES 
+                            (UUID(),
+                            :status,
+                            :name,
+                            :url,
+                            :content,
+                            :menu_item,
+                            :template_id,
+                            :meta_keywords,
+                            :meta_author,
+                            :meta_description,
+                            NOW(),
+                            :created_by,
+                            NOW(),
+                            :updated_by)",
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the page");
@@ -289,27 +285,23 @@ class Pages extends Controller
                     let data["meta_description"] = _POST["meta_description"];
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
-                        let status = database->execute(
-                            "UPDATE pages SET 
-                                status=:status,
-                                name=:name,
-                                url=:url,
-                                template_id=:template_id,
-                                content=:content,
-                                menu_item=:menu_item,
-                                meta_keywords=:meta_keywords,
-                                meta_author=:meta_author,
-                                meta_description=:meta_description,
-                                updated_at=NOW(),
-                                updated_by=:updated_by
-                            WHERE id=:id",
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
+                    let database = new Database(this->cfg);
+                    let status = database->execute(
+                        "UPDATE pages SET 
+                            status=:status,
+                            name=:name,
+                            url=:url,
+                            template_id=:template_id,
+                            content=:content,
+                            menu_item=:menu_item,
+                            meta_keywords=:meta_keywords,
+                            meta_author=:meta_author,
+                            meta_description=:meta_description,
+                            updated_at=NOW(),
+                            updated_by=:updated_by
+                        WHERE id=:id",
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the page");
@@ -472,12 +464,8 @@ class Pages extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg->save_mode == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE pages SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE pages SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to recover the page");

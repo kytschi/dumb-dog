@@ -337,12 +337,9 @@ class Templates extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg->save_mode == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE templates SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE templates SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to recover the template");
                         let html .= this->consoleLogError(status);

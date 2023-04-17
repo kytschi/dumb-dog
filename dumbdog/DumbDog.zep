@@ -304,7 +304,10 @@ class DumbDog
         let javascript = new Javascript();
 
         let id = "bk";
-        if (strpos(location, "page") !== false) {
+        
+        if (strpos(location, "page not") !== false) {
+            let id = "error";
+        } elseif (strpos(location, "page") !== false) {
             let id = "page-bk";
         } elseif (strpos(location, "dashboard") !== false) {
             let id = "dashboard-bk";

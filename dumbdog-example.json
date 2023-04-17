@@ -7,5 +7,6 @@
         "db": "dumb_dog",
         "username": "dumbdog",
         "password": "dumbdog"
-    }
+    },
+    "save_mode": true
 }
