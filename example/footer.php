@@ -1,6 +1,6 @@
 <footer>
     <div class="footer-item">
         <img src="/assets/dumbdog.png" alt="dumb-dog">
-        <span>Powered by Dumb Dog</span>
+        <a href="https://github.com/kytschi/dumb-dog" target="_blank">Powered by Dumb Dog</a>
     </div>
 </footer>

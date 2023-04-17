@@ -41,8 +41,12 @@ body {
     background-position: bottom -390px right -10px;
 }
 a {
-    color: var(--text-required-colour);
+    color: var(--text-highlight-colour);
     font-weight: bold;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
 }
 pre {
     background-color: var(--text-required-colour);
@@ -82,12 +86,18 @@ footer {
     text-align: left;
     vertical-align: middle;
 }
-.footer-item span {
+.footer-item a {
     float: left;
-    margin-top: 20px;
+    text-decoration: none;
+    color: var(--button-text-colour);
+}
+.footer-item a:hover {
+    color: var(--text-highlight-colour);
+    text-decoration: underline;
 }
 .footer-item img {
     float: left;
+    width: 100px;
 }
 
 /* Inputs */
