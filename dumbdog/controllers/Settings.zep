@@ -75,6 +75,7 @@ class Settings extends Controller
                     let data["meta_description"] = _POST["meta_description"];
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
+                    let data["robots_txt"] = _POST["robots_txt"];
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
@@ -85,7 +86,8 @@ class Settings extends Controller
                             `status`=:status,
                             meta_description=:meta_description,
                             meta_author=:meta_author,
-                            meta_keywords=:meta_keywords
+                            meta_keywords=:meta_keywords,
+                            robots_txt=:robots_txt
                         WHERE name IS NOT NULL",
                         data
                     );
@@ -129,18 +131,6 @@ class Settings extends Controller
                     <input type='text' name='name' placeholder='make sure to set a name' value='" . page->name . "'>
                 </div>
                 <div class='input-group'>
-                    <span>meta author</span>
-                    <input type='text' name='meta_author' placeholder='who made this?' value='" . page->meta_author . "'>
-                </div>
-                <div class='input-group'>
-                    <span>meta keywords</span>
-                    <input type='text' name='meta_keywords' placeholder='list some keywords for the site' value='" . page->meta_keywords . "'>
-                </div>
-                <div class='input-group'>
-                    <span>meta description</span>
-                    <textarea name='meta_description' placeholder='describe the site a bit'>" . page->meta_description . "</textarea>
-                </div>
-                <div class='input-group'>
                     <span>theme<span class='required'>*</span></span>
                     <select name='theme_id'>";
         let data = database->all("SELECT * FROM themes WHERE deleted_at IS NULL ORDER BY `default` DESC");
@@ -155,6 +145,22 @@ class Settings extends Controller
         }
         let html .= "
                     </select>
+                </div>
+                <div class='input-group'>
+                    <span>meta author</span>
+                    <input type='text' name='meta_author' placeholder='who made this?' value='" . page->meta_author . "'>
+                </div>
+                <div class='input-group'>
+                    <span>meta keywords</span>
+                    <input type='text' name='meta_keywords' placeholder='list some keywords for the site' value='" . page->meta_keywords . "'>
+                </div>
+                <div class='input-group'>
+                    <span>meta description</span>
+                    <textarea name='meta_description' placeholder='describe the site a bit'>" . page->meta_description . "</textarea>
+                </div>
+                <div class='input-group'>
+                    <span>robots.txt</span>
+                    <textarea name='robots_txt' placeholder='some text for robots'>" . page->robots_txt . "</textarea>
                 </div>
             </div>
             <div class='box-footer'>
