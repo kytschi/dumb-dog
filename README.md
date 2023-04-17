@@ -1,5 +1,5 @@
 # Dumb Dog
-The dumbest dog on the block CMS you'll ever see!
+The dumbest dog on the CMS block you'll ever see!
 
 ## Some screens of it
 ![Snapshot](https://github.com/kytschi/dumb-dog/blob/main/screen-1.jpg)

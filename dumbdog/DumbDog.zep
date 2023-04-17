@@ -118,10 +118,20 @@ class DumbDog
                         "add",
                         "add a template"
                     ],
+                    "/templates/delete": [
+                        "Templates",
+                        "delete",
+                        "delete the template"
+                    ],
                     "/templates/edit": [
                         "Templates",
                         "edit",
                         "edit the template"
+                    ],
+                    "/templates/recover": [
+                        "Templates",
+                        "recover",
+                        "recover the template"
                     ],
                     "/templates": [
                         "Templates",
@@ -133,10 +143,20 @@ class DumbDog
                         "add",
                         "add a theme"
                     ],
+                    "/themes/delete": [
+                        "Themes",
+                        "delete",
+                        "delete the theme"
+                    ],
                     "/themes/edit": [
                         "Themes",
                         "edit",
                         "edit the theme"
+                    ],
+                    "/themes/recover": [
+                        "Themes",
+                        "recover",
+                        "recover the theme"
                     ],
                     "/themes": [
                         "Themes",
