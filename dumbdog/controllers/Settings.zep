@@ -42,13 +42,13 @@ class Settings extends Controller
 
     public function index(string path)
     {
-        var titles, html, database, page, data = [];
+        var titles, html, database, model, data = [];
         let titles = new Titles();
 
         let database = new Database(this->cfg);
-        let page = database->get("SELECT * FROM settings LIMIT 1");
+        let model = database->get("SELECT * FROM settings LIMIT 1");
 
-        if (empty(page)) {
+        if (empty(model)) {
             throw new NotFoundException("Settings not found");
         }
 
@@ -66,12 +66,12 @@ class Settings extends Controller
             if (isset(_POST["save"])) {
                 var database, status = false;
 
-                if (!this->validate(_POST, ["name", "theme_id", "status"])) {
+                if (!this->validate(_POST, ["name", "theme_id"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
                     let data["theme_id"] = _POST["theme_id"];
-                    let data["status"] = _POST["status"];
+                    let data["status"] = _POST["status"] ? "online" : "offline";
                     let data["meta_description"] = _POST["meta_description"];
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
@@ -112,23 +112,25 @@ class Settings extends Controller
             </div>
             <div class='box-body'>
                 <div class='input-group'>
-                    <span>status<span class='required'>*</span></span>
-                    <select name='status'>
-                        <option value='online'";
-        if (page->status == "online") {
-            let html .= " selected='selected'";
-        }
-        let html .= ">Online</option>
-                        <option value='offline'";
-        if (page->status == "offline") {
-            let html .= " selected='selected'";
-        }
-        let html .= ">Offline</option>
-                    </select>
+                    <span>online</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='status' value='1'";
+                if (model->{"status"} == "online") {
+                    let html .= " checked='checked'";
+                }
+                
+                let html .= ">
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
                 </div>
                 <div class='input-group'>
                     <span>name<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='make sure to set a name' value='" . page->name . "'>
+                    <input type='text' name='name' placeholder='make sure to set a name' value='" . model->name . "'>
                 </div>
                 <div class='input-group'>
                     <span>theme<span class='required'>*</span></span>
@@ -137,7 +139,7 @@ class Settings extends Controller
         var iLoop = 0;
         while (iLoop < count(data)) {
             let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == page->theme_id) {
+            if (data[iLoop]->id == model->theme_id) {
                 let html .= " selected='selected'";
             }
             let html .= ">" . data[iLoop]->name . "</option>";
@@ -148,19 +150,19 @@ class Settings extends Controller
                 </div>
                 <div class='input-group'>
                     <span>meta author</span>
-                    <input type='text' name='meta_author' placeholder='who made this?' value='" . page->meta_author . "'>
+                    <input type='text' name='meta_author' placeholder='who made this?' value='" . model->meta_author . "'>
                 </div>
                 <div class='input-group'>
                     <span>meta keywords</span>
-                    <input type='text' name='meta_keywords' placeholder='list some keywords for the site' value='" . page->meta_keywords . "'>
+                    <input type='text' name='meta_keywords' placeholder='list some keywords for the site' value='" . model->meta_keywords . "'>
                 </div>
                 <div class='input-group'>
                     <span>meta description</span>
-                    <textarea name='meta_description' placeholder='describe the site a bit'>" . page->meta_description . "</textarea>
+                    <textarea name='meta_description' placeholder='describe the site a bit'>" . model->meta_description . "</textarea>
                 </div>
                 <div class='input-group'>
                     <span>robots.txt</span>
-                    <textarea name='robots_txt' placeholder='some text for robots'>" . page->robots_txt . "</textarea>
+                    <textarea name='robots_txt' placeholder='some text for robots'>" . model->robots_txt . "</textarea>
                 </div>
             </div>
             <div class='box-footer'>
