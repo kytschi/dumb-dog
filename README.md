@@ -14,6 +14,8 @@ The dumbest dog on the block CMS you'll ever see!
 
 ## Installation
 
+Download or clone the repository.
+
 Copy the module located in the ext/modules folder to your PHP modules folder on your server.
 https://github.com/kytschi/dumb-dog/blob/main/ext/modules/dumbdog.so
 
@@ -27,22 +29,51 @@ You can also just create the ini and point the `extension` to the folder with th
 
 And don't forget to restart your webserver.
 
+Create yourself a database and run the SQL located in the setup folder.
+https://github.com/kytschi/dumb-dog/blob/main/setup/database.sql
+
+Once the database is setup and the SQL installed, go to the `index.php` in the public folder and configure the database connection.
+
+```
+/**
+ * database => the database cfg.
+ */
+new DumbDog(
+    [
+        'database' => [
+            'type' => 'mysql',
+            'host' => 'localhost',
+            'port' => '3306',
+            'db' => 'dumb_dog',
+            'username' => 'dumbdog',
+            'password' => 'dumbdog'
+        ]
+    ]
+);
+```
+
+That's it, now you can access Dumb Dog via whatever url you've setup for the project by adding `/dumb-dog` to the url.
+
+Default login is username `dumbdog` and password is `woofwoof`.
+
+**DONT FORGET TO CREATE YOUR OWN USER AND DELETE THE DEFAULT ONE OR CHANGE ITS PASSWORD!**
+
 ## Credits
-Many thanks to laimuilin18 for the art work.
+Many thanks to laimuilin18 for the art work.\
 https://www.vecteezy.com/members/laimuilin18
 
-Moon Flower font
-FONT BY DENISE BENTULAN (c) 2013
+Moon Flower font\
+FONT BY DENISE BENTULAN (c) 2013\
 http://deathmunkey.deviantart.com
 
-Yummy Cupcakes font
+Yummy Cupcakes font\
 http://bythebutterfly.com
 
-Icons from
+Icons from\
 https://icons8.com
 
-Jquery
+Jquery\
 https://jquery.com/
 
-Trumbowyg
+Trumbowyg\
 https://alex-d.github.io/Trumbowyg/
