@@ -35,6 +35,19 @@ class Controller
         return "<script type='text/javascript'>console.log('DUMB DOG ERROR:', '" . str_replace(["\n", "\r\n"], "", strip_tags(message)) . "');</script>";
     }
 
+    public function deletedState(string message)
+    {
+        return "<div class='deleted alert'><span>deleted</span></div>";
+    }
+
+    public function getPageId(string path)
+    {
+        var splits;
+
+        let splits = explode("/", path);
+        return array_pop(splits);
+    }
+
     public function getUserId()
     {
         return this->system_uuid;

@@ -38,7 +38,11 @@ class Tiles
             let iLoop = 0;
             while (iLoop < count(data)) {
                 let html .= "<div class='tile'>
-                    <div class='box wfull'>
+                    <div class='box wfull";
+                if (data[iLoop]->deleted_at) {
+                    let html .= " deleted";
+                }
+                let html .= "'>
                         <div class='box-title'>
                             <span>" . data[iLoop]->name . "</span>
                         </div>

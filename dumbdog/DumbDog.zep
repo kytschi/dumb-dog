@@ -143,10 +143,20 @@ class DumbDog
                         "add",
                         "add a user"
                     ],
+                    "/users/delete": [
+                        "Users",
+                        "delete",
+                        "delete the user"
+                    ],
                     "/users/edit": [
                         "Users",
                         "edit",
                         "edit the user"
+                    ],
+                    "/users/recover": [
+                        "Users",
+                        "recover",
+                        "recover the user"
                     ],
                     "/users": [
                         "Users",
@@ -272,7 +282,7 @@ class DumbDog
             let titles = new Titles();
 
             this->ddHead(404, "page not found");
-            echo titles->page("page not found");
+            echo titles->page("page not found", "/assets/dumbdog.png");
             this->ddFooter(false);
         }
     }
