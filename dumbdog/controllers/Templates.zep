@@ -37,7 +37,7 @@ class Templates extends Controller
 
     public function __construct(array cfg)
     {
-        let this->cfg = cfg;    
+        let this->cfg = cfg;
     }
 
     public function add(string path)
@@ -113,23 +113,85 @@ class Templates extends Controller
         return html;
     }
 
-    public function edit(string path)
+    public function delete(string path)
     {
-        var titles, html, database, splits, id, page, data = [];
+        var titles, html, database, data = [], model;
         let titles = new Titles();
 
-        let splits = explode("/", path);
-        let id = array_pop(splits);
+        let database = new Database(this->cfg);
+        let data["id"] = this->getPageId(path);
+        let model = database->get("SELECT * FROM templates WHERE id=:id", data);
+        if (empty(model)) {
+            throw new NotFoundException("Template not found");
+        }
+
+        let html = titles->page("Delete the template", "/assets/delete.png");
+
+        if (!empty(_POST)) {
+            if (isset(_POST["delete"])) {
+                var status = false, err;
+                try {
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE templates SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    if (!is_bool(status)) {
+                        let html .= this->saveFailed("Failed to delete the template");
+                        let html .= this->consoleLogError(status);
+                    } else {
+                        this->redirect("/dumb-dog/templates?deleted=true");
+                    }
+                } catch \Exception, err {
+                    let html .= this->saveFailed(err->getMessage());
+                }
+            }
+        }
+
+        let html .= "<form method='post'><div class='box wfull'>
+            <div class='box-title'>
+                <span>are your sure?</span>
+            </div>
+            <div class='box-body'>
+                <p>I'll bury you <strong>" . model->name . "</strong> like I bury my bone...</p>
+            </div>
+            <div class='box-footer'>
+                <a href='/dumb-dog/templates/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <button type='submit' name='delete'>delete</button>
+            </div>
+        </div></form>";
+
+        return html;
+    }
+
+    public function edit(string path)
+    {
+        var titles, html, database, model, data = [];
+        let titles = new Titles();
 
         let database = new Database(this->cfg);
-        let data["id"] = id;
-        let page = database->get("SELECT * FROM templates WHERE id=:id", data);
+        let data["id"] = this->getPageId(path);
+        let model = database->get("SELECT * FROM templates WHERE id=:id", data);
 
-        if (empty(page)) {
+        if (empty(model)) {
             throw new NotFoundException("Template not found");
         }
 
         let html = titles->page("Edit the template", "/assets/edit-page.png");
+
+        if (model->deleted_at) {
+            let html .= this->deletedState("I'm in a deleted state");
+        }
+
+        let html .= "<div class='page-toolbar";
+        if (model->deleted_at) {
+            let html .= " deleted'>";
+            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='button' title='Recover the template'>
+                <img src='/assets/recover.png'>
+            </a>";
+        } else {
+            let html .= "'><a href='/dumb-dog/templates/delete/" . model->id . "' class='button' title='Delete the template'>
+                <img src='/assets/delete.png'>
+            </a>";
+        }
+        let html .= "</div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -162,7 +224,7 @@ class Templates extends Controller
                         let html .= this->saveFailed("Failed to update the template");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/templates/edit/" . page->id . "?saved=true");
+                        this->redirect("/dumb-dog/templates/edit/" . model->id . "?saved=true");
                     }
                 }
             }
@@ -172,18 +234,22 @@ class Templates extends Controller
             let html .= this->saveSuccess("I've updated the template");
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div class='box wfull";
+        if (model->deleted_at) {
+            let html .= " deleted";
+        }
+        let html .= "'>
             <div class='box-title'>
-                <span>the page</span>
+                <span>the template</span>
             </div>
             <div class='box-body'>
                 <div class='input-group'>
                     <span>name<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='make sure to set a name' value='" . page->name . "'>
+                    <input type='text' name='name' placeholder='make sure to set a name' value='" . model->name . "'>
                 </div>
                 <div class='input-group'>
                     <span>file<span class='required'>*</span></span>
-                    <input type='text' name='file' placeholder='where am I located and with what file?' value='" . page->file . "'>
+                    <input type='text' name='file' placeholder='where am I located and with what file?' value='" . model->file . "'>
                 </div>
                 <div class='input-group'>
                     <span>default</span>
@@ -191,7 +257,7 @@ class Templates extends Controller
                         <label>
                             <input type='checkbox' name='default' value='1'";
 
-                if (page->{"default"} == 1) {
+                if (model->{"default"} == 1) {
                     let html .= " checked='checked'";
                 }
                 
@@ -219,6 +285,11 @@ class Templates extends Controller
         let titles = new Titles();
         
         let html = titles->page("Templates", "/assets/templates.png");
+
+        if (isset(_GET["deleted"])) {
+            let html .= this->saveSuccess("I've deleted the template");
+        }
+
         let html .= "<div class='page-toolbar'>
             <a href='/dumb-dog/templates/add' class='button' title='Add a template'>
                 <img src='/assets/add-page.png'>
@@ -232,6 +303,54 @@ class Templates extends Controller
             database->all("SELECT * FROM templates"),
             "/dumb-dog/templates/edit/"
         );
+
+        return html;
+    }
+
+    public function recover(string path)
+    {
+        var titles, html, database, data = [], model;
+        let titles = new Titles();
+
+        let database = new Database(this->cfg);
+        let data["id"] = this->getPageId(path);
+        let model = database->get("SELECT * FROM templates WHERE id=:id", data);
+        if (empty(model)) {
+            throw new NotFoundException("Template not found");
+        }
+
+        let html = titles->page("Recover the template", "/assets/recover.png");
+
+        if (!empty(_POST)) {
+            if (isset(_POST["recover"])) {
+                var status = false, err;
+                try {
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE templates SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    if (!is_bool(status)) {
+                        let html .= this->saveFailed("Failed to recover the template");
+                        let html .= this->consoleLogError(status);
+                    } else {
+                        this->redirect("/dumb-dog/templates/edit/" . model->id);
+                    }
+                } catch \Exception, err {
+                    let html .= this->saveFailed(err->getMessage());
+                }
+            }
+        }
+
+        let html .= "<form method='post'><div class='box wfull'>
+            <div class='box-title'>
+                <span>are your sure?</span>
+            </div>
+            <div class='box-body'>
+                <p>Dig up <strong>" . model->name . "</strong>...</p>
+            </div>
+            <div class='box-footer'>
+                <a href='/dumb-dog/templates/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <button type='submit' name='recover'>recover</button>
+            </div>
+        </div></form>";
 
         return html;
     }
