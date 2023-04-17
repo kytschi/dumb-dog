@@ -226,6 +226,45 @@ class DumbDog
                 this->ddHead(code, location);
                 echo output;
                 this->ddFooter(isset(_SESSION["dd"]) ? true : false);
+            } elseif(path == "/robots.txt") {
+                var database, settings;
+                let database = new Database(this->cfg);
+
+                let settings = database->get("
+                        SELECT
+                            settings.robots_txt
+                        FROM 
+                            settings
+                        LIMIT 1");
+                if (settings) {
+                    header("Content-Type: text/plain");
+                    echo settings->robots_txt;
+                }
+            } elseif(path == "/sitemap.xml") {
+                var database, pages, iLoop, url;
+                let database = new Database(this->cfg);
+
+                let pages = database->all("
+                        SELECT
+                            pages.*
+                        FROM 
+                            pages
+                        WHERE pages.status='live' AND pages.deleted_at IS NULL");
+                if (pages) {
+                    let iLoop = 0;
+                    let url = (_SERVER["HTTPS"] ? "https://" : "http://") . _SERVER["SERVER_NAME"];
+                    header("Content-Type: text/xml");
+                    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+                    echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">";
+                    while (iLoop < count(pages)) {
+                        echo "<url>";
+                        echo "<loc>" .  url . pages[iLoop]->url . "</loc>";
+                        echo "<lastmod>" . (new \DateTime(pages[iLoop]->updated_at))->format(\DateTime::ATOM) . "</lastmod>";
+                        echo "</url>";                        
+                        let iLoop = iLoop + 1;
+                    }
+                    echo "</urlset>";
+                }
             } else {
                 var database, data = [], page;
 
