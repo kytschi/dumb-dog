@@ -52,13 +52,14 @@ class Pages extends Controller
                 var status = false;
                 let data = [];
 
-                if (!this->validate(_POST, ["name", "file"])) {
+                if (!this->validate(_POST, ["name", "url", "template_id"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
                     let data["url"] = _POST["url"];
-                    let data["content"] = _POST["content"];
+                    let data["content"] = str_replace("\\", "&#92;", _POST["content"]);
+                    let data["menu_item"] = _POST["menu_item"];
                     let data["template_id"] = _POST["template_id"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
                     let data["meta_author"] = _POST["meta_author"];
@@ -66,37 +67,43 @@ class Pages extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    let status = database->execute(
-                        "INSERT INTO pages 
-                            (id,
-                            status,
-                            name,
-                            url,
-                            content,
-                            template_id,
-                            meta_keywords,
-                            meta_author,
-                            meta_description,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (UUID(),
-                            :status,
-                            :name,
-                            :url,
-                            :content,
-                            :template_id,
-                            :meta_keywords,
-                            :meta_author,
-                            :meta_description,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
-                        data
-                    );
+                    if (this->cfg["save_mode"] == true) {
+                        let status = database->execute(
+                            "INSERT INTO pages 
+                                (id,
+                                status,
+                                name,
+                                url,
+                                content,
+                                menu_item,
+                                template_id,
+                                meta_keywords,
+                                meta_author,
+                                meta_description,
+                                created_at,
+                                created_by,
+                                updated_at,
+                                updated_by) 
+                            VALUES 
+                                (UUID(),
+                                :status,
+                                :name,
+                                :url,
+                                :content,
+                                :menu_item,
+                                :template_id,
+                                :meta_keywords,
+                                :meta_author,
+                                :meta_description,
+                                NOW(),
+                                :created_by,
+                                NOW(),
+                                :updated_by)",
+                            data
+                        );
+                    } else {
+                        let status = true;
+                    }
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the page");
@@ -126,15 +133,19 @@ class Pages extends Controller
                     </div>
                 </div>
                 <div class='input-group'>
-                    <span>name<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='give me a name' value=''>
-                </div>
-                <div class='input-group'>
                     <span>url<span class='required'>*</span></span>
                     <input type='text' name='url' placeholder='how will I be reached' value=''>
                 </div>
                 <div class='input-group'>
-                    <span>template</span>
+                    <span>title<span class='required'>*</span></span>
+                    <input type='text' name='name' placeholder='give me a name' value=''>
+                </div>
+                <div class='input-group'>
+                    <span>content</span>
+                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'></textarea>
+                </div>
+                <div class='input-group'>
+                    <span>template<span class='required'>*</span></span>
                     <select name='template_id'>";
         let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
         var iLoop = 0;
@@ -147,6 +158,15 @@ class Pages extends Controller
             let iLoop = iLoop + 1;
         }
         let html .= "
+                    </select>
+                </div>
+                <div class='input-group'>
+                    <span>menu item</span>
+                    <select name='menu_item'>
+                        <option value=''>none</option>
+                        <option value='header'>header</option>
+                        <option value='footer'>footer</option>
+                        <option value='both'>both</option>
                     </select>
                 </div>
                 <div class='input-group'>
@@ -184,13 +204,17 @@ class Pages extends Controller
         }
 
         let html = titles->page("Delete the page", "/assets/delete.png");
-
+        
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
                 var status = false, err;
                 try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE pages SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    if (this->cfg["save_mode"] == true) {
+                        let data["updated_by"] = this->getUserId();
+                        let status = database->execute("UPDATE pages SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    } else {
+                        let status = true;
+                    }
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to delete the page");
                         let html .= this->consoleLogError(status);
@@ -261,29 +285,35 @@ class Pages extends Controller
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
                     let data["url"] = _POST["url"];
-                    let data["content"] = _POST["content"];
+                    let data["content"] = str_replace("\\", "&#92;", _POST["content"]);
+                    let data["menu_item"] = _POST["menu_item"];
                     let data["template_id"] = _POST["template_id"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_description"] = _POST["meta_description"];
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
-                    let status = database->execute(
-                        "UPDATE pages SET 
-                            status=:status,
-                            name=:name,
-                            url=:url,
-                            template_id=:template_id,
-                            content=:content,
-                            meta_keywords=:meta_keywords,
-                            meta_author=:meta_author,
-                            meta_description=:meta_description,
-                            updated_at=NOW(),
-                            updated_by=:updated_by
-                        WHERE id=:id",
-                        data
-                    );
+                    if (this->cfg["save_mode"] == true) {
+                        let database = new Database(this->cfg);
+                        let status = database->execute(
+                            "UPDATE pages SET 
+                                status=:status,
+                                name=:name,
+                                url=:url,
+                                template_id=:template_id,
+                                content=:content,
+                                menu_item=:menu_item,
+                                meta_keywords=:meta_keywords,
+                                meta_author=:meta_author,
+                                meta_description=:meta_description,
+                                updated_at=NOW(),
+                                updated_by=:updated_by
+                            WHERE id=:id",
+                            data
+                        );
+                    } else {
+                        let status = true;
+                    }
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the page");
@@ -338,7 +368,7 @@ class Pages extends Controller
                     <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'>" . model->content . "</textarea>
                 </div>
                 <div class='input-group'>
-                    <span>template</span>
+                    <span>template<span class='required'>*</span></span>
                     <select name='template_id'>";
         let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
         var iLoop = 0;
@@ -352,6 +382,28 @@ class Pages extends Controller
         }
         let html .= "
                     </select>
+                </div>
+                <div class='input-group'>
+                    <span>menu item</span>
+                    <select name='menu_item'>
+                    <option value=''";
+            if (model->menu_item == "") {
+                let html .= " selected='selected'";
+            }
+            let html .= ">none</option>
+                        <option value='header'";
+            if (model->menu_item == "header") {
+                let html .= " selected='selected'";
+            }
+            let html .= ">header</option><option value='footer'";
+            if (model->menu_item == "footer") {
+                let html .= " selected='selected'";
+            }
+            let html .= ">footer</option><option value='both'";
+            if (model->menu_item == "both") {
+                let html .= " selected='selected'";
+            }
+            let html .= ">both</option></select>
                 </div>
                 <div class='input-group'>
                     <span>meta keywords</span>
@@ -399,7 +451,7 @@ class Pages extends Controller
 
         let tiles = new Tiles();
         let html = html . tiles->build(
-            database->all("SELECT * FROM pages"),
+            database->all("SELECT * FROM pages ORDER BY name"),
             "/dumb-dog/pages/edit/"
         );
 
@@ -424,8 +476,13 @@ class Pages extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE pages SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    if (this->cfg["save_mode"] == true) {
+                        let data["updated_by"] = this->getUserId();
+                        let status = database->execute("UPDATE pages SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    } else {
+                        let status = true;
+                    }
+
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to recover the page");
                         let html .= this->consoleLogError(status);

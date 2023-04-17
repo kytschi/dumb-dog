@@ -44,7 +44,11 @@ class DumbDog
 
     public function __construct(array cfg = [])
     {
+        if (!array_key_exists("save_mode", cfg)) {
+            let cfg["save_mode"] = true;
+        }
         let this->cfg = cfg;
+
         define("VERSION", this->version);
 
         var parsed, path, controller, output, code, backend = false, err;
@@ -221,18 +225,39 @@ class DumbDog
                 let database = new Database(this->cfg);
                 let data["url"] = path;
 
-                let page = database->get("SELECT
-                        pages.*, file 
+                let page = database->get("
+                    SELECT
+                        pages.name,
+                        pages.url,
+                        pages.content,
+                        pages.meta_keywords,
+                        pages.meta_description,
+                        pages.meta_author,
+                        templates.file AS template
                     FROM pages 
                     JOIN templates ON templates.id=pages.template_id 
-                    WHERE url=:url AND status='live' AND deleted_at IS NULL", data);
+                    WHERE pages.url=:url AND pages.status='live' AND pages.deleted_at IS NULL", data);
                 if (page) {
-                    var settings;
-                    let settings = database->get("SELECT settings.*,themes.folder AS theme FROM settings JOIN themes ON themes.id=settings.theme_id LIMIT 1");
-                    if (file_exists("./website/" . page->file)) {
+                    var settings, menu;
+                    let settings = database->get("
+                        SELECT
+                            settings.name,
+                            settings.meta_keywords,
+                            settings.meta_description,
+                            settings.meta_author,
+                            themes.folder AS theme
+                        FROM 
+                            settings
+                        JOIN themes ON themes.id=settings.theme_id LIMIT 1");
+                    if (file_exists("./website/" . page->template)) {
                         let settings->theme = "/website/themes/" . settings->theme . "/theme.css";
-                        eval("$dd_site=json_decode('" . json_encode(settings) . "');$dd_page=json_decode('" . json_encode(page) . "');");
-                        require_once("./website/" . page->file);
+                        eval("$dd_site=json_decode('" . json_encode(settings) . "', false, 512, JSON_THROW_ON_ERROR);");
+                        eval("$dd_page=json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR);");
+                        let menu = database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+                        if (menu) {
+                            eval("$dd_menu_header=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
+                        }
+                        require_once("./website/" . page->template);
                     } else {
                         throw new Exception("template not found");
                     }
@@ -287,6 +312,9 @@ class DumbDog
         }
 
         echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><main>";
+        if (this->cfg["save_mode"] == false) {
+            echo "<div class='warning alert'><span>saving is currently disabled</span></div>";
+        }
         echo javascript->logo();
     }
 

@@ -52,11 +52,28 @@ new DumbDog(
 );
 ```
 
+Next point your webserver to the `public` folder of Dumb Dog where the `index.php` is located.
+
 That's it, now you can access Dumb Dog via whatever url you've setup for the project by adding `/dumb-dog` to the url.
 
 Default login is username `dumbdog` and password is `woofwoof`.
 
 **DONT FORGET TO CREATE YOUR OWN USER AND DELETE THE DEFAULT ONE OR CHANGE ITS PASSWORD!**
+
+## Getting started
+
+Once the module is installed and you've got your webserver all setup pointing to the `index.php` your ready to start building.
+
+The front-end website is held in the `public\website` folder. This is where you'll keep all your `templates` and your `themes`.
+
+Have a look at the `example` website in the repository to show you a way of building using Dumb Dog.
+
+**NOW, HAVE FUN!**
+
+## More information
+
+I've knocked up a demo website running the `example` in this repository and there's more information located there to help you get going and under Dumb Dog.\
+https://dumbdog.kytschi.com
 
 ## Credits
 Many thanks to laimuilin18 for the art work.\

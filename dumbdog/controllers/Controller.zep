@@ -50,6 +50,9 @@ class Controller
 
     public function getUserId()
     {
+        if (isset(_SESSION["dd"])) {
+            return _SESSION["dd"];
+        }
         return this->system_uuid;
     }
 
