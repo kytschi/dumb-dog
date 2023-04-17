@@ -306,7 +306,7 @@ class Users extends Controller
         var titles, tiles, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Users", "/assets/templates.png");
+        let html = titles->page("Users", "/assets/users.png");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the user");

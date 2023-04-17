@@ -278,7 +278,7 @@ class Themes extends Controller
         var titles, tiles, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Themes", "/assets/templates.png");
+        let html = titles->page("Themes", "/assets/themes.png");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the theme");
