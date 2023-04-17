@@ -35,7 +35,7 @@ class Users extends Controller
 {
     private cfg;
 
-    public function __construct(array cfg)
+    public function __construct(object cfg)
     {
         let this->cfg = cfg;    
     }
@@ -67,7 +67,7 @@ class Users extends Controller
                             throw new \Exception("username already taken");
                         }
 
-                        if (this->cfg["save_mode"] == true) {
+                        if (this->cfg->save_mode == true) {
                             let data["nickname"] = _POST["nickname"];
                             let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
                             let data["created_by"] = this->getUserId();
@@ -166,7 +166,7 @@ class Users extends Controller
             if (isset(_POST["delete"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let data["updated_by"] = this->getUserId();
                         let status = database->execute("UPDATE users SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     } else {
@@ -247,7 +247,7 @@ class Users extends Controller
                         let query .= ", password=:password";
                     }
 
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let data["name"] = _POST["name"];
                         let data["nickname"] = _POST["nickname"];
                         let data["updated_by"] = this->getUserId();
@@ -358,7 +358,7 @@ class Users extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let data["updated_by"] = this->getUserId();
                         let status = database->execute("UPDATE users SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     } else {

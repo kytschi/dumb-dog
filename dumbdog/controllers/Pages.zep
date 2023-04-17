@@ -34,7 +34,7 @@ class Pages extends Controller
 {
     private cfg;
 
-    public function __construct(array cfg)
+    public function __construct(object cfg)
     {
         let this->cfg = cfg;    
     }
@@ -67,7 +67,7 @@ class Pages extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let status = database->execute(
                             "INSERT INTO pages 
                                 (id,
@@ -209,12 +209,8 @@ class Pages extends Controller
             if (isset(_POST["delete"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg["save_mode"] == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE pages SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE pages SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to delete the page");
                         let html .= this->consoleLogError(status);
@@ -293,7 +289,7 @@ class Pages extends Controller
                     let data["meta_description"] = _POST["meta_description"];
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let database = new Database(this->cfg);
                         let status = database->execute(
                             "UPDATE pages SET 
@@ -476,7 +472,7 @@ class Pages extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let data["updated_by"] = this->getUserId();
                         let status = database->execute("UPDATE pages SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     } else {

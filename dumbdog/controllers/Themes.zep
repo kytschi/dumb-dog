@@ -35,7 +35,7 @@ class Themes extends Controller
 {
     private cfg;
 
-    public function __construct(array cfg)
+    public function __construct(object cfg)
     {
         let this->cfg = cfg;    
     }
@@ -59,7 +59,7 @@ class Themes extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let database = new Database(this->cfg);
                         let status = database->execute(
                             "INSERT INTO themes 
@@ -135,7 +135,7 @@ class Themes extends Controller
             if (isset(_POST["delete"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let data["updated_by"] = this->getUserId();
                         let status = database->execute("UPDATE themes SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     } else {
@@ -214,7 +214,7 @@ class Themes extends Controller
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["updated_by"] = this->getUserId();
 
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let database = new Database(this->cfg);
                         let status = database->execute(
                             "UPDATE themes SET 
@@ -331,7 +331,7 @@ class Themes extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let data["updated_by"] = this->getUserId();
                         let status = database->execute("UPDATE themes SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     } else {

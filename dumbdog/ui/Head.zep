@@ -30,7 +30,7 @@ class Head
 {
     private cfg;
 
-    public function __construct(array cfg)
+    public function __construct(object cfg)
     {
         let this->cfg = cfg;    
     }

@@ -39,13 +39,20 @@ use DumbDog\Ui\Gfx\Titles;
 
 class DumbDog
 {
-    private cfg = [];
+    private cfg;
     private version = "0.0.1 alpha";
 
-    public function __construct(array cfg = [])
+    public function __construct(string cfg_file)
     {
-        if (!array_key_exists("save_mode", cfg)) {
-            let cfg["save_mode"] = true;
+        var cfg;
+        let cfg = new \stdClass();
+
+        if (!file_exists(cfg_file)) {
+            throw new Exception("Failed to load the config file");
+        }
+        let cfg = json_decode(file_get_contents(cfg_file));
+        if (!property_exists(cfg, "save_mode")) {
+            let cfg->save_mode = true;
         }
         let this->cfg = cfg;
 
@@ -312,7 +319,7 @@ class DumbDog
         }
 
         echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><main>";
-        if (this->cfg["save_mode"] == false) {
+        if (this->cfg->save_mode == false) {
             echo "<div class='warning alert'><span>saving is currently disabled</span></div>";
         }
         echo javascript->logo();

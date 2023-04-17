@@ -37,18 +37,7 @@ try {
     /**
      * database => the database cfg.
      */
-    new DumbDog(
-        [
-            'database' => [
-                'type' => 'mysql',
-                'host' => 'localhost',
-                'port' => '3306',
-                'db' => 'dumb_dog',
-                'username' => 'dumbdog',
-                'password' => 'dumbdog'
-            ]
-        ]
-    );
+    new DumbDog("../dumbdog.json");
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();
 }

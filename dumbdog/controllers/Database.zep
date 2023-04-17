@@ -31,43 +31,43 @@ class Database
     private cfg;
     private db;
 
-    public function __construct(array cfg)
+    public function __construct(object cfg)
     {
         var connection, username, password;
         let username = "";
         let password = "";
 
-        if (empty(cfg["database"])) {
+        if (empty(cfg->database)) {
             throw new CfgException("missing database config");
         }
 
-        if (empty(cfg["database"]["db"])) {
+        if (empty(cfg->database->db)) {
             throw new CfgException("missing 'db' from the database config");
         }
 
         let connection = "mysql:";
-        if (!empty(cfg["database"]["type"])) {
-            let connection = cfg["database"]["type"] . ":";
+        if (!empty(cfg->database->type)) {
+            let connection = cfg->database->type . ":";
         }
                 
-        if (empty(cfg["database"]["host"])) {
+        if (empty(cfg->database->host)) {
             let connection .= "host=localhost;";
         } else {
-            let connection .= "host=" . cfg["database"]["host"] . ";";
+            let connection .= "host=" . cfg->database->host . ";";
         }
         
-        if (!empty(cfg["database"]["port"])) {
-            let connection .= "port=" . cfg["database"]["port"] . ";";
+        if (!empty(cfg->database->port)) {
+            let connection .= "port=" . cfg->database->port . ";";
         }
 
-        let connection .= "dbname=" . cfg["database"]["db"] . ";";        
+        let connection .= "dbname=" . cfg->database->db . ";";        
 
-        if (!empty(cfg["database"]["username"])) {
-            let username = cfg["database"]["username"];
+        if (!empty(cfg->database->username)) {
+            let username = cfg->database->username;
         }
 
-        if (!empty(cfg["database"]["password"])) {
-            let password = cfg["database"]["password"];
+        if (!empty(cfg->database->password)) {
+            let password = cfg->database->password;
         }
                 
         let this->cfg = cfg;
@@ -84,6 +84,9 @@ class Database
 
     public function execute(string query, array data = [])
     {
+        if (this->cfg->save_mode == false) {
+            return true;
+        }
         var statement, status, errors;
 
         ob_start();
