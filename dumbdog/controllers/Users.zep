@@ -220,7 +220,6 @@ class Users extends Controller
                 <img src='/assets/delete.png'>
             </a>";
         }
-        
         let html .= "</div>";
 
         if (!empty(_POST)) {

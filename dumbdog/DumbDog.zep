@@ -93,10 +93,20 @@ class DumbDog
                         "add",
                         "create a page"
                     ],
+                    "/pages/delete": [
+                        "Pages",
+                        "delete",
+                        "delete the page"
+                    ],
                     "/pages/edit": [
                         "Pages",
                         "edit",
                         "edit the page"
+                    ],
+                    "/pages/recover": [
+                        "Pages",
+                        "recover",
+                        "recover the page"
                     ],
                     "/pages": [
                         "Pages",
@@ -195,7 +205,7 @@ class DumbDog
                         pages.*, file 
                     FROM pages 
                     JOIN templates ON templates.id=pages.template_id 
-                    WHERE url=:url AND status='live'", data);
+                    WHERE url=:url AND status='live' AND deleted_at IS NULL", data);
                 if (page) {
                     var settings;
                     let settings = database->get("SELECT settings.*,themes.folder AS theme FROM settings JOIN themes ON themes.id=settings.theme_id LIMIT 1");
