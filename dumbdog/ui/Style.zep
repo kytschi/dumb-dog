@@ -423,6 +423,7 @@ class Style
             box-shadow: var(--text-heading-shadow);
             background-repeat: no-repeat;
             background-position: 20px 20px;
+            background-size: 80px;
         }
         .page-title span {
             padding: 0px 40px 10px 100px;

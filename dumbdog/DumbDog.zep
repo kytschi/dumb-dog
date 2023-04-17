@@ -266,49 +266,57 @@ class DumbDog
                     echo "</urlset>";
                 }
             } else {
-                var database, data = [], page;
-
+                var database, data = [], page, settings, menu;
+                
                 let database = new Database(this->cfg);
-                let data["url"] = path;
-
-                let page = database->get("
+                
+                let settings = database->get("
                     SELECT
-                        pages.name,
-                        pages.url,
-                        pages.content,
-                        pages.meta_keywords,
-                        pages.meta_description,
-                        pages.meta_author,
-                        templates.file AS template
-                    FROM pages 
-                    JOIN templates ON templates.id=pages.template_id 
-                    WHERE pages.url=:url AND pages.status='live' AND pages.deleted_at IS NULL", data);
-                if (page) {
-                    var settings, menu;
-                    let settings = database->get("
-                        SELECT
-                            settings.name,
-                            settings.meta_keywords,
-                            settings.meta_description,
-                            settings.meta_author,
-                            themes.folder AS theme
-                        FROM 
-                            settings
-                        JOIN themes ON themes.id=settings.theme_id LIMIT 1");
-                    if (file_exists("./website/" . page->template)) {
-                        let settings->theme = "/website/themes/" . settings->theme . "/theme.css";
-                        eval("$dd_site=json_decode('" . json_encode(settings) . "', false, 512, JSON_THROW_ON_ERROR);");
-                        eval("$dd_page=json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR);");
-                        let menu = database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
-                        if (menu) {
-                            eval("$dd_menu_header=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
-                        }
-                        require_once("./website/" . page->template);
-                    } else {
-                        throw new Exception("template not found");
-                    }
+                        settings.name,
+                        settings.meta_keywords,
+                        settings.meta_description,
+                        settings.meta_author,
+                        settings.status,
+                        themes.folder AS theme
+                    FROM 
+                        settings
+                    JOIN themes ON themes.id=settings.theme_id LIMIT 1");
+                if (empty(settings)) {
+                    throw new \Exception("show stopper...no settings in the database");
+                }
+
+                if (settings->status == "offline") {
+                    this->offline();
                 } else {
-                    this->notFound(false);
+                    let data["url"] = path;
+                    let page = database->get("
+                        SELECT
+                            pages.name,
+                            pages.url,
+                            pages.content,
+                            pages.meta_keywords,
+                            pages.meta_description,
+                            pages.meta_author,
+                            templates.file AS template
+                        FROM pages 
+                        JOIN templates ON templates.id=pages.template_id 
+                        WHERE pages.url=:url AND pages.status='live' AND pages.deleted_at IS NULL", data);
+                    if (page) {
+                        if (file_exists("./website/" . page->template)) {
+                            let settings->theme = "/website/themes/" . settings->theme . "/theme.css";
+                            eval("$dd_site=json_decode('" . json_encode(settings) . "', false, 512, JSON_THROW_ON_ERROR);");
+                            eval("$dd_page=json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR);");
+                            let menu = database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+                            if (menu) {
+                                eval("$dd_menu_header=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
+                            }
+                            require_once("./website/" . page->template);
+                        } else {
+                            throw new Exception("template not found");
+                        }
+                    } else {
+                        this->notFound(false);
+                    }
                 }
             }
         } catch NotFoundException, err {
@@ -344,7 +352,7 @@ class DumbDog
 
         let id = "bk";
         
-        if (strpos(location, "page not") !== false) {
+        if (strpos(location, "page not") !== false || strpos(location, "offline") !== false) {
             let id = "error";
         } elseif (strpos(location, "page") !== false) {
             let id = "page-bk";
@@ -392,6 +400,16 @@ class DumbDog
             echo titles->page("page not found", "/assets/dumbdog.png");
             this->ddFooter(false);
         }
+    }
+
+    private function offline()
+    {
+        var titles;
+        let titles = new Titles();
+
+        this->ddHead(404, "offline");
+        echo titles->page("offline", "/assets/dumbdog.png");
+        this->ddFooter(false);        
     }
 
     private function quickMenu()
