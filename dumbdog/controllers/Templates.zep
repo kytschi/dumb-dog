@@ -59,14 +59,18 @@ class Templates extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
-                    let status = database->execute(
-                        "INSERT INTO templates 
-                            (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
-                        VALUES 
-                            (UUID(), :name, :file, :default, NOW(), :created_by, NOW(), :updated_by)",
-                        data
-                    );
+                    if (this->cfg["save_mode"] == true) {
+                        let database = new Database(this->cfg);
+                        let status = database->execute(
+                            "INSERT INTO templates 
+                                (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
+                            VALUES 
+                                (UUID(), :name, :file, :default, NOW(), :created_by, NOW(), :updated_by)",
+                            data
+                        );
+                    } else {
+                        let status = true;
+                    }
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the template");
@@ -131,8 +135,13 @@ class Templates extends Controller
             if (isset(_POST["delete"])) {
                 var status = false, err;
                 try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE templates SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    if (this->cfg["save_mode"] == true) {
+                        let data["updated_by"] = this->getUserId();
+                        let status = database->execute("UPDATE templates SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    } else {
+                        let status = true;
+                    }
+
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to delete the template");
                         let html .= this->consoleLogError(status);
@@ -205,20 +214,23 @@ class Templates extends Controller
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
-                    if (data["default"]) {
+                    if (this->cfg["save_mode"] == true) {
+                        let database = new Database(this->cfg);
+                        if (data["default"]) {
+                            let status = database->execute(
+                                "UPDATE templates SET `default`=0, updated_at=NOW(), updated_by=:updated_by",
+                                data
+                            );
+                        }
                         let status = database->execute(
-                            "UPDATE templates SET `default`=0, updated_at=NOW(), updated_by=:updated_by",
+                            "UPDATE templates SET 
+                                name=:name, file=:file, `default`=:default, updated_at=NOW(), updated_by=:updated_by
+                            WHERE id=:id",
                             data
                         );
+                    } else {
+                        let status = true;
                     }
-
-                    let status = database->execute(
-                        "UPDATE templates SET 
-                            name=:name, file=:file, `default`=:default, updated_at=NOW(), updated_by=:updated_by
-                        WHERE id=:id",
-                        data
-                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the template");
@@ -325,8 +337,12 @@ class Templates extends Controller
             if (isset(_POST["recover"])) {
                 var status = false, err;
                 try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE templates SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    if (this->cfg["save_mode"] == true) {
+                        let data["updated_by"] = this->getUserId();
+                        let status = database->execute("UPDATE templates SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    } else {
+                        let status = true;
+                    }
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to recover the template");
                         let html .= this->consoleLogError(status);

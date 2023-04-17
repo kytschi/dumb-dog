@@ -47,6 +47,7 @@ class Style
             /* Box */
             --box-background-colour: #fff;
             --box-deleted-background-colour: #8B8B8B;
+            --box-warning-background-colour: #F08966;
             --box-border-colour: #030202;
             --box-title-background-colour: #EB9691;
             --box-title-border-colour: #030202;
@@ -174,10 +175,25 @@ class Style
             font-family: 'subheading', Helvetica, sans-serif;
             line-height: 44pt;
         }
-        input, textarea, select {
-            font-family: Helvetica, sans-serif;
+        input, textarea, select, .trumbowyg-editor {
+            font-family: Helvetica, sans-serif !important;
             font-size: 14pt;
+        }
+        input, textarea, select {
             padding: 10px;
+        }
+        .trumbowyg-editor,
+        .trumbowyg-editor input,
+        .trumbowyg-editor button,
+        .trumbowyg-editor h1,
+        .trumbowyg-editor h2,
+        .trumbowyg-editor h3,
+        .trumbowyg-editor h4,
+        .trumbowyg-editor h5,
+        .trumbowyg-editor h6 {
+            line-height: 14pt !important;
+            font-family: Helvetica, sans-serif !important;
+            margin: 0 !important;
         }
         input:focus, textarea:focus, select:focus {
             border:1px solid var(--input-border-focus-colour);
@@ -314,12 +330,6 @@ class Style
         .box-body {
             padding: 40px 40px;
         }
-        .box-body p {
-            padding: 0;
-            margin: 0;
-            font-family: 'subheading', Helvetica, sans-serif;
-            line-height: 44pt;
-        }
         .box-footer {
             padding: 0 40px 40px 40px;
             display: flex;
@@ -352,6 +362,9 @@ class Style
         }
         .deleted.alert, .deleted .box-title {
             background-color: var(--box-deleted-background-colour);
+        }
+        .warning.alert {
+            background-color: var(--box-warning-background-colour);
         }
 
         /* Quick menu */

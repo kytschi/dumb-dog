@@ -76,19 +76,23 @@ class Settings extends Controller
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
                                         
-                    let database = new Database(this->cfg);
-                    let status = database->execute(
-                        "UPDATE settings
-                        SET 
-                            name=:name,
-                            theme_id=:theme_id,
-                            `status`=:status,
-                            meta_description=:meta_description,
-                            meta_author=:meta_author,
-                            meta_keywords=:meta_keywords
-                        WHERE name IS NOT NULL",
-                        data
-                    );
+                    if (this->cfg["save_mode"] == true) {
+                        let database = new Database(this->cfg);
+                        let status = database->execute(
+                            "UPDATE settings
+                            SET 
+                                name=:name,
+                                theme_id=:theme_id,
+                                `status`=:status,
+                                meta_description=:meta_description,
+                                meta_author=:meta_author,
+                                meta_keywords=:meta_keywords
+                            WHERE name IS NOT NULL",
+                            data
+                        );
+                    } else {
+                        let status = true;
+                    }
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the settings");

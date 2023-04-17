@@ -36,7 +36,9 @@ class Javascript
                 document.getElementById('quick-menu').style.display = 'none';
             }
         }
-        $('.wysiwyg').trumbowyg();
+        $('.wysiwyg').trumbowyg({
+            removeformatPasted: true
+        });
         </script>";
     }
 
