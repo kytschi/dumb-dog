@@ -94,10 +94,14 @@ class Settings extends Controller
                         let html .= this->saveFailed("Failed to update the settings");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've updated the settings");
+                        this->redirect("/dumb-dog/settings?saved=true");
                     }
                 }
             }
+        }
+
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("I've updated the settings");
         }
 
         let html .= "<form method='post'><div class='box wfull'>
