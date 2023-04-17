@@ -66,43 +66,39 @@ class Users extends Controller
                         if (user) {
                             throw new \Exception("username already taken");
                         }
+                        
+                        let data["nickname"] = _POST["nickname"];
+                        let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
+                        let data["created_by"] = this->getUserId();
+                        let data["updated_by"] = this->getUserId();
 
-                        if (this->cfg->save_mode == true) {
-                            let data["nickname"] = _POST["nickname"];
-                            let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
-                            let data["created_by"] = this->getUserId();
-                            let data["updated_by"] = this->getUserId();
-
-                            let status = database->execute(
-                                "INSERT INTO users 
-                                    (
-                                        id,
-                                        name,
-                                        nickname,
-                                        `password`,
-                                        created_at,
-                                        created_by,
-                                        updated_at,
-                                        updated_by,
-                                        status
-                                    ) 
-                                VALUES 
-                                    (
-                                        UUID(),
-                                        :name,
-                                        :nickname,
-                                        :password,
-                                        NOW(),
-                                        :created_by,
-                                        NOW(),
-                                        :updated_by,
-                                        'active'
-                                    )",
-                                data
-                            );
-                        } else {
-                            let status = true;
-                        }
+                        let status = database->execute(
+                            "INSERT INTO users 
+                                (
+                                    id,
+                                    name,
+                                    nickname,
+                                    `password`,
+                                    created_at,
+                                    created_by,
+                                    updated_at,
+                                    updated_by,
+                                    status
+                                ) 
+                            VALUES 
+                                (
+                                    UUID(),
+                                    :name,
+                                    :nickname,
+                                    :password,
+                                    NOW(),
+                                    :created_by,
+                                    NOW(),
+                                    :updated_by,
+                                    'active'
+                                )",
+                            data
+                        );
 
                         if (!is_bool(status)) {
                             let html .= this->saveFailed("Failed to save the user");
@@ -166,12 +162,9 @@ class Users extends Controller
             if (isset(_POST["delete"])) {
                 var status = false, err;
                 try {
-                    if (this->cfg->save_mode == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE users SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE users SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to delete the user");
                         let html .= this->consoleLogError(status);
@@ -247,21 +240,17 @@ class Users extends Controller
                         let query .= ", password=:password";
                     }
 
-                    if (this->cfg->save_mode == true) {
-                        let data["name"] = _POST["name"];
-                        let data["nickname"] = _POST["nickname"];
-                        let data["updated_by"] = this->getUserId();
+                    let data["name"] = _POST["name"];
+                    let data["nickname"] = _POST["nickname"];
+                    let data["updated_by"] = this->getUserId();
 
-                        let query .= " WHERE id=:id";
+                    let query .= " WHERE id=:id";
 
-                        let database = new Database(this->cfg);
-                        let status = database->execute(
-                            query,
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
+                    let database = new Database(this->cfg);
+                    let status = database->execute(
+                        query,
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the user");
@@ -357,13 +346,10 @@ class Users extends Controller
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {
                 var status = false, err;
-                try {
-                    if (this->cfg->save_mode == true) {
-                        let data["updated_by"] = this->getUserId();
-                        let status = database->execute("UPDATE users SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    } else {
-                        let status = true;
-                    }
+                try {    
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE users SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);                    
+
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to recover the user");
                         let html .= this->consoleLogError(status);
