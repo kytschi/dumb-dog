@@ -24,6 +24,10 @@
  */
 namespace DumbDog\Exceptions;
 
+use DumbDog\Ui\Head;
+use DumbDog\Ui\Javascript;
+use DumbDog\Ui\Gfx\Titles;
+
 class Exception extends \Exception
 {
     public code;
@@ -41,13 +45,33 @@ class Exception extends \Exception
      */
     public function __toString()
     {
-        var message;
+        var html, titles, head, javascript;
 
-        let message = this->gfx(this->getCode()) . 
-            "<p>&nbsp;&nbsp;<strong>" . this->getMessage() . "</strong><br/>" . 
-            "&nbsp;&nbsp;<small><muted>Dumb Dog " . constant("VERSION") . "</muted></small></p>";
+        let titles = new Titles();
+        let head = new Head([]);
+        let javascript = new Javascript();
 
-        return message;
+        if (this->code == 404) {
+            header("HTTP/1.1 404 Not Found");
+        } elseif (this->code == 400) {
+            header("HTTP/1.1 400 Bad Request");
+        } else {
+            header("HTTP/1.1 500 Internal Server Error");
+        }
+
+        let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") . "<body id='error'><main>";
+        let html .= titles->page("bad doggie!", "/assets/error.png");
+        let html .= "<div class='box'>
+            <div class='box-body'>
+                <p>" . this->getMessage() . "</p>
+            </div>
+            <div class='box-footer'>
+                <button type='button' onclick='window.history.back()'>back</button>
+            </div>
+        </div>";
+        let html .= "</main></body>" . javascript->logo() . "</html>";
+
+        return html;
     }
 
     /**
@@ -70,44 +94,5 @@ class Exception extends \Exception
             echo "<p>&nbsp;&nbsp;<strong>Trace</strong><br/>&nbsp;&nbsp;Source <strong>" . str_replace(getcwd(), "", template) . "</strong> at line <strong>" . line . "</strong></p>";
         }
         die();
-    }
-
-    /**
-     * Generate the grumpy cat, I mean just look at him!
-     */
-    private function gfx(int code)
-    {
-        if (!code) {
-            let code = 500;
-        }
-
-        var gfx;
-
-        let gfx = "<pre>
- ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢀⣠⢴⣤⠴⠚⠉⢁⠀⠀⠀⢤⡈⠉⠓⠶⢯⣷⠲⢤⡀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⢀⣠⠶⣏⡵⠚⠁⠀⠀⢀⠞⠀⡄⢠⠀⠱⢄⡀⠀⠀⢿⣇⠀⠉⠓⠒⠲⣦⠀⠀⠀
-⠀⣴⠋⠀⢺⣿⠀⠀⠀⢀⠤⠀⠄⠀⢠⠘⠀⠀⣒⡚⢤⣀⠈⠻⣷⣦⡀⠀⢀⡏⠀⠀⠀
-⠀⢷⡇⠀⢸⡇⢀⣤⣶⣶⣶⣾⡇⡆⢈⡆⢠⢠⣿⣿⣶⣶⣤⡀⠈⣿⡿⢄⡾⠁⠀⠀⠀
-⠀⠀⠹⣦⣾⡟⠳⣿⣿⣿⣿⣷⣿⣟⣿⣿⡻⢿⣿⣿⣿⣿⡿⠃⠀⣇⠻⠞⠀⠀⠀⠀⠀
-⠀⠀⠀⠈⠛⡇⠀⠙⣿⡿⢋⡿⢿⣿⣿⣿⡿⠛⠮⣟⠛⢛⡁⠀⠀⢹⡄⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⢸⡁⠀⣿⣟⠛⢽⣷⣶⣾⣿⡇⢤⣶⣴⡾⣿⣿⣿⠀⠀⢰⠇⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠈⣷⡀⠙⢿⡷⣦⣬⣿⠟⢻⠛⢦⣤⣼⣶⢿⡿⠃⠀⣰⢻⣆⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣰⣇⠙⢦⠀⠙⢯⡛⢿⡀⠈⠀⠀⣿⣿⡵⠋⠀⡠⠊⣡⠎⢸⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⡏⠹⡄⠀⠀⢢⡀⠈⠛⠛⠿⠶⠿⠛⠋⠀⠀⠀⣠⠞⠁⢀⠛⢧⠀⠀⠀⠀⠀⢰⣷⡀⠀⠀⣿⣿⠀⣠⣴⣾⣿⣶⣦⡀⠀⣶⣶⣶⣶⣶⡄⣶⣶⣶⣶⣶⡆⠀
-⠀⠀⠀⠀⡽⡀⠘⢦⡀⠀⠙⠦⡀⠐⠐⠒⠢⠄⠀⡀⢀⡞⠁⠀⢠⠎⠀⢸⡀⠀⠀⠀⠀⢸⣿⣿⣄⠀⣿⣿⣼⣿⠋⠀⠀⠈⠻⣿⡆⣿⣇⠀⠀⢹⣿⣿⣿⠀⠀⠀⠀
-⠀⠀⠀⠀⡇⠸⡄⠀⠙⢆⠀⠀⠉⢦⡀⠀⡠⠒⠉⠀⠈⠀⠀⢀⠁⠀⠀⢸⠇⠀⠀⠀⠀⢸⣿⠙⣿⣦⣿⣿⣿⣇⠀⠀⠀⠀⠀⣿⡷⣿⣿⣤⣴⣿⠟⣿⣿⠿⠿⠿⠇⠀
-⠀⠀⠀⠀⡇⠀⠈⠁⠀⠈⠣⣄⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣠⠞⠀⠀⠀⢸⡄⠀⠀⠀⠀⢸⣿⠀⠈⢿⣿⣿⠹⣿⣦⣀⣀⣠⣼⡿⠃⣿⡯⠉⠉⠁⠀⣿⣿⣀⣀⣀⡀
-⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⡞⢳⠀⠀⠀⠀⠘⠛⠀⠀⠀⠛⠛⠀⠈⠛⠻⠿⠟⠋⠁⠀⠛⠓⠀⠀⠀⠀⠛⠛⠛⠛⠛⠃⠀
-⠀⠀⠀⠀⣿⠂⠀⠀⠀⠀⠠⠤⠤⠒⠃⠀⠓⠤⠤⠀⠀⡀⠀⠀⠀⠀⠀⣇⣘⣆⠀⠀⠀
-⠀⠀⠀⠀⡟⠀⠀⠀⣴⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⡄⠀⠀⠀⠀⢹⠀⠈⢧⠀⠀Error Code: " . code . "
-⠀⠀⠀⠀⡇⠀⠀⢸⡿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⡄⠀⠀⠀⡇⠀⠀⠸⡆⠀
-⠀⠀⠀⠀⡇⠀⠀⠈⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⡇⠀⠀⠀⡇⠀
-⠀⠀⠀⢠⡇⠀⠀⢀⡾⣈⢧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠃⠀⠀⢸⡇⠀⢀⣼⠁⠀
-⢀⣤⣖⡋⠀⠀⠀⣼⢁⡬⠀⣹⠦⢄⣀⠀⠀⠀⠀⣀⣀⠤⣾⠀⠀⠀⢸⡧⠤⠞⡧⢄⡀
-⢸⣿⣏⣀⡇⢀⡼⠛⠚⠛⠊⠁⠀⠀⠀⠉⠉⠉⠉⠀⠀⠀⢿⣀⠀⣀⠘⡟⣶⣄⢑⣦⠗
-⠀⠈⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⠦⠼⠶⠛⠉⠈⠉⠀⠀</pre>";
-
-        return gfx;
     }
 }
