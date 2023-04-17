@@ -48,7 +48,7 @@ class Exception extends \Exception
         var html, titles, head, javascript;
 
         let titles = new Titles();
-        let head = new Head([]);
+        let head = new Head(new \stdClass());
         let javascript = new Javascript();
 
         if (this->code == 404) {

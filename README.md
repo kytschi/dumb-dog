@@ -32,24 +32,18 @@ And don't forget to restart your webserver.
 Create yourself a database and run the SQL located in the setup folder.
 https://github.com/kytschi/dumb-dog/blob/main/setup/database.sql
 
-Once the database is setup and the SQL installed, go to the `index.php` in the public folder and configure the database connection.
+Once the database is setup and the SQL installed, go to the `dumbdog-example.json` in the root folder and copy it to a file called `dumbdog.json`. This is where you can configure Dumb Dog. Now set the database connection details to that of your newly created database.
 
 ```
-/**
- * database => the database cfg.
- */
-new DumbDog(
-    [
-        'database' => [
-            'type' => 'mysql',
-            'host' => 'localhost',
-            'port' => '3306',
-            'db' => 'dumb_dog',
-            'username' => 'dumbdog',
-            'password' => 'dumbdog'
-        ]
-    ]
-);
+"database":
+{
+    "type": "mysql",
+    "host": "localhost",
+    "port": "3306",
+    "db": "dumb_dog",
+    "username": "dumbdog",
+    "password": "dumbdog"
+}
 ```
 
 Next point your webserver to the `public` folder of Dumb Dog where the `index.php` is located.

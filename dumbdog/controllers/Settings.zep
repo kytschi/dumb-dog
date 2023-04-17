@@ -35,7 +35,7 @@ class Settings extends Controller
 {
     private cfg;
 
-    public function __construct(array cfg)
+    public function __construct(object cfg)
     {
         let this->cfg = cfg;    
     }
@@ -76,7 +76,7 @@ class Settings extends Controller
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
                                         
-                    if (this->cfg["save_mode"] == true) {
+                    if (this->cfg->save_mode == true) {
                         let database = new Database(this->cfg);
                         let status = database->execute(
                             "UPDATE settings
