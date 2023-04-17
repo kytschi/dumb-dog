@@ -268,7 +268,7 @@ class DumbDog
         }
 
         var head, javascript, id;
-        let head = new Head(this->cfg);        
+        let head = new Head(this->cfg);
         let javascript = new Javascript();
 
         let id = "bk";

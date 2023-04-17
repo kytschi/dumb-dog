@@ -39,7 +39,48 @@ class Style
     private function defaultStyle()
     {
         return "<style>
-        @import url('/assets/style.css');
+        :root {
+            /* Body */
+            --body-background-colour: #92ddd6;
+            --body-text-colour: #030202;
+        
+            /* Box */
+            --box-background-colour: #fff;
+            --box-deleted-background-colour: #8B8B8B;
+            --box-border-colour: #030202;
+            --box-title-background-colour: #EB9691;
+            --box-title-border-colour: #030202;
+            --box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+        
+            /* Buttons */
+            --button-background-colour: #EB9691;
+            --button-background-colour-disabled: #c9c9c9;
+            --button-hover-background-colour: #fca8a4;
+            --button-border-colour: #030202;
+            --button-svg-fill-colour: #030202;
+            --button-text-colour: #030202;
+            --button-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+        
+            /* Inputs */
+            --input-border-colour: #030202;
+            --input-border-focus-colour: #fca8a4;
+        
+            /* Text */
+            --text-heading-background-colour: #fff;
+            --text-heading-border-colour: #030202;
+            --text-heading-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+            --text-required-colour: #fca8a4;
+        }
+        
+        /* Fonts */
+        @font-face {
+            font-family: 'heading';
+            src: url('/assets/heading.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'subheading';
+            src: url('/assets/body.ttf') format('truetype');
+        }
         html, body {
             color: var(--body-text-colour);
             font-family: Helvetica, sans-serif;
@@ -62,7 +103,14 @@ class Style
             background-image: url('/assets/dashboard-bk.jpg');
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: bottom -370px right -10px;
+            background-position: bottom -390px right -10px;
+        }
+        #error {
+            background-color: #92ddd6;
+            background-image: url('/assets/error.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: bottom -390px right -10px;
         }
         #page-bk {
             background-color: #C3C4C6;
@@ -76,7 +124,7 @@ class Style
             background-image: url('/assets/dashboard-bk.jpg');
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: bottom -370px right -10px;
+            background-position: bottom -390px right -10px;
         }
         #settings-bk {
             background-color: #C7D9E5;
@@ -154,7 +202,7 @@ class Style
             margin-right: 10px;
             width: 100px;
             height: 38.2px;
-            background-color: #fff;
+            background-color: var(--box-background-colour);
             border:1px solid var(--input-border-colour);
             transition: all 0.3s ease-in-out;
         }
@@ -174,7 +222,7 @@ class Style
             user-select: none;
         }
         .switcher label input:checked + span {
-            background-color: #fff;
+            background-color: var(--box-background-colour)
         }
         .switcher label input:checked + span small {
             background-color: var(--button-background-colour);
@@ -241,7 +289,7 @@ class Style
             width: 60px;
         }
         .deleted .round, .deleted .button, .deleted button {
-            background-color: #8B8B8B;
+            background-color: var(--box-deleted-background-colour);
         }
 
         /* Box */
@@ -303,7 +351,7 @@ class Style
             margin: 0;
         }
         .deleted.alert, .deleted .box-title {
-            background-color: #8B8B8B;
+            background-color: var(--box-deleted-background-colour);
         }
 
         /* Quick menu */

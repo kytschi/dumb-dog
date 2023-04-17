@@ -33,6 +33,7 @@ try {
         session_name("dd");
         session_start();
     }
+    
     /**
      * database => the database cfg.
      */
