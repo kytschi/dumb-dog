@@ -149,9 +149,6 @@ button:hover, .button:hover {
     margin-bottom: 20px;
 }
 .page-toolbar .button {
-    margin-right: 20px;
-}
-.round {
     height: 100px !important;
     width: 100px !important;
     border-radius: 50%;
@@ -162,13 +159,15 @@ button:hover, .button:hover {
     background-color: var(--button-background-colour);
     border: 3px solid var(--button-border-colour);
     cursor: pointer;
+    margin-right: 20px;
 }
-.round img {
+.page-toolbar .button img {
     margin-top: 20px;
     width: 60px;
 }
-.deleted .round, .deleted .button, .deleted button {
-    background-color: var(--box-deleted-background-colour);
+.button.logo img {
+    margin-top: 22px;
+    width: 80px;
 }
 
 /* Box */
@@ -240,41 +239,6 @@ button:hover, .button:hover {
     background-color: var(--box-deleted-background-colour);
 }
 
-/* Quick menu */
-#quick-menu-button {                
-    position: fixed;
-    right: 30px;
-    top: 30px;
-    z-index: 100;
-}
-#quick-menu {
-    position: fixed;
-    right: 55px;
-    top: 140px;
-    width: 80px;
-    z-index: 101;
-}
-#quick-menu .button, #quick-menu-button .button, .page-toolbar .button {
-    display: block;
-    height: 100px;
-    width: 100px;
-    border-radius: 50%;
-    text-align: center;
-    overflow: hidden;
-    box-shadow: var(--button-shadow);
-}
-#quick-menu .button, .page-toolbar .button  {
-    margin-bottom: 10px;
-}
-#quick-menu img, .page-toolbar img {
-    margin-top: 20px;
-    width: 60px;
-}
-.button.logo img {
-    margin-top: 22px;
-    width: 80px;
-}
-
 /* Text */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'subheading', Helvetica, sans-serif;
@@ -306,6 +270,9 @@ h2, h3 {
 .required {
     padding-top: 10px;
     color: var(--text-required-colour);
+}
+.highlight {
+    color: var(--text-highlight-colour);
 }
 
 /* Sizes */
