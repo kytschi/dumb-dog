@@ -240,6 +240,9 @@ class Style
             margin-top: 20px;
             width: 60px;
         }
+        .deleted .round, .deleted .button, .deleted button {
+            background-color: #8B8B8B;
+        }
 
         /* Box */
         .box {
@@ -249,8 +252,25 @@ class Style
             background-color: var(--box-background-colour);
             margin-bottom: 40px;
         }
+        .alert {
+            width: 100%;
+            border: 3px solid var(--box-border-colour);
+            box-shadow: var(--box-shadow);
+            background-color: var(--box-background-colour);
+            margin-bottom: 40px;
+            font-size: 48pt;
+            font-weight: bold;
+            font-family: 'heading', Helvetica, sans-serif;
+            padding: 20px;
+        }
         .box-body {
             padding: 40px 40px;
+        }
+        .box-body p {
+            padding: 0;
+            margin: 0;
+            font-family: 'subheading', Helvetica, sans-serif;
+            line-height: 44pt;
         }
         .box-footer {
             padding: 0 40px 40px 40px;
@@ -281,6 +301,9 @@ class Style
         .error .box-body p, .success .box-body p {
             padding: 0;
             margin: 0;
+        }
+        .deleted.alert, .deleted .box-title {
+            background-color: #8B8B8B;
         }
 
         /* Quick menu */
