@@ -46,8 +46,14 @@ class Tiles
                         <div class='box-title'>
                             <span>" . data[iLoop]->name . "</span>
                         </div>
-                        <div class='box-body'>
-                        </div>
+                        <div class='box-body thumb'>";
+                if (property_exists(data[iLoop], "filename")) {
+                    if (data[iLoop]->filename) {
+                        let html .= "<img src='/website/files/thumb-" . data[iLoop]->filename . "' alt='" . data[iLoop]->name . "'>";
+                        let html .= "<input type='hidden' value='/website/files/" .  data[iLoop]->filename . "'>";
+                    }
+                }
+                let html .= "</div>
                         <div class='box-footer'>";
                 if (property_exists(data[iLoop], "default")) {
                     if (data[iLoop]->{"default"}) {
@@ -56,6 +62,11 @@ class Tiles
                 }
                 if (property_exists(data[iLoop], "url")) {
                     let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='round' title='View me live'><img src='/assets/web.png'></a>";
+                }
+                if (property_exists(data[iLoop], "filename")) {
+                    if (data[iLoop]->filename) {
+                        let html .= "<span onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")' class='round' title='Copy URL to clipboard'><img src='/assets/clipboard.png'></span>";
+                    }
                 }
                 let html .="<a href='" . url . data[iLoop]->id . "' class='round' title='edit the page'><img src='/assets/edit-page.png' alt='edit'></a>
                         </div>
