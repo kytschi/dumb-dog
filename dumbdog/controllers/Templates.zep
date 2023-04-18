@@ -192,11 +192,14 @@ class Templates extends Controller
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
             let html .= " deleted'>";
+        }
+        let html .= "'><a href='/dumb-dog/templates' class='button' title='Back to list'><img src='/assets/back.png'></a>";
+        if (model->deleted_at) {
             let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='button' title='Recover the template'>
                 <img src='/assets/recover.png'>
             </a>";
         } else {
-            let html .= "'><a href='/dumb-dog/templates/delete/" . model->id . "' class='button' title='Delete the template'>
+            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='button' title='Delete the template'>
                 <img src='/assets/delete.png'>
             </a>";
         }
