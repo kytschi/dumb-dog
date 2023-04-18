@@ -75,6 +75,8 @@ class DumbDog
                     let path = "/dashboard";
                 }
 
+                this->secure(path);
+
                 var controllers = [
                     "Dashboard": new Dashboard(cfg),
                     "Files": new Files(cfg),
@@ -247,8 +249,6 @@ class DumbDog
                     let code = 404;
                     let output = this->notFound();
                 }
-   
-                this->secure(path);
 
                 this->ddHead(code, location);
                 echo output;
@@ -318,6 +318,7 @@ class DumbDog
                     let data["url"] = path;
                     let page = database->get("
                         SELECT
+                            pages.id,
                             pages.name,
                             pages.url,
                             pages.content,
@@ -347,7 +348,56 @@ class DumbDog
                             if (menu) {
                                 eval("$DUMBDOG->menu->both=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
                             }
+                            
                             require_once("./website/" . page->template);
+
+                            let data = [];
+                            let data["page_id"] = page->id;
+                            let data["visitor"] = hash("sha256", _SERVER["REMOTE_ADDR"]);
+                            let data["referer"] = null;
+                            let data["agent"] = null;
+                            let data["bot"] = null;
+
+                            if (isset(_SERVER["HTTP_REFERER"])) {
+                                let menu = parse_url(_SERVER["HTTP_REFERER"]);
+                                let settings = (_SERVER["HTTPS"] ? "https://" : "http://") . _SERVER["SERVER_NAME"];
+                                if (!empty(menu["host"])) {
+                                    if (menu["host"] != settings) {
+                                        let data["referer"] = trim(str_replace(["www."], "", menu["host"]));
+                                    }
+                                }
+                            }
+
+                            if (isset(_SERVER["HTTP_USER_AGENT"])) {
+                                let data["agent"] = _SERVER["HTTP_USER_AGENT"];
+
+                                let settings = this->setBot(strtolower(data["agent"]));
+                                if (is_bool(settings) && settings === true) {
+                                    let data["bot"] = data["agent"];
+                                } elseif (is_string(settings)) {
+                                    let data["bot"] = settings;
+                                }
+                            }
+
+                            database->execute(
+                                "INSERT INTO stats 
+                                    (id,
+                                    page_id,
+                                    visitor,
+                                    referer,
+                                    agent,
+                                    bot,
+                                    created_at) 
+                                VALUES 
+                                    (UUID(),
+                                    :page_id,
+                                    :visitor,
+                                    :referer,
+                                    :agent,
+                                    :bot,
+                                    NOW())",
+                                data
+                            );
                         } else {
                             throw new Exception("template not found");
                         }
@@ -475,7 +525,7 @@ class DumbDog
         </div>";
     }
 
-    public function secure(string path)
+    private function secure(string path)
     {
         if (!isset(_SESSION["dd"])) {
             if (path != "/the-pound") {
@@ -483,5 +533,60 @@ class DumbDog
                 die();
             }
         }
+    }
+
+    private function setBot(string agent)
+    {
+        if (
+            strpos("crawl", agent) !== false ||
+            strpos("bot", agent) !== false ||
+            strpos("spider", agent) !== false
+        ) {
+            return true;
+        }
+
+        var bots = [
+            "Mail.RU_Bot": "https://help.mail.ru/webmaster/indexing/robots",
+            "Xenu Link Sleuth": "Xenu Link Sleuth",
+            "W3C Validator": "W3C_Validator",
+            "TLS tester": "TLS tester",
+            "Screaming Frog": "Screaming Frog SEO",
+            "panscient.com": "panscient.com",
+            "pantest": "pantest",
+            "Pandalytics": "Pandalytics",
+            "P3P Validator": "P3P Validator",
+            "okhttp": "okhttp",
+            "Netwalk research scanner": "Netwalk research scanner",
+            "NetSystemsResearch": "NetSystemsResearch",
+            "netEstate": "netEstate",
+            "pdrlabs cloud mapping": "Cloud mapping experiment",
+            "CheckMarkNetwork": "CheckMarkNetwork",
+            "colly": "colly",
+            "expanseinc.com": "expanseinc.com",
+            "facebookexternalhit": "facebookexternalhit",
+            "FeedFetcher-Google": "FeedFetcher-Google",
+            "Fuzz Faster U Fool": "Fuzz Faster U Fool",
+            "got": "got (https://github.com/sindresorhus/got)",
+            "HTTP Banner Detection": "HTTP Banner Detection",
+            "Gather Analyze Provide": "https://gdnplus.com",
+            "httpx": "github.com/projectdiscovery/httpx",
+            "IDG/IT": "IDG/IT (http://spaziodati.eu/)",
+            "Kryptos Logic Telltale": "Kryptos Logic Telltale - telltale.kryptoslogic.com",
+            "l9tcpid": "l9tcpid",
+            "LinkWalker": "LinkWalker/3.0 (http://www.brandprotect.com)",
+            "masscan-ng": "masscan-ng",
+            "APIs-Ayeh": "APIs-Ayeh",
+            "Google Site Verification": "Google-Site-Verification",
+            "Bloglovin": "Bloglovin"
+        ],
+        type, check;
+
+        for type, check in bots {
+            if (strpos(agent, strtolower(check)) !== false) {
+                return type;
+            }
+        }
+
+        return false;
     }
 }
