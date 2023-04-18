@@ -184,11 +184,14 @@ class Themes extends Controller
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
             let html .= " deleted'>";
+        }
+        let html .= "'><a href='/dumb-dog/themes' class='button' title='Back to list'><img src='/assets/back.png'></a>";
+        if (model->deleted_at) {
             let html .= "<a href='/dumb-dog/themes/recover/" . model->id . "' class='button' title='Recover the theme'>
                 <img src='/assets/recover.png'>
             </a>";
         } else {
-            let html .= "'><a href='/dumb-dog/themes/delete/" . model->id . "' class='button' title='Delete the theme'>
+            let html .= "<a href='/dumb-dog/themes/delete/" . model->id . "' class='button' title='Delete the theme'>
                 <img src='/assets/delete.png'>
             </a>";
         }

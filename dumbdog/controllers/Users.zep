@@ -213,11 +213,14 @@ class Users extends Controller
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
             let html .= " deleted'>";
+        }
+        let html .= "'><a href='/dumb-dog/users' class='button' title='Back to list'><img src='/assets/back.png'></a>";
+        if (model->deleted_at) {
             let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='button' title='Recover the user'>
                 <img src='/assets/recover.png'>
             </a>";
         } else {
-            let html .= "'><a href='/dumb-dog/users/delete/" . model->id . "' class='button' title='Delete the user'>
+            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='button' title='Delete the user'>
                 <img src='/assets/delete.png'>
             </a>";
         }
