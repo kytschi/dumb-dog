@@ -132,10 +132,88 @@ class Dashboard extends Controller
         let database = new Database(this->cfg);
         let data["id"] = _SESSION["dd"];
         let model = database->get("SELECT * FROM users WHERE id=:id", data);
-
         if (model) {
             let html .= "<h2 class='page-sub-title'><span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span></h2>";
         }
+
+        var colours = [
+            "visitors": "#00c129",
+            "unique": "#1D8CF8",
+            "bot": "#E14ECA"
+        ], values, value;
+
+        let model = "SELECT ";
+        let values = date("Y");
+        let value = 1;
+        while (value <= 12) {
+            let data = value;
+            if (data < 10) {
+                let data = "0" . data;
+            }
+
+            let model .= "(SELECT count(id) FROM stats WHERE created_at BETWEEN '" . values . "-" .
+                    data . "-01' AND '" . values . "-" .
+                    data . "-31') AS " .
+                    strtolower(date("F", strtotime(date('Y') . "-" . data . "-01"))) . "_visitors,";
+
+            let model .= "(SELECT count(*) FROM (SELECT count(id) FROM stats WHERE bot IS NULL AND 
+                    created_at BETWEEN '" . values . "-" .
+                    data . "-01' AND '" . values . "-" .
+                    data . "-31' GROUP BY visitor) AS total) AS " .
+                    strtolower(date("F", strtotime(date('Y') . "-" . data . "-01"))) . "_unique,";
+
+            let model .= "(SELECT count(id) FROM stats WHERE bot IS NOT NULL AND 
+                    created_at BETWEEN '" . values . "-" . data . "-01' AND '" . values . "-" .
+                    data . "-31') AS " .
+                    strtolower(date("F", strtotime(date('Y') . "-" . data . "-01"))) . "_bot,";
+            let value = value + 1;
+        }
+        let data = database->all(rtrim(model, ','));
+
+        let values = [];
+        for titles in data {
+            for model, value in get_object_vars(titles) {
+                let value = explode("_", model);
+                let value = array_pop(value);
+                if (!isset(values[value])) {
+                    let values[value] = [];
+                }
+                let values[value][] = titles->{model};
+            }
+        }
+        let html .= "<div class='box'><div class='box-title'><span>stats</span></div><div class='box-body'>
+        <canvas id='visitors' width='600' height='200'></canvas></div></div>
+        <script type='text/javascript'>
+        var ctx = document.getElementById('visitors').getContext('2d');
+        var orders = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                datasets: [";                    
+        
+        for titles, data in values {
+            let html .= "
+            {
+                label: '" . ucwords(titles) . "',
+                data: [". rtrim(implode(",", data), ",") . "],
+                fill: false,
+                backgroundColor: '" . colours[titles] . "',
+                borderColor: '" . colours[titles] . "',
+                tension: 0.1
+            },";
+        }
+
+        let html .= "]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        </script>";
 
         return html;
     }

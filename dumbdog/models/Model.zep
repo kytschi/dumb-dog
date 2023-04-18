@@ -26,12 +26,5 @@ namespace DumbDog\Models;
 
 class Model
 {
-    public id;
-    public name;
-    public created_at;
-    public created_by;
-    public updated_at;
-    public update_by;
-    public deleted_at;
-    public deleted_by;
+    //
 }
