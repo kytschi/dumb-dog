@@ -66,6 +66,8 @@ class Pages extends Controller
 
         let html = titles->page("Create a page", "/assets/add-page.png");
 
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/pages' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
+
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
                 var status = false;

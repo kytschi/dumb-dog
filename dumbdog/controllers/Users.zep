@@ -45,6 +45,7 @@ class Users extends Controller
         var titles, html;
         let titles = new Titles();
         let html = titles->page("Add a user", "/assets/add-page.png");
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/users' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {

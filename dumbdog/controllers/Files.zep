@@ -46,6 +46,7 @@ class Files extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Upload a file", "/assets/add-page.png");
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
