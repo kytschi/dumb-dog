@@ -3,7 +3,7 @@
     <head>
         <title><?= $DUMBDOG->page->name; ?> | <?= $DUMBDOG->site->name; ?></title>
         <link rel="icon" type="image/png" sizes="64x64" href="/assets/dumbdog.png">
-        <link rel="stylesheet" type="text/css" href="<?= $DUMBDOG->site->theme . '?t=' . time(); ?>">
+        <link rel="stylesheet" type="text/css" href="<?= $DUMBDOG->site->theme; ?>">
         <meta name="description" content="<?= $DUMBDOG->page->meta_description ? $DUMBDOG->page->meta_description : $DUMBDOG->meta_description; ?>">
         <meta name="keywords" content="<?= $DUMBDOG->page->meta_keywords ? $DUMBDOG->page->meta_keywords : $DUMBDOG->settings->meta_keywords; ?>">
         <meta name="author" content="<?= $DUMBDOG->page->meta_author ? $DUMBDOG->page->meta_author : $DUMBDOG->settings->meta_author; ?>">
