@@ -26,6 +26,7 @@ namespace DumbDog;
 
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
@@ -76,6 +77,7 @@ class DumbDog
 
                 var controllers = [
                     "Dashboard": new Dashboard(cfg),
+                    "Files": new Files(cfg),
                     "Pages": new Pages(cfg),
                     "Settings": new Settings(cfg),
                     "Templates": new Templates(cfg),
@@ -123,6 +125,31 @@ class DumbDog
                         "Pages",
                         "index",
                         "pages"
+                    ],
+                    "/files/add": [
+                        "Files",
+                        "add",
+                        "create a file"
+                    ],
+                    "/files/delete": [
+                        "Files",
+                        "delete",
+                        "delete the file"
+                    ],
+                    "/files/edit": [
+                        "Files",
+                        "edit",
+                        "edit the file"
+                    ],
+                    "/files/recover": [
+                        "Pages",
+                        "recover",
+                        "recover the file"
+                    ],
+                    "/files": [
+                        "Files",
+                        "index",
+                        "files"
                     ],
                     "/templates/add": [
                         "Templates",

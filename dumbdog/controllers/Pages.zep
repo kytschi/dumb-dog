@@ -284,6 +284,7 @@ class Pages extends Controller
                 <img src='/assets/delete.png'>
             </a>";
         }
+        let html .= "<a href='" . model->url . "' target='_blank' class='button' title='View me live'><img src='/assets/web.png'></a>";
         let html .= "</div>";
 
         if (!empty(_POST)) {
@@ -448,6 +449,9 @@ class Pages extends Controller
         let html .= "<div class='page-toolbar'>
             <a href='/dumb-dog/pages/add' class='button' title='Add a page'>
                 <img src='/assets/add-page.png'>
+            </a>
+            <a href='/dumb-dog/files' class='button' title='Managing the files and media'>
+                <img src='/assets/files.png'>
             </a>
             <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
                 <img src='/assets/templates.png'>

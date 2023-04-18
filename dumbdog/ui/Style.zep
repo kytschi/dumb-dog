@@ -190,7 +190,8 @@ class Style
         .trumbowyg-editor h3,
         .trumbowyg-editor h4,
         .trumbowyg-editor h5,
-        .trumbowyg-editor h6 {
+        .trumbowyg-editor h6,
+        .trumbowyg-editor span {
             line-height: 14pt !important;
             font-family: Helvetica, sans-serif !important;
             margin: 0 !important;
@@ -474,6 +475,15 @@ class Style
             display: inline-block;
             break-inside: avoid-column;
             margin: 0 0 40px 0;
+            width: 100%;
+        }
+        .tile .box-body {
+            padding: 10px 10px;
+        }
+        .tile .box-body.thumb {
+            overflow: hidden;
+        }
+        .tile .box-body.thumb img {
             width: 100%;
         }
         </style>";

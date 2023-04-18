@@ -67,6 +67,38 @@ class Controller
         </div></div>";
     }
 
+    /**
+     * Generate a random string.
+     */
+     public function randomString(int length = 64)
+     {
+        var keyspace = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        /*
+         * If the length is less than one, throw an error.
+         */
+        if (length < 1) {
+            throw new \RangeException("Length must be a positive integer");
+        }
+
+        /*
+         * Define the pieces array.
+         */
+        var pieces = [], iLoop;
+
+        /*
+         * Loop through and build pieces.
+         */
+        while (iLoop < length) {
+            let pieces[] = substr(keyspace, random_int(0, 53), 1);
+            let iLoop = iLoop + 1;
+        }
+
+        /*
+         * Implode the pieces and return the random string.
+         */
+        return implode("", pieces);
+    }
+
     public function redirect(string url)
     {
         header("Location: " . url);
