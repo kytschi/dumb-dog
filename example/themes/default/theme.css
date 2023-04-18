@@ -99,6 +99,9 @@ footer {
     float: left;
     width: 100px;
 }
+.float-right {
+    float: right;
+}
 
 /* Inputs */
 .input-group {

@@ -39,6 +39,25 @@ class Pages extends Controller
         let this->cfg = cfg;    
     }
 
+    public function all()
+    {
+        var database;
+        let database = new Database(this->cfg);
+
+        return database->all("
+        SELECT
+            pages.name,
+            pages.url,
+            pages.content,
+            pages.meta_keywords,
+            pages.meta_description,
+            pages.meta_author,
+            templates.file AS template
+        FROM pages 
+        JOIN templates ON templates.id=pages.template_id 
+        WHERE pages.status='live' AND pages.deleted_at IS NULL");
+    }
+
     public function add(string path)
     {
         var titles, html, data, database;
