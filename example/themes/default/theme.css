@@ -99,6 +99,9 @@ footer {
     float: left;
     width: 100px;
 }
+footer .button {
+    margin-left: 20px;
+}
 .float-right {
     float: right;
 }
@@ -134,7 +137,7 @@ button, .default-item, .button-blank  {
     font-size: 44pt;
     line-height: 34pt;
 }
-button, .button-blank {
+button, .button-blank, .button {
     padding: 10px 40px;
 }
 .default-item {
@@ -145,6 +148,10 @@ button, .button-blank {
     background-color: var(--button-background-colour);
     border: 3px solid var(--button-border-colour);
     cursor: pointer;
+    text-decoration: none;
+}
+a.button:hover {
+    color: var(--button-text-colour);
     text-decoration: none;
 }
 .button-blank {
@@ -225,6 +232,16 @@ button:hover, .button:hover {
 }
 .box-footer a, .box-footer button {
     margin-left: 20px;
+}
+.box-footer a {
+    float: left;
+    font-family: 'subheading', Helvetica, sans-serif;
+    text-decoration: none;
+    color: var(--button-text-colour);
+}
+.box-footer a:hover {
+    color: var(--button-text-colour);
+    text-decoration: none;
 }
 .box-title {
     background-color: var(--box-title-background-colour);
