@@ -142,10 +142,14 @@ class Dashboard extends Controller
             "bot": "#E14ECA"
         ], values, value;
 
+        //I'm reusing vars here so take note!
         let model = "SELECT ";
+
+        //The Year.
         let values = date("Y");
         let value = 1;
         while (value <= 12) {
+            //The Month.
             let data = value;
             if (data < 10) {
                 let data = "0" . data;
@@ -211,6 +215,100 @@ class Dashboard extends Controller
                         beginAtZero: true
                     }
                 }
+            }
+        });
+        </script>";
+
+        let html .= "<div style='display:flex;column-gap: 20px;'>";
+
+        let model = "SELECT count(id) AS total, bot FROM stats WHERE bot IS NOT NULL ";
+        let model .= "GROUP BY bot ORDER BY total DESC";
+        let data = database->all(model);
+
+        //Height
+        let model = count(data) * 30;
+        let value = (model < 200) ? 200 : model;
+
+        let html .= "<div class='box' style='width: 50%'><div class='box-title'><span>bots</span></div><div class='box-body'>
+        <canvas id='bots' width='600' height='" . value . "'></canvas></div></div>
+        <script type='text/javascript'>
+        var ctx_bots = document.getElementById('bots').getContext('2d');
+        var bots = new Chart(ctx_bots, {
+            type: 'horizontalBar',
+            data: {";
+        
+        let colours = [];
+        let values = [];
+        let titles = [];
+
+        for value in data {
+            let titles[] = "'" . value->referer . "'";
+            let values[] = value->total;
+            let colours[] = "'#" . substr(md5(value->referer), 3, 6) . "'";
+        }
+        let html .= "labels: [" . implode(",", titles) . "],
+                datasets: [
+                    {
+                        label: 'bots',
+                        data: [" . implode(",", values) . "],
+                        backgroundColor: [" . implode(",", colours) . "],
+                        borderColor: '#5E5E60',
+                        borderWidth: 0.4
+                    },
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                legend: {
+                    display: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+        </script>";
+
+        let model = "SELECT count(id) AS total, referer FROM stats WHERE referer IS NOT NULL ";
+        let model .= "GROUP BY referer ORDER BY total DESC";
+        let data = database->all(model);
+
+        
+        let html .= "<div class='box' style='width: 50%'><div class='box-title'><span>referrers</span></div><div class='box-body'>
+        <canvas id='referrers' width='600' height='400'></canvas></div></div></div>
+        <script type='text/javascript'>
+        var ctx_referrers = document.getElementById('referrers').getContext('2d');
+        var referrers = new Chart(ctx_referrers, {
+            type: 'doughnut',
+            data: {";
+        
+        let colours = [];
+        let values = [];
+        let titles = [];
+
+        for value in data {
+            let titles[] = "'" . value->referer . "'";
+            let values[] = value->total;
+            let colours[] = "'#" . substr(md5(value->referer), 3, 6) . "'";
+        }
+        let html .= "labels: [" . implode(",", titles) . "],
+                datasets: [
+                    {
+                        label: 'referrers',
+                        data: [" . implode(",", values) . "],
+                        backgroundColor: [" . implode(",", colours) . "],
+                        borderColor: '#5E5E60',
+                        borderWidth: 0.4
+                    },
+                ]
+            },
+            options: {
             }
         });
         </script>";
