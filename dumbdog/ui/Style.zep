@@ -311,14 +311,12 @@ class Style
 
         /* Box */
         .box {
-            width: 100%;
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
             margin-bottom: 40px;
         }
         .alert {
-            width: 100%;
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);

@@ -229,8 +229,8 @@ class Dashboard extends Controller
         let model = count(data) * 30;
         let value = (model < 200) ? 200 : model;
 
-        let html .= "<div class='box' style='width: 50%'><div class='box-title'><span>bots</span></div><div class='box-body'>
-        <canvas id='bots' width='600' height='" . value . "'></canvas></div></div>
+        let html .= "<div class='box'><div class='box-title'><span>bots</span></div><div class='box-body'>
+        <canvas id='bots' width='505' height='" . value . "'></canvas></div></div>
         <script type='text/javascript'>
         var ctx_bots = document.getElementById('bots').getContext('2d');
         var bots = new Chart(ctx_bots, {
@@ -280,8 +280,8 @@ class Dashboard extends Controller
         let data = database->all(model);
 
         
-        let html .= "<div class='box' style='width: 50%'><div class='box-title'><span>referrers</span></div><div class='box-body'>
-        <canvas id='referrers' width='600' height='400'></canvas></div></div></div>
+        let html .= "<div class='box'><div class='box-title'><span>referrers</span></div><div class='box-body'>
+        <canvas id='referrers' width='505' height='400'></canvas></div></div></div>
         <script type='text/javascript'>
         var ctx_referrers = document.getElementById('referrers').getContext('2d');
         var referrers = new Chart(ctx_referrers, {
