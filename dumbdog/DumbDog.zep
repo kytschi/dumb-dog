@@ -498,6 +498,7 @@ class DumbDog
 
         this->ddHead(404, "offline");
         echo titles->page("offline", "/assets/dumbdog.png");
+        echo "<div class='box'><div class='box-body'><h3>*yawn* Let me sleep a little longer will you...</h3></div></div>";
         this->ddFooter(false);        
     }
 
