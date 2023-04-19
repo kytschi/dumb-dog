@@ -82,9 +82,12 @@ class Database
         return statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Model");
     }
 
-    public function execute(string query, array data = [])
+    public function execute(string query, array data = [], bool always_save = false)
     {
-        if (this->cfg->save_mode == false) {
+        /**
+         * If save mode is disabled just return, but you can override that with always_save.
+         */
+        if (this->cfg->save_mode == false && !always_save) {
             return true;
         }
         var statement, status, errors;

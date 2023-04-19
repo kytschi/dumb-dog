@@ -379,6 +379,7 @@ class DumbDog
                                 }
                             }
 
+                            // Save the stats.
                             database->execute(
                                 "INSERT INTO stats 
                                     (id,
@@ -396,7 +397,8 @@ class DumbDog
                                     :agent,
                                     :bot,
                                     NOW())",
-                                data
+                                data,
+                                true
                             );
                         } else {
                             throw new Exception("template not found");
