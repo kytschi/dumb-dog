@@ -185,6 +185,8 @@ class Style
         .trumbowyg-editor,
         .trumbowyg-editor input,
         .trumbowyg-editor button,
+        .trumbowyg-dropdown-link button,
+        .trumbowyg-dropdown-formatting button,
         .trumbowyg-editor h1,
         .trumbowyg-editor h2,
         .trumbowyg-editor h3,
@@ -195,6 +197,10 @@ class Style
             line-height: 14pt !important;
             font-family: Helvetica, sans-serif !important;
             margin: 0 !important;
+        }
+        .trumbowyg-dropdown-link button,
+        .trumbowyg-dropdown-formatting button {
+            line-height: 35px !important;
         }
         input:focus, textarea:focus, select:focus {
             border:1px solid var(--input-border-focus-colour);

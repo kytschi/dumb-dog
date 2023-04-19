@@ -72,7 +72,7 @@ I've knocked up a demo website running the `example` in this repository and ther
 https://dumbdog.kytschi.com
 
 ## Credits
-Many thanks to laimuilin18 for the art work.\
+Many thanks to laimuilin18 for the art work. They make the app mate!\
 https://www.vecteezy.com/members/laimuilin18
 
 Moon Flower font\
