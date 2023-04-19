@@ -242,9 +242,9 @@ class Dashboard extends Controller
         let titles = [];
 
         for value in data {
-            let titles[] = "'" . value->referer . "'";
+            let titles[] = "'" . value->bot . "'";
             let values[] = value->total;
-            let colours[] = "'#" . substr(md5(value->referer), 3, 6) . "'";
+            let colours[] = "'#" . substr(md5(value->bot), 3, 6) . "'";
         }
         let html .= "labels: [" . implode(",", titles) . "],
                 datasets: [
