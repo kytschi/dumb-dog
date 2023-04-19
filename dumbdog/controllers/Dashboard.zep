@@ -185,7 +185,7 @@ class Dashboard extends Controller
                 let values[value][] = titles->{model};
             }
         }
-        let html .= "<div class='box'><div class='box-title'><span>stats</span></div><div class='box-body'>
+        let html .= "<div class='box'><div class='box-title'><span>annual stats</span></div><div class='box-body'>
         <canvas id='visitors' width='600' height='200'></canvas></div></div>
         <script type='text/javascript'>
         var ctx = document.getElementById('visitors').getContext('2d');

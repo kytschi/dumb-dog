@@ -436,6 +436,86 @@ class Pages extends Controller
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
+        
+        var query, year, month, colours = [
+            "visitors": "#00c129",
+            "unique": "#1D8CF8",
+            "bot": "#E14ECA"
+        ];
+
+        let query = "SELECT ";
+        let year = date("Y");
+        let iLoop = 1;
+        while (iLoop <= 12) {
+            let month = iLoop;
+            if (month < 10) {
+                let month = "0" . month;
+            }
+
+            let query .= "(SELECT count(id) FROM stats WHERE page_id=:page_id AND created_at BETWEEN '" . year . "-" .
+                    month . "-01' AND '" . year . "-" .
+                    month . "-31') AS " .
+                    strtolower(date("F", strtotime(date('Y') . "-" . month . "-01"))) . "_visitors,";
+
+            let query .= "(SELECT count(*) FROM (SELECT count(id) FROM stats WHERE page_id=:page_id AND bot IS NULL AND 
+                    created_at BETWEEN '" . year . "-" .
+                    month . "-01' AND '" . year . "-" .
+                    month . "-31' GROUP BY visitor) AS total) AS " .
+                    strtolower(date("F", strtotime(date('Y') . "-" . month . "-01"))) . "_unique,";
+
+            let query .= "(SELECT count(id) FROM stats WHERE page_id=:page_id AND bot IS NOT NULL AND 
+                    created_at BETWEEN '" . year . "-" . month . "-01' AND '" . year . "-" .
+                    month . "-31') AS " .
+                    strtolower(date("F", strtotime(date('Y') . "-" . month . "-01"))) . "_bot,";
+            let iLoop = iLoop + 1;
+        }
+        let data = database->all(rtrim(query, ','), ["page_id": model->id]);
+
+        //I'm reusing vars here, keep an eye.
+        let query = [];
+        for month in data {
+            for year, iLoop in get_object_vars(month) {
+                let iLoop = explode("_", year);
+                let iLoop = array_pop(iLoop);
+                if (!isset(query[iLoop])) {
+                    let query[iLoop] = [];
+                }
+                let query[iLoop][] = month->{year};
+            }
+        }
+        let html .= "<div class='box'><div class='box-title'><span>annual stats</span></div><div class='box-body'>
+        <canvas id='visitors' width='600' height='200'></canvas></div></div>
+        <script type='text/javascript'>
+        var ctx = document.getElementById('visitors').getContext('2d');
+        var orders = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                datasets: [";                    
+        
+        for month, year in query {
+            let html .= "
+            {
+                label: '" . ucwords(month) . "',
+                data: [". rtrim(implode(",", year), ",") . "],
+                fill: false,
+                backgroundColor: '" . colours[month] . "',
+                borderColor: '" . colours[month] . "',
+                tension: 0.1
+            },";
+        }
+
+        let html .= "]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        </script>";
 
         return html;
     }
