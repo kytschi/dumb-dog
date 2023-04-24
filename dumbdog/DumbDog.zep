@@ -34,6 +34,7 @@ use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
 use DumbDog\Engines\Smarty;
 use DumbDog\Engines\Twig;
+use DumbDog\Engines\Volt;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
@@ -624,6 +625,9 @@ class DumbDog
         let engine = get_class(template_engine);
                 
         switch(engine) {
+            case "Phalcon\\Mvc\\View\\Engine\\Volt\\Compiler":
+                let this->template_engine = new Volt(template_engine);
+                break;
             case "Smarty":
                 let this->template_engine = new Smarty(template_engine);
                 break;
