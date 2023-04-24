@@ -1,7 +1,7 @@
-<?php
 /**
- * DumbDog example index
+ * Twig template engine helper
  *
+ * @package     DumbDog\Engines\Twig
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -21,35 +21,27 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
- */
-use DumbDog\DumbDog;
-use DumbDog\Exceptions\Exception;
+*/
+namespace DumbDog\Engines;
 
-try {
-    /**
-     * I'm needed for the session handling for logins etc.
-     */
-    if (session_status() === PHP_SESSION_NONE) {
-        session_name("dd");
-        session_start();
+class Twig
+{   
+    private template_engine;
+
+    public function __construct(template_engine)
+    {
+        let this->template_engine = template_engine;
     }
 
-    /**
-     * Twig template engine.
-     */
-    require_once "../vendor/autoload.php";
-    $loader = new \Twig\Loader\FilesystemLoader("./website");
-    $engine = new \Twig\Environment(
-        $loader,
-        [
-            "cache" => "../cache"
-        ]
-    );
-    
-    /**
-     * database => the database cfg.
-     */
-    new DumbDog("../dumbdog.json", $engine);
-} catch (\Exception $err) {
-    (new Exception($err->getMessage()))->fatal();
+    public function render(string template, array vars)
+    {
+        var dumbdog;
+
+        let dumbdog = new \stdClass();
+        let dumbdog->page = vars[0];
+        let dumbdog->site = vars[1];
+        let dumbdog->pages = vars[2];
+
+        echo this->template_engine->render(template, ["DUMBDOG": dumbdog]);
+    }
 }

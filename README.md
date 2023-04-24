@@ -50,6 +50,9 @@ Next point your webserver to the `public` folder of Dumb Dog where the `index.ph
 
 Make sure that the `public/website/files` folder has permission to write to by your webserver's user. This folder is used to store any files you upload via Dumb Dog.
 
+**NOTE**
+If your using a template engine please make sure that the `cache` folder has write permissions by the webserver user.
+
 That's it, now you can access Dumb Dog via whatever url you've setup for the project by adding `/dumb-dog` to the url.
 
 Default login is username `dumbdog` and password is `woofwoof`.
