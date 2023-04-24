@@ -43,17 +43,31 @@ try {
      */
     // Include the autoload file.
     require_once "../vendor/autoload.php";
-
+    /*
     // Define the template folder for Twig.
     $loader = new \Twig\Loader\FilesystemLoader("./website");
 
     // Define the Twig engine.
-    /*$engine = new \Twig\Environment(
+    $engine = new \Twig\Environment(
         $loader,
         [
             "cache" => "../cache"
         ]
     );*/
+
+    /**
+     * Smarty template engine.
+     */
+    // Include the autoload file.
+    require_once "../vendor/autoload.php";
+    // Define the Smarty template engine.
+    $engine = new Smarty();
+    // Set the Template folder.
+    $engine->setTemplateDir('./website');
+    // Set the compile folder.
+    $engine->setCompileDir('../cache');
+    // Set Cache folder if you like, speeds stuff up a lot.
+    $engine->setCacheDir('../cache');
     
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
