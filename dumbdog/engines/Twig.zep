@@ -41,6 +41,7 @@ class Twig
         let dumbdog->page = vars[0];
         let dumbdog->site = vars[1];
         let dumbdog->pages = vars[2];
+        let dumbdog->menu = vars[3];
 
         echo this->template_engine->render(template, ["DUMBDOG": dumbdog]);
     }

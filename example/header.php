@@ -18,7 +18,7 @@
                 foreach ($DUMBDOG->menu->header as $item) {
                     ?>
                     <a href="<?= $item->url; ?>" class="button" title="<?= $item->name; ?>">
-                        <img src="/website/assets/<?= strtolower($item->name); ?>.png">
+                        <img src="/website/assets/<?= str_replace(" ", "-", strtolower($item->name)); ?>.png">
                     </a>
                     <?php
                 }
