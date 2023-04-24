@@ -48,12 +48,12 @@ try {
     $loader = new \Twig\Loader\FilesystemLoader("./website");
 
     // Define the Twig engine.
-    $engine = new \Twig\Environment(
+    /*$engine = new \Twig\Environment(
         $loader,
         [
             "cache" => "../cache"
         ]
-    );
+    );*/
     
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
