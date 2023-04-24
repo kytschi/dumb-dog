@@ -32,6 +32,7 @@ use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
+use DumbDog\Engines\Smarty;
 use DumbDog\Engines\Twig;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
@@ -623,6 +624,9 @@ class DumbDog
         let engine = get_class(template_engine);
                 
         switch(engine) {
+            case "Smarty":
+                let this->template_engine = new Smarty(template_engine);
+                break;
             case "Twig\\Environment":
                 let this->template_engine = new Twig(template_engine);
                 break;
