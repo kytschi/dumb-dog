@@ -16,7 +16,7 @@
             <div class="page-toolbar">
                 {% for item in DUMBDOG.menu.header %}
                     <a href="{{ item.url }}" class="button" title="{{ item.name }}">
-                        <img src="/website/assets/{{ item.name|replace({' ':'-'})|lower }}.png">
+                        <img src="/website/assets/{{ item.name|replace(' ', '-')|lower }}.png">
                     </a>
                 {% endfor %}
                 <a href="/dumb-dog" class="button logo" title="Check out my rear-end">

@@ -1,19 +1,14 @@
-<?php
-$pages = $DUMBDOG->pages->all();
-require_once("./website/header.php");
-?>
+{% include './website/volt/header.volt' %}
 <div id="tiles">
-<?php
-foreach ($pages as $item) {
-    ?>
+    {% for item in DUMBDOG.menu.header %}
     <div class='tile'>
         <div class="box">
             <div class="box-title">
-                <span><?= $item->name; ?></span>
+                <span>{{ item.name }}</span>
             </div>
             <div class="box-body">&nbsp;</div>
             <div class="box-footer">
-                <a href="<?= $item->url; ?>" class="button" title="view <?= $item->name;?>">
+                <a href="{{ item.url }}" class="button" title="view {{ item.name }}">
                     <span>
                         view
                     </span>
@@ -21,8 +16,6 @@ foreach ($pages as $item) {
             </div>
         </div>
     </div>
-    <?php
-}
-?>
+    {% endfor %}
 </div>
-<?php require_once("./website/footer.php"); ?>
+{% include './website/volt/footer.volt' %}
