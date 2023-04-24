@@ -32,6 +32,7 @@ use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
+use DumbDog\Engines\Twig;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
@@ -41,9 +42,10 @@ use DumbDog\Ui\Gfx\Titles;
 class DumbDog
 {
     private cfg;
+    private template_engine = null;
     private version = "0.0.1 alpha";
 
-    public function __construct(string cfg_file)
+    public function __construct(string cfg_file, template_engine = null)
     {
         var cfg;
         let cfg = new \stdClass();
@@ -56,6 +58,7 @@ class DumbDog
             let cfg->save_mode = true;
         }
         let this->cfg = cfg;
+        let this->template_engine = template_engine;
 
         define("VERSION", this->version);
 
@@ -64,6 +67,10 @@ class DumbDog
         let path = "/" . trim(parsed["path"], "/");
 
         let code = 200;
+
+        if (template_engine) {
+            this->setTemplateEngine(template_engine);
+        }
 
         try {
             if (strpos(path, "/dumb-dog") !== false) {
@@ -349,7 +356,18 @@ class DumbDog
                                 eval("$DUMBDOG->menu->both=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
                             }
                             
-                            require_once("./website/" . page->template);
+                            if (!empty(this->template_engine)) {
+                                this->template_engine->render(
+                                    page->template,
+                                    [
+                                        page,
+                                        settings,
+                                        new Pages(this->cfg)
+                                    ]
+                                );
+                            } else {
+                                require_once("./website/" . page->template);
+                            }
 
                             let data = [];
                             let data["page_id"] = page->id;
@@ -591,5 +609,19 @@ class DumbDog
         }
 
         return false;
+    }
+
+    private function setTemplateEngine(template_engine)
+    {
+        var engine;
+        let engine = get_class(template_engine);
+                
+        switch(engine) {
+            case "Twig\\Environment":
+                let this->template_engine = new Twig(template_engine);
+                break;
+            default:
+                throw new Exception("Template engine not supported");
+        }
     }
 }

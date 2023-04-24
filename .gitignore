@@ -5,3 +5,6 @@ compile.log
 public/website
 ui.php
 dumbdog.json
+composer*
+vendor*
+cache
