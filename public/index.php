@@ -55,9 +55,6 @@ try {
         ]
     );
     
-    /**
-     * database => the database cfg.
-     */
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();
