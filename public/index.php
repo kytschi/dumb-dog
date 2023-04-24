@@ -41,9 +41,9 @@ try {
     /**
      * Twig template engine.
      */
+    /*
     // Include the autoload file.
     require_once "../vendor/autoload.php";
-    /*
     // Define the template folder for Twig.
     $loader = new \Twig\Loader\FilesystemLoader("./website");
 
@@ -58,6 +58,7 @@ try {
     /**
      * Smarty template engine.
      */
+    /*
     // Include the autoload file.
     require_once "../vendor/autoload.php";
     // Define the Smarty template engine.
@@ -68,7 +69,16 @@ try {
     $engine->setCompileDir('../cache');
     // Set Cache folder if you like, speeds stuff up a lot.
     $engine->setCacheDir('../cache');
-    
+    */
+    /**
+     * Volt template engine.
+     */
+    /*$engine = new Phalcon\Mvc\View\Engine\Volt\Compiler();
+    $engine->setOptions(
+        [
+            'path' => '../cache/'
+        ]
+    );*/
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();
