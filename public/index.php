@@ -33,12 +33,21 @@ try {
         session_name("dd");
         session_start();
     }
+    /**
+     * No template engine.
+     */
+    $engine = null;
 
     /**
      * Twig template engine.
      */
+    // Include the autoload file.
     require_once "../vendor/autoload.php";
+
+    // Define the template folder for Twig.
     $loader = new \Twig\Loader\FilesystemLoader("./website");
+
+    // Define the Twig engine.
     $engine = new \Twig\Environment(
         $loader,
         [
