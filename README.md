@@ -69,10 +69,82 @@ Have a look at the `example` website in the repository to show you a way of buil
 
 **NOW, HAVE FUN!**
 
+## Template engines
+
+Dumb Dog does support some of the major templating engines out there should you want to use. Personally I'd just stick with PHP "templates" over using an engine as it's much much faster. But people love to complicate things ;-)
+
+### Twig
+
+See [Twig installation](https://twig.symfony.com/doc/3.x/installation.html) on how to install Twig into your project/website.
+
+Now in your index.php define the Twig template engine and include it in Dumb Dog.
+
+```php
+// Include the autoload file.
+require_once "../vendor/autoload.php";
+
+// Define the template folder for Twig.
+$loader = new \Twig\Loader\FilesystemLoader("./website");
+
+// Define the Twig engine.
+$engine = new \Twig\Environment(
+        $loader,
+        [
+            "cache" => "../cache"
+        ]
+);
+```
+
+### Smarty
+
+See [Smarty installation](https://smarty-php.github.io/smarty/4.x/getting-started/) on how to install Smarty into your project/website.
+
+Now in your index.php define the Smarty template engine and include it in Dumb Dog.
+
+```php
+// Include the autoload file.
+require_once "../vendor/autoload.php";
+// Define the Smarty template engine.
+$engine = new Smarty();
+// Set the Template folder.
+$engine->setTemplateDir('./website');
+// Set the compile folder.
+$engine->setCompileDir('../cache');
+// Set Cache folder if you like, speeds stuff up a lot.
+$engine->setCacheDir('../cache');
+```
+
+### Volt
+
+See [Phalcon installation](https://docs.phalcon.io/4.0/en/volt) on how to install Volt into your project/website.
+
+Now in your index.php define the Volt template engine and include it in Dumb Dog.
+```php
+$engine = new Phalcon\Mvc\View\Engine\Volt\Compiler();
+$engine->setOptions(
+    [
+        'path' => '../cache/'
+    ]
+);
+```
+
+### Blade
+
+See [Blade installation](https://github.com/EFTEC/BladeOne) on how to install Blade into your project/website.
+
+Now in your index.php define the Blade template engine and include it in Dumb Dog.
+```php
+$engine = new eftec\bladeone\BladeOne(
+    './website',
+    '../cache',
+    eftec\bladeone\BladeOne::MODE_DEBUG
+);
+```
+
 ## More information
 
 I've knocked up a demo website running the `example` in this repository and there's more information located there to help you get going and under Dumb Dog.\
-https://dumbdog.kytschi.com
+https://dumb-dog.kytschi.com
 
 ## Credits
 Many thanks to laimuilin18 for the art work. They make the app mate!\
