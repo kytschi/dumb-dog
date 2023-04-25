@@ -144,7 +144,7 @@ $engine = new eftec\bladeone\BladeOne(
 ## More information
 
 I've knocked up a demo website running the `example` in this repository and there's more information located there to help you get going and under Dumb Dog.\
-https://dumb-dog.kytschi.com
+[See it live](https://dumb-dog.kytschi.com)
 
 ## Credits
 Many thanks to laimuilin18 for the art work. They make the app mate!\
