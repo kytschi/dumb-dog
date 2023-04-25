@@ -33,6 +33,7 @@ use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
 use DumbDog\Engines\Blade;
+use DumbDog\Engines\Mustache;
 use DumbDog\Engines\Plates;
 use DumbDog\Engines\Smarty;
 use DumbDog\Engines\Twig;
@@ -638,6 +639,9 @@ class DumbDog
                 break;
             case "League\\Plates\\Engine":
                 let this->template_engine = new Plates(template_engine);
+                break;
+            case "Mustache_Engine":
+                let this->template_engine = new Mustache(template_engine);
                 break;
             case "Phalcon\\Mvc\\View\\Engine\\Volt\\Compiler":
                 let this->template_engine = new Volt(template_engine);

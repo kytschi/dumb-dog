@@ -95,6 +95,14 @@ try {
      * Plates template engine.
      */
     //$engine = new League\Plates\Engine('./website');
+
+    /**
+     * Mustache template engine.
+     */
+    /*$engine = new Mustache_Engine([
+        'cache' => '../cache',
+        'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/website')
+    ]);*/
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();
