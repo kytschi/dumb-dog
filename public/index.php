@@ -39,7 +39,7 @@ try {
     $engine = null;
 
     // Include the autoload file when using composer.
-    require_once "../vendor/autoload.php";
+    //require_once "../vendor/autoload.php";
 
     /**
      * Twig template engine.
@@ -85,11 +85,11 @@ try {
     /**
      * Blade template engine.
      */
-    $engine = new eftec\bladeone\BladeOne(
+    /*$engine = new eftec\bladeone\BladeOne(
         './website',
         '../cache',
         eftec\bladeone\BladeOne::MODE_DEBUG
-    );
+    );*/
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();
