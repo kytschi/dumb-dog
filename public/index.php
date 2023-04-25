@@ -90,6 +90,11 @@ try {
         '../cache',
         eftec\bladeone\BladeOne::MODE_DEBUG
     );*/
+
+    /**
+     * Plates template engine.
+     */
+    //$engine = new League\Plates\Engine('./website');
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();

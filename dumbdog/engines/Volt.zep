@@ -27,6 +27,7 @@ namespace DumbDog\Engines;
 class Volt
 {   
     private template_engine;
+    public extension = "";
 
     public function __construct(template_engine)
     {

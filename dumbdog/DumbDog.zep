@@ -33,6 +33,7 @@ use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
 use DumbDog\Engines\Blade;
+use DumbDog\Engines\Plates;
 use DumbDog\Engines\Smarty;
 use DumbDog\Engines\Twig;
 use DumbDog\Engines\Volt;
@@ -340,7 +341,13 @@ class DumbDog
                         JOIN templates ON templates.id=pages.template_id 
                         WHERE pages.url=:url AND pages.status='live' AND pages.deleted_at IS NULL", data);
                     if (page) {
-                        if (file_exists("./website/" . page->template)) {
+                        var file;
+                        let file = page->template;
+                        if (!empty(this->template_engine)) {
+                            let file = page->template . this->template_engine->extension;
+                        }
+
+                        if (file_exists("./website/" . file)) {
                             var obj;
                             let obj = new \stdClass();
                             let settings->theme = "/website/themes/" . settings->theme . "/theme.css";
@@ -628,6 +635,9 @@ class DumbDog
         switch(engine) {
             case "eftec\\bladeone\\BladeOne":
                 let this->template_engine = new Blade(template_engine);
+                break;
+            case "League\\Plates\\Engine":
+                let this->template_engine = new Plates(template_engine);
                 break;
             case "Phalcon\\Mvc\\View\\Engine\\Volt\\Compiler":
                 let this->template_engine = new Volt(template_engine);

@@ -1,7 +1,7 @@
-{{ include('twig/header.html') }}
+@include('blade/header.blade.php')
 <div class="box">
     <div class="box-body">
-        {{ DUMBDOG.page.content|raw}}
+        {!! $DUMBDOG->page->content !!}
     </div>
 </div>
-{{ include('twig/footer.html') }}
+@include('blade/footer.blade.php')
