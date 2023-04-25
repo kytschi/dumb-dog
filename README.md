@@ -141,6 +141,27 @@ $engine = new eftec\bladeone\BladeOne(
 );
 ```
 
+### Plates
+
+See [Plates installation](https://platesphp.com/getting-started/installation/) on how to install Plates into your project/website.
+
+Now in your index.php define the Plates template engine and include it in Dumb Dog.
+```php
+$engine = new League\Plates\Engine('./website');
+```
+
+### Mustache
+
+See [Mustache installation](https://github.com/bobthecow/mustache.php) on how to install Mustache into your project/website.
+
+Now in your index.php define the Mustache template engine and include it in Dumb Dog.
+```php
+$engine = new Mustache_Engine([
+    'cache' => '../cache',
+    'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/website')
+]);
+```
+
 ## More information
 
 I've knocked up a demo website running the `example` in this repository and there's more information located there to help you get going and under Dumb Dog.\
