@@ -38,12 +38,13 @@ try {
      */
     $engine = null;
 
+    // Include the autoload file when using composer.
+    require_once "../vendor/autoload.php";
+
     /**
      * Twig template engine.
      */
     /*
-    // Include the autoload file.
-    require_once "../vendor/autoload.php";
     // Define the template folder for Twig.
     $loader = new \Twig\Loader\FilesystemLoader("./website");
 
@@ -70,6 +71,7 @@ try {
     // Set Cache folder if you like, speeds stuff up a lot.
     $engine->setCacheDir('../cache');
     */
+
     /**
      * Volt template engine.
      */
@@ -79,6 +81,15 @@ try {
             'path' => '../cache/'
         ]
     );*/
+
+    /**
+     * Blade template engine.
+     */
+    $engine = new eftec\bladeone\BladeOne(
+        './website',
+        '../cache',
+        eftec\bladeone\BladeOne::MODE_DEBUG
+    );
     new DumbDog("../dumbdog.json", $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();

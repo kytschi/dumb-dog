@@ -383,7 +383,7 @@ class Pages extends Controller
                 <div class='input-group'>
                     <span>template<span class='required'>*</span></span>
                     <select name='template_id'>";
-        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
+        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC, name");
         var iLoop = 0;
         while (iLoop < count(data)) {
             let html .= "<option value='" . data[iLoop]->id . "'";

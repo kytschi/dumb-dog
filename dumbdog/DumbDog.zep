@@ -32,6 +32,7 @@ use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
+use DumbDog\Engines\Blade;
 use DumbDog\Engines\Smarty;
 use DumbDog\Engines\Twig;
 use DumbDog\Engines\Volt;
@@ -625,6 +626,9 @@ class DumbDog
         let engine = get_class(template_engine);
                 
         switch(engine) {
+            case "eftec\\bladeone\\BladeOne":
+                let this->template_engine = new Blade(template_engine);
+                break;
             case "Phalcon\\Mvc\\View\\Engine\\Volt\\Compiler":
                 let this->template_engine = new Volt(template_engine);
                 break;
