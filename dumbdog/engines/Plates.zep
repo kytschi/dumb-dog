@@ -1,7 +1,7 @@
 /**
- * Smarty template engine helper
+ * Plates template engine helper
  *
- * @package     DumbDog\Engines\Smarty
+ * @package     DumbDog\Engines\Plates
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
  * @version     0.0.1
@@ -24,10 +24,10 @@
 */
 namespace DumbDog\Engines;
 
-class Smarty
+class Plates
 {   
     private template_engine;
-    public extension = "";
+    public extension = ".php";
 
     public function __construct(template_engine)
     {
@@ -44,7 +44,6 @@ class Smarty
         let dumbdog->pages = vars[2];
         let dumbdog->menu = vars[3];
 
-        this->template_engine->assign("DUMBDOG", dumbdog);
-        this->template_engine->display(template);
+        echo this->template_engine->render(template, ["DUMBDOG": dumbdog]);
     }
 }

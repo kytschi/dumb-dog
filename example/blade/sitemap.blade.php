@@ -1,14 +1,14 @@
-{{ include('twig/header.html') }}
+@include('blade/header.blade.php')
 <div id="tiles">
-    {% for item in DUMBDOG.pages.all() %}
+    @foreach ($DUMBDOG->pages->all() as $item)
     <div class='tile'>
         <div class="box">
             <div class="box-title">
-                <span>{{ item.name }}</span>
+                <span>{{ $item->name }}</span>
             </div>
             <div class="box-body">&nbsp;</div>
             <div class="box-footer">
-                <a href="{{ item.url }}" class="button" title="view {{ item.name }}">
+                <a href="{{ $item->url }}" class="button" title="view {{ $item->name }}">
                     <span>
                         view
                     </span>
@@ -16,6 +16,6 @@
             </div>
         </div>
     </div>
-    {% endfor %}
+    @endforeach
     </div>
-{{ include('twig/footer.html') }}
+@include('blade/footer.blade.php')
