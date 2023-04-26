@@ -141,7 +141,7 @@ class Pages extends Controller
                     <span>live</span>
                     <div class='switcher'>
                         <label>
-                            <input type='checkbox' name='status' value='1'>
+                            <input type='checkbox' name='status' value='1' checked='checked'>
                             <span>
                                 <small class='switcher-on'></small>
                                 <small class='switcher-off'></small>
