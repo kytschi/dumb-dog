@@ -351,7 +351,12 @@ class DumbDog
                         if (file_exists("./website/" . file)) {
                             var obj;
                             let obj = new \stdClass();
-                            let settings->theme = "/website/themes/" . settings->theme . "/theme.css";
+                            let obj->header = [];
+                            let obj->footer = [];
+                            let obj->both = [];
+
+                            let settings->theme_folder = "/website/themes/" . settings->theme;
+                            let settings->theme = settings->theme_folder . "/theme.css";
                             eval("$DUMBDOG = new \\stdClass();$DUMBDOG->menu = new \\stdClass();");
                             eval("$DUMBDOG->pages = new DumbDog\\Controllers\\Pages(json_decode('" . json_encode(this->cfg) . "', false, 512, JSON_THROW_ON_ERROR));");
                             eval("$DUMBDOG->site=json_decode('" . json_encode(settings) . "', false, 512, JSON_THROW_ON_ERROR);");
@@ -360,16 +365,22 @@ class DumbDog
                             if (menu) {
                                 let obj->header = menu;
                                 eval("$DUMBDOG->menu->header=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
+                            } else {
+                                eval("$DUMBDOG->menu->header=[];");
                             }
                             let menu = database->all("SELECT name, url FROM pages WHERE menu_item='footer' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
                             if (menu) {
                                 let obj->footer = menu;
                                 eval("$DUMBDOG->menu->footer=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
+                            } else {
+                                eval("$DUMBDOG->menu->footer=[];");
                             }
                             let menu = database->all("SELECT name, url FROM pages WHERE menu_item='both' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
                             if (menu) {
                                 let obj->both = menu;
                                 eval("$DUMBDOG->menu->both=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
+                            } else {
+                                eval("$DUMBDOG->menu->both=[];");
                             }
                             
                             if (!empty(this->template_engine)) {
