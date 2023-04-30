@@ -237,11 +237,13 @@ class Users extends Controller
                     let query = "UPDATE users SET name=:name, nickname=:nickname, updated_at=NOW(), updated_by=:updated_by";
                 
                     if (isset(_POST["password"]) && isset(_POST["password_check"])) {
-                        if (_POST["password"] != _POST["password_check"]) {
-                            throw new \Exception("passwords do not match!");
+                        if (!empty(_POST["password"]) && !empty(_POST["password_check"])) {
+                            if (_POST["password"] != _POST["password_check"]) {
+                                throw new \Exception("passwords do not match!");
+                            }
+                            let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
+                            let query .= ", password=:password";
                         }
-                        let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
-                        let query .= ", password=:password";
                     }
 
                     let data["name"] = _POST["name"];
