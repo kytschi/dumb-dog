@@ -24,6 +24,8 @@
 */
 namespace DumbDog\Engines;
 
+use DumbDog\Ui\Captcha;
+
 class Twig
 {   
     private template_engine;
@@ -43,6 +45,7 @@ class Twig
         let dumbdog->site = vars[1];
         let dumbdog->pages = vars[2];
         let dumbdog->menu = vars[3];
+        let dumbdog->captcha = new Captcha();
 
         echo this->template_engine->render(template, ["DUMBDOG": dumbdog]);
     }
