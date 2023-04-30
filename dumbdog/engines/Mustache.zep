@@ -24,6 +24,8 @@
 */
 namespace DumbDog\Engines;
 
+use DumbDog\Ui\Captcha;
+
 class Mustache
 {   
     private template_engine;
@@ -43,6 +45,7 @@ class Mustache
         let dumbdog->site = vars[1];
         let dumbdog->pages = vars[2];
         let dumbdog->menu = vars[3];
+        let dumbdog->captcha = new Captcha();
 
         let loader = this->template_engine->loadTemplate(template);
         echo loader->render(["DUMBDOG": dumbdog]);

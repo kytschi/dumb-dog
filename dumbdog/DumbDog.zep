@@ -358,6 +358,7 @@ class DumbDog
                             let settings->theme_folder = "/website/themes/" . settings->theme;
                             let settings->theme = settings->theme_folder . "/theme.css";
                             eval("$DUMBDOG = new \\stdClass();$DUMBDOG->menu = new \\stdClass();");
+                            eval("$DUMBDOG->captcha=new DumbDog\\Ui\\Captcha();");
                             eval("$DUMBDOG->pages = new DumbDog\\Controllers\\Pages(json_decode('" . json_encode(this->cfg) . "', false, 512, JSON_THROW_ON_ERROR));");
                             eval("$DUMBDOG->site=json_decode('" . json_encode(settings) . "', false, 512, JSON_THROW_ON_ERROR);");
                             eval("$DUMBDOG->page=json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR);");
