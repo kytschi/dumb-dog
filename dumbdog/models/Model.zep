@@ -24,7 +24,7 @@
 */
 namespace DumbDog\Models;
 
-class Model
+class Model extends \stdClass
 {
     //
 }

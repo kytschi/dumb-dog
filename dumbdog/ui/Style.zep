@@ -26,7 +26,7 @@ namespace DumbDog\Ui;
 
 class Style
 {
-    public function __construct(array cfg = [])
+    public function __construct(object cfg)
     {
         //
     }

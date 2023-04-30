@@ -262,7 +262,7 @@ class DumbDog
                     let output = this->notFound();
                 }
 
-                this->ddHead(code, location);
+                this->ddHead(location, code);
                 echo output;
                 this->ddFooter(isset(_SESSION["dd"]) ? true : false);
             } elseif(path == "/robots.txt") {
@@ -455,7 +455,7 @@ class DumbDog
                 }
             }
         } catch NotFoundException, err {
-            this->ddHead(404);
+            this->ddHead("", 404);
             echo this->notFound(backend, err->getMessage());
             this->ddFooter();
         } catch \Exception, err {
@@ -475,7 +475,7 @@ class DumbDog
         echo "</body>" . javascript->common() . "</html>";
     }
 
-    private function ddHead(int code = 200, string location)
+    private function ddHead(string location, int code = 200)
     {
         if (code == 404) {
             header("HTTP/1.1 404 Not Found");
@@ -531,7 +531,7 @@ class DumbDog
             var titles;
             let titles = new Titles();
 
-            this->ddHead(404, "page not found");
+            this->ddHead("page not found", 404);
             echo titles->page("page not found", "/assets/dumbdog.png");
             this->ddFooter(false);
         }
@@ -542,7 +542,7 @@ class DumbDog
         var titles;
         let titles = new Titles();
 
-        this->ddHead(404, "offline");
+        this->ddHead("offline", 404);
         echo titles->page("offline", "/assets/dumbdog.png");
         echo "<div class='box'><div class='box-body'><h3>*yawn* Let me sleep a little longer will you...</h3></div></div>";
         this->ddFooter(false);        
