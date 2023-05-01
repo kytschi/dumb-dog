@@ -36,7 +36,7 @@ class Titles
         var html;
         let html = "<h1 class='page-title'><span";
         if (image) {
-            let html .= " style='background-image: url(" . image . ");'";
+            let html .= " class='icon icon-" . image . "'";
         }
         return html . ">" . title . "</span></h1>";
     }

@@ -47,7 +47,7 @@ class Dashboard extends Controller
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
-        let html = titles->page("Dashboard", "/assets/dashboard.png");
+        let html = titles->page("Dashboard", "dashboard");
 
         let database = new Database(this->cfg);
         let data["id"] = _SESSION["dd"];
@@ -242,7 +242,7 @@ class Dashboard extends Controller
         let titles = new Titles();
         let captcha = new Captcha();
 
-        let html = titles->page("let me in", "/assets/login.png");
+        let html = titles->page("let me in", "login");
 
         if (!empty(_POST)) {
             if (isset(_POST["login"])) {

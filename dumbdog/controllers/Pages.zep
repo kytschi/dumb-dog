@@ -64,9 +64,9 @@ class Pages extends Controller
         let titles = new Titles();
         let database = new Database(this->cfg);
 
-        let html = titles->page("Create a page", "/assets/add-page.png");
+        let html = titles->page("Create a page", "add-page");
 
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/pages' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/pages' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -220,7 +220,7 @@ class Pages extends Controller
             throw new NotFoundException("Page not found");
         }
 
-        let html = titles->page("Delete the page", "/assets/delete.png");
+        let html = titles->page("Delete the page", "delete");
         
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
@@ -269,7 +269,7 @@ class Pages extends Controller
             throw new NotFoundException("Page not found");
         }
 
-        let html = titles->page("Edit the page", "/assets/edit-page.png");
+        let html = titles->page("Edit the page", "edit-page");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -277,18 +277,14 @@ class Pages extends Controller
 
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted'>";
+            let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/pages' class='button' title='Back to list'><img src='/assets/back.png'></a>";
-        let html .= "<a href='" . model->url . "' target='_blank' class='button' title='View me live'><img src='/assets/web.png'></a>";
+        let html .= "'><a href='/dumb-dog/pages' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "<a href='" . model->url . "' target='_blank' class='button icon icon-web' title='View me live'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/pages/recover/" . model->id . "' class='button' title='Recover the page'>
-                <img src='/assets/recover.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/pages/recover/" . model->id . "' class='button icon icon-recover' title='Recover the page'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/pages/delete/" . model->id . "' class='button' title='Delete the page'>
-                <img src='/assets/delete.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/pages/delete/" . model->id . "' class='button icon icon-delete' title='Delete the page'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -525,22 +521,16 @@ class Pages extends Controller
         var titles, tiles, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Pages", "/assets/pages.png");
+        let html = titles->page("Pages", "pages");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the page");
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages/add' class='button' title='Add a page'>
-                <img src='/assets/add-page.png'>
-            </a>
-            <a href='/dumb-dog/files' class='button' title='Managing the files and media'>
-                <img src='/assets/files.png'>
-            </a>
-            <a href='/dumb-dog/templates' class='button' title='Managing the templates'>
-                <img src='/assets/templates.png'>
-            </a>
+            <a href='/dumb-dog/pages/add' class='button icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/files' class='button icon icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates' class='button icon icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -566,7 +556,7 @@ class Pages extends Controller
             throw new NotFoundException("Page not found");
         }
 
-        let html = titles->page("Recover the page", "/assets/recover.png");
+        let html = titles->page("Recover the page", "recover");
 
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {

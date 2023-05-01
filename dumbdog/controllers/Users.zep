@@ -44,8 +44,8 @@ class Users extends Controller
     {
         var titles, html;
         let titles = new Titles();
-        let html = titles->page("Add a user", "/assets/add-page.png");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/users' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
+        let html = titles->page("Add a user", "add-page");
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/users' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -157,7 +157,7 @@ class Users extends Controller
             throw new NotFoundException("User not found");
         }
 
-        let html = titles->page("Delete the user", "/assets/delete.png");
+        let html = titles->page("Delete the user", "delete");
 
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
@@ -207,23 +207,19 @@ class Users extends Controller
             throw new NotFoundException("User not found");
         }
 
-        let html = titles->page("Edit the user", "/assets/edit-page.png");
+        let html = titles->page("Edit the user", "edit-page");
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
         }
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted'>";
+            let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/users' class='button' title='Back to list'><img src='/assets/back.png'></a>";
+        let html .= "'><a href='/dumb-dog/users' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='button' title='Recover the user'>
-                <img src='/assets/recover.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='button icon icon-recover' title='Recover the user'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='button' title='Delete the user'>
-                <img src='/assets/delete.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='button icon icon-delete' title='Delete the user'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -312,16 +308,14 @@ class Users extends Controller
         var titles, table, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Users", "/assets/users.png");
+        let html = titles->page("Users", "users");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the user");
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/users/add' class='button' title='Add a user'>
-                <img src='/assets/add-page.png'>
-            </a>
+            <a href='/dumb-dog/users/add' class='button icon' title='Add a user'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -351,7 +345,7 @@ class Users extends Controller
             throw new NotFoundException("User not found");
         }
 
-        let html = titles->page("Recover the user", "/assets/recover.png");
+        let html = titles->page("Recover the user", "recover");
 
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {
