@@ -110,19 +110,12 @@ class Captcha
 
     public function validate()
 	{
-		if (!isset(_REQUEST["dd_captcha"]) || !isset(_POST["dd_captcha"]) || !isset(_GET["dd_captcha"])) {
+		if (!isset(_REQUEST["dd_captcha"]) || !isset(_REQUEST["_DDCAPTCHA"])) {            
 			return false;
 		}
 
-		var splits, iv, encrypted, token, captcha;
-        if (isset(_REQUEST["_DDCAPTCHA"])) {
-            let captcha = _REQUEST["_DDCAPTCHA"];
-        } elseif (isset(_POST["_DDCAPTCHA"])) {
-            let captcha = _POST["_DDCAPTCHA"];
-        } elseif (isset(_GET["_DDCAPTCHA"])) {
-            let captcha = _GET["_DDCAPTCHA"];
-        }
-		let splits = explode("=", captcha);
+		var splits, iv, encrypted, token;
+		let splits = explode("=", _REQUEST["_DDCAPTCHA"]);
 		
 		let encrypted = splits[0];
 		unset(splits[0]);
@@ -132,7 +125,7 @@ class Captcha
 		let token = openssl_decrypt(
             encrypted,
             "aes128",
-            captcha,
+            _REQUEST["dd_captcha"],
             0,
 			iv
         );
@@ -147,7 +140,7 @@ class Captcha
             return false;
         }
 
-        if (splits[1] != captcha) {
+        if (splits[1] != _REQUEST["dd_captcha"]) {
             return false;
         }
 
