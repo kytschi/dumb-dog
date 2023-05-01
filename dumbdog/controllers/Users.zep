@@ -28,7 +28,7 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Tiles;
+use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
 
 class Users extends Controller
@@ -309,7 +309,7 @@ class Users extends Controller
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
+        var titles, table, database, html;
         let titles = new Titles();
         
         let html = titles->page("Users", "/assets/users.png");
@@ -326,8 +326,12 @@ class Users extends Controller
 
         let database = new Database(this->cfg);
 
-        let tiles = new Tiles();
-        let html = html . tiles->build(
+        let table = new Table();
+        let html = html . table->build(
+            [
+                "name",
+                "status"
+            ],
             database->all("SELECT * FROM users"),
             "/dumb-dog/users/edit/"
         );

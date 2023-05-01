@@ -17,7 +17,7 @@ The dumbest dog on the CMS block you'll ever see!
 Download or clone the repository.
 
 Copy the module located in the ext/modules folder to your PHP modules folder on your server.
-https://github.com/kytschi/dumb-dog/blob/main/ext/modules/dumbdog.so
+https://github.com/kytschi/dumb-dog/blob/main/compiled
 
 Now create an ini to load the module in your PHP modules ini folder.
 ```
