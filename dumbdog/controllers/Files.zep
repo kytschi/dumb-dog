@@ -233,7 +233,7 @@ class Files extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/files' class='button' title='Back to list'><img src='/assets/back.png'></a>";
+        let html .= "'><a href='/dumb-dog/files' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
             let html .= "<a href='/dumb-dog/files/recover/" . model->id . "' class='button icon icon-recover' title='Recover the file'>&nbsp;</a>";
         } else {
