@@ -16,7 +16,7 @@ The dumbest dog on the CMS block you'll ever see!
 
 Download or clone the repository.
 
-Copy the module located in the ext/modules folder to your PHP modules folder on your server.
+Copy the module located in the compiled folder to your PHP modules folder on your server.
 https://github.com/kytschi/dumb-dog/blob/main/compiled
 
 Now create an ini to load the module in your PHP modules ini folder.
@@ -27,7 +27,10 @@ extension=dumbdog.so
 
 You can also just create the ini and point the `extension` to the folder with the `dumbdog.so`.
 
-And don't forget to restart your webserver.
+**And don't forget to restart your webserver.**
+
+If you have issues with the module you may need to compile it yourself. 
+See https://docs.zephir-lang.com/0.12/en/installation for more information on installing Zephir and compiling.
 
 Create yourself a database and run the SQL located in the setup folder.
 https://github.com/kytschi/dumb-dog/blob/main/setup/database.sql
