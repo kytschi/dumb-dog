@@ -41,7 +41,7 @@ class Table
                 let html .= "<th>" . columns[iLoop_head] . "</th>";
                 let iLoop_head = iLoop_head + 1;
             }
-            let html .= "<th width='120px'>&nbsp;</th></tr></thead><tbody>";
+            let html .= "<th width='120px'>Tools</th></tr></thead><tbody>";
             let iLoop = 0;
             while (iLoop < count(data)) {
                 let html .= "<tr";
