@@ -86,12 +86,14 @@ class Files extends Controller
                         data
                     );
 
-                    copy(
-                        _FILES["file"]["tmp_name"],
-                        getcwd() . "/website/files/" . filename
-                    );
+                    if (this->cfg->save_mode == false) {
+                        copy(
+                            _FILES["file"]["tmp_name"],
+                            getcwd() . "/website/files/" . filename
+                        );
 
-                    this->createThumb(filename);
+                        this->createThumb(filename);
+                    }
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the file");
