@@ -44,7 +44,7 @@ class Themes extends Controller
     {
         var titles, html;
         let titles = new Titles();
-        let html = titles->page("Add a theme", "add-page");
+        let html = titles->page("Add a theme", "add");
         let html .= "<div class='page-toolbar'><a href='/dumb-dog/themes' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
@@ -176,7 +176,7 @@ class Themes extends Controller
             throw new NotFoundException("Theme not found");
         }
 
-        let html = titles->page("Edit the theme", "edit-page");
+        let html = titles->page("Edit the theme", "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
