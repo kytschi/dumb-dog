@@ -552,26 +552,14 @@ class DumbDog
     private function quickMenu()
     {
         echo "<div id='quick-menu' style='display: none'>
-            <a href='/dumb-dog/pages/add' class='button' title='Add a page'>
-                <img src='/assets/add-page.png'>
-            </a>
-            <a href='/dumb-dog/pages' class='button' title='Managing the pages'>
-                <img src='/assets/pages.png'>
-            </a>
-            <a href='/dumb-dog' class='button' title='Go to the dashboard'>
-                <img src='/assets/dashboard.png'>
-            </a>
-            <a href='/dumb-dog/settings' class='button' title='Site wide settings'>
-                <img src='/assets/settings.png'>
-            </a>
-            <a href='/dumb-dog/give-up' class='button' title='Log me out'>
-                <img src='/assets/logout.png'>
-            </a>
+            <a href='/dumb-dog/pages/add' class='button icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='button icon icon-pages' title='Managing the pages'>&nbsp;</a>
+            <a href='/dumb-dog' class='button icon icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
+            <a href='/dumb-dog/settings' class='button icon icon-settings' title='Site wide settings'>&nbsp;</a>
+            <a href='/dumb-dog/give-up' class='button icon icon-logout' title='Log me out'>&nbsp;</a>
         </div>
         <div id='quick-menu-button' onclick='showQuickMenu()'>
-            <div class='button'>
-                <img src='/assets/dumbdog.png'>
-            </div>
+            <div class='button icon icon-dumbdog'>&nbsp;</div>
         </div>";
     }
 
