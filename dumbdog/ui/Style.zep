@@ -175,9 +175,9 @@ class Style
             font-family: 'subheading', Helvetica, sans-serif;
             line-height: 44pt;
         }
-        input, textarea, select, .trumbowyg-editor {
+        input, textarea, select, .trumbowyg-editor, td {
             font-family: Helvetica, sans-serif !important;
-            font-size: 14pt;
+            font-size: 14pt !important;
         }
         input, textarea, select {
             padding: 10px;
@@ -296,6 +296,7 @@ class Style
             margin-right: 20px;
         }
         .round {
+            display: block;
             height: 100px !important;
             width: 100px !important;
             border-radius: 50%;
@@ -316,11 +317,12 @@ class Style
         }
 
         /* Box */
-        .box {
+        .box, .table {
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
             margin-bottom: 40px;
+            border-collapse: collapse;
         }
         .alert {
             border: 3px solid var(--box-border-colour);
@@ -344,14 +346,25 @@ class Style
             margin-left: 20px;
         }
         .box-title {
-            background-color: var(--box-title-background-colour);
-            padding: 20px;
             display: flex;
             flex-direction: row;
+        }
+        .box-title, th, td {
+            padding: 20px;
             border-bottom: 3px solid var(--box-title-border-colour);
+        }
+        .box-title, th {
+            background-color: var(--box-title-background-colour);
             font-size: 48pt;
             font-weight: bold;
             font-family: 'heading', Helvetica, sans-serif;
+        }
+        th {
+            font-size: 32pt;
+        }
+        th, td {
+            text-align: left;
+            border-right: 3px solid var(--box-title-border-colour);
         }
         .box-title img {
             width: 80px;
@@ -371,7 +384,6 @@ class Style
         .warning.alert {
             background-color: var(--box-warning-background-colour);
         }
-
         /* Quick menu */
         #quick-menu-button {                
             position: fixed;

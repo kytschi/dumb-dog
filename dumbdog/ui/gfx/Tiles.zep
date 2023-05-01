@@ -68,7 +68,7 @@ class Tiles
                         let html .= "<span onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")' class='round' title='Copy URL to clipboard'><img src='/assets/clipboard.png'></span>";
                     }
                 }
-                let html .="<a href='" . url . data[iLoop]->id . "' class='round' title='edit the page'><img src='/assets/edit-page.png' alt='edit'></a>
+                let html .="<a href='" . url . data[iLoop]->id . "' class='round' title='edit me'><img src='/assets/edit-page.png' alt='edit'></a>
                         </div>
                     </div>
                 </div>";
