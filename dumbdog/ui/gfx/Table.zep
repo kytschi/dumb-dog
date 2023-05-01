@@ -57,7 +57,7 @@ class Table
                     let iLoop_head = iLoop_head + 1;
                 }
 
-                let html .= "<td><a href='" . url . data[iLoop]->id . "' class='round' title='edit me'><img src='/assets/edit-page.png' alt='edit'></a></td>";
+                let html .= "<td><a href='" . url . data[iLoop]->id . "' class='round icon icon-edit' title='edit me'>&nbsp;</a></td>";
 
                 let html .= "</tr>";
                 let iLoop = iLoop + 1;

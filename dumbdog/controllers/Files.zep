@@ -45,8 +45,8 @@ class Files extends Controller
         let titles = new Titles();
         let database = new Database(this->cfg);
 
-        let html = titles->page("Upload a file", "/assets/add-page.png");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
+        let html = titles->page("Upload a file", "add");
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='button icon icon-back' title='Back to list'><img src='/assets/back.png'></a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -172,7 +172,7 @@ class Files extends Controller
             throw new NotFoundException("Media not found");
         }
 
-        let html = titles->page("Delete the file", "/assets/delete.png");
+        let html = titles->page("Delete the file", "delete");
         
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
@@ -221,7 +221,7 @@ class Files extends Controller
             throw new NotFoundException("File not found");
         }
 
-        let html = titles->page("Edit the file", "/assets/edit-page.png");
+        let html = titles->page("Edit the file", "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -306,16 +306,14 @@ class Files extends Controller
         var titles, tiles, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Files", "/assets/files.png");
+        let html = titles->page("Files", "files");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the file item");
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/files/add' class='button' title='Upload some media'>
-                <img src='/assets/add-page.png'>
-            </a>
+            <a href='/dumb-dog/files/add' class='button icon' title='Upload some media'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -341,7 +339,7 @@ class Files extends Controller
             throw new NotFoundException("File not found");
         }
 
-        let html = titles->page("Recover the file", "/assets/recover.png");
+        let html = titles->page("Recover the file", "recover");
 
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {

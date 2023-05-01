@@ -44,7 +44,7 @@ class Users extends Controller
     {
         var titles, html;
         let titles = new Titles();
-        let html = titles->page("Add a user", "add-page");
+        let html = titles->page("Add a user", "add");
         let html .= "<div class='page-toolbar'><a href='/dumb-dog/users' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
@@ -207,7 +207,7 @@ class Users extends Controller
             throw new NotFoundException("User not found");
         }
 
-        let html = titles->page("Edit the user", "edit-page");
+        let html = titles->page("Edit the user", "edit");
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
         }

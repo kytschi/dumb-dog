@@ -64,7 +64,7 @@ class Pages extends Controller
         let titles = new Titles();
         let database = new Database(this->cfg);
 
-        let html = titles->page("Create a page", "add-page");
+        let html = titles->page("Create a page", "add");
 
         let html .= "<div class='page-toolbar'><a href='/dumb-dog/pages' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
@@ -269,7 +269,7 @@ class Pages extends Controller
             throw new NotFoundException("Page not found");
         }
 
-        let html = titles->page("Edit the page", "edit-page");
+        let html = titles->page("Edit the page", "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");

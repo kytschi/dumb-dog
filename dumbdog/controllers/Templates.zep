@@ -44,7 +44,7 @@ class Templates extends Controller
     {
         var titles, html;
         let titles = new Titles();
-        let html = titles->page("Add a template", "add-page");
+        let html = titles->page("Add a template", "add");
         let html .= "<div class='page-toolbar'><a href='/dumb-dog/templates' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
@@ -184,7 +184,7 @@ class Templates extends Controller
             throw new NotFoundException("Template not found");
         }
 
-        let html = titles->page("Edit the template", "edit-page");
+        let html = titles->page("Edit the template", "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
