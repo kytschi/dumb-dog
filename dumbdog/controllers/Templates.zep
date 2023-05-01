@@ -44,8 +44,8 @@ class Templates extends Controller
     {
         var titles, html;
         let titles = new Titles();
-        let html = titles->page("Add a template", "/assets/add-page.png");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/templates' class='button' title='Back to list'><img src='/assets/back.png'></a></div>";
+        let html = titles->page("Add a template", "add-page");
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/templates' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -130,7 +130,7 @@ class Templates extends Controller
             throw new NotFoundException("Template not found");
         }
 
-        let html = titles->page("Delete the template", "/assets/delete.png");
+        let html = titles->page("Delete the template", "delete");
 
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
@@ -184,7 +184,7 @@ class Templates extends Controller
             throw new NotFoundException("Template not found");
         }
 
-        let html = titles->page("Edit the template", "/assets/edit-page.png");
+        let html = titles->page("Edit the template", "edit-page");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -192,17 +192,13 @@ class Templates extends Controller
 
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted'>";
+            let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/templates' class='button' title='Back to list'><img src='/assets/back.png'></a>";
+        let html .= "'><a href='/dumb-dog/templates' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='button' title='Recover the template'>
-                <img src='/assets/recover.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='button icon icon-recover' title='Recover the template'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='button' title='Delete the template'>
-                <img src='/assets/delete.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='button icon icon-delete' title='Delete the template'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -300,16 +296,14 @@ class Templates extends Controller
         var titles, tiles, database, html;
         let titles = new Titles();
         
-        let html = titles->page("Templates", "/assets/templates.png");
+        let html = titles->page("Templates", "templates");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the template");
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/templates/add' class='button' title='Add a template'>
-                <img src='/assets/add-page.png'>
-            </a>
+            <a href='/dumb-dog/templates/add' class='button icon' title='Add a template'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -335,7 +329,7 @@ class Templates extends Controller
             throw new NotFoundException("Template not found");
         }
 
-        let html = titles->page("Recover the template", "/assets/recover.png");
+        let html = titles->page("Recover the template", "recover");
 
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {

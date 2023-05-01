@@ -442,7 +442,7 @@ class Style
             background-position: 20px 20px;
             background-size: 64px;
         }
-        .page-title span {
+        .page-title span.icon {
             padding: 0px 40px 10px 100px;
         }
         .page-sub-title span {
@@ -501,6 +501,77 @@ class Style
         }
         .tile .box-body.thumb img {
             width: 100%;
+        }
+        /* Icons */
+        .icon {
+            width: 64px;
+            height: 64px;
+            position: relative;
+        }
+        .icon::before {
+            content: '';
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            left: 20px;
+            top: 20px;
+            right: 0px;
+            bottom: 0px;
+            background-image: url('/assets/icons.png');
+            background-repeat: no-repeat;
+            background-position: 0 0;
+        }
+        .icon-dumbdog::before {
+            width: 80px;
+            height: 68px;
+            left: 14px;
+            top: 16px;
+            background-position: -512px -64px;
+        }
+        .icon-pages::before {
+            background-position: -512px 0px;
+        }
+        .icon-dashboard::before {
+            background-position: -384px -64px;
+        }
+        .icon-settings::before {
+            background-position: -384px 0px;
+        }
+        .icon-logout::before {
+            background-position: -576px 0px;
+        }
+        .icon-users::before {
+            background-position: -192px 0px;
+        }
+        .icon-login::before {
+            background-position: 0px -64px;
+        }
+        .icon-files::before {
+            background-position: -128px -64px;
+        }
+        .icon-templates::before {
+            background-position: -320px 0px;
+        }
+        .icon-back::before {
+            background-position: -64px 0px;
+        }
+        .icon-web::before {
+            background-position: -128px 0px;
+        }
+        .icon-recover::before {
+            background-position: -448px 0px;
+        }
+        .icon-delete::before {
+            background-position: -320px -64px;
+        }
+        .icon-themes::before {
+            background-position: -256px 0px;
+        }
+        .icon-copy::before {
+            background-position: -448px 0px;
+        }
+        .icon-edit::before {
+            background-position: -256px -64px;
         }
         </style>";
     }

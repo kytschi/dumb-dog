@@ -61,14 +61,14 @@ class Tiles
                     }
                 }
                 if (property_exists(data[iLoop], "url")) {
-                    let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='round' title='View me live'><img src='/assets/web.png'></a>";
+                    let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='round icon icon-web' title='View me live'>&nbsp;</a>";
                 }
                 if (property_exists(data[iLoop], "filename")) {
                     if (data[iLoop]->filename) {
-                        let html .= "<span onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")' class='round' title='Copy URL to clipboard'><img src='/assets/clipboard.png'></span>";
+                        let html .= "<span onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")' class='round icon icon-copy' title='Copy URL to clipboard'>&nbsp;</span>";
                     }
                 }
-                let html .="<a href='" . url . data[iLoop]->id . "' class='round' title='edit me'><img src='/assets/edit-page.png' alt='edit'></a>
+                let html .="<a href='" . url . data[iLoop]->id . "' class='round icon icon-edit' title='edit me'>&nbsp;</a>
                         </div>
                     </div>
                 </div>";

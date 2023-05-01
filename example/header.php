@@ -11,7 +11,7 @@
     <body id="home">
         <main>
             <h1 class="page-title">
-                <span style="background-image: url(/assets/templates.png);"><?= $DUMBDOG->page->name; ?></span>
+                <span style="background-image: url(/website/assets/templates.png);"><?= $DUMBDOG->page->name; ?></span>
             </h1>
             <div class="page-toolbar">
                 <?php
