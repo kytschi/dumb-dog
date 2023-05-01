@@ -568,7 +568,7 @@ class Style
             background-position: -256px 0px;
         }
         .icon-copy::before {
-            background-position: -448px 0px;
+            background-position: -448px -64px;
         }
         .icon-edit::before {
             background-position: -256px -64px;

@@ -229,17 +229,13 @@ class Files extends Controller
 
         let html .= "<div class='page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted'>";
+            let html .= " deleted";
         }
         let html .= "'><a href='/dumb-dog/files' class='button' title='Back to list'><img src='/assets/back.png'></a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "' class='button' title='Recover the file'>
-                <img src='/assets/recover.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "' class='button icon icon-recover' title='Recover the file'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "' class='button' title='Delete the file'>
-                <img src='/assets/delete.png'>
-            </a>";
+            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "' class='button icon icon-delete' title='Delete the file'>&nbsp;</a>";
         }
         let html .= "</div>";
 
