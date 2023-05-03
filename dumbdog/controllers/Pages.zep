@@ -32,41 +32,23 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Pages extends Controller
 {
-    private cfg;
+    public cfg;
+    public global_url = "/dumb-dog/pages";
 
     public function __construct(object cfg)
     {
         let this->cfg = cfg;    
     }
 
-    public function all()
+    public function add(string path, string type = "page")
     {
-        var database;
-        let database = new Database(this->cfg);
-
-        return database->all("
-        SELECT
-            pages.name,
-            pages.url,
-            pages.content,
-            pages.meta_keywords,
-            pages.meta_description,
-            pages.meta_author,
-            templates.file AS template
-        FROM pages 
-        JOIN templates ON templates.id=pages.template_id 
-        WHERE pages.status='live' AND pages.deleted_at IS NULL");
-    }
-
-    public function add(string path)
-    {
-        var titles, html, data, database;
+        var titles, html, data, database, iLoop;
         let titles = new Titles();
         let database = new Database(this->cfg);
 
-        let html = titles->page("Create a page", "add");
+        let html = titles->page("Create the " . type, "add");
 
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/pages' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'><a href='" . this->global_url . "' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -78,7 +60,7 @@ class Pages extends Controller
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
-                    let data["url"] = _POST["url"];
+                    let data["url"] = str_replace(" ", "-", strtolower(_POST["url"]));
                     let data["content"] = str_replace("\\", "&#92;", _POST["content"]);
                     let data["menu_item"] = _POST["menu_item"];
                     let data["template_id"] = _POST["template_id"];
@@ -87,6 +69,23 @@ class Pages extends Controller
                     let data["meta_description"] = _POST["meta_description"];
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
+                    let data["type"] = type;
+                    let data["event_on"] = null;
+                    let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
+
+                    if (isset(_POST["event_on"])) {
+                        if (!isset(_POST["event_time"])) {
+                            let _POST["event_time"] = "00:00";
+                        } elseif (empty(_POST["event_time"])) {
+                            let _POST["event_time"] = "00:00";
+                        }
+                        var date;
+                        let date = \DateTime::createFromFormat("d/m/Y H:i:s", _POST["event_on"] . " " . _POST["event_time"] . ":00");
+                        if (empty(date)) {
+                            throw new \Exception("Failed to process the date");
+                        }
+                        let data["event_on"] = date->format("Y-m-d H:i:s");
+                    }
 
                     let status = database->execute(
                         "INSERT INTO pages 
@@ -100,6 +99,9 @@ class Pages extends Controller
                             meta_keywords,
                             meta_author,
                             meta_description,
+                            type,
+                            event_on,
+                            event_length,
                             created_at,
                             created_by,
                             updated_at,
@@ -115,6 +117,9 @@ class Pages extends Controller
                             :meta_keywords,
                             :meta_author,
                             :meta_description,
+                            :type,
+                            :event_on,
+                            :event_length,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -123,10 +128,10 @@ class Pages extends Controller
                     );
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to save the page");
+                        let html .= this->saveFailed("Failed to save the " . type);
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've saved the page");
+                        let html .= this->saveSuccess("I've saved the " . type);
                     }
                 }
             }
@@ -134,7 +139,7 @@ class Pages extends Controller
 
         let html .= "<form method='post'><div class='box wfull'>
             <div class='box-title'>
-                <span>the page</span>
+                <span>the " . type . "</span>
             </div>
             <div class='box-body'>
                 <div class='input-group'>
@@ -159,13 +164,38 @@ class Pages extends Controller
                 </div>
                 <div class='input-group'>
                     <span>content</span>
-                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'></textarea>
+                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the content'></textarea>
+                </div>";
+        if (type == "event") {
+            let html .= "
+                <div class='input-group'>
+                    <span>when its on</span>
+                    <input type='text' class='datepicker' name='event_on'>
                 </div>
+                <div class='input-group'>
+                    <span>what time its on, enter as hour:minutes</span>
+                    <input type='text' name='event_time' placeholder='24 hour time please' value=''>
+                </div>
+                <div class='input-group'>
+                    <span>how long for</span>
+                    <select name='event_length'>
+                        <option value='1'>1 hour</option>
+                        <option value='2'>2 hours</option>
+                        <option value='4'>4 hours</option>
+                        <option value='all_day'>all day</option>
+                        <option value='daily'>daily</option>
+                        <option value='weekly'>weekly</option>
+                        <option value='monthly'>monthly</option>
+                        <option value='annually'>annually</option>
+                    </select>
+                </div>";
+        }
+        let html .= "
                 <div class='input-group'>
                     <span>template<span class='required'>*</span></span>
                     <select name='template_id'>";
         let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
-        var iLoop = 0;
+        let iLoop = 0;
         while (iLoop < count(data)) {
             let html .= "<option value='" . data[iLoop]->id . "'";
             if (data[iLoop]->{"default"}) {
@@ -200,7 +230,7 @@ class Pages extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/pages' class='button-blank'>cancel</a>
+                <a href='" . this->global_url . "' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -217,10 +247,10 @@ class Pages extends Controller
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM pages WHERE id=:id", data);
         if (empty(model)) {
-            throw new NotFoundException("Page not found");
+            throw new NotFoundException("Entry not found");
         }
 
-        let html = titles->page("Delete the page", "delete");
+        let html = titles->page("Delete the entry", "delete");
         
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
@@ -229,10 +259,10 @@ class Pages extends Controller
                     let data["updated_by"] = this->getUserId();
                     let status = database->execute("UPDATE pages SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to delete the page");
+                        let html .= this->saveFailed("Failed to delete the entry");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/pages?deleted=true");
+                        this->redirect(this->global_url . "?deleted=true");
                     }
                 } catch \Exception, err {
                     let html .= this->saveFailed(err->getMessage());
@@ -248,7 +278,7 @@ class Pages extends Controller
                 <p>I'll bury you <strong>" . model->name . "</strong> like I bury my bone...</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/pages/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <a href='" . this->global_url . "/edit/" . model->id . "' class='button-blank'>cancel</a>
                 <button type='submit' name='delete'>delete</button>
             </div>
         </div></form>";
@@ -256,20 +286,20 @@ class Pages extends Controller
         return html;
     }
 
-    public function edit(string path)
+    public function edit(string path, string type = "page")
     {
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
         let database = new Database(this->cfg);
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM pages WHERE id=:id", data);
+        let model = database->get("SELECT * FROM pages WHERE type='" . type . "' AND id=:id", data);
 
         if (empty(model)) {
-            throw new NotFoundException("Page not found");
+            throw new NotFoundException(ucwords(type) . " not found");
         }
 
-        let html = titles->page("Edit the page", "edit");
+        let html = titles->page("Edit the " . type, "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -279,12 +309,12 @@ class Pages extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/pages' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='" . this->global_url ."' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
         let html .= "<a href='" . model->url . "' target='_blank' class='button icon icon-web' title='View me live'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/pages/recover/" . model->id . "' class='button icon icon-recover' title='Recover the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='button icon icon-recover' title='Recover the page'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/pages/delete/" . model->id . "' class='button icon icon-delete' title='Delete the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='button icon icon-delete' title='Delete the page'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -297,7 +327,7 @@ class Pages extends Controller
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
-                    let data["url"] = _POST["url"];
+                    let data["url"] = str_replace(" ", "-", strtolower(_POST["url"]));
                     let data["content"] = str_replace("\\", "&#92;", _POST["content"]);
                     let data["menu_item"] = _POST["menu_item"];
                     let data["template_id"] = _POST["template_id"];
@@ -305,6 +335,23 @@ class Pages extends Controller
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_description"] = _POST["meta_description"];
                     let data["updated_by"] = this->getUserId();
+
+                    let data["event_on"] = null;
+                    let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
+
+                    if (isset(_POST["event_on"])) {
+                        if (!isset(_POST["event_time"])) {
+                            let _POST["event_time"] = "00:00";
+                        } elseif (empty(_POST["event_time"])) {
+                            let _POST["event_time"] = "00:00";
+                        }
+                        var date;
+                        let date = \DateTime::createFromFormat("d/m/Y H:i:s", _POST["event_on"] . " " . _POST["event_time"] . ":00");
+                        if (empty(date)) {
+                            throw new \Exception("Failed to process the date");
+                        }
+                        let data["event_on"] = date->format("Y-m-d H:i:s");
+                    }
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
@@ -319,23 +366,25 @@ class Pages extends Controller
                             meta_author=:meta_author,
                             meta_description=:meta_description,
                             updated_at=NOW(),
-                            updated_by=:updated_by
+                            updated_by=:updated_by,
+                            event_on=:event_on,
+                            event_length=:event_length 
                         WHERE id=:id",
                         data
                     );
-
+                
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to update the page");
+                        let html .= this->saveFailed("Failed to update the " . type);
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/pages/edit/" . model->id . "?saved=true");
+                        this->redirect(this->global_url . "/edit/" . model->id . "?saved=true");
                     }
                 }
             }
         }
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("I've updated the page");
+            let html .= this->saveSuccess("I've updated the " . type);
         }
 
         let html .= "<form method='post'><div class='box wfull";
@@ -344,7 +393,7 @@ class Pages extends Controller
         }
         let html .= "'>
             <div class='box-title'>
-                <span>the page</span>
+                <span>the " . type . "</span>
             </div>
             <div class='box-body'>
                 <div class='input-group'>
@@ -375,8 +424,34 @@ class Pages extends Controller
                 <div class='input-group'>
                     <span>content</span>
                     <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'>" . model->content . "</textarea>
+                </div>";
+
+        if (type == "event") {
+            let html .= "
+                <div class='input-group'>
+                    <span>when its on</span>
+                    <input type='text' class='datepicker' name='event_on' value='" . date("d/m/Y", strtotime(model->event_on)) . "'>
                 </div>
                 <div class='input-group'>
+                    <span>what time its on, enter as hour:minutes</span>
+                    <input type='text' name='event_time' placeholder='24 hour time please' value='" . date("H:i", strtotime(model->event_on)) . "'>
+                </div>
+                <div class='input-group'>
+                    <span>how long for</span>
+                    <select name='event_length'>
+                        <option value='1'" . (model->event_length == "1" ? " selected='selected'" : "") . ">1 hour</option>
+                        <option value='2'" . (model->event_length == "2" ? " selected='selected'" : "") . ">2 hours</option>
+                        <option value='4'" . (model->event_length == "4" ? " selected='selected'" : "") . ">4 hours</option>
+                        <option value='all_day'" . (model->event_length == "all_day" ? " selected='selected'" : "") . ">all day</option>
+                        <option value='daily'" . (model->event_length == "daily" ? " selected='selected'" : "") . ">daily</option>
+                        <option value='weekly'" . (model->event_length == "weekly" ? " selected='selected'" : "") . ">weekly</option>
+                        <option value='monthly'" . (model->event_length == "monthly" ? " selected='selected'" : "") . ">monthly</option>
+                        <option value='annually'" . (model->event_length == "annually" ? " selected='selected'" : "") . ">annually</option>
+                    </select>
+                </div>";
+        }
+
+        let html .= "<div class='input-group'>
                     <span>template<span class='required'>*</span></span>
                     <select name='template_id'>";
         let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC, name");
@@ -529,6 +604,7 @@ class Pages extends Controller
 
         let html .= "<div class='page-toolbar'>
             <a href='/dumb-dog/pages/add' class='button icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/events' class='button icon icon-events' title='Events'>&nbsp;</a>
             <a href='/dumb-dog/files' class='button icon icon-files' title='Managing the files and media'>&nbsp;</a>
             <a href='/dumb-dog/templates' class='button icon icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
@@ -553,10 +629,10 @@ class Pages extends Controller
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM pages WHERE id=:id", data);
         if (empty(model)) {
-            throw new NotFoundException("Page not found");
+            throw new NotFoundException("Entry not found");
         }
 
-        let html = titles->page("Recover the page", "recover");
+        let html = titles->page("Recover the entry", "recover");
 
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {
@@ -566,10 +642,10 @@ class Pages extends Controller
                     let status = database->execute("UPDATE pages SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to recover the page");
+                        let html .= this->saveFailed("Failed to recover the entry");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/pages/edit/" . model->id);
+                        this->redirect(this->global_url ."/edit/" . model->id);
                     }
                 } catch \Exception, err {
                     let html .= this->saveFailed(err->getMessage());
@@ -585,7 +661,7 @@ class Pages extends Controller
                 <p>Dig up <strong>" . model->name . "</strong>...</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/pages/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <a href='" . this->global_url . "/edit/" . model->id . "' class='button-blank'>cancel</a>
                 <button type='submit' name='recover'>recover</button>
             </div>
         </div></form>";

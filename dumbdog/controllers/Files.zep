@@ -46,7 +46,7 @@ class Files extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Upload a file", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='button icon icon-back' title='Back to list'><img src='/assets/back.png'></a></div>";
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -63,6 +63,7 @@ class Files extends Controller
                     let data["mime_type"] = _FILES["file"]["type"];
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
+                    let data["tags"] = _POST["tags"];
 
                     let status = database->execute(
                         "INSERT INTO files 
@@ -70,6 +71,7 @@ class Files extends Controller
                             name,
                             filename,
                             mime_type,
+                            tags,
                             created_at,
                             created_by,
                             updated_at,
@@ -79,6 +81,7 @@ class Files extends Controller
                             :name,
                             :filename,
                             :mime_type,
+                            :tags,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -86,7 +89,7 @@ class Files extends Controller
                         data
                     );
 
-                    if (this->cfg->save_mode == false) {
+                    if (this->cfg->save_mode != false) {
                         copy(
                             _FILES["file"]["tmp_name"],
                             getcwd() . "/website/files/" . filename
@@ -117,6 +120,10 @@ class Files extends Controller
                 <div class='input-group'>
                     <span>file<span class='required'>*</span></span>
                     <input type='file' name='file' placeholder='upload a file' value=''>
+                </div>
+                <div class='input-group'>
+                    <span>tags</span>
+                    <input type='text' name='tags' class='tags' placeholder='tag the file' value=''>
                 </div>
             </div>
             <div class='box-footer'>
@@ -249,12 +256,14 @@ class Files extends Controller
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
+                    let data["tags"] = _POST["tags"];
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
                     let status = database->execute(
                         "UPDATE files SET 
                             name=:name,
+                            tags=:tags,
                             updated_at=NOW(),
                             updated_by=:updated_by
                         WHERE id=:id",
@@ -288,10 +297,13 @@ class Files extends Controller
                     <span>name<span class='required'>*</span></span>
                     <input type='text' name='name' placeholder='the file name' value='" . model->name . "'>
                 </div>
-                
+                <div class='input-group'>
+                    <span>tags</span>
+                    <input type='text' name='tags' class='tags' placeholder='tag the file' value='" . model->tags . "'>
+                </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/pages' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/files' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -311,6 +323,7 @@ class Files extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/pages' class='button icon icon-up' title='Back to pages'>&nbsp;</a>
             <a href='/dumb-dog/files/add' class='button icon' title='Upload some media'>&nbsp;</a>
         </div>";
 

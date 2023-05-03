@@ -26,6 +26,7 @@ namespace DumbDog;
 
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Settings;
@@ -91,6 +92,7 @@ class DumbDog
 
                 var controllers = [
                     "Dashboard": new Dashboard(cfg),
+                    "Events": new Events(cfg),
                     "Files": new Files(cfg),
                     "Pages": new Pages(cfg),
                     "Settings": new Settings(cfg),
@@ -139,6 +141,31 @@ class DumbDog
                         "Pages",
                         "index",
                         "pages"
+                    ],
+                    "/events/add": [
+                        "Events",
+                        "add",
+                        "create an event"
+                    ],
+                    "/events/delete": [
+                        "Events",
+                        "delete",
+                        "delete the event"
+                    ],
+                    "/events/edit": [
+                        "Events",
+                        "edit",
+                        "edit the event"
+                    ],
+                    "/events/recover": [
+                        "Events",
+                        "recover",
+                        "recover the event"
+                    ],
+                    "/events": [
+                        "Events",
+                        "index",
+                        "events"
                     ],
                     "/files/add": [
                         "Files",
@@ -355,35 +382,11 @@ class DumbDog
                             let obj->footer = [];
                             let obj->both = [];
 
-                            let settings->theme_folder = "/website/themes/" . settings->theme;
-                            let settings->theme = settings->theme_folder . "/theme.css";
-                            eval("$DUMBDOG = new \\stdClass();$DUMBDOG->menu = new \\stdClass();");
-                            eval("$DUMBDOG->captcha=new DumbDog\\Ui\\Captcha();");
-                            eval("$DUMBDOG->pages = new DumbDog\\Controllers\\Pages(json_decode('" . json_encode(this->cfg) . "', false, 512, JSON_THROW_ON_ERROR));");
-                            eval("$DUMBDOG->site=json_decode('" . json_encode(settings) . "', false, 512, JSON_THROW_ON_ERROR);");
-                            eval("$DUMBDOG->page=json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR);");
-                            let menu = database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
-                            if (menu) {
-                                let obj->header = menu;
-                                eval("$DUMBDOG->menu->header=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
-                            } else {
-                                eval("$DUMBDOG->menu->header=[];");
-                            }
-                            let menu = database->all("SELECT name, url FROM pages WHERE menu_item='footer' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
-                            if (menu) {
-                                let obj->footer = menu;
-                                eval("$DUMBDOG->menu->footer=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
-                            } else {
-                                eval("$DUMBDOG->menu->footer=[];");
-                            }
-                            let menu = database->all("SELECT name, url FROM pages WHERE menu_item='both' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
-                            if (menu) {
-                                let obj->both = menu;
-                                eval("$DUMBDOG->menu->both=json_decode('" . json_encode(menu) . "', false, 512, JSON_THROW_ON_ERROR);");
-                            } else {
-                                eval("$DUMBDOG->menu->both=[];");
-                            }
-                            
+                            eval("$DUMBDOG = new DumbDog\\Helper\\DumbDog(
+                                json_decode('" . json_encode(this->cfg) . "', false, 512, JSON_THROW_ON_ERROR),
+                                json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR)
+                            );");
+                                                        
                             if (!empty(this->template_engine)) {
                                 this->template_engine->render(
                                     page->template,

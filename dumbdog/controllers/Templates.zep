@@ -303,6 +303,7 @@ class Templates extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/pages' class='button icon icon-up' title='Back to pages'>&nbsp;</a>
             <a href='/dumb-dog/templates/add' class='button icon' title='Add a template'>&nbsp;</a>
         </div>";
 
