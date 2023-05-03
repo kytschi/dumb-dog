@@ -1,5 +1,5 @@
 <?php
-$pages = $DUMBDOG->pages->all();
+$pages = $DUMBDOG->pages->get();
 require_once("./website/header.php");
 ?>
 <div id="tiles">

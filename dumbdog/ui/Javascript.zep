@@ -66,8 +66,14 @@ class Javascript
                 console.error('DUMB DOG ERROR: Could not copy text, ', err);
             });
         }
-        $('.wysiwyg').trumbowyg({
-            removeformatPasted: true
+        $(function() {
+            $('.wysiwyg').trumbowyg({
+                removeformatPasted: true
+            });
+            $('.datepicker').datepicker({
+                dateFormat: 'dd/mm/yy'
+            });
+            $('.tags').tagify();
         });
         </script>";
     }

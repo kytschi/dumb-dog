@@ -189,3 +189,6 @@ https://jquery.com/
 
 Trumbowyg\
 https://alex-d.github.io/Trumbowyg/
+
+Tagify\
+https://github.com/yairEO/tagify

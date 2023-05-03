@@ -1,6 +1,6 @@
 {include file='smarty/header.tpl'}
 <div id="tiles">
-    {foreach $DUMBDOG->pages->all() as $item}
+    {foreach $DUMBDOG->pages->get() as $item}
     <div class='tile'>
         <div class="box">
             <div class="box-title">

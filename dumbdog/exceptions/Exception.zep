@@ -60,7 +60,7 @@ class Exception extends \Exception
         }
 
         let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") . "<body id='error'><main>";
-        let html .= titles->page("bad doggie!", "/assets/error.png");
+        let html .= titles->page("bad doggie!", "error");
         let html .= "<div class='box'>
             <div class='box-body'>
                 <p>" . this->getMessage() . "</p>

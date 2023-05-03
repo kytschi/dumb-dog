@@ -46,14 +46,24 @@ class Tiles
                         <div class='box-title'>
                             <span>" . data[iLoop]->name . "</span>
                         </div>
-                        <div class='box-body thumb'>";
+                        <div class='box-body'><div class='thumb'>";
                 if (property_exists(data[iLoop], "filename")) {
                     if (data[iLoop]->filename) {
                         let html .= "<img src='/website/files/thumb-" . data[iLoop]->filename . "' alt='" . data[iLoop]->name . "'>";
                         let html .= "<input type='hidden' value='/website/files/" .  data[iLoop]->filename . "'>";
                     }
                 }
+                let html .= "</div>";
+                if (property_exists(data[iLoop], "tags")) {
+                    var tag;
+                    let html .= "<div class='box-tags'>";
+                    for tag in json_decode(data[iLoop]->tags) {
+                        let html .= "<span class='tag'>" . tag->value . "</span>";
+                    }
+                    let html .= "</div>";
+                }
                 let html .= "</div>
+
                         <div class='box-footer'>";
                 if (property_exists(data[iLoop], "default")) {
                     if (data[iLoop]->{"default"}) {
