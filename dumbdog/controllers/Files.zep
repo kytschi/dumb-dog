@@ -57,13 +57,27 @@ class Files extends Controller
                     let html .= this->missingRequired();
                 } else {
                     var filename;
-                    let filename = this->randomString(16) . "-" . _FILES["file"]["name"];
+                    let filename = this->randomString(16) .
+                        "-" .
+                        str_replace([" ", "\"", "'", "’", "&", ":", ";"], "-", strtolower(_FILES["file"]["name"]));
                     let data["name"] = _POST["name"];
                     let data["filename"] = filename;
                     let data["mime_type"] = _FILES["file"]["type"];
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
                     let data["tags"] = _POST["tags"];
+
+                    if (this->cfg->save_mode != false) {
+                        if (empty(_FILES["file"]["tmp_name"])) {
+                            throw new \Exception("Failed to upload the file");
+                        }
+                        copy(
+                            _FILES["file"]["tmp_name"],
+                            getcwd() . "/website/files/" . filename
+                        );
+
+                        this->createThumb(filename);
+                    }
 
                     let status = database->execute(
                         "INSERT INTO files 
@@ -89,14 +103,7 @@ class Files extends Controller
                         data
                     );
 
-                    if (this->cfg->save_mode != false) {
-                        copy(
-                            _FILES["file"]["tmp_name"],
-                            getcwd() . "/website/files/" . filename
-                        );
-
-                        this->createThumb(filename);
-                    }
+                    
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the file");
@@ -252,7 +259,7 @@ class Files extends Controller
             if (isset(_POST["save"])) {
                 var database, status = false;
 
-                if (!this->validate(_POST, ["name", "url", "template_id"])) {
+                if (!this->validate(_POST, ["name"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];

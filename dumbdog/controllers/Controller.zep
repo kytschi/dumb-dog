@@ -24,11 +24,29 @@
 */
 namespace DumbDog\Controllers;
 
+use DumbDog\Controllers\Database;
+use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
+use DumbDog\Ui\Gfx\Titles;
 
 class Controller
 {   
+    protected cfg;
     protected system_uuid = "00000000-0000-0000-0000-000000000000";
+
+    public function cleanContent(string content)
+    {
+        var checks = [
+            "\\":"&#92;",
+            "’": "&#39;"
+        ],
+        check, replace;
+
+        for check, replace in checks {
+            let content = str_replace(check, replace, content);
+        }
+        return content;
+    }
 
     public function consoleLogError(string message)
     {
@@ -125,6 +143,116 @@ class Controller
         <div class='box-body'>
             <p>" . message . "</p>
         </div></div>";
+    }
+
+    protected function triggerDelete(string path, string table)
+    {
+        var titles, html, database, data = [], model;
+        let titles = new Titles();
+
+        let database = new Database(this->cfg);
+        let data["id"] = this->getPageId(path);
+        let model = database->get("SELECT * FROM " . table . " WHERE id=:id", data);
+        if (empty(model)) {
+            throw new NotFoundException(rtrim(table, "s") . " not found");
+        }
+
+        let html = titles->page("Delete the " . rtrim(table, "s"), "delete");
+
+        if (!empty(_POST)) {
+            if (isset(_POST["delete"])) {
+                var status = false, err;
+                try {
+                    if (this->cfg->save_mode == true) {
+                        let data["updated_by"] = this->getUserId();
+                        let status = database->execute("UPDATE " . table . " SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    } else {
+                        let status = true;
+                    }
+
+                    if (!is_bool(status)) {
+                        let html .= this->saveFailed("Failed to delete the " . rtrim(table, "s"));
+                        let html .= this->consoleLogError(status);
+                    } else {
+                        this->redirect("/dumb-dog/" . table . "?deleted=true");
+                    }
+                } catch \Exception, err {
+                    let html .= this->saveFailed(err->getMessage());
+                }
+            }
+        }
+
+        let html .= "<form method='post'><div class='error box wfull'>
+            <div class='box-title'>
+                <span>are your sure?</span>
+            </div>
+            <div class='box-body'><p>I'll bury you ";
+        if (model->name) {
+            let html .= "<strong>" . model->name . "</strong> ";
+        }
+        let html .= "like I bury my bone...</p>
+            </div>
+            <div class='box-footer'>
+                <a href='/dumb-dog/" . table . "/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <button type='submit' name='delete'>delete</button>
+            </div>
+        </div></form>";
+
+        return html;
+    }
+
+    public function triggerRecover(string path, string table)
+    {
+        var titles, html, database, data = [], model;
+        let titles = new Titles();
+
+        let database = new Database(this->cfg);
+        let data["id"] = this->getPageId(path);
+        let model = database->get("SELECT * FROM " . table . " WHERE id=:id", data);
+        if (empty(model)) {
+            throw new NotFoundException(ucwords(rtrim(table, "s")) . " not found");
+        }
+
+        let html = titles->page("Recover the " . rtrim(table, "s"), "recover");
+
+        if (!empty(_POST)) {
+            if (isset(_POST["recover"])) {
+                var status = false, err;
+                try {
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE " . table . " SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    
+                    if (!is_bool(status)) {
+                        let html .= this->saveFailed("Failed to recover the " . rtrim(table, "s"));
+                        let html .= this->consoleLogError(status);
+                    } else {
+                        this->redirect("/dumb-dog/" . table . "/edit/" . model->id);
+                    }
+                } catch \Exception, err {
+                    let html .= this->saveFailed(err->getMessage());
+                }
+            }
+        }
+
+        let html .= "<form method='post'><div class='error box wfull'>
+            <div class='box-title'>
+                <span>are your sure?</span>
+            </div>
+            <div class='box-body'><p>";
+        if (model->name) {
+            let html .= "Dig up <strong>" . model->name . "</strong>";
+        } else {
+            let html .= "Dig it up";
+        }
+        let html .= "...</p>
+            </div>
+            <div class='box-footer'>
+                <a href='/dumb-dog/" . table . "/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <button type='submit' name='recover'>recover</button>
+            </div>
+        </div></form>";
+
+        return html;
     }
 
     public function validate(array data, array checks)

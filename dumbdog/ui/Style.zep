@@ -198,6 +198,38 @@ class Style
             font-family: Helvetica, sans-serif !important;
             margin: 0 !important;
         }
+        .trumbowyg-editor h1,
+        .trumbowyg-editor h2,
+        .trumbowyg-editor h3,
+        .trumbowyg-editor h4,
+        .trumbowyg-editor h5,
+        .trumbowyg-editor h6 {
+            margin: 5px 0 !important;
+        }
+        .trumbowyg-editor h1 {
+            font-size: 1.6em;
+            line-height: 1.6em !important;
+        }
+        .trumbowyg-editor h2 {
+            font-size: 1.5em;
+            line-height: 1.5em !important;
+        }
+        .trumbowyg-editor h3 {
+            font-size: 1.4em;
+            line-height: 1.4em !important;
+        }
+        .trumbowyg-editor h4 {
+            font-size: 1.3em;
+            line-height: 1.3em !important;
+        }
+        .trumbowyg-editor h5 {
+            font-size: 1.2em;
+            line-height: 1.2em !important;
+        }
+        .trumbowyg-editor h6 {
+            font-size: 1.1em;
+            line-height: 1.1em !important;
+        }
         .trumbowyg-dropdown-link button,
         .trumbowyg-dropdown-formatting button {
             line-height: 35px !important;
@@ -371,7 +403,7 @@ class Style
             margin-right: 10px;
         }
         .error .box-body, .success .box-body {
-            font-family: 'subheading', Helvetica, sans-serif;
+            font-family: 'heading', Helvetica, sans-serif;
             font-size: 56pt;
             text-transform: uppercase;
         }
@@ -483,6 +515,11 @@ class Style
                 -webkit-column-count: 3;
                 column-count: 3;
             }
+            #pages #tiles {
+                -moz-column-count: 2;
+                -webkit-column-count: 2;
+                column-count: 2;
+            }
         }
 
         #tiles {
@@ -532,7 +569,7 @@ class Style
             top: 20px;
             right: 0px;
             bottom: 0px;
-            background-image: url('/assets/icons.png?t=2');
+            background-image: url('/assets/icons.png?t=" . time() . "');
             background-repeat: no-repeat;
             background-position: 0 0;
         }
@@ -591,8 +628,17 @@ class Style
         .icon-error::before {
             background-position: -192px -64px;
         }
+        .icon-events::before {
+            background-position: 0px -128px;
+        }
         .icon-up::before {
             background-position: -64px -128px;
+        }
+        .icon-comments::before {
+            background-position: -128px -128px;
+        }
+        .icon-messages::before {
+            background-position: -192px -128px;
         }
         </style>";
     }

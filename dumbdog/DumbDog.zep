@@ -24,6 +24,7 @@
 */
 namespace DumbDog;
 
+use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Events;
@@ -91,6 +92,7 @@ class DumbDog
                 this->secure(path);
 
                 var controllers = [
+                    "Comments": new Comments(cfg),
                     "Dashboard": new Dashboard(cfg),
                     "Events": new Events(cfg),
                     "Files": new Files(cfg),
@@ -116,6 +118,31 @@ class DumbDog
                         "Dashboard",
                         "logout",
                         "logout"
+                    ],
+                    "/comments/add": [
+                        "Comments",
+                        "add",
+                        "create a comment"
+                    ],
+                    "/comments/delete": [
+                        "Comments",
+                        "delete",
+                        "delete the comment"
+                    ],
+                    "/comments/edit": [
+                        "Comments",
+                        "edit",
+                        "edit the comment"
+                    ],
+                    "/comments/recover": [
+                        "Comments",
+                        "recover",
+                        "recover the comment"
+                    ],
+                    "/comments": [
+                        "Comments",
+                        "index",
+                        "comments"
                     ],
                     "/pages/add": [
                         "Pages",
@@ -364,6 +391,7 @@ class DumbDog
                             pages.meta_keywords,
                             pages.meta_description,
                             pages.meta_author,
+                            pages.created_at,
                             templates.file AS template
                         FROM pages 
                         JOIN templates ON templates.id=pages.template_id 

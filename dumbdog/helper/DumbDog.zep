@@ -102,26 +102,17 @@ class DumbDog
         return database->all(query, ["tag": "%{\"value\":\"" . tag . "\"}%"]);
     }
 
-    public function pages(array filters = [])
+    public function comments(array filters = [])
     {
         var database, query, where;
         let database = new Database(this->cfg);
 
         let query = "
         SELECT
-            pages.name,
-            pages.url,
-            pages.content,
-            pages.meta_keywords,
-            pages.meta_description,
-            pages.meta_author,
-            pages.event_on,
-            pages.event_length,
-            pages.type,
-            templates.file AS template
-        FROM pages 
-        JOIN templates ON templates.id=pages.template_id";
-        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL";
+            comments.name,
+            comments.content
+        FROM comments";
+        let where = " WHERE comments.deleted_at IS NULL";
 
         if (count(filters)) {
             var key, value;
@@ -137,5 +128,52 @@ class DumbDog
         }
 
         return database->all(query . where);
+    }
+
+    public function pages(array filters = [])
+    {
+        var database, query, where, data = [];
+        let database = new Database(this->cfg);
+
+        let query = "
+        SELECT
+            pages.id,
+            pages.name,
+            pages.url,
+            pages.content,
+            pages.meta_keywords,
+            pages.meta_description,
+            pages.meta_author,
+            pages.event_on,
+            pages.event_length,
+            pages.type,
+            pages.created_at,
+            templates.file AS template
+        FROM pages 
+        JOIN templates ON templates.id=pages.template_id";
+        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL AND pages.type != 'event'";
+
+        if (count(filters)) {
+            var key, value;
+            for key, value in filters {
+                switch (key) {
+                    case "children":
+                        let where .= " AND parent_id=:parent_id";
+                        let data["parent_id"] = value;
+                        break;
+                    case "tag":
+                        let where .= " AND tags like :tag";
+                        let data["tag"] = "%{\"value\":\"" . value . "\"}%";
+                        break;
+                    case "where":
+                        let where .= " AND " . value;
+                        break;
+                    default:
+                        continue;
+                }
+            }
+        }
+
+        return database->all(query . where, data);
     }
 }

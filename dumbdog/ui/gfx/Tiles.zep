@@ -55,12 +55,14 @@ class Tiles
                 }
                 let html .= "</div>";
                 if (property_exists(data[iLoop], "tags")) {
-                    var tag;
-                    let html .= "<div class='box-tags'>";
-                    for tag in json_decode(data[iLoop]->tags) {
-                        let html .= "<span class='tag'>" . tag->value . "</span>";
+                    if (!empty(data[iLoop]->tags)) {
+                        var tag;
+                        let html .= "<div class='box-tags'>";
+                        for tag in json_decode(data[iLoop]->tags) {
+                            let html .= "<span class='tag'>" . tag->value . "</span>";
+                        }
+                        let html .= "</div>";
                     }
-                    let html .= "</div>";
                 }
                 let html .= "</div>
 
