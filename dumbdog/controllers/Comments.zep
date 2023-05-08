@@ -289,8 +289,7 @@ class Comments extends Controller
 
         let database = new Database(this->cfg);
 
-        let html = "<div id='tiles'>";
-
+        let html .= "<div id='tiles'>";
         let data = database->all("SELECT * FROM comments");
         if (count(data)) {
             var iLoop, str;
@@ -313,7 +312,7 @@ class Comments extends Controller
                 let iLoop = iLoop + 1;
             }
         } else {
-            let html = html . titles->noResults();
+            let html .= titles->noResults();
         }
         return html . "</div>";
     }
