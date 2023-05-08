@@ -4,7 +4,7 @@
  * @package     DumbDog\DumbDog
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
- * @version     0.0.1 alpha
+ * @version     0.0.2 alpha
  *
  * Copyright 2023 Mike Welsh
  * This library is free software; you can redistribute it and/or
@@ -50,7 +50,7 @@ class DumbDog
 {
     private cfg;
     private template_engine = null;
-    private version = "0.0.1 alpha";
+    private version = "0.0.2 alpha";
 
     public function __construct(string cfg_file, template_engine = null)
     {
