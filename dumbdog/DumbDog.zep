@@ -385,6 +385,7 @@ class DumbDog
                     let page = database->get("
                         SELECT
                             pages.id,
+                            pages.parent_id,
                             pages.name,
                             pages.url,
                             pages.content,

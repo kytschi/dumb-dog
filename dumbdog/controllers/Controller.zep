@@ -261,6 +261,8 @@ class Controller
         while (iLoop < count(checks)) {
             if (!isset(data[checks[iLoop]])) {
                 return false;
+            } elseif (empty(data[checks[iLoop]])) {
+                return false;
             }
             let iLoop = iLoop + 1;
         }
