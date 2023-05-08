@@ -138,6 +138,7 @@ class DumbDog
         let query = "
         SELECT
             pages.id,
+            pages.parent_id,
             pages.name,
             pages.url,
             pages.content,
