@@ -130,7 +130,17 @@ class DumbDog
         return database->all(query . where);
     }
 
+    public function events(array filters = [])
+    {
+        return this->pageQuery(filters, "event");
+    }
+
     public function pages(array filters = [])
+    {
+        return this->pageQuery(filters);
+    }
+
+    private function pageQuery(array filters, string type = "page")
     {
         var database, query, where, data = [];
         let database = new Database(this->cfg);
@@ -152,7 +162,13 @@ class DumbDog
             templates.file AS template
         FROM pages 
         JOIN templates ON templates.id=pages.template_id";
-        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL AND pages.type != 'event'";
+
+        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL";
+        if (type == "event") {
+            let where .= " AND pages.type = 'event'";
+        } else {
+            let where .= " AND pages.type != 'event'";
+        }
 
         if (count(filters)) {
             var key, value;
@@ -167,7 +183,8 @@ class DumbDog
                         let data["tag"] = "%{\"value\":\"" . value . "\"}%";
                         break;
                     case "where":
-                        let where .= " AND " . value;
+                        let where .= " AND " . value["query"];
+                        let data = value["data"];
                         break;
                     default:
                         continue;
