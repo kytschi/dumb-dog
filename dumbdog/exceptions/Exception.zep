@@ -51,6 +51,10 @@ class Exception extends \Exception
         let head = new Head(new \stdClass());
         let javascript = new Javascript();
 
+        if (headers_sent()) {
+            return "<p><strong>DUMB DOG ERROR</strong><br/>" . this->getMessage() . "</p>";
+        }
+
         if (this->code == 404) {
             header("HTTP/1.1 404 Not Found");
         } elseif (this->code == 400) {
@@ -80,15 +84,6 @@ class Exception extends \Exception
      */
     public function fatal(string template = "", int line = 0)
     {
-        switch (this->code) {
-            case 404:
-                header("HTTP/1.0 404 Not Found");
-                break;
-            default:
-                header("HTTP/1.0 500 Internal Server Error");
-                break;
-        }
-        
         echo this;
         if (template && line) {
             echo "<p>&nbsp;&nbsp;<strong>Trace</strong><br/>&nbsp;&nbsp;Source <strong>" . str_replace(getcwd(), "", template) . "</strong> at line <strong>" . line . "</strong></p>";
