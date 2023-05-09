@@ -147,18 +147,7 @@ class DumbDog
 
         let query = "
         SELECT
-            pages.id,
-            pages.parent_id,
-            pages.name,
-            pages.url,
-            pages.content,
-            pages.meta_keywords,
-            pages.meta_description,
-            pages.meta_author,
-            pages.event_on,
-            pages.event_length,
-            pages.type,
-            pages.created_at,
+            pages.*,
             templates.file AS template
         FROM pages 
         JOIN templates ON templates.id=pages.template_id";

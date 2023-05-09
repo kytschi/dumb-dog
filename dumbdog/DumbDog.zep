@@ -384,15 +384,7 @@ class DumbDog
                     let data["url"] = path;
                     let page = database->get("
                         SELECT
-                            pages.id,
-                            pages.parent_id,
-                            pages.name,
-                            pages.url,
-                            pages.content,
-                            pages.meta_keywords,
-                            pages.meta_description,
-                            pages.meta_author,
-                            pages.created_at,
+                            pages.*,
                             templates.file AS template
                         FROM pages 
                         JOIN templates ON templates.id=pages.template_id 
