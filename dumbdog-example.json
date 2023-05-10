@@ -8,5 +8,6 @@
         "username": "dumbdog",
         "password": "dumbdog"
     },
-    "save_mode": true
+    "save_mode": true,
+    "encryption": "GENERATE A RANDOM KEY WITH openssl rand -base64 32"
 }

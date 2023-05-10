@@ -61,7 +61,7 @@
     "name": "DumbDog",
     "description": "The dumbest dog in the CMS pound",
     "author": "Mike Welsh",
-    "version": "0.0.2 alpha",
+    "version": "0.0.3 alpha",
     "verbose": false,
     "requires": {
         "extensions": []

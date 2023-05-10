@@ -26,12 +26,15 @@ namespace DumbDog\Helper;
 
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Pages;
+use DumbDog\Helper\Security;
 use DumbDog\Ui\Captcha;
 
 class DumbDog
 {
+    private cfg;
+    protected system_uuid = "00000000-0000-0000-0000-000000000000";
+
     public captcha;
-    public cfg;
     public page;
     public menu;
     public site;
@@ -84,6 +87,55 @@ class DumbDog
             let menu->both = data;
         }
         let this->menu = menu;
+    }
+
+    public function addMessage(array data)
+    {
+        var database, security, status;
+        let security = new Security(this->cfg);
+        let database = new Database(this->cfg);
+
+        let data["from_email"] = security->encrypt(data["from_email"]);
+        let data["from_name"] = security->encrypt(data["from_name"]);
+        let data["from_number"] = security->encrypt(data["from_number"]);
+        let data["message"] = security->encrypt(data["message"]);
+        let data["to_name"] = "dumb dog";
+        let data["created_by"] = this->system_uuid;
+        let data["updated_by"] = this->system_uuid;
+
+        let status = database->execute(
+            "INSERT INTO messages 
+                (id,
+                subject,
+                from_email,
+                from_name,
+                from_number,
+                message,
+                to_name,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by) 
+            VALUES 
+                (UUID(),
+                :subject,
+                :from_email,
+                :from_name,
+                :from_number,
+                :message,
+                :to_name,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by)",
+            data
+        );
+
+        if (!is_bool(status)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function filesByTag(string tag)

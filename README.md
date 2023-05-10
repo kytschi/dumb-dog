@@ -49,6 +49,13 @@ Once the database is setup and the SQL installed, go to the `dumbdog-example.jso
 }
 ```
 
+Generate a random key for the encryption part of Dumb Dog, can use a command like the following and save that to the
+`encryption` variable in the `dumbdog.json` file.
+
+```
+openssl rand -base64 32
+```
+
 Next point your webserver to the `public` folder of Dumb Dog where the `index.php` is located.
 
 Make sure that the `public/website/files` folder has permission to write to by your webserver's user. This folder is used to store any files you upload via Dumb Dog.

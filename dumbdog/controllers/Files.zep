@@ -178,50 +178,7 @@ class Files extends Controller
 
     public function delete(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
-
-        let database = new Database(this->cfg);
-        let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM files WHERE id=:id", data);
-        if (empty(model)) {
-            throw new NotFoundException("Media not found");
-        }
-
-        let html = titles->page("Delete the file", "delete");
-        
-        if (!empty(_POST)) {
-            if (isset(_POST["delete"])) {
-                var status = false, err;
-                try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE files SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to delete the file");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/files?deleted=true");
-                    }
-                } catch \Exception, err {
-                    let html .= this->saveFailed(err->getMessage());
-                }
-            }
-        }
-
-        let html .= "<form method='post'><div class='box wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'>
-                <p>I'll bury you <strong>" . model->name . "</strong> like I bury my bone...</p>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/files/edit/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='delete'>delete</button>
-            </div>
-        </div></form>";
-
-        return html;
+        return this->triggerDelete(path, "files");
     }
 
     public function edit(string path)
@@ -347,50 +304,6 @@ class Files extends Controller
 
     public function recover(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
-
-        let database = new Database(this->cfg);
-        let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM files WHERE id=:id", data);
-        if (empty(model)) {
-            throw new NotFoundException("File not found");
-        }
-
-        let html = titles->page("Recover the file", "recover");
-
-        if (!empty(_POST)) {
-            if (isset(_POST["recover"])) {
-                var status = false, err;
-                try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE files SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to recover the file");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/files/edit/" . model->id);
-                    }
-                } catch \Exception, err {
-                    let html .= this->saveFailed(err->getMessage());
-                }
-            }
-        }
-
-        let html .= "<form method='post'><div class='box wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'>
-                <p>Dig up <strong>" . model->name . "</strong>...</p>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/files/edit/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='recover'>recover</button>
-            </div>
-        </div></form>";
-
-        return html;
+        return this->triggerRecover(path, "files");
     }
 }

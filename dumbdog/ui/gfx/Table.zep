@@ -24,21 +24,31 @@
 */
 namespace DumbDog\Ui\Gfx;
 
+use DumbDog\Helper\Security;
 use DumbDog\Ui\Gfx\Titles;
 
 class Table
 {
+    private cfg;
+
+    public function __construct(object cfg)
+    {
+        let this->cfg = cfg;
+    }
+
     public function build(array columns, array data, string url = "")
     {
         var titles, html;
         
         let html = "<div id='table'>";
         if (count(data)) {
-            var iLoop, iLoop_head, key;
+            var iLoop, iLoop_head, key, splits, security;
+            let security = new Security(this->cfg);
             let iLoop_head = 0;
             let html .= "<table class='table wfull'><thead><tr>";
             while (iLoop_head < count(columns)) {
-                let html .= "<th>" . columns[iLoop_head] . "</th>";
+                let splits = explode("|", columns[iLoop_head]);
+                let html .= "<th>" . str_replace("_", " ", splits[0]) . "</th>";
                 let iLoop_head = iLoop_head + 1;
             }
             let html .= "<th width='120px'>Tools</th></tr></thead><tbody>";
@@ -52,8 +62,19 @@ class Table
 
                 let iLoop_head = 0;
                 while (iLoop_head < count(columns)) {
-                    let key = columns[iLoop_head];
-                    let html .= "<td>" . data[iLoop]->{key} . "</td>";
+                    let splits = explode("|", columns[iLoop_head]);
+                    let key = splits[0];
+                    let key = data[iLoop]->{key};
+
+                    if (isset(splits[1])) {
+                        switch(splits[1]) {
+                            case "decrypt":
+                                let key = security->decrypt(key);
+                                break;
+                        }
+                    }
+                    
+                    let html .= "<td>" . key . "</td>";
                     let iLoop_head = iLoop_head + 1;
                 }
 
