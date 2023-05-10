@@ -59,9 +59,9 @@
     },
     "namespace": "dumbdog",
     "name": "DumbDog",
-    "description": "CMS",
+    "description": "The dumbest dog in the CMS pound",
     "author": "Mike Welsh",
-    "version": "0.0.1",
+    "version": "0.0.2 alpha",
     "verbose": false,
     "requires": {
         "extensions": []
