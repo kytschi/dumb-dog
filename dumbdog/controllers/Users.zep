@@ -147,51 +147,7 @@ class Users extends Controller
 
     public function delete(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
-
-        let database = new Database(this->cfg);
-        let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM users WHERE id=:id", data);
-        if (empty(model)) {
-            throw new NotFoundException("User not found");
-        }
-
-        let html = titles->page("Delete the user", "delete");
-
-        if (!empty(_POST)) {
-            if (isset(_POST["delete"])) {
-                var status = false, err;
-                try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE users SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-                    
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to delete the user");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/users?deleted=true");
-                    }
-                } catch \Exception, err {
-                    let html .= this->saveFailed(err->getMessage());
-                }
-            }
-        }
-
-        let html .= "<form method='post'><div class='box wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'>
-                <p>I'll bury you <strong>" . (model->nickname ? model->nickname : model->name) . "</strong> like I bury my bone...</p>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/users/edit/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='delete'>delete</button>
-            </div>
-        </div></form>";
-
-        return html;
+        return this->triggerDelete(path, "users");
     }
 
     public function edit(string path)
@@ -320,7 +276,7 @@ class Users extends Controller
 
         let database = new Database(this->cfg);
 
-        let table = new Table();
+        let table = new Table(this->cfg);
         let html = html . table->build(
             [
                 "name",
@@ -335,50 +291,6 @@ class Users extends Controller
 
     public function recover(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
-
-        let database = new Database(this->cfg);
-        let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM users WHERE id=:id", data);
-        if (empty(model)) {
-            throw new NotFoundException("User not found");
-        }
-
-        let html = titles->page("Recover the user", "recover");
-
-        if (!empty(_POST)) {
-            if (isset(_POST["recover"])) {
-                var status = false, err;
-                try {    
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE users SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);                    
-
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to recover the user");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/users/edit/" . model->id);
-                    }
-                } catch \Exception, err {
-                    let html .= this->saveFailed(err->getMessage());
-                }
-            }
-        }
-
-        let html .= "<form method='post'><div class='box wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'>
-                <p>Dig up <strong>" . (model->nickname ? model->nickname : model->name) . "</strong>...</p>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/users/edit/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='recover'>recover</button>
-            </div>
-        </div></form>";
-
-        return html;
+        return this->triggerRecover(path, "users");
     }
 }

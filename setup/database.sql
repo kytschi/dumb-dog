@@ -1,4 +1,4 @@
--- MariaDB dump 10.19  Distrib 10.5.18-MariaDB, for debian-linux-gnu (x86_64)
+-- MariaDB dump 10.19  Distrib 10.5.19-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: 127.0.0.1    Database: dumb_dog
 -- ------------------------------------------------------
@@ -94,6 +94,59 @@ CREATE TABLE `files` (
 LOCK TABLES `files` WRITE;
 /*!40000 ALTER TABLE `files` DISABLE KEYS */;
 /*!40000 ALTER TABLE `files` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `messages`
+--
+
+DROP TABLE IF EXISTS `messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `messages` (
+  `id` varchar(36) NOT NULL,
+  `parent_id` varchar(36) DEFAULT NULL,
+  `subject` varchar(255) NOT NULL,
+  `from_email` varchar(255) DEFAULT NULL,
+  `from_name` varchar(255) NOT NULL,
+  `from_number` varchar(255) DEFAULT NULL,
+  `to_name` varchar(255) DEFAULT NULL,
+  `to_user_id` varchar(36) DEFAULT NULL,
+  `to_email` varchar(255) DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `status` varchar(10) NOT NULL DEFAULT 'unread',
+  `created_at` datetime NOT NULL,
+  `created_by` varchar(36) DEFAULT NULL,
+  `updated_at` datetime NOT NULL,
+  `updated_by` varchar(36) NOT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `deleted_by` varchar(36) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `messages_created_at_IDX` (`created_at`) USING BTREE,
+  KEY `messages_created_by_IDX` (`created_by`) USING BTREE,
+  KEY `messages_deleted_at_IDX` (`deleted_at`) USING BTREE,
+  KEY `messages_deleted_by_IDX` (`deleted_by`) USING BTREE,
+  KEY `messages_from_email_IDX` (`from_email`) USING BTREE,
+  KEY `messages_from_name_IDX` (`from_name`) USING BTREE,
+  KEY `messages_from_number_IDX` (`from_number`) USING BTREE,
+  KEY `messages_parent_id_IDX` (`parent_id`) USING BTREE,
+  KEY `messages_status_IDX` (`status`) USING BTREE,
+  KEY `messages_subject_IDX` (`subject`) USING BTREE,
+  KEY `messages_to_email_IDX` (`to_email`) USING BTREE,
+  KEY `messages_to_name_IDX` (`to_name`) USING BTREE,
+  KEY `messages_to_user_id_IDX` (`to_user_id`) USING BTREE,
+  KEY `messages_updated_at_IDX` (`updated_at`) USING BTREE,
+  KEY `messages_updated_by_IDX` (`updated_by`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `messages`
+--
+
+LOCK TABLES `messages` WRITE;
+/*!40000 ALTER TABLE `messages` DISABLE KEYS */;
+/*!40000 ALTER TABLE `messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -225,7 +278,7 @@ CREATE TABLE `stats` (
 
 LOCK TABLES `stats` WRITE;
 /*!40000 ALTER TABLE `stats` DISABLE KEYS */;
-INSERT INTO `stats` VALUES ('1fd9fa1f-edbb-11ed-8801-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-08 17:12:27'),('30bea529-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:20:10'),('32712283-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:20:13'),('76de075c-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:08'),('83bf1332-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:29'),('87b1b5c7-e855-11ed-87d7-525400686e51','afe5c73e-dd2e-11ed-8a63-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:36'),('883c99ec-e855-11ed-87d7-525400686e51','adbba018-dd42-11ed-8a63-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:37'),('889d2293-e855-11ed-87d7-525400686e51','c580c158-dd56-11ed-8a63-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:38'),('88f90e91-e855-11ed-87d7-525400686e51','0e0817b7-ddbe-11ed-89a6-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:38'),('d8177eb2-e835-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 16:35:47'),('eb958aa8-e856-11ed-87d7-525400686e51','0e0817b7-ddbe-11ed-89a6-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:32:33');
+INSERT INTO `stats` VALUES ('15062320-ef2c-11ed-8700-525400686e52','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-10 13:13:33'),('1fd9fa1f-edbb-11ed-8801-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-08 17:12:27'),('30bea529-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:20:10'),('32712283-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:20:13'),('56fbb066-ef3c-11ed-8700-525400686e52','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-10 15:09:56'),('76de075c-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:08'),('83bf1332-e855-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:29'),('87b1b5c7-e855-11ed-87d7-525400686e51','afe5c73e-dd2e-11ed-8a63-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:36'),('883c99ec-e855-11ed-87d7-525400686e51','adbba018-dd42-11ed-8a63-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:37'),('889d2293-e855-11ed-87d7-525400686e51','c580c158-dd56-11ed-8a63-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:38'),('88f90e91-e855-11ed-87d7-525400686e51','0e0817b7-ddbe-11ed-89a6-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:22:38'),('d8177eb2-e835-11ed-87d7-525400686e51','77640251-342c-4fc9-a574-4ff81251e622','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 16:35:47'),('eb958aa8-e856-11ed-87d7-525400686e51','0e0817b7-ddbe-11ed-89a6-5254003f8571','fb42b0b5b9860122ca9a4cc1355864bb6252a55dc1a8248d90cac43b3ad725a1','dumbdog.kytschi.ninja',NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0','2023-05-01 20:32:33');
 /*!40000 ALTER TABLE `stats` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -376,4 +429,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-08 17:20:30
+-- Dump completed on 2023-05-10 22:14:15

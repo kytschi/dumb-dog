@@ -116,51 +116,7 @@ class Themes extends Controller
 
     public function delete(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
-
-        let database = new Database(this->cfg);
-        let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM themes WHERE id=:id", data);
-        if (empty(model)) {
-            throw new NotFoundException("Theme not found");
-        }
-
-        let html = titles->page("Delete the theme", "delete");
-
-        if (!empty(_POST)) {
-            if (isset(_POST["delete"])) {
-                var status = false, err;
-                try {                    
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE themes SET deleted_at=NOW(), deleted_by=:updated_by, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to delete the theme");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/themes?deleted=true");
-                    }
-                } catch \Exception, err {
-                    let html .= this->saveFailed(err->getMessage());
-                }
-            }
-        }
-
-        let html .= "<form method='post'><div class='box wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'>
-                <p>I'll bury you <strong>" . model->name . "</strong> like I bury my bone...</p>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/themes/edit/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='delete'>delete</button>
-            </div>
-        </div></form>";
-
-        return html;
+        return this->triggerDelete(path, "themes");
     }
 
     public function edit(string path)
@@ -301,50 +257,6 @@ class Themes extends Controller
 
     public function recover(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
-
-        let database = new Database(this->cfg);
-        let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM themes WHERE id=:id", data);
-        if (empty(model)) {
-            throw new NotFoundException("Themes not found");
-        }
-
-        let html = titles->page("Recover the theme", "recover");
-
-        if (!empty(_POST)) {
-            if (isset(_POST["recover"])) {
-                var status = false, err;
-                try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE themes SET deleted_at=NULL, deleted_by=NULL, updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
-
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to recover the theme");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/themes/edit/" . model->id);
-                    }
-                } catch \Exception, err {
-                    let html .= this->saveFailed(err->getMessage());
-                }
-            }
-        }
-
-        let html .= "<form method='post'><div class='box wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'>
-                <p>Dig up <strong>" . model->name . "</strong>...</p>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/themes/edit/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='recover'>recover</button>
-            </div>
-        </div></form>";
-
-        return html;
+        return this->triggerRecover(path, "themes");
     }
 }

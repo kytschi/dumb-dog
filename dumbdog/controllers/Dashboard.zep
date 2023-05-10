@@ -56,6 +56,9 @@ class Dashboard extends Controller
             let html .= "<h2 class='page-sub-title'><span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span></h2>";
         }
 
+        let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/messages' class='button icon icon-messages' title='Messages'>&nbsp;</a></div>";
+
         var colours = [
             "visitors": "#00c129",
             "unique": "#1D8CF8",

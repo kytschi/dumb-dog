@@ -29,6 +29,7 @@ use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
+use DumbDog\Controllers\Messages;
 use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
@@ -50,7 +51,7 @@ class DumbDog
 {
     private cfg;
     private template_engine = null;
-    private version = "0.0.2 alpha";
+    private version = "0.0.3 alpha";
 
     public function __construct(string cfg_file, template_engine = null)
     {
@@ -81,7 +82,7 @@ class DumbDog
 
         try {
             if (strpos(path, "/dumb-dog") !== false) {
-                var location, url, route;
+                var location = "", url = "", route;
                 let backend = true;
                 let path = "/" . trim(str_replace("/dumb-dog", "", parsed["path"]), "/");
 
@@ -96,6 +97,7 @@ class DumbDog
                     "Dashboard": new Dashboard(cfg),
                     "Events": new Events(cfg),
                     "Files": new Files(cfg),
+                    "Messages": new Messages(cfg),
                     "Pages": new Pages(cfg),
                     "Settings": new Settings(cfg),
                     "Templates": new Templates(cfg),
@@ -218,6 +220,26 @@ class DumbDog
                         "Files",
                         "index",
                         "files"
+                    ],
+                    "/messages/delete": [
+                        "Messages",
+                        "delete",
+                        "delete the message"
+                    ],
+                    "/messages/view": [
+                        "Messages",
+                        "view",
+                        "view the message"
+                    ],
+                    "/messages/recover": [
+                        "Messages",
+                        "recover",
+                        "recover the message"
+                    ],
+                    "/messages": [
+                        "Messages",
+                        "index",
+                        "messages"
                     ],
                     "/templates/add": [
                         "Templates",
@@ -575,6 +597,10 @@ class DumbDog
 
     private function quickMenu()
     {
+        var database, model;
+        let database = new Database(this->cfg);
+        let model = database->get("SELECT count(id) AS total FROM messages WHERE status='unread'");
+
         echo "<div id='quick-menu' style='display: none'>
             <a href='/dumb-dog/pages/add' class='button icon' title='Add a page'>&nbsp;</a>
             <a href='/dumb-dog/pages' class='button icon icon-pages' title='Managing the pages'>&nbsp;</a>
@@ -582,9 +608,12 @@ class DumbDog
             <a href='/dumb-dog/settings' class='button icon icon-settings' title='Site wide settings'>&nbsp;</a>
             <a href='/dumb-dog/give-up' class='button icon icon-logout' title='Log me out'>&nbsp;</a>
         </div>
-        <div id='quick-menu-button' onclick='showQuickMenu()'>
-            <div class='button icon icon-dumbdog'>&nbsp;</div>
-        </div>";
+        <div id='quick-menu-button'>
+            <div class='button icon icon-dumbdog' onclick='showQuickMenu()'>&nbsp;</div>";
+        if (model->total) {
+            echo "<div id='message-count'><a href='/dumb-dog/messages'>new messages</a><span></span></div>";
+        }
+        echo "</div>";
     }
 
     private function secure(string path)
