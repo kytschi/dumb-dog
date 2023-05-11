@@ -105,6 +105,9 @@ class Style
         a:hover {
             text-decoration: underline;
         }
+        .button:hover, .mini:hover {
+            text-decoration: none;
+        }
         #bk {
             background-color: #92ddd6;
             background-image: url('/assets/dashboard-bk.jpg');
@@ -351,6 +354,23 @@ class Style
             margin-top: 20px;
             width: 60px;
         }
+        .mini {
+            display: block;
+            cursor: pointer;
+            width: 40px !important;
+            height: 40px !important;
+        }
+        .mini.icon::before {
+            width: 40px !important;
+            height: 40px !important;
+            left: 0px !important;
+            top: 0px !important;
+            background-size: 400px 400px;
+            
+        }
+        .mini.icon-edit::before {
+            background-position: -160px -40px !important;
+        }
         .deleted .round, .deleted .button, .deleted button {
             background-color: var(--box-deleted-background-colour);
         }
@@ -459,6 +479,7 @@ class Style
             margin-top: 22px;
             width: 80px;
         }
+        
         #message-count {
             border-radius: 40px;
             background-color: #fff;
@@ -602,7 +623,7 @@ class Style
             top: 20px;
             right: 0px;
             bottom: 0px;
-            background-image: url('/assets/icons.png?t=" . time() . "');
+            background-image: url('/assets/icons.png?t=" . time () . "');
             background-repeat: no-repeat;
             background-position: 0 0;
         }
@@ -672,6 +693,12 @@ class Style
         }
         .icon-messages::before {
             background-position: -192px -128px;
+        }
+        .icon-message-read::before {
+            background-position: -320px -128px;
+        }
+        .icon-message-view::before {
+            background-position: -384px -128px;
         }
         </style>";
     }
