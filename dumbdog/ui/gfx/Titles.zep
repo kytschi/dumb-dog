@@ -28,7 +28,7 @@ class Titles
 {
     public function noResults()
     {
-        return "<h2 class='no-results'><span>no results</span></h2>";
+        return "<div><h2 class='no-results'><span>no results</span></h2></div>";
     }
 
     public function page(string title, string image = "")

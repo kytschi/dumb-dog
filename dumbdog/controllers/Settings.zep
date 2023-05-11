@@ -33,8 +33,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Settings extends Controller
 {
-    private cfg;
-
     public function __construct(object cfg)
     {
         let this->cfg = cfg;    
@@ -54,8 +52,8 @@ class Settings extends Controller
 
         let html = titles->page("Site settings", "settings");
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/themes' class='button icon icon-themes' title='Managing the themes'>&nbsp;</a>
-            <a href='/dumb-dog/users' class='button icon icon-users' title='Manage the users'>&nbsp;</a>
+            <a href='/dumb-dog/themes' class='round icon icon-themes' title='Managing the themes'>&nbsp;</a>
+            <a href='/dumb-dog/users' class='round icon icon-users' title='Manage the users'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {

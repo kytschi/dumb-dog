@@ -32,7 +32,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Pages extends Controller
 {
-    public cfg;
     public global_url = "/dumb-dog/pages";
 
     public function __construct(object cfg)
@@ -48,7 +47,7 @@ class Pages extends Controller
 
         let html = titles->page("Create the " . type, "add");
 
-        let html .= "<div class='page-toolbar'><a href='" . this->global_url . "' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'><a href='" . this->global_url . "' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -288,12 +287,12 @@ class Pages extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='" . this->global_url ."' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
-        let html .= "<a href='" . model->url . "' target='_blank' class='button icon icon-web' title='View me live'>&nbsp;</a>";
+        let html .= "'><a href='" . this->global_url ."' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "<a href='" . model->url . "' target='_blank' class='round icon icon-web' title='View me live'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='button icon icon-recover' title='Recover the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='round icon icon-recover' title='Recover the page'>&nbsp;</a>";
         } else {
-            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='button icon icon-delete' title='Delete the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='round icon icon-delete' title='Delete the page'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -595,8 +594,10 @@ class Pages extends Controller
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
+        var titles, tiles, database, html, query, data;
         let titles = new Titles();
+        let database = new Database(this->cfg);
+        let tiles = new Tiles();
         
         let html = titles->page("Pages", "pages");
 
@@ -605,19 +606,27 @@ class Pages extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages/add' class='button icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/events' class='button icon icon-events' title='Events'>&nbsp;</a>
-            <a href='/dumb-dog/comments' class='button icon icon-comments' title='Comments'>&nbsp;</a>
-            <a href='/dumb-dog/files' class='button icon icon-files' title='Managing the files and media'>&nbsp;</a>
-            <a href='/dumb-dog/templates' class='button icon icon-templates' title='Managing the templates'>&nbsp;</a>
-        </div><div id='pages'>";
+            <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/events' class='round icon icon-events' title='Events'>&nbsp;</a>
+            <a href='/dumb-dog/comments' class='round icon icon-comments' title='Comments'>&nbsp;</a>
+            <a href='/dumb-dog/files' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>
+        </div>";
 
-        let database = new Database(this->cfg);
+        let html .= this->tags(path, "pages");
 
-        let tiles = new Tiles();
+        let html .= "<div id='pages'>";
+
+        let data = [];
+        let query = "SELECT * FROM pages";
+        if (isset(_GET["tag"])) {
+            let query .= " WHERE tags like :tag";
+            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        }
+        let query .= " ORDER BY name";
         let html = html . tiles->build(
-            database->all("SELECT * FROM pages ORDER BY name"),
-            "/dumb-dog/pages/edit/"
+            database->all(query, data),
+            "/dumb-dog/" . path . "/edit/"
         );
 
         return html . "</div>";

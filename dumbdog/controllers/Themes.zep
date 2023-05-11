@@ -33,8 +33,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Themes extends Controller
 {
-    private cfg;
-
     public function __construct(object cfg)
     {
         let this->cfg = cfg;    
@@ -45,7 +43,7 @@ class Themes extends Controller
         var titles, html;
         let titles = new Titles();
         let html = titles->page("Add a theme", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/themes' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/themes' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -142,11 +140,11 @@ class Themes extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/themes' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/themes' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/themes/recover/" . model->id . "' class='button icon icon-recover' title='Recover the theme'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/themes/recover/" . model->id . "' class='round icon icon-recover' title='Recover the theme'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/themes/delete/" . model->id . "' class='button icon icon-delete' title='Delete the theme'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/themes/delete/" . model->id . "' class='round icon icon-delete' title='Delete the theme'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -241,7 +239,7 @@ class Themes extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/themes/add' class='button icon' title='Add a theme'>&nbsp;</a>
+            <a href='/dumb-dog/themes/add' class='round icon' title='Add a theme'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

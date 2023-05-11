@@ -145,7 +145,44 @@ class Controller
         </div></div>";
     }
 
-    protected function triggerDelete(string path, string table)
+    public function tags(string path, string table)
+    {
+        var database, data, html = "";
+
+        let database = new Database(this->cfg);
+        let data = database->all("SELECT tags FROM " . table . " WHERE tags IS NOT NULL AND tags != ''");
+
+        if (data) {
+            let html .= "<div id='tags'>";
+            var selected = "";
+            if (isset(_GET["tag"])) {
+                let selected = urldecode(_GET["tag"]);
+            }
+            var tag, json, value, url;
+            for tag in data {
+                let json = json_decode(tag->tags);
+                if (empty(json)) {
+                    continue;
+                }
+                for value in json {
+                    let url = path . "?tag=" . urlencode(value->value);
+                    if (selected == value->value) {
+                        let url = path;
+                    }
+                    let html .= "<a href='/dumb-dog" . url . "' class='tag". 
+                        (selected == value->value ? " selected" : "") . "'>" . 
+                        value->value .
+                        (selected == value->value ? " <span>x</span>" : "") . 
+                        "</a>";
+                }
+            }
+            let html .= "</div>";
+        }
+
+        return html;
+    }
+
+    public function triggerDelete(string path, string table)
     {
         var titles, html, database, data = [], model;
         let titles = new Titles();

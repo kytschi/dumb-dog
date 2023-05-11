@@ -68,14 +68,14 @@ class Messages extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/messages' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/messages' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->status != "read") {
-            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='button icon icon-message-read' title='Mark as read'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='round icon icon-message-read' title='Mark as read'>&nbsp;</a>";
         }
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='button icon icon-recover' title='Recover the message'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='round icon icon-recover' title='Recover the message'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='button icon icon-delete' title='Delete the message'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='round icon icon-delete' title='Delete the message'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -163,7 +163,7 @@ class Messages extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/dashboard' class='button icon icon-up' title='Back to the dashboard'>&nbsp;</a>
+            <a href='/dumb-dog/dashboard' class='round icon icon-up' title='Back to the dashboard'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
