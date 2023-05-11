@@ -487,7 +487,7 @@ class Style
             width: 80px;
         }
         
-        #message-count {
+        #message-count, #appointments {
             border-radius: 40px;
             background-color: #fff;
             padding: 15px 20px 10px 20px;
@@ -501,19 +501,52 @@ class Style
             font-size: 36pt;
             line-height: 26pt;
         }
-        #message-count span {
+        #message-count span, #appointments span {
             content: '';
             position: absolute;
             display: block;
             width: 64px;
             height: 64px;
-            margin-left: 125px;
+            margin-left: 123px;
             margin-top: -46px;
             background-image: url('/assets/icons.png');
             background-repeat: no-repeat;
             background-position: -256px -128px;
         }
-        
+        #appointments {
+            margin-left: -244px;
+            margin-top: -34px;
+        }
+        #appointments span {
+            margin-left: 164px;
+            margin-top: -61px;
+            background-position: -512px -128px;
+        }
+
+        /* Calendar */
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            border-top: 3px solid var(--text-heading-border-colour);
+            border-left: 3px solid var(--text-heading-border-colour);
+        }
+        #calendar-month {
+            font-family: 'heading', Helvetica, sans-serif;
+            font-size: 56pt;
+            line-height: 56pt;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        #calendar .calendar-entry, #calendar .calendar-day, #calendar .calendar-blank {
+            padding: 20px;
+            background-color: #fff;
+            border-bottom: 3px solid var(--text-heading-border-colour);
+            border-right: 3px solid var(--text-heading-border-colour);
+        }
+        #calendar .calendar-blank {
+            background-color: #dfdfdf;
+        }
+                
         /* Text */
         h1, h2, h3, h4, h5, h6 {
             font-family: 'subheading', Helvetica, sans-serif;
@@ -528,7 +561,7 @@ class Style
             font-size: 56pt;
             line-height: 56pt;
         }
-        .page-title span, .no-results span, .page-sub-title span {                
+        .page-title span, .no-results span, .page-sub-title span, #calendar-month span {                
             background-color: var(--text-heading-background-colour);
             border: 3px solid var(--text-heading-border-colour);
             padding: 10px 40px 0 40px;
@@ -536,6 +569,9 @@ class Style
             background-repeat: no-repeat;
             background-position: 20px 20px;
             background-size: 64px;
+        }
+        #calendar-month span {
+            padding: 0px 40px;
         }
         .page-title span.icon {
             padding: 0px 40px 10px 100px;
@@ -714,6 +750,9 @@ class Style
         }
         .icon-message-view::before {
             background-position: -384px -128px;
+        }
+        .icon-appointments::before {
+            background-position: -448px -128px;
         }
         </style>";
     }

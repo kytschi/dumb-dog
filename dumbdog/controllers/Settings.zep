@@ -33,11 +33,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Settings extends Controller
 {
-    public function __construct(object cfg)
-    {
-        let this->cfg = cfg;    
-    }
-
     public function index(string path)
     {
         var titles, html, database, model, data = [];

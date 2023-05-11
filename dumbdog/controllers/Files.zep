@@ -32,11 +32,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Files extends Controller
 {
-    public function __construct(object cfg)
-    {
-        let this->cfg = cfg;    
-    }
-
     public function add(string path)
     {
         var titles, html, data, database;

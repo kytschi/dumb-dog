@@ -34,11 +34,6 @@ class Pages extends Controller
 {
     public global_url = "/dumb-dog/pages";
 
-    public function __construct(object cfg)
-    {
-        let this->cfg = cfg;    
-    }
-
     public function add(string path, string type = "page")
     {
         var titles, html, data, database, iLoop;
@@ -80,12 +75,7 @@ class Pages extends Controller
                         } elseif (empty(_POST["event_time"])) {
                             let _POST["event_time"] = "00:00";
                         }
-                        var date;
-                        let date = \DateTime::createFromFormat("d/m/Y H:i:s", _POST["event_on"] . " " . _POST["event_time"] . ":00");
-                        if (empty(date)) {
-                            throw new \Exception("Failed to process the date");
-                        }
-                        let data["event_on"] = date->format("Y-m-d H:i:s");
+                        let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
                     }
 
                     let status = database->execute(
@@ -324,12 +314,7 @@ class Pages extends Controller
                         } elseif (empty(_POST["event_time"])) {
                             let _POST["event_time"] = "00:00";
                         }
-                        var date;
-                        let date = \DateTime::createFromFormat("d/m/Y H:i:s", _POST["event_on"] . " " . _POST["event_time"] . ":00");
-                        if (empty(date)) {
-                            throw new \Exception("Failed to process the date");
-                        }
-                        let data["event_on"] = date->format("Y-m-d H:i:s");
+                        let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
                     }
 
                     let database = new Database(this->cfg);

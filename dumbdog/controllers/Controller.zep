@@ -34,6 +34,11 @@ class Controller
     protected cfg;
     protected system_uuid = "00000000-0000-0000-0000-000000000000";
 
+    public function __construct(object cfg)
+    {
+        let this->cfg = cfg;
+    }
+
     public function cleanContent(string content)
     {
         var checks = [
@@ -51,6 +56,82 @@ class Controller
     public function consoleLogError(string message)
     {
         return "<script type='text/javascript'>console.log('DUMB DOG ERROR:', '" . str_replace(["\n", "\r\n"], "", strip_tags(message)) . "');</script>";
+    }
+
+    public function createInputDate(string label, string var_name, string placeholder, bool required = false, value = null)
+    {
+        if (empty(value)) {
+            let value = (isset(_POST[var_name]) ? _POST[var_name] : date("Y-m-d"));
+        } else {
+            let value = date("Y-m-d");
+        }
+
+        let value = date("d/m/Y", strtotime(value));
+
+        return "<div class='input-group'>
+            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+            <input
+                class='datepicker' 
+                type='text'
+                name='" . var_name . "' 
+                placeholder='' 
+                value='" . value . "'>
+        </div>";
+    }
+
+    public function createInputText(string label, string var_name, string placeholder, bool required = false, value = null)
+    {
+        if (empty(value)) {
+            let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
+        }
+
+        return "<div class='input-group'>
+            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+            <input
+                type='text'
+                name='" . var_name . "' 
+                placeholder='' 
+                value='" . value . "'>
+        </div>";
+    }
+
+    public function createInputTextarea(string label, string var_name, string placeholder, bool required = false, value = null)
+    {
+        if (empty(value)) {
+            let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
+        }
+        return "<div class='input-group'>
+            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+            <textarea
+                name='" . var_name . "' rows='4' 
+                placeholder='" . placeholder . "'" . (required ? " required='required'" : "") . 
+            ">" . value . "</textarea>
+        </div>";
+    }
+
+    public function createInputWysiwyg(string label, string var_name, string placeholder, bool required = false, value = null)
+    {
+        if (empty(value)) {
+            let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
+        }
+        return "<div class='input-group'>
+            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+            <textarea
+                class='wysiwyg' name='" . var_name . "' rows='7' 
+                placeholder='" . placeholder . "'" . (required ? " required='required'" : "") . 
+            ">" . value . "</textarea>
+        </div>";
+    }
+
+    public function dateToSql(string str)
+    {
+        var date;
+        let date = \DateTime::createFromFormat("d/m/Y H:i:s", str);
+        if (empty(date)) {
+            throw new \Exception("Failed to process the date");
+        }
+
+        return date->format("Y-m-d H:i:s");
     }
 
     public function deletedState(string message)

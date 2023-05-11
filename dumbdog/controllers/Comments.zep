@@ -33,14 +33,9 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Comments extends Controller
 {
-    public function __construct(object cfg)
-    {
-        let this->cfg = cfg;
-    }
-
     public function add(string path)
     {
-        var titles, html, data, database;
+        var titles, html, database;
         let titles = new Titles();
 
         let database = new Database(this->cfg);
@@ -89,46 +84,70 @@ class Comments extends Controller
             <div class='box-title'>
                 <span>the comment</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>comment<span class='required'>*</span></span>
-                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the comment' required='required'></textarea>
-                </div>
-                <div class='input-group'>
-                    <span>name</span>
-                    <input type='text' name='name' placeholder='who said it?' value=''>
-                </div>
-                <div class='input-group'>
-                    <span>attach to page</span>
-                    <select name='page_id'><option value=''>not required</option>";
+            <div class='box-body'>" .
+                this->createInputWysiwyg("content", "content", "the comment", true) .
+                this->createInputText("name", "name", "who said it?");
+        let html .= this->createSelects(database);
+        let html .= "</div><div class='box-footer'>
+                <a href='/dumb-dog/comments' class='button-blank'>cancel</a>
+                <button type='submit' name='save'>save</button>
+            </div></div></form>";
+
+        return html;
+    }
+
+    private function createSelects(database, model = null)
+    {
+        var data, html;
+
+        let html = "<div class='input-group'>
+            <span>attach to page</span>
+            <select name='page_id'><option value=''>not required</option>";
+
         let data = database->all("SELECT * FROM pages ORDER BY name");
-        var iLoop = 0;
+        var iLoop = 0, selected;
+
+        if (model) {
+            let selected = model->page_id;
+        } elseif (isset(_POST["page_id"])) {
+            let selected = _POST["page_id"];
+        }
+
         while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'>" . data[iLoop]->name . "</option>";
+            let html .= "<option value='" . data[iLoop]->id . "'";
+            if (data[iLoop]->id == selected) {
+                let html .= " selected='selected'";
+            }
+            let html .= ">" . data[iLoop]->name . "</option>";
             let iLoop = iLoop + 1;
         }
+
         let html .= "
                     </select>
                 </div>
                 <div class='input-group'>
                     <span>user said it</span>
                     <select name='user_id'><option value=''>not required</option>";
+
         let data = database->all("SELECT * FROM users ORDER BY name");
         let iLoop = 0;
+
+        if (model) {
+            let selected = model->user_id;
+        } elseif (isset(_POST["user_id"])) {
+            let selected = _POST["user_id"];
+        }
+
         while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'>" . data[iLoop]->name . "</option>";
+            let html .= "<option value='" . data[iLoop]->id . "'";
+            if (data[iLoop]->id == selected) {
+                let html .= " selected='selected'";
+            }
+            let html .= ">" . data[iLoop]->name . "</option>";
             let iLoop = iLoop + 1;
         }
-        let html .= "
-                    </select>
-                </div>
-            </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/comments' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
-            </div>
-        </div></form>";
 
+        let html .= "</select></div>";
         return html;
     }
 
@@ -220,48 +239,11 @@ class Comments extends Controller
             <div class='box-title'>
                 <span>the comment</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>comment<span class='required'>*</span></span>
-                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the comment' required='required'>" . model->content . "</textarea>
-                </div>
-                <div class='input-group'>
-                    <span>commentor's name</span>
-                    <input type='text' name='name' placeholder='who said it?' value='" . model->name . "'>
-                </div>
-                <div class='input-group'>
-                    <span>attach to page</span>
-                    <select name='page_id'><option value=''>not required</option>";
-        let data = database->all("SELECT * FROM pages ORDER BY name");
-        var iLoop = 0;
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == model->page_id) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-        let html .= "
-                    </select>
-                </div>
-                <div class='input-group'>
-                    <span>user said it</span>
-                    <select name='user_id'><option value=''>not required</option>";
-        let data = database->all("SELECT * FROM users ORDER BY name");
-        let iLoop = 0;
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == model->user_id) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-        let html .= "
-                    </select>
-                </div>
-            </div>
+            <div class='box-body'>" .
+                this->createInputWysiwyg("content", "content", "the comment", true, model->content) .
+                this->createInputText("name", "name", "who said it?", false, model->name);
+        let html .= this->createSelects(database, model);
+        let html .= "</div>
             <div class='box-footer'>
                 <a href='/dumb-dog/comments' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
