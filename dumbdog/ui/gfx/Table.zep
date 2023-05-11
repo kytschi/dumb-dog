@@ -68,6 +68,9 @@ class Table
 
                     if (isset(splits[1])) {
                         switch(splits[1]) {
+                            case "date":
+                                let key = date("d/m/Y", strtotime(key));
+                                break;
                             case "decrypt":
                                 let key = security->decrypt(key);
                                 break;
@@ -78,7 +81,7 @@ class Table
                     let iLoop_head = iLoop_head + 1;
                 }
 
-                let html .= "<td><a href='" . url . data[iLoop]->id . "' class='round icon icon-edit' title='edit me'>&nbsp;</a></td>";
+                let html .= "<td><a href='" . url . data[iLoop]->id . "' class='mini icon icon-edit' title='edit me'>&nbsp;</a></td>";
 
                 let html .= "</tr>";
                 let iLoop = iLoop + 1;

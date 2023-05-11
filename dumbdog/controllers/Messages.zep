@@ -58,7 +58,7 @@ class Messages extends Controller
             throw new NotFoundException("Message not found");
         }
 
-        let html = titles->page("Viewing the message", "edit");
+        let html = titles->page("Viewing the message", "message-view");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -69,6 +69,9 @@ class Messages extends Controller
             let html .= " deleted";
         }
         let html .= "'><a href='/dumb-dog/messages' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        if (model->status != "read") {
+            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='button icon icon-message-read' title='Mark as read'>&nbsp;</a>";
+        }
         if (model->deleted_at) {
             let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='button icon icon-recover' title='Recover the message'>&nbsp;</a>";
         } else {
@@ -131,6 +134,14 @@ class Messages extends Controller
                     <input value='" . security->decrypt(model->from_name) . "' readonly='readonly'>
                 </div>
                 <div class='input-group'>
+                    <span>email</span>
+                    <input value='" . security->decrypt(model->from_email) . "' readonly='readonly'>
+                </div>
+                <div class='input-group'>
+                    <span>number</span>
+                    <input value='" . security->decrypt(model->from_number) . "' readonly='readonly'>
+                </div>
+                <div class='input-group'>
                     <span>message</span>
                     <textarea readonly='readonly'>" . security->decrypt(model->message) . "</textarea>
                 </div>
@@ -160,13 +171,62 @@ class Messages extends Controller
         let table = new Table(this->cfg);
         let html = html . table->build(
             [
+                "created_at|date",
                 "subject",
                 "from_name|decrypt",
                 "status"
             ],
-            database->all("SELECT * FROM messages"),
+            database->all("SELECT * FROM messages ORDER BY created_at DESC"),
             "/dumb-dog/messages/view/"
         );
+        return html;
+    }
+
+    public function read(string path)
+    {
+        var titles, html, database, data = [], model;
+        let titles = new Titles();
+
+        let database = new Database(this->cfg);
+        let data["id"] = this->getPageId(path);
+        let model = database->get("SELECT * FROM messages WHERE id=:id", data);
+        if (empty(model)) {
+            throw new NotFoundException("Message not found");
+        }
+
+        let html = titles->page("Mark the message as read", "message-read");
+
+        if (!empty(_POST)) {
+            if (isset(_POST["read"])) {
+                var status = false, err;
+                try {
+                    let data["updated_by"] = this->getUserId();
+                    let status = database->execute("UPDATE messages SET status='read', updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    
+                    if (!is_bool(status)) {
+                        let html .= this->saveFailed("Failed to mark as read");
+                        let html .= this->consoleLogError(status);
+                    } else {
+                        this->redirect("/dumb-dog/messages/view/" . model->id);
+                    }
+                } catch \Exception, err {
+                    let html .= this->saveFailed(err->getMessage());
+                }
+            }
+        }
+
+        let html .= "<form method='post'><div class='error box wfull'>
+            <div class='box-title'>
+                <span>are your sure?</span>
+            </div>
+            <div class='box-body'><p>I've read it already!</p>
+            </div>
+            <div class='box-footer'>
+                <a href='/dumb-dog/messages/view/" . model->id . "' class='button-blank'>cancel</a>
+                <button type='submit' name='read'>read</button>
+            </div>
+        </div></form>";
+
         return html;
     }
 

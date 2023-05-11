@@ -231,6 +231,11 @@ class DumbDog
                         "view",
                         "view the message"
                     ],
+                    "/messages/read": [
+                        "Messages",
+                        "read",
+                        "mark the message as read"
+                    ],
                     "/messages/recover": [
                         "Messages",
                         "recover",
