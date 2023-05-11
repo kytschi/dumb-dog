@@ -33,11 +33,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Users extends Controller
 {
-    public function __construct(object cfg)
-    {
-        let this->cfg = cfg;    
-    }
-
     public function add(string path)
     {
         var titles, html;

@@ -34,11 +34,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Messages extends Controller
 {
-    public function __construct(object cfg)
-    {
-        let this->cfg = cfg;
-    }
-
     public function delete(string path)
     {
         return this->triggerDelete(path, "messages");
