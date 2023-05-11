@@ -32,7 +32,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Events extends Pages
 {
-    public cfg;
     public global_url = "/dumb-dog/events";
     
     public function add(string path, string type = "event")
@@ -57,8 +56,8 @@ class Events extends Pages
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='button icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/events/add' class='button icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/events/add' class='round icon' title='Add a page'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

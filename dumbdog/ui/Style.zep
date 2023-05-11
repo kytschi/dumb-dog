@@ -171,6 +171,8 @@ class Style
             max-width: 1200px;
             z-index: 2;
             padding: 60px 0px;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Inputs */
@@ -307,7 +309,7 @@ class Style
             font-size: 44pt;
             line-height: 34pt;
         }
-        button, .button-blank {
+        button, .button-blank, .button {
             padding: 10px 40px;
         }
         .default-item {
@@ -330,11 +332,16 @@ class Style
         .button-blank:hover {
             color: var(--button-hover-background-colour);
         }
+        .page-toolbar, #tags {
+            margin-bottom: 20px !important;
+        }
+        #tags {
+            width: 100%;
+        }
         .page-toolbar {
             display: flex;
-            margin-bottom: 20px;
         }
-        .page-toolbar .button {
+        .page-toolbar .round {
             margin-right: 20px;
         }
         .round {
@@ -458,7 +465,7 @@ class Style
             width: 80px;
             z-index: 101;
         }
-        #quick-menu .button, #quick-menu-button .button, .page-toolbar .button {
+        #quick-menu .round, #quick-menu-button .round, .page-toolbar .round {
             display: block;
             height: 100px;
             width: 100px;
@@ -468,7 +475,7 @@ class Style
             overflow: hidden;
             box-shadow: var(--button-shadow);
         }
-        #quick-menu .button, .page-toolbar .button  {
+        #quick-menu .round, .page-toolbar .round  {
             margin-bottom: 10px;
         }
         #quick-menu img, .page-toolbar img {
@@ -595,15 +602,23 @@ class Style
         .tile .box-body .box-tags {
             float: left;
             width: 100%;
+        }
+        .tile .box-body .box-tags, #tags {
             margin-top: 10px;
             margin-bottom: 10px;
         }
-        .tile .box-body .box-tags .tag {
+        .tile .box-body .box-tags .tag, #tags .tag {
             float: left;
             margin-right: 5px;
+            margin-bottom: 5px;
             border-radius: 25px;
             padding: 15px;
+            background-color: #fff;
             border: 3px solid var(--box-title-background-colour);
+        }
+        .tag.selected {
+            color: #fff;
+            background-color: var(--box-title-background-colour) !important;
         }
         .tile .box-body .thumb img {
             width: 100%;

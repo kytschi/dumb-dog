@@ -46,7 +46,7 @@ class Comments extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Add a comment", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/comments' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/comments' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -160,11 +160,11 @@ class Comments extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/comments' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/comments' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/comments/recover/" . model->id . "' class='button icon icon-recover' title='Recover the comment'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/comments/recover/" . model->id . "' class='round icon icon-recover' title='Recover the comment'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/comments/delete/" . model->id . "' class='button icon icon-delete' title='Delete the comment'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/comments/delete/" . model->id . "' class='round icon icon-delete' title='Delete the comment'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -283,8 +283,8 @@ class Comments extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='button icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/comments/add' class='button icon' title='Add a comment'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/comments/add' class='round icon' title='Add a comment'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

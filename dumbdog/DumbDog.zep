@@ -607,14 +607,14 @@ class DumbDog
         let model = database->get("SELECT count(id) AS total FROM messages WHERE status='unread'");
 
         echo "<div id='quick-menu' style='display: none'>
-            <a href='/dumb-dog/pages/add' class='button icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/pages' class='button icon icon-pages' title='Managing the pages'>&nbsp;</a>
-            <a href='/dumb-dog' class='button icon icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
-            <a href='/dumb-dog/settings' class='button icon icon-settings' title='Site wide settings'>&nbsp;</a>
-            <a href='/dumb-dog/give-up' class='button icon icon-logout' title='Log me out'>&nbsp;</a>
+            <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='round icon icon-pages' title='Managing the pages'>&nbsp;</a>
+            <a href='/dumb-dog' class='round icon icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
+            <a href='/dumb-dog/settings' class='round icon icon-settings' title='Site wide settings'>&nbsp;</a>
+            <a href='/dumb-dog/give-up' class='round icon icon-logout' title='Log me out'>&nbsp;</a>
         </div>
         <div id='quick-menu-button'>
-            <div class='button icon icon-dumbdog' onclick='showQuickMenu()'>&nbsp;</div>";
+            <div class='round icon icon-dumbdog' onclick='showQuickMenu()'>&nbsp;</div>";
         if (model->total) {
             echo "<div id='message-count'><a href='/dumb-dog/messages'>new messages</a><span></span></div>";
         }

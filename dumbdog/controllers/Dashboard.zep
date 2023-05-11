@@ -35,8 +35,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Dashboard extends Controller
 {
-    private cfg;
-
     public function __construct(object cfg)
     {
         let this->cfg = cfg;    
@@ -57,7 +55,7 @@ class Dashboard extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/messages' class='button icon icon-messages' title='Messages'>&nbsp;</a></div>";
+            <a href='/dumb-dog/messages' class='round icon icon-messages' title='Messages'>&nbsp;</a></div>";
 
         var colours = [
             "visitors": "#00c129",

@@ -32,8 +32,6 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Files extends Controller
 {
-    private cfg;
-
     public function __construct(object cfg)
     {
         let this->cfg = cfg;    
@@ -46,7 +44,7 @@ class Files extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Upload a file", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='button icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -204,11 +202,11 @@ class Files extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/files' class='button icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/files' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "' class='button icon icon-recover' title='Recover the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "' class='round icon icon-recover' title='Recover the file'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "' class='button icon icon-delete' title='Delete the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "' class='round icon icon-delete' title='Delete the file'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -277,8 +275,11 @@ class Files extends Controller
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
+        var titles, tiles, database, html, data, query;
+
+        let database = new Database(this->cfg);
         let titles = new Titles();
+        let tiles = new Tiles();
         
         let html = titles->page("Files", "files");
 
@@ -287,18 +288,23 @@ class Files extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='button icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/files/add' class='button icon' title='Upload some media'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/files/add' class='round icon' title='Upload some media'>&nbsp;</a>
         </div>";
 
-        let database = new Database(this->cfg);
+        let html .= this->tags(path, "files");
 
-        let tiles = new Tiles();
+        let data = [];
+        let query = "SELECT * FROM files";
+        if (isset(_GET["tag"])) {
+            let query .= " WHERE tags like :tag";
+            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        }
+        let query .= " ORDER BY name";
         let html = html . tiles->build(
-            database->all("SELECT * FROM files ORDER BY name"),
-            "/dumb-dog/files/edit/"
+            database->all(query, data),
+            "/dumb-dog/" . path . "/edit/"
         );
-
         return html;
     }
 
