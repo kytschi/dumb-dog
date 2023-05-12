@@ -16,6 +16,51 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `appointments`
+--
+
+DROP TABLE IF EXISTS `appointments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `appointments` (
+  `id` varchar(36) NOT NULL,
+  `user_id` varchar(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `with_email` varchar(255) DEFAULT NULL,
+  `with_number` varchar(255) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `on_date` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `created_by` varchar(36) NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `updated_by` varchar(36) NOT NULL,
+  `deleted_at` varchar(36) DEFAULT NULL,
+  `deleted_by` varchar(36) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `appointments_created_at_IDX` (`created_at`) USING BTREE,
+  KEY `appointments_created_by_IDX` (`created_by`) USING BTREE,
+  KEY `appointments_deleted_at_IDX` (`deleted_at`) USING BTREE,
+  KEY `appointments_deleted_by_IDX` (`deleted_by`) USING BTREE,
+  KEY `appointments_on_date_IDX` (`on_date`) USING BTREE,
+  KEY `appointments_updated_at_IDX` (`updated_at`) USING BTREE,
+  KEY `appointments_updated_by_IDX` (`updated_by`) USING BTREE,
+  KEY `appointments_user_id_IDX` (`user_id`) USING BTREE,
+  KEY `appointments_with_email_IDX` (`with_email`) USING BTREE,
+  KEY `appointments_with_name_IDX` (`name`) USING BTREE,
+  KEY `appointments_with_number_IDX` (`with_number`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `appointments`
+--
+
+LOCK TABLES `appointments` WRITE;
+/*!40000 ALTER TABLE `appointments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `appointments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `comments`
 --
 
@@ -429,4 +474,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-10 22:14:15
+-- Dump completed on 2023-05-12  9:54:09

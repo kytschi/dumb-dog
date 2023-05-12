@@ -46,6 +46,8 @@ class Style
         
             /* Box */
             --box-background-colour: #fff;
+            --box-success-background-colour: #1FD4AF;
+            --box-active-background-colour: #71C2FF;
             --box-deleted-background-colour: #8B8B8B;
             --box-warning-background-colour: #F08966;
             --box-border-colour: #030202;
@@ -538,7 +540,7 @@ class Style
             margin-bottom: 20px;
         }
         #calendar .calendar-entry, #calendar .calendar-day, #calendar .calendar-blank {
-            padding: 20px;
+            padding: 10px;
             background-color: #fff;
             border-bottom: 3px solid var(--text-heading-border-colour);
             border-right: 3px solid var(--text-heading-border-colour);
@@ -546,8 +548,23 @@ class Style
         #calendar .calendar-blank {
             background-color: #dfdfdf;
         }
+        .calendar-today {
+            color: var(--box-active-background-colour);
+            font-weight: bold;
+        }
+        #calendar .calendar-entry {
+            display: flex;
+            flex-direction: column;
+        }
+        .calendar-event {
+            padding: 10px;
+            background-color: var(--box-active-background-colour);
+            margin-top: 5px;
+            color: var(--body-text-colour);
+            font-weight: normal;
+        }
                 
-        /* Text */
+        /* Text #C7D9E5;*/
         h1, h2, h3, h4, h5, h6 {
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 56pt;
