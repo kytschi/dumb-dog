@@ -4,7 +4,7 @@
  * @package     DumbDog\DumbDog
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
- * @version     0.0.2 alpha
+ * @version     0.0.3 alpha
  *
  * Copyright 2023 Mike Welsh
  * This library is free software; you can redistribute it and/or
@@ -608,7 +608,7 @@ class DumbDog
 
         echo "<div id='quick-menu' style='display: none'>
             <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/pages' class='round icon icon-pages' title='Managing the pages'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='round icon icon-pages' title='Managing the content'>&nbsp;</a>
             <a href='/dumb-dog/appointments' class='round icon icon-appointments' title='Go to the appointments'>&nbsp;</a>
             <a href='/dumb-dog' class='round icon icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
             <a href='/dumb-dog/settings' class='round icon icon-settings' title='Site wide settings'>&nbsp;</a>
@@ -623,7 +623,7 @@ class DumbDog
         }
 
         let appointments = database->get(
-            "SELECT count(id) AS total FROM appointments WHERE user_id=:user_id",
+            "SELECT count(id) AS total FROM appointments WHERE user_id=:user_id AND on_date >= NOW()",
             [
                 "user_id": controller->getUserId()
             ]

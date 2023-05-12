@@ -62,11 +62,11 @@ class Controller
     {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : date("Y-m-d"));
-        } else {
-            let value = date("Y-m-d");
         }
 
-        let value = date("d/m/Y", strtotime(value));
+        if (strpos(value, "-") !== false) {
+            let value = date("d/m/Y", strtotime(value));
+        }
 
         return "<div class='input-group'>
             <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
