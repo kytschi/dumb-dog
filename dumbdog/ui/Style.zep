@@ -539,6 +539,22 @@ class Style
             margin-top: 20px;
             margin-bottom: 20px;
         }
+        #calendar-month a, #calendar-month span {
+            float: left;
+            margin-right: 10px;
+        }
+        #calendar-month a {
+            display: block;
+            width: 64px;
+            height: 64px;
+        }
+        #calendar-month a:hover {
+            text-decoration: none;
+        }
+        #calendar-month a:before {
+            top: 10px !important;
+            left: 0 !important;
+        }
         #calendar .calendar-entry, #calendar .calendar-day, #calendar .calendar-blank {
             padding: 10px;
             background-color: #fff;
@@ -586,9 +602,6 @@ class Style
             background-repeat: no-repeat;
             background-position: 20px 20px;
             background-size: 64px;
-        }
-        #calendar-month span {
-            padding: 0px 40px;
         }
         .page-title span.icon {
             padding: 0px 40px 10px 100px;
@@ -770,6 +783,12 @@ class Style
         }
         .icon-appointments::before {
             background-position: -448px -128px;
+        }
+        .icon-next::before {
+            background-position: -576px -128px;
+        }
+        .icon-prev::before {
+            background-position: 0 -192px;
         }
         </style>";
     }

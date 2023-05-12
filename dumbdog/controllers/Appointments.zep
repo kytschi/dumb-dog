@@ -317,17 +317,29 @@ class Appointments extends Controller
             <a href='/dumb-dog/appointments/add' class='round icon' title='Add an appointment'>&nbsp;</a>
         </div>";
 
-        var days, iLoop = 0, start, blanks = 0, data, entry, today;
+        var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date;
         
-        let start = date("l", strtotime(date("Y-01-01")));
-        let today = intval(date("d"));
+        if (isset(_GET["date"])) {
+            let date = _GET["date"];
+        } else {
+            let date = date("Y-m");
+        }
+
+        let start = date("l", strtotime(date(date . "-01")));
+        if (date("Y-m") == date) {
+            let today = intval(date("d"));
+        }
         
-        let html .= "<div id='calendar-month'><span>" . date("F Y") . "</span></div><div id='calendar'>";
+        let html .= "<div id='calendar-month'>
+            <span>" . date("F Y", strtotime(date . "-01")) . "</span>&nbsp;
+            <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='icon icon-prev'>&nbsp;</a>
+            <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='icon icon-next'>&nbsp;</a>
+        </div><div id='calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         while(iLoop < count(days)) {
             let html .= "<div class='calendar-day'>" . days[iLoop] . "</div>";
             if (days[iLoop] == start) {
-                let blanks = iLoop + 1;
+                let blanks = iLoop;
             }
             let iLoop = iLoop + 1;
         }
@@ -353,7 +365,7 @@ class Appointments extends Controller
             let data = database->all(
                 "SELECT * FROM appointments WHERE on_date BETWEEN CONCAT(:on_date, ' 00:00') AND CONCAT(:on_date, ' 23:59') ORDER BY on_date",
                 [
-                    "on_date": date("Y-m-" . iLoop)
+                    "on_date": date(date . "-" . iLoop)
                 ]
             );
             if (data) {
