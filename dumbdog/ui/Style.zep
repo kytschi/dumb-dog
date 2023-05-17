@@ -291,7 +291,7 @@ class Style
             user-select: none;
         }
         .switcher label input:checked + span {
-            background-color: var(--box-background-colour)
+            background-color: var(--box-background-colour);
         }
         .switcher label input:checked + span small {
             background-color: var(--button-background-colour);
@@ -543,6 +543,13 @@ class Style
             float: left;
             margin-right: 10px;
         }
+        #calendar-month span {
+            padding-top: 7px !important;
+        }
+        #calendar-month div {
+            float: left;
+            padding-bottom: 10px !important;
+        }
         #calendar-month a {
             display: block;
             width: 64px;
@@ -579,6 +586,14 @@ class Style
             color: var(--body-text-colour);
             font-weight: normal;
         }
+        .calendar-free-slot {
+            background-color: #F2845F;
+        }
+
+        .calendar-free-slot small span {
+            color: #fff;
+            font-weight: bold;
+        }
                 
         /* Text #C7D9E5;*/
         h1, h2, h3, h4, h5, h6 {
@@ -594,9 +609,10 @@ class Style
             font-size: 56pt;
             line-height: 56pt;
         }
-        .page-title span, .no-results span, .page-sub-title span, #calendar-month span {                
+        .page-title span, .no-results span, .page-sub-title span, #calendar-month div {
             background-color: var(--text-heading-background-colour);
             border: 3px solid var(--text-heading-border-colour);
+            margin: 0;
             padding: 10px 40px 0 40px;
             box-shadow: var(--text-heading-shadow);
             background-repeat: no-repeat;

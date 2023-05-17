@@ -54,6 +54,7 @@ class Appointments extends Controller
                     let data["with_email"] = _POST["with_email"];
                     let data["with_number"] = _POST["with_number"];
                     let data["content"] = _POST["content"];
+                    let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
                     let data["on_date"] = this->dateToSql(_POST["on_date"] . " " . _POST["on_time"] . ":00");
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
@@ -70,6 +71,7 @@ class Appointments extends Controller
                                     with_number,
                                     content,
                                     on_date,
+                                    free_slot,
                                     created_at,
                                     created_by,
                                     updated_at,
@@ -84,6 +86,7 @@ class Appointments extends Controller
                                     :with_number,
                                     :content,
                                     :on_date,
+                                    :free_slot,
                                     NOW(),
                                     :created_by,
                                     NOW(),
@@ -114,8 +117,9 @@ class Appointments extends Controller
             <div class='box-title'>
                 <span>the appointment</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
+            <div class='box-body'>";
+        let html .= this->createInputSwitch("free slot", "free_slot", false, isset(_POST["free_slot"]) ? _POST["free_slot"] : false);
+        let html .= "<div class='input-group'>
                     <span>for user<span class='required'>*</span></span>
                     <select name='user_id'>";
 
@@ -208,6 +212,7 @@ class Appointments extends Controller
                     let data["with_email"] = _POST["with_email"];
                     let data["with_number"] = _POST["with_number"];
                     let data["content"] = _POST["content"];
+                    let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
                     let data["on_date"] = this->dateToSql(_POST["on_date"] . " " . _POST["on_time"] . ":00");
                     let data["updated_by"] = this->getUserId();
 
@@ -221,6 +226,7 @@ class Appointments extends Controller
                                 with_number=:with_number, 
                                 content=:content, 
                                 on_date=:on_date, 
+                                free_slot=:free_slot, 
                                 updated_at=NOW(), 
                                 updated_by=:updated_by
                             WHERE id=:id",
@@ -253,8 +259,9 @@ class Appointments extends Controller
             <div class='box-title'>
                 <span>the appointment</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
+            <div class='box-body'>";
+        let html .= this->createInputSwitch("free slot", "free_slot", false, model->free_slot);
+        let html .= "<div class='input-group'>
                     <span>for user<span class='required'>*</span></span>
                     <select name='user_id'>";
 
@@ -331,9 +338,13 @@ class Appointments extends Controller
         }
         
         let html .= "<div id='calendar-month'>
-            <span>" . date("F Y", strtotime(date . "-01")) . "</span>&nbsp;
-            <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='icon icon-prev'>&nbsp;</a>
-            <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='icon icon-next'>&nbsp;</a>
+            <div>
+                <span>
+                    " . date("F Y", strtotime(date . "-01")) . "
+                </span>
+                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='icon icon-prev'>&nbsp;</a>
+                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='icon icon-next'>&nbsp;</a>
+            </div>
         </div><div id='calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         while(iLoop < count(days)) {
@@ -370,9 +381,15 @@ class Appointments extends Controller
             );
             if (data) {
                 for entry in data {
-                    let html .= "<div class='calendar-event'>
-                    <a href='/dumb-dog/appointments/edit/" . entry->id . "'><small>" .
-                        date("H:i", strtotime(entry->on_date)) . "</small><br/>" . 
+                    let html .= "<div class='calendar-event";
+                    if (entry->free_slot) {
+                        let html .= " calendar-free-slot";
+                    }
+                    let html .= "'><a href='/dumb-dog/appointments/edit/" . entry->id . "'><small>" .date("H:i", strtotime(entry->on_date));
+                    if (entry->free_slot) {
+                        let html .= "&nbsp;<span>free slot</span>";
+                    }
+                    let html .= "</small><br/>" . 
                         entry->name . 
                     "</a></div>";
                 }

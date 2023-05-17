@@ -26,6 +26,7 @@ namespace DumbDog\Helper;
 
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Pages;
+use DumbDog\Exceptions\Exception;
 use DumbDog\Helper\Security;
 use DumbDog\Ui\Captcha;
 
@@ -138,25 +139,62 @@ class DumbDog
         return true;
     }
 
-    public function filesByTag(string tag)
+    public function appointments(array filters = [])
     {
-        var database, query;
+        var database, query, where, data = [];
         let database = new Database(this->cfg);
 
         let query = "
-        SELECT
-            name,
-            mime_type,
-            CONCAT('/website/files/', filename) AS filename 
-        FROM files 
-        WHERE tags like :tag AND deleted_at IS NULL";
+        SELECT * FROM appointments";
+        let where = " WHERE free_slot=1 AND appointments.deleted_at IS NULL";
 
-        return database->all(query, ["tag": "%{\"value\":\"" . tag . "\"}%"]);
+        if (count(filters)) {
+            var key, value;
+            for key, value in filters {
+                switch (key) {
+                    case "where":
+                        let where .= " AND " . value["query"];
+                        let data = value["data"];
+                        break;
+                    default:
+                        continue;
+                }
+            }
+        }
+
+        return database->all(query . where, data);
+    }
+
+    public function bookAppointment(array data)
+    {
+        var database, model;
+        let database = new Database(this->cfg);
+
+        let model = database->get(
+            "SELECT * FROM appointments WHERE free_slot=1 AND id=:id",
+            ["id": data["id"]]
+        );
+        if (empty(model)) {
+            throw new Exception("Failed to find the appointment");
+        }
+
+        let data["updated_by"] = this->system_uuid;
+        
+        return database->execute(
+            "UPDATE appointments SET 
+                name=:name,
+                content=:content, 
+                free_slot=0,
+                updated_at=NOW(), 
+                updated_by=:updated_by
+            WHERE id=:id",
+            data
+        );
     }
 
     public function comments(array filters = [])
     {
-        var database, query, where;
+        var database, query, where, data = [];
         let database = new Database(this->cfg);
 
         let query = "
@@ -171,7 +209,8 @@ class DumbDog
             for key, value in filters {
                 switch (key) {
                     case "where":
-                        let where .= " AND " . value;
+                        let where .= " AND " . value["query"];
+                        let data = value["data"];
                         break;
                     default:
                         continue;
@@ -179,12 +218,28 @@ class DumbDog
             }
         }
 
-        return database->all(query . where);
+        return database->all(query . where, data);
     }
 
     public function events(array filters = [])
     {
         return this->pageQuery(filters, "event");
+    }
+
+    public function filesByTag(string tag)
+    {
+        var database, query;
+        let database = new Database(this->cfg);
+
+        let query = "
+        SELECT
+            name,
+            mime_type,
+            CONCAT('/website/files/', filename) AS filename 
+        FROM files 
+        WHERE tags like :tag AND deleted_at IS NULL";
+
+        return database->all(query, ["tag": "%{\"value\":\"" . tag . "\"}%"]);
     }
 
     public function pages(array filters = [])

@@ -79,6 +79,22 @@ class Controller
         </div>";
     }
 
+    public function createInputSwitch(string label, string var_name, bool required = false, selected = false)
+    {
+        return "<div class='input-group'>
+                    <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+                    <div class='switcher'>
+                        <label>
+                            <input type='checkbox' name='free_slot' value='1' " . (selected ? " checked='checked'" : "") . ">
+                            <span>
+                                <small class='switcher-on'></small>
+                                <small class='switcher-off'></small>
+                            </span>
+                        </label>
+                    </div>
+                </div>";
+    }
+
     public function createInputText(string label, string var_name, string placeholder, bool required = false, value = null)
     {
         if (empty(value)) {
