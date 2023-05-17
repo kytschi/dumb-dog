@@ -243,6 +243,7 @@ class DumbDog
 
         let query = "
         SELECT
+            comments.id,
             comments.name,
             comments.content
         FROM comments";
