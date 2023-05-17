@@ -90,6 +90,41 @@ class DumbDog
         let this->menu = menu;
     }
 
+    public function addComment(array data)
+    {
+        var database, security, status;
+        let security = new Security(this->cfg);
+        let database = new Database(this->cfg);
+
+        let data["content"] = security->clean(data["content"]);
+        let data["created_by"] = this->system_uuid;
+        let data["updated_by"] = this->system_uuid;
+
+        let status = database->execute(
+            "INSERT INTO comments 
+                (id,
+                content,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by) 
+            VALUES 
+                (UUID(),
+                :content,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by)",
+            data
+        );
+
+        if (!is_bool(status)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function addMessage(array data)
     {
         var database, security, status;
@@ -99,7 +134,7 @@ class DumbDog
         let data["from_email"] = security->encrypt(data["from_email"]);
         let data["from_name"] = security->encrypt(data["from_name"]);
         let data["from_number"] = security->encrypt(data["from_number"]);
-        let data["message"] = security->encrypt(data["message"]);
+        let data["message"] = security->encrypt(security->clean(data["message"]));
         let data["to_name"] = "dumb dog";
         let data["created_by"] = this->system_uuid;
         let data["updated_by"] = this->system_uuid;
@@ -152,9 +187,16 @@ class DumbDog
             var key, value;
             for key, value in filters {
                 switch (key) {
+                    case "order":
+                        let where .= " " . value;
+                        break;
                     case "where":
-                        let where .= " AND " . value["query"];
-                        let data = value["data"];
+                        if (isset(value["query"])) {
+                            let where .= " AND " . value["query"];
+                        }
+                        if (isset(value["data"])) {
+                            let data = value["data"];
+                        }
                         break;
                     default:
                         continue;
@@ -167,7 +209,8 @@ class DumbDog
 
     public function bookAppointment(array data)
     {
-        var database, model;
+        var database, model, security;
+        let security = new Security(this->cfg);
         let database = new Database(this->cfg);
 
         let model = database->get(
@@ -179,6 +222,7 @@ class DumbDog
         }
 
         let data["updated_by"] = this->system_uuid;
+        let data["content"] = security->clean(data["content"]);
         
         return database->execute(
             "UPDATE appointments SET 
@@ -202,15 +246,22 @@ class DumbDog
             comments.name,
             comments.content
         FROM comments";
-        let where = " WHERE comments.deleted_at IS NULL";
+        let where = " WHERE comments.reviewed = 1 AND comments.deleted_at IS NULL";
 
         if (count(filters)) {
             var key, value;
             for key, value in filters {
                 switch (key) {
+                    case "order":
+                        let where .= " " . value;
+                        break;
                     case "where":
-                        let where .= " AND " . value["query"];
-                        let data = value["data"];
+                        if (isset(value["query"])) {
+                            let where .= " AND " . value["query"];
+                        }
+                        if (isset(value["data"])) {
+                            let data = value["data"];
+                        }
                         break;
                     default:
                         continue;
@@ -274,13 +325,20 @@ class DumbDog
                         let where .= " AND parent_id=:parent_id";
                         let data["parent_id"] = value;
                         break;
+                    case "order":
+                        let where .= " " . value;
+                        break;
                     case "tag":
                         let where .= " AND tags like :tag";
                         let data["tag"] = "%{\"value\":\"" . value . "\"}%";
                         break;
                     case "where":
-                        let where .= " AND " . value["query"];
-                        let data = value["data"];
+                        if (isset(value["query"])) {
+                            let where .= " AND " . value["query"];
+                        }
+                        if (isset(value["data"])) {
+                            let data = value["data"];
+                        }
                         break;
                     default:
                         continue;

@@ -53,6 +53,7 @@ class Comments extends Controller
                     let data["name"] = _POST["name"];
                     let data["page_id"] = _POST["page_id"];
                     let data["user_id"] = _POST["user_id"];
+                    let data["reviewed"] = isset(_POST["reviewed"]) ? 1 : 0;
                     let data["content"] = this->cleanContent(_POST["content"]);
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
@@ -61,9 +62,31 @@ class Comments extends Controller
                         let database = new Database(this->cfg);
                         let status = database->execute(
                             "INSERT INTO comments 
-                                (id, name, page_id, user_id, content, created_at, created_by, updated_at, updated_by) 
+                                (
+                                    id,
+                                    name,
+                                    page_id,
+                                    user_id,
+                                    reviewed,
+                                    content,
+                                    created_at,
+                                    created_by,
+                                    updated_at,
+                                    updated_by
+                                ) 
                             VALUES 
-                                (UUID(), :name, :page_id, :user_id, :content, NOW(), :created_by, NOW(), :updated_by)",
+                                (
+                                    UUID(),
+                                    :name,
+                                    :page_id,
+                                    :user_id,
+                                    :reviewed,
+                                    :content,
+                                    NOW(),
+                                    :created_by,
+                                    NOW(),
+                                    :updated_by
+                                )",
                             data
                         );
                     } else {
@@ -85,6 +108,7 @@ class Comments extends Controller
                 <span>the comment</span>
             </div>
             <div class='box-body'>" .
+                this->createInputSwitch("can go live", "reviewed", false) .
                 this->createInputWysiwyg("content", "content", "the comment", true) .
                 this->createInputText("name", "name", "who said it?");
         let html .= this->createSelects(database);
@@ -197,6 +221,7 @@ class Comments extends Controller
                     let data["name"] = _POST["name"];
                     let data["page_id"] = _POST["page_id"];
                     let data["user_id"] = _POST["user_id"];
+                    let data["reviewed"] = isset(_POST["reviewed"]) ? 1 : 0;
                     let data["content"] = _POST["content"];
                     let data["updated_by"] = this->getUserId();
 
@@ -205,6 +230,7 @@ class Comments extends Controller
                         let status = database->execute(
                             "UPDATE comments SET 
                                 name=:name, 
+                                reviewed=:reviewed,
                                 page_id=:page_id,
                                 user_id=:user_id,
                                 content=:content, 
@@ -240,6 +266,7 @@ class Comments extends Controller
                 <span>the comment</span>
             </div>
             <div class='box-body'>" .
+                this->createInputSwitch("can go live", "reviewed", false, model->reviewed) .
                 this->createInputWysiwyg("content", "content", "the comment", true, model->content) .
                 this->createInputText("name", "name", "who said it?", false, model->name);
         let html .= this->createSelects(database, model);

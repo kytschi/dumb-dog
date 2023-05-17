@@ -35,6 +35,11 @@ class Security
         let this->cfg = cfg;
     }
 
+    public function clean(string str)
+    {
+        return filter_var(rawurldecode(str), FILTER_SANITIZE_STRING);
+    }
+
     public function decrypt(str)
     {
         if (empty(this->cfg->encryption)) {

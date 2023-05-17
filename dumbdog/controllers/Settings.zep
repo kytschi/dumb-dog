@@ -116,11 +116,9 @@ class Settings extends Controller
                             </span>
                         </label>
                     </div>
-                </div>
-                <div class='input-group'>
-                    <span>name<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='make sure to set a name' value='" . model->name . "'>
-                </div>
+                </div>";
+            let html .= this->createInputText("name", "name", "make sure to set a name", true, model->name);
+            let html .= "
                 <div class='input-group'>
                     <span>theme<span class='required'>*</span></span>
                     <select name='theme_id'>";
