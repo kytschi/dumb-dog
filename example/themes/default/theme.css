@@ -74,6 +74,7 @@ table th {
     background-color: var(--box-title-background-colour);
 }
 table td {
+    vertical-align: top;
     border-top: 3px solid var(--button-border-colour);
 }
 

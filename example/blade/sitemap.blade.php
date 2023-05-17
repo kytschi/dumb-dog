@@ -1,6 +1,6 @@
 @include('blade/header.blade.php')
 <div id="tiles">
-    @foreach ($DUMBDOG->pages->get() as $item)
+    @foreach ($DUMBDOG->pages->all() as $item)
     <div class='tile'>
         <div class="box">
             <div class="box-title">
