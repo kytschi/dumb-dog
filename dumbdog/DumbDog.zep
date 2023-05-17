@@ -623,7 +623,7 @@ class DumbDog
         }
 
         let appointments = database->get(
-            "SELECT count(id) AS total FROM appointments WHERE user_id=:user_id AND on_date >= NOW()",
+            "SELECT count(id) AS total FROM appointments WHERE user_id=:user_id AND on_date >= NOW() AND free_slot = 0",
             [
                 "user_id": controller->getUserId()
             ]
