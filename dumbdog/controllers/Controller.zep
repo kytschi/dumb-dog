@@ -85,7 +85,7 @@ class Controller
                     <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
                     <div class='switcher'>
                         <label>
-                            <input type='checkbox' name='free_slot' value='1' " . (selected ? " checked='checked'" : "") . ">
+                            <input type='checkbox' name='" . var_name . "' value='1' " . (selected ? " checked='checked'" : "") . ">
                             <span>
                                 <small class='switcher-on'></small>
                                 <small class='switcher-off'></small>
@@ -107,7 +107,7 @@ class Controller
                 type='text'
                 name='" . var_name . "' 
                 placeholder='' 
-                value='" . value . "'>
+                value=\"" . value . "\"'>
         </div>";
     }
 
