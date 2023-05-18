@@ -65,6 +65,7 @@ class Pages extends Controller
                     let data["updated_by"] = this->getUserId();
                     let data["type"] = type;
                     let data["event_on"] = null;
+                    let data["price"] = 0.00;
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
                     let data["tags"] = _POST["tags"];
                     let data["parent_id"] = _POST["parent_id"];
@@ -76,6 +77,10 @@ class Pages extends Controller
                             let _POST["event_time"] = "00:00";
                         }
                         let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
+                    }
+
+                    if (isset(_POST["price"])) {
+                        let data["price"] = floatval(_POST["price"]);
                     }
 
                     let status = database->execute(
@@ -95,6 +100,7 @@ class Pages extends Controller
                             event_length,
                             tags,
                             parent_id,
+                            price,
                             created_at,
                             created_by,
                             updated_at,
@@ -115,6 +121,7 @@ class Pages extends Controller
                             :event_length,
                             :tags,
                             :parent_id,
+                            :price,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -161,30 +168,8 @@ class Pages extends Controller
                     <span>content</span>
                     <textarea class='wysiwyg' name='content' rows='7' placeholder='the content'></textarea>
                 </div>";
-        if (type == "event") {
-            let html .= "
-                <div class='input-group'>
-                    <span>when its on</span>
-                    <input type='text' class='datepicker' name='event_on'>
-                </div>
-                <div class='input-group'>
-                    <span>what time its on, enter as hour:minutes</span>
-                    <input type='text' name='event_time' placeholder='24 hour time please' value=''>
-                </div>
-                <div class='input-group'>
-                    <span>how long for</span>
-                    <select name='event_length'>
-                        <option value='1'>1 hour</option>
-                        <option value='2'>2 hours</option>
-                        <option value='4'>4 hours</option>
-                        <option value='all_day'>all day</option>
-                        <option value='daily'>daily</option>
-                        <option value='weekly'>weekly</option>
-                        <option value='monthly'>monthly</option>
-                        <option value='annually'>annually</option>
-                    </select>
-                </div>";
-        }
+        
+        let html .= this->addHtml();
         let html .= "
                 <div class='input-group'>
                     <span>template<span class='required'>*</span></span>
@@ -249,6 +234,11 @@ class Pages extends Controller
         return html;
     }
 
+    public function addHtml()
+    {
+        return "";
+    }
+
     public function delete(string path)
     {
         return this->triggerDelete(path, "pages");
@@ -307,6 +297,7 @@ class Pages extends Controller
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
                     let data["tags"] = _POST["tags"];
                     let data["parent_id"] = _POST["parent_id"];
+                    let data["price"] = 0.00;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -315,6 +306,10 @@ class Pages extends Controller
                             let _POST["event_time"] = "00:00";
                         }
                         let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
+                    }
+
+                    if (isset(_POST["price"])) {
+                        let data["price"] = floatval(_POST["price"]);
                     }
 
                     let database = new Database(this->cfg);
@@ -334,7 +329,8 @@ class Pages extends Controller
                             event_on=:event_on,
                             event_length=:event_length,
                             tags=:tags,
-                            parent_id=:parent_id 
+                            parent_id=:parent_id,
+                            price=:price 
                         WHERE id=:id",
                         data
                     );
@@ -391,32 +387,7 @@ class Pages extends Controller
                     <span>content</span>
                     <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'>" . model->content . "</textarea>
                 </div>";
-
-        if (type == "event") {
-            let html .= "
-                <div class='input-group'>
-                    <span>when its on</span>
-                    <input type='text' class='datepicker' name='event_on' value='" . date("d/m/Y", strtotime(model->event_on)) . "'>
-                </div>
-                <div class='input-group'>
-                    <span>what time its on, enter as hour:minutes</span>
-                    <input type='text' name='event_time' placeholder='24 hour time please' value='" . date("H:i", strtotime(model->event_on)) . "'>
-                </div>
-                <div class='input-group'>
-                    <span>how long for</span>
-                    <select name='event_length'>
-                        <option value='1'" . (model->event_length == "1" ? " selected='selected'" : "") . ">1 hour</option>
-                        <option value='2'" . (model->event_length == "2" ? " selected='selected'" : "") . ">2 hours</option>
-                        <option value='4'" . (model->event_length == "4" ? " selected='selected'" : "") . ">4 hours</option>
-                        <option value='all_day'" . (model->event_length == "all_day" ? " selected='selected'" : "") . ">all day</option>
-                        <option value='daily'" . (model->event_length == "daily" ? " selected='selected'" : "") . ">daily</option>
-                        <option value='weekly'" . (model->event_length == "weekly" ? " selected='selected'" : "") . ">weekly</option>
-                        <option value='monthly'" . (model->event_length == "monthly" ? " selected='selected'" : "") . ">monthly</option>
-                        <option value='annually'" . (model->event_length == "annually" ? " selected='selected'" : "") . ">annually</option>
-                    </select>
-                </div>";
-        }
-
+        let html .= this->editHtml(model);
         let html .= "<div class='input-group'>
                     <span>template<span class='required'>*</span></span>
                     <select name='template_id' required='required'>";
@@ -577,6 +548,11 @@ class Pages extends Controller
         return html;
     }
 
+    public function editHtml(model)
+    {
+        return "";
+    }
+
     public function index(string path)
     {
         var titles, tiles, database, html, query, data;
@@ -593,6 +569,7 @@ class Pages extends Controller
         let html .= "<div class='page-toolbar'>
             <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
             <a href='/dumb-dog/events' class='round icon icon-events' title='Events'>&nbsp;</a>
+            <a href='/dumb-dog/products' class='round icon icon-products' title='Products'>&nbsp;</a>
             <a href='/dumb-dog/comments' class='round icon icon-comments' title='Comments'>&nbsp;</a>
             <a href='/dumb-dog/files' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
             <a href='/dumb-dog/templates' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>

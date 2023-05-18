@@ -255,23 +255,27 @@ class Controller
             if (isset(_GET["tag"])) {
                 let selected = urldecode(_GET["tag"]);
             }
-            var tag, json, value, url;
+            var tag, json, value, url, tags = [];
             for tag in data {
                 let json = json_decode(tag->tags);
                 if (empty(json)) {
                     continue;
                 }
                 for value in json {
-                    let url = path . "?tag=" . urlencode(value->value);
-                    if (selected == value->value) {
-                        let url = path;
-                    }
-                    let html .= "<a href='/dumb-dog" . url . "' class='tag". 
-                        (selected == value->value ? " selected" : "") . "'>" . 
-                        value->value .
-                        (selected == value->value ? " <span>x</span>" : "") . 
-                        "</a>";
+                    let tags[value->value] = value->value;
                 }
+            }
+
+            for tag in tags {
+                let url = path . "?tag=" . urlencode(tag);
+                if (selected == tag) {
+                    let url = path;
+                }
+                let html .= "<a href='/dumb-dog" . url . "' class='tag". 
+                    (selected == tag ? " selected" : "") . "'>" . 
+                    tag .
+                    (selected == tag ? " <span>x</span>" : "") . 
+                    "</a>";
             }
             let html .= "</div>";
         }
