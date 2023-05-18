@@ -806,6 +806,9 @@ class Style
         .icon-prev::before {
             background-position: 0 -192px;
         }
+        .icon-products::before {
+            background-position: -64px -192px;
+        }
         </style>";
     }
 

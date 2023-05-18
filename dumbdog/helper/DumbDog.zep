@@ -311,12 +311,7 @@ class DumbDog
         FROM pages 
         JOIN templates ON templates.id=pages.template_id";
 
-        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL";
-        if (type == "event") {
-            let where .= " AND pages.type = 'event'";
-        } else {
-            let where .= " AND pages.type != 'event'";
-        }
+        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL AND pages.type = '" . type . "'";
 
         if (count(filters)) {
             var key, value;
@@ -348,5 +343,10 @@ class DumbDog
         }
 
         return database->all(query . where, data);
+    }
+
+    public function products(array filters = [])
+    {
+        return this->pageQuery(filters, "product");
     }
 }
