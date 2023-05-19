@@ -110,62 +110,84 @@ class Style
         .button:hover, .mini:hover {
             text-decoration: none;
         }
-        #bk {
-            background-color: #92ddd6;
-            background-image: url('/assets/dashboard-bk.jpg');
+        /* Backgrounds */
+        .background-image {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 1200px;
+            height: 1200px;
+            overflow: hidden;
+            background-image: url('/assets/backgrounds.jpg?t=" . time() . "');
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: bottom -390px right -10px;
         }
-        #error {
+        #bk, #dashboard-bk {
             background-color: #92ddd6;
-            background-image: url('/assets/error.jpg');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -390px right -10px;
+        }
+        #bk .background-image, #dashboard-bk .background-image {
+            background-position: bottom 0px right -12000px;
         }
         #page-bk {
-            background-color: #C3C4C6;
-            background-image: url('/assets/pages-bk.jpg?sds');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -220px right -140px;
+            background-color: #3c6794;
         }
-        #dashboard-bk {
-            background-color: #92ddd6;
-            background-image: url('/assets/dashboard-bk.jpg');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -390px right -10px;
+        #page-bk .background-image {
+            background-position: bottom 0px right -10800px;
+        }
+        #events-bk {
+            background-color: #67cbda;
+        }
+        #events-bk .background-image {
+            background-position: bottom 0px right -9600px;
+        }
+        #appointments-bk {
+            background-color: #25B5B6;
+        }
+        #appointments-bk .background-image {
+            background-position: bottom 0px right -8400px;
+        }
+        #products-bk {
+            background-color: #fbdee3;
+        }
+        #products-bk .background-image {
+            background-position: bottom 0px right -7200px;
         }
         #settings-bk {
             background-color: #C7D9E5;
-            background-image: url('/assets/settings-bk.jpg');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -220px right -140px;
+        }
+        #settings-bk .background-image {
+            background-position: bottom 0px right -6000px;
         }
         #templates-bk {
             background-color: #597566;
-            background-image: url('/assets/templates-bk.jpg');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -220px right -140px;
+        }
+        #templates-bk .background-image {
+            background-position: bottom 0px right -4800px;
         }
         #themes-bk {
             background-color: #B4B5BA;
-            background-image: url('/assets/themes-bk.jpg');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -220px right -140px;
+        }
+        #themes-bk .background-image {
+            background-position: bottom 0px right -3600px;
         }
         #users-bk {
             background-color: #f5ded6;
-            background-image: url('/assets/users-bk.jpg');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: bottom -260px right -10px;
         }
+        #users-bk .background-image {
+            background-position: bottom 0px right -2400px;
+        }
+        #page-not-found {
+            background-color: #fff;
+        }
+        #page-not-found .background-image {
+            background-position: bottom 0px right -1200px;
+        }
+        #error {
+            background-color: #92ddd6;
+        }
+        #error .background-image {
+            background-position: bottom 0px right 0px;
+        }        
         main {
             position: relative;
             margin: 0 auto;

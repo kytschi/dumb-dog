@@ -443,12 +443,20 @@ class DumbDog
 
         let id = "bk";
         
-        if (strpos(location, "page not") !== false || strpos(location, "offline") !== false) {
+        if (strpos(location, "page not") !== false) {
+            let id = "page-not-found";
+        } elseif (strpos(location, "offline") !== false) {
             let id = "error";
         } elseif (strpos(location, "page") !== false) {
             let id = "page-bk";
+        } elseif (strpos(location, "appointment") !== false) {
+            let id = "appointments-bk";
+        } elseif (strpos(location, "product") !== false) {
+            let id = "products-bk";
         } elseif (strpos(location, "dashboard") !== false) {
             let id = "dashboard-bk";
+        } elseif (strpos(location, "event") !== false) {
+            let id = "events-bk";
         } elseif (strpos(location, "settings") !== false) {
             let id = "settings-bk";
         } elseif (strpos(location, "theme") !== false) {
@@ -459,7 +467,7 @@ class DumbDog
             let id = "users-bk";
         }
 
-        echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><main>";
+        echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><div class='background-image'></div><main>";
         if (this->cfg->save_mode == false) {
             echo "<div class='warning alert'><span>saving is currently disabled</span></div>";
         }

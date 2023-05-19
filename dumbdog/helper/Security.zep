@@ -37,7 +37,7 @@ class Security
 
     public function clean(string str)
     {
-        return filter_var(rawurldecode(str), FILTER_SANITIZE_STRING);
+        return filter_var(rawurldecode(str), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     }
 
     public function decrypt(str)
