@@ -414,6 +414,9 @@ class Style
             margin-bottom: 40px;
             border-collapse: collapse;
         }
+        #login.box {
+            width: 50%;
+        }
         .alert {
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
@@ -616,8 +619,24 @@ class Style
             color: #fff;
             font-weight: bold;
         }
+
+        /* Products */
+        .product-stock, .product-price {
+            padding: 10px;
+            border-radius: 15px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        .product-stock {
+            color: #fff;
+            background-color: var(--box-success-background-colour);
+        }
+        .product-price {
+            color: #fff;
+            background-color: var(--box-success-background-colour);
+        }
                 
-        /* Text #C7D9E5;*/
+        /* Text */
         h1, h2, h3, h4, h5, h6 {
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 56pt;
@@ -698,7 +717,7 @@ class Style
             width: 100%;
         }
         .tile .box-body {
-            padding: 10px 10px;
+            padding: 20px 10px;
         }
         .tile .box-body .thumb {
             overflow: hidden;

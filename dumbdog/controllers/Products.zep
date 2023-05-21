@@ -41,7 +41,9 @@ class Products extends Pages
 
     public function addHtml()
     {
-        return this->createInputText("price", "price", "the price", true);
+        return 
+            this->createInputText("price", "price", "the price", true) .
+            this->createInputText("stock", "stock", "the stock", true);
     }
 
     public function edit(string path, string type = "product")
@@ -51,7 +53,9 @@ class Products extends Pages
 
     public function editHtml(model)
     {
-        return this->createInputText("price", "price", "the price", true, model->price);
+        return 
+            this->createInputText("price", "price", "the price", true, model->price) .
+            this->createInputText("stock", "stock", "the stock", true, model->stock);
     }
 
     public function index(string path)
@@ -68,6 +72,8 @@ class Products extends Pages
         let html .= "<div class='page-toolbar'>
             <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
             <a href='/dumb-dog/products/add' class='round icon' title='Add a product'>&nbsp;</a>
+            <a href='/dumb-dog/files?from=products' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates?from=products' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
