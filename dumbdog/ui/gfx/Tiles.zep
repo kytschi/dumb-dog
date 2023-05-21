@@ -24,17 +24,19 @@
 */
 namespace DumbDog\Ui\Gfx;
 
+use DumbDog\Controllers\Controller;
 use DumbDog\Ui\Gfx\Titles;
 
 class Tiles
 {
-    public function build(array data, string url = "")
+    public function build(array data, string url = "", string from = "")
     {
         var titles, html;
         
         let html = "<div id='tiles'>";
+
         if (count(data)) {
-            var iLoop;
+            var iLoop, link_url;
             let iLoop = 0;
             while (iLoop < count(data)) {
                 let html .= "<div class='tile'>
@@ -54,6 +56,16 @@ class Tiles
                     }
                 }
                 let html .= "</div>";
+                if (property_exists(data[iLoop], "stock")) {
+                    if (data[iLoop]->stock) {
+                        let html .= "<span class='product-stock' title='In stock'>" . data[iLoop]->stock . "</span>";
+                    }
+                }
+                if (property_exists(data[iLoop], "price")) {
+                    if (data[iLoop]->price) {
+                        let html .= "<span class='product-price' title='Product price'>&pound;" . data[iLoop]->price . "</span>";
+                    }
+                }
                 if (property_exists(data[iLoop], "tags")) {
                     if (!empty(data[iLoop]->tags)) {
                         var tag;
@@ -80,7 +92,11 @@ class Tiles
                         let html .= "<span onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")' class='round icon icon-copy' title='Copy URL to clipboard'>&nbsp;</span>";
                     }
                 }
-                let html .="<a href='" . url . data[iLoop]->id . "' class='round icon icon-edit' title='edit me'>&nbsp;</a>
+                let link_url = url . data[iLoop]->id;
+                if (from) {
+                    let link_url .= "?from=" . from;
+                }
+                let html .="<a href='" . link_url . "' class='round icon icon-edit' title='edit me'>&nbsp;</a>
                         </div>
                     </div>
                 </div>";

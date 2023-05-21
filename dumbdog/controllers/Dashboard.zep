@@ -272,7 +272,7 @@ class Dashboard extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div id='login' class='box'>
             <div class='box-body'>
                 <div class='input-group'>
                     <span>username<span class='required'>*</span></span>

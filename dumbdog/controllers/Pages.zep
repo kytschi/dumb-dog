@@ -64,11 +64,12 @@ class Pages extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
                     let data["type"] = type;
-                    let data["event_on"] = null;
-                    let data["price"] = 0.00;
+                    let data["event_on"] = null;                    
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
                     let data["tags"] = _POST["tags"];
                     let data["parent_id"] = _POST["parent_id"];
+                    let data["price"] = 0.00;
+                    let data["stock"] = 0;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -81,6 +82,9 @@ class Pages extends Controller
 
                     if (isset(_POST["price"])) {
                         let data["price"] = floatval(_POST["price"]);
+                    }
+                    if (isset(_POST["stock"])) {
+                        let data["stock"] = intval(_POST["stock"]);
                     }
 
                     let status = database->execute(
@@ -101,6 +105,7 @@ class Pages extends Controller
                             tags,
                             parent_id,
                             price,
+                            stock,
                             created_at,
                             created_by,
                             updated_at,
@@ -122,6 +127,7 @@ class Pages extends Controller
                             :tags,
                             :parent_id,
                             :price,
+                            :stock,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -133,10 +139,14 @@ class Pages extends Controller
                         let html .= this->saveFailed("Failed to save the " . type);
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've saved the " . type);
+                        this->redirect(this->global_url . "?saved=true");
                     }
                 }
             }
+        }
+
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("I've saved the file");
         }
 
         let html .= "<form method='post'><div class='box wfull'>
@@ -298,6 +308,7 @@ class Pages extends Controller
                     let data["tags"] = _POST["tags"];
                     let data["parent_id"] = _POST["parent_id"];
                     let data["price"] = 0.00;
+                    let data["stock"] = 0;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -310,6 +321,9 @@ class Pages extends Controller
 
                     if (isset(_POST["price"])) {
                         let data["price"] = floatval(_POST["price"]);
+                    }
+                    if (isset(_POST["stock"])) {
+                        let data["stock"] = intval(_POST["stock"]);
                     }
 
                     let database = new Database(this->cfg);
@@ -330,7 +344,8 @@ class Pages extends Controller
                             event_length=:event_length,
                             tags=:tags,
                             parent_id=:parent_id,
-                            price=:price 
+                            price=:price,
+                            stock=:stock 
                         WHERE id=:id",
                         data
                     );
@@ -460,7 +475,7 @@ class Pages extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/pages' class='button-blank'>cancel</a>
+                <a href='" . this->global_url . "' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -580,9 +595,9 @@ class Pages extends Controller
         let html .= "<div id='pages'>";
 
         let data = [];
-        let query = "SELECT * FROM pages";
+        let query = "SELECT * FROM pages WHERE type='page'";
         if (isset(_GET["tag"])) {
-            let query .= " WHERE tags like :tag";
+            let query .= " AND tags like :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
         let query .= " ORDER BY name";

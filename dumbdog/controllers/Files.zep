@@ -38,8 +38,10 @@ class Files extends Controller
         let titles = new Titles();
         let database = new Database(this->cfg);
 
+        var from = this->validFrom();
+
         let html = titles->page("Upload a file", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files?from=" . from . "' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -102,13 +104,17 @@ class Files extends Controller
                         let html .= this->saveFailed("Failed to save the file");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've saved the file");
+                        this->redirect("/dumb-dog/files/add?from=" . from . "&saved=true");
                     }
                 }
             }
         }
 
-        let html .= "<form method='post' enctype='multipart/form-data'><div class='box wfull'>
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("I've saved the file");
+        }
+
+        let html .= "<form method='post' action='/dumb-dog/files/add?from=" . from . "' enctype='multipart/form-data'><div class='box wfull'>
             <div class='box-title'>
                 <span>the file</span>
             </div>
@@ -127,7 +133,7 @@ class Files extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/files' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/files?from=" . from . "' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -197,11 +203,14 @@ class Files extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/files' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+
+        var from = this->validFrom();
+
+        let html .= "'><a href='/dumb-dog/files?from=" . from . "' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "' class='round icon icon-recover' title='Recover the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "?from=" . from . "' class='round icon icon-recover' title='Recover the file'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "' class='round icon icon-delete' title='Delete the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "?from=" . from . "' class='round icon icon-delete' title='Delete the file'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -231,7 +240,7 @@ class Files extends Controller
                         let html .= this->saveFailed("Failed to update the file");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/files/edit/" . model->id . "?saved=true");
+                        this->redirect("/dumb-dog/files/edit/" . model->id . "?from=" . from . "&saved=true");
                     }
                 }
             }
@@ -241,7 +250,7 @@ class Files extends Controller
             let html .= this->saveSuccess("I've updated the file");
         }
 
-        let html .= "<form method='post' enctype='multipart/form-data'><div class='box wfull";
+        let html .= "<form method='post' action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "' enctype='multipart/form-data'><div class='box wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -260,7 +269,7 @@ class Files extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/files' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/files?from=" . from . "' class='button-blank'>cancel</a>
                 <button type='submit' name='save'>save</button>
             </div>
         </div></form>";
@@ -282,9 +291,11 @@ class Files extends Controller
             let html .= this->saveSuccess("I've deleted the file item");
         }
 
+        var from = this->validFrom();
+
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/files/add' class='round icon' title='Upload some media'>&nbsp;</a>
+            <a href='/dumb-dog/" . from . "' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/files/add?from=" . from . "' class='round icon' title='Upload some media'>&nbsp;</a>
         </div>";
 
         let html .= this->tags(path, "files");
@@ -298,7 +309,8 @@ class Files extends Controller
         let query .= " ORDER BY name";
         let html = html . tiles->build(
             database->all(query, data),
-            "/dumb-dog/" . path . "/edit/"
+            "/dumb-dog/" . path . "/edit/",
+            from
         );
         return html;
     }

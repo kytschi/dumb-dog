@@ -297,6 +297,8 @@ class Controller
 
         let html = titles->page("Delete the " . rtrim(table, "s"), "delete");
 
+        var from = this->validFrom();
+
         if (!empty(_POST)) {
             if (isset(_POST["delete"])) {
                 var status = false, err;
@@ -312,7 +314,7 @@ class Controller
                         let html .= this->saveFailed("Failed to delete the " . rtrim(table, "s"));
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/" . table . "?deleted=true");
+                        this->redirect("/dumb-dog/" . table . "?deleted=true&from=" . from);
                     }
                 } catch \Exception, err {
                     let html .= this->saveFailed(err->getMessage());
@@ -320,7 +322,7 @@ class Controller
             }
         }
 
-        let html .= "<form method='post'><div class='error box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/files/delete/" . model->id . "?from=" . from . "'><div class='error box wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
@@ -331,7 +333,7 @@ class Controller
         let html .= "like I bury my bone...</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/" . table . "/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "' class='button-blank'>cancel</a>
                 <button type='submit' name='delete'>delete</button>
             </div>
         </div></form>";
@@ -353,6 +355,8 @@ class Controller
 
         let html = titles->page("Recover the " . rtrim(table, "s"), "recover");
 
+        var from = this->validFrom();
+
         if (!empty(_POST)) {
             if (isset(_POST["recover"])) {
                 var status = false, err;
@@ -364,7 +368,7 @@ class Controller
                         let html .= this->saveFailed("Failed to recover the " . rtrim(table, "s"));
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/" . table . "/edit/" . model->id);
+                        this->redirect("/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from);
                     }
                 } catch \Exception, err {
                     let html .= this->saveFailed(err->getMessage());
@@ -372,7 +376,7 @@ class Controller
             }
         }
 
-        let html .= "<form method='post'><div class='error box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/files/recover/" . model->id . "?from=" . from . "'><div class='error box wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
@@ -385,7 +389,7 @@ class Controller
         let html .= "...</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/" . table . "/edit/" . model->id . "' class='button-blank'>cancel</a>
+                <a href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "' class='button-blank'>cancel</a>
                 <button type='submit' name='recover'>recover</button>
             </div>
         </div></form>";
@@ -405,5 +409,15 @@ class Controller
             let iLoop = iLoop + 1;
         }
         return true;
+    }
+
+    public function validFrom()
+    {
+        if (isset(_GET["from"])) {
+            if (in_array(_GET["from"], ["pages", "products"])) {
+                return _GET["from"];
+            }
+        }
+        return "pages";
     }
 }

@@ -287,7 +287,8 @@ class DumbDog
         SELECT
             name,
             mime_type,
-            CONCAT('/website/files/', filename) AS filename 
+            CONCAT('/website/files/', filename) AS filename,
+            CONCAT('/website/files/thumb-', filename) AS thumbnail  
         FROM files 
         WHERE tags like :tag AND deleted_at IS NULL";
 
