@@ -578,10 +578,10 @@ class DumbDog
                 id=:id",
             [
                 "id": _SESSION["dd_basket"],
-                "total": products->total,
-                "sub_total": products->sub_total,
-                "sub_total_tax": products->sub_total_tax,
-                "quantity": products->quantity,
+                "total": floatval(products->total),
+                "sub_total": floatval(products->sub_total),
+                "sub_total_tax": floatval(products->sub_total_tax),
+                "quantity": intval(products->quantity),
                 "updated_by": this->system_uuid
             ]
         );
