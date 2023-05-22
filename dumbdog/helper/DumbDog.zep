@@ -224,17 +224,32 @@ class DumbDog
             let quantity = 1;
         }
 
+        if (isset(_SESSION["dd_basket"])) {
+            let order_product = database->get(
+                "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
+                ["id": _SESSION["dd_basket"]]
+            );
+
+            if (empty(order_product)) {
+                unset(_SESSION["dd_basket"]);
+            }
+        }
+
         if (!isset(_SESSION["dd_basket"])) {
             var id, security, status;
             let security = new Security(this->cfg);
             let id = security->uuid();
+
+            let data = database->get("SELECT count(id) AS order_number FROM orders");
+
             let status = database->execute(
                 "INSERT INTO orders 
-                    (id, created_at, created_by, updated_at, updated_by)
+                    (id, order_number, created_at, created_by, updated_at, updated_by)
                 VALUES
-                    (:id, NOW(), :created_by, NOW(), :updated_by)",
+                    (:id, :order_number, NOW(), :created_by, NOW(), :updated_by)",
                 [
                     "id": id,
+                    "order_number": sprintf("%08d", data->order_number),
                     "created_by": this->system_uuid,
                     "updated_by": this->system_uuid
                 ]
@@ -349,6 +364,11 @@ class DumbDog
             "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
             ["id": _SESSION["dd_basket"]]
         );
+
+        if (empty(model)) {
+            unset(_SESSION["dd_basket"]);
+            return null;
+        }
 
         let model->items = database->all(
             "SELECT

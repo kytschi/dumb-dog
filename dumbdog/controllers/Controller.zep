@@ -342,7 +342,7 @@ class Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/delete/" . model->id . "?from=" . from . "'><div class='error box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/" . table . "/delete/" . model->id . "?from=" . from . "'><div class='error box wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
@@ -396,7 +396,7 @@ class Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/recover/" . model->id . "?from=" . from . "'><div class='error box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/" . table . "/recover/" . model->id . "?from=" . from . "'><div class='error box wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
