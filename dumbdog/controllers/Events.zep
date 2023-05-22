@@ -41,28 +41,22 @@ class Events extends Pages
 
     public function addHtml()
     {
-        return "
-            <div class='input-group'>
-                <span>when its on</span>
-                <input type='text' class='datepicker' name='event_on'>
-            </div>
-            <div class='input-group'>
-                <span>what time its on, enter as hour:minutes</span>
-                <input type='text' name='event_time' placeholder='24 hour time please' value=''>
-            </div>
-            <div class='input-group'>
-                <span>how long for</span>
-                <select name='event_length'>
-                    <option value='1'>1 hour</option>
-                    <option value='2'>2 hours</option>
-                    <option value='4'>4 hours</option>
-                    <option value='all_day'>all day</option>
-                    <option value='daily'>daily</option>
-                    <option value='weekly'>weekly</option>
-                    <option value='monthly'>monthly</option>
-                    <option value='annually'>annually</option>
-                </select>
-            </div>";
+        return this->createInputDate("when its on", "event_on", "please set a date if required") . 
+            this->createInputText("what time its on, enter as hour:minutes", "event_time", "24 hour time please") .
+            this->createInputSelect(
+                "how long for",
+                "event_length",
+                [
+                    "1": "1 hour",
+                    "2": "2 hours",
+                    "4": "4 hours",
+                    "all_day": "all day",
+                    "daily": "daily",
+                    "weekly": "weekly",
+                    "monthly": "monthly",
+                    "annually": "annually"
+                ]
+            );
     }
 
     public function edit(string path, string type = "event")
@@ -72,28 +66,24 @@ class Events extends Pages
 
     public function editHtml(model)
     {
-        return "
-        <div class='input-group'>
-            <span>when its on</span>
-            <input type='text' class='datepicker' name='event_on' value='" . date("d/m/Y", strtotime(model->event_on)) . "'>
-        </div>
-        <div class='input-group'>
-            <span>what time its on, enter as hour:minutes</span>
-            <input type='text' name='event_time' placeholder='24 hour time please' value='" . date("H:i", strtotime(model->event_on)) . "'>
-        </div>
-        <div class='input-group'>
-            <span>how long for</span>
-            <select name='event_length'>
-                <option value='1'" . (model->event_length == "1" ? " selected='selected'" : "") . ">1 hour</option>
-                <option value='2'" . (model->event_length == "2" ? " selected='selected'" : "") . ">2 hours</option>
-                <option value='4'" . (model->event_length == "4" ? " selected='selected'" : "") . ">4 hours</option>
-                <option value='all_day'" . (model->event_length == "all_day" ? " selected='selected'" : "") . ">all day</option>
-                <option value='daily'" . (model->event_length == "daily" ? " selected='selected'" : "") . ">daily</option>
-                <option value='weekly'" . (model->event_length == "weekly" ? " selected='selected'" : "") . ">weekly</option>
-                <option value='monthly'" . (model->event_length == "monthly" ? " selected='selected'" : "") . ">monthly</option>
-                <option value='annually'" . (model->event_length == "annually" ? " selected='selected'" : "") . ">annually</option>
-            </select>
-        </div>";
+        return this->createInputDate("when its on", "event_on", "please set a date if required", false, date("d/m/Y", strtotime(model->event_on))) . 
+            this->createInputText("what time its on, enter as hour:minutes", "event_time", "24 hour time please", false, date("H:i", strtotime(model->event_on))) .
+            this->createInputSelect(
+                "how long for",
+                "event_length",
+                [
+                    "1": "1 hour",
+                    "2": "2 hours",
+                    "4": "4 hours",
+                    "all_day": "all day",
+                    "daily": "daily",
+                    "weekly": "weekly",
+                    "monthly": "monthly",
+                    "annually": "annually"
+                ],
+                false,
+                model->event_length
+            );
     }
 
     public function index(string path)

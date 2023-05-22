@@ -33,10 +33,11 @@ use DumbDog\Ui\Gfx\Titles;
 class Pages extends Controller
 {
     public global_url = "/dumb-dog/pages";
+    public required = ["name", "url", "template_id"];
 
     public function add(string path, string type = "page")
     {
-        var titles, html, data, database, iLoop;
+        var titles, html, data, database;
         let titles = new Titles();
         let database = new Database(this->cfg);
 
@@ -49,7 +50,7 @@ class Pages extends Controller
                 var status = false;
                 let data = [];
 
-                if (!this->validate(_POST, ["name", "url", "template_id"])) {
+                if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
@@ -70,6 +71,7 @@ class Pages extends Controller
                     let data["parent_id"] = _POST["parent_id"];
                     let data["price"] = 0.00;
                     let data["stock"] = 0;
+                    let data["code"] = null;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -85,6 +87,9 @@ class Pages extends Controller
                     }
                     if (isset(_POST["stock"])) {
                         let data["stock"] = intval(_POST["stock"]);
+                    }
+                    if (isset(_POST["code"])) {
+                        let data["code"] = _POST["code"];
                     }
 
                     let status = database->execute(
@@ -153,87 +158,35 @@ class Pages extends Controller
             <div class='box-title'>
                 <span>the " . type . "</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>live</span>
-                    <div class='switcher'>
-                        <label>
-                            <input type='checkbox' name='status' value='1' checked='checked'>
-                            <span>
-                                <small class='switcher-on'></small>
-                                <small class='switcher-off'></small>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-                <div class='input-group'>
-                    <span>url<span class='required'>*</span></span>
-                    <input type='text' name='url' placeholder='how will I be reached' value=''>
-                </div>
-                <div class='input-group'>
-                    <span>title<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='give me a name' value=''>
-                </div>
-                <div class='input-group'>
-                    <span>content</span>
-                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the content'></textarea>
-                </div>";
-        
-        let html .= this->addHtml();
+            <div class='box-body'>";
+
+        let html .= this->createInputSwitch("live", "status") . 
+            this->createInputText("url", "url", "how will I be reached", true) .
+            this->createInputText("title", "title", "give me a name", true) .
+            this->templatesSelect(database) . 
+            this->createInputWysiwyg("content", "content", "the content") .        
+            this->addHtml();
+
+        /* Parent page */
+        let html .= this->parentSelect(type, database, null);
+
+        let html .= this->createInputText("tags", "tags", "tag the content", false, null, "tags") .
+            this->createInputSelect(
+                "menu item",
+                "menu_item",
+                [
+                    "none": "none",
+                    "header": "header",
+                    "footer": "footer",
+                    "both": "both"
+                ],
+                false
+            ) . 
+            this->createInputText("meta keywords", "meta_keywords", "add some keywords if you like") .
+            this->createInputText("meta author", "meta_author", "add an author") .
+            this->createInputTextarea("meta description", "meta_description", "add a description");
+
         let html .= "
-                <div class='input-group'>
-                    <span>template<span class='required'>*</span></span>
-                    <select name='template_id' required='required'>";
-        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC");
-        let iLoop = 0;
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->{"default"}) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-        let html .= "
-                    </select>
-                </div>
-                <div class='input-group'>
-                    <span>parent</span>
-                    <select name='parent_id'><option value=''>no parent</option>";
-        let data = database->all("SELECT * FROM pages WHERE type !='event' ORDER BY name");
-        let iLoop = 0;
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'>" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-        let html .= "
-                    </select>
-                </div>
-                <div class='input-group'>
-                    <span>menu item</span>
-                    <select name='menu_item'>
-                        <option value=''>none</option>
-                        <option value='header'>header</option>
-                        <option value='footer'>footer</option>
-                        <option value='both'>both</option>
-                    </select>
-                </div>
-                <div class='input-group'>
-                    <span>tags</span>
-                    <input type='text' name='tags' class='tags' placeholder='tag the page' value=''>
-                </div>
-                <div class='input-group'>
-                    <span>meta keywords</span>
-                    <input type='text' name='meta_keywords' placeholder='add some keywords if you like'>
-                </div>
-                <div class='input-group'>
-                    <span>meta author</span>
-                    <input type='text' name='meta_author' placeholder='add an author'>
-                </div>
-                <div class='input-group'>
-                    <span>meta description</span>
-                    <textarea rows='4' name='meta_description' placeholder='add a description'></textarea>
-                </div>
             </div>
             <div class='box-footer'>
                 <a href='" . this->global_url . "' class='button-blank'>cancel</a>
@@ -290,7 +243,7 @@ class Pages extends Controller
             if (isset(_POST["save"])) {
                 var database, status = false;
 
-                if (!this->validate(_POST, ["name", "url", "template_id"])) {
+                if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
@@ -309,6 +262,7 @@ class Pages extends Controller
                     let data["parent_id"] = _POST["parent_id"];
                     let data["price"] = 0.00;
                     let data["stock"] = 0;
+                    let data["code"] = null;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -324,6 +278,9 @@ class Pages extends Controller
                     }
                     if (isset(_POST["stock"])) {
                         let data["stock"] = intval(_POST["stock"]);
+                    }
+                    if (isset(_POST["code"])) {
+                        let data["code"] = _POST["code"];
                     }
 
                     let database = new Database(this->cfg);
@@ -364,115 +321,28 @@ class Pages extends Controller
             let html .= this->saveSuccess("I've updated the " . type);
         }
 
-        let html .= "<form method='post'><div class='box wfull";
-        if (model->deleted_at) {
-            let html .= " deleted";
-        }
-        let html .= "'>
-            <div class='box-title'>
-                <span>the " . type . "</span>
-            </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>live</span>
-                    <div class='switcher'>
-                        <label>
-                            <input type='checkbox' name='status' value='1'";
-                if (model->{"status"} == "live") {
-                    let html .= " checked='checked'";
-                }
-                
-                let html .= ">
-                            <span>
-                                <small class='switcher-on'></small>
-                                <small class='switcher-off'></small>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-                <div class='input-group'>
-                    <span>url<span class='required'>*</span></span>
-                    <input type='text' name='url' placeholder='the page url' value='" . model->url . "'>
-                </div>
-                <div class='input-group'>
-                    <span>title<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='the page title' value='" . model->name . "'>
-                </div>
-                <div class='input-group'>
-                    <span>content</span>
-                    <textarea class='wysiwyg' name='content' rows='7' placeholder='the page content'>" . model->content . "</textarea>
-                </div>";
-        let html .= this->editHtml(model);
-        let html .= "<div class='input-group'>
-                    <span>template<span class='required'>*</span></span>
-                    <select name='template_id' required='required'>";
-        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC, name");
-        var iLoop = 0;
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == model->template_id) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
+        let html .= "<form method='post'>
+        <div class='box wfull" . (model->deleted_at ? " deleted" : "") . "'>
+            <div class='box-title'><span>the " . type . "</span></div>
+            <div class='box-body'>";
+
+        let html .= this->createInputSwitch("live", "status", false, model->status) . 
+            this->createInputText("url", "url", "how will I be reached", true, model->url) .
+            this->createInputText("title", "title", "give me a name", true, model->name) .
+            this->templatesSelect(database, model->template_id) . 
+            this->createInputWysiwyg("content", "content", "the content", false, model->content) . 
+            this->editHtml(model);
+
+        /* Parent page */
+        let html .= this->parentSelect(type, database, model->parent_id, model->id);
+
+        let html .= this->createInputText("tags", "tags", "tag the content", false, model->tags, "tags") .
+            this->createInputSelect("menu item", "menu_item", ["none", "header", "footer", "both"], false, model->menu_item) . 
+            this->createInputText("meta keywords", "meta_keywords", "add some keywords if you like", false, model->meta_keywords) .
+            this->createInputText("meta author", "meta_author", "add an author", false, model->meta_author) .
+            this->createInputTextarea("meta description", "meta_description", "add a description", false, model->meta_description);
+
         let html .= "
-                    </select>
-                </div>
-                <div class='input-group'>
-                    <span>parent</span>
-                    <select name='parent_id'><option value=''>no parent</option>";
-        let data = database->all("SELECT * FROM pages WHERE type !='event' ORDER BY name");
-        let iLoop = 0;
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == model->parent_id) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-        let html .= "
-                    </select>
-                </div>
-                <div class='input-group'>
-                    <span>tags</span>
-                    <input type='text' name='tags' class='tags' placeholder='tag the page' value='" . model->tags . "'>
-                </div>
-                <div class='input-group'>
-                    <span>menu item</span>
-                    <select name='menu_item'>
-                    <option value=''";
-            if (model->menu_item == "") {
-                let html .= " selected='selected'";
-            }
-            let html .= ">none</option>
-                        <option value='header'";
-            if (model->menu_item == "header") {
-                let html .= " selected='selected'";
-            }
-            let html .= ">header</option><option value='footer'";
-            if (model->menu_item == "footer") {
-                let html .= " selected='selected'";
-            }
-            let html .= ">footer</option><option value='both'";
-            if (model->menu_item == "both") {
-                let html .= " selected='selected'";
-            }
-            let html .= ">both</option></select>
-                </div>
-                <div class='input-group'>
-                    <span>meta keywords</span>
-                    <input type='text' name='meta_keywords' placeholder='add some keywords if you like' value='" . model->meta_keywords . "'>
-                </div>
-                <div class='input-group'>
-                    <span>meta author</span>
-                    <input type='text' name='meta_author' placeholder='add an author' value='" . model->meta_author . "'>
-                </div>
-                <div class='input-group'>
-                    <span>meta description</span>
-                    <textarea rows='4' name='meta_description' placeholder='add a description'>" . model->meta_description . "</textarea>
-                </div>
             </div>
             <div class='box-footer'>
                 <a href='" . this->global_url . "' class='button-blank'>cancel</a>
@@ -480,7 +350,87 @@ class Pages extends Controller
             </div>
         </div></form>";
         
-        var query, year, month, colours = [
+        let html .= this->stats(database, model);
+
+        return html;
+    }
+
+    public function editHtml(model)
+    {
+        return "";
+    }
+
+    public function index(string path)
+    {
+        var titles, tiles, database, html, query, data;
+        let titles = new Titles();
+        let database = new Database(this->cfg);
+        let tiles = new Tiles();
+        
+        let html = titles->page("Pages", "pages");
+
+        if (isset(_GET["deleted"])) {
+            let html .= this->saveSuccess("I've deleted the page");
+        }
+
+        let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/events' class='round icon icon-events' title='Events'>&nbsp;</a>
+            <a href='/dumb-dog/products' class='round icon icon-products' title='Products'>&nbsp;</a>
+            <a href='/dumb-dog/comments' class='round icon icon-comments' title='Comments'>&nbsp;</a>
+            <a href='/dumb-dog/files' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>
+        </div>";
+
+        let html .= this->tags(path, "pages");
+
+        let html .= "<div id='pages'>";
+
+        let data = [];
+        let query = "SELECT * FROM pages WHERE type='page'";
+        if (isset(_GET["tag"])) {
+            let query .= " AND tags like :tag";
+            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        }
+        let query .= " ORDER BY name";
+        let html = html . tiles->build(
+            database->all(query, data),
+            "/dumb-dog/" . path . "/edit/"
+        );
+
+        return html . "</div>";
+    }
+
+    private function parentSelect(type, database, model = null, exclude = null)
+    {
+        var select = ["": "no parent"], selected = null, data;
+        let data = database->all(
+            "SELECT * FROM pages WHERE type ='" . type . "'" . (exclude ? " AND id != '" . exclude . "'" : "") . " ORDER BY name"
+        );
+        var iLoop = 0;
+
+        if (model) {
+            let selected = model;
+        } elseif (isset(_POST["parent_id"])) {
+            let selected = _POST["parent_id"];
+        }
+
+        while (iLoop < count(data)) {
+            let select[data[iLoop]->id] = data[iLoop]->name;
+            let iLoop = iLoop + 1;
+        }
+
+        return this->createInputSelect("parent", "parent_id", select, false, selected);
+    }
+
+    public function recover(string path)
+    {
+        return this->triggerRecover(path, "pages");
+    }
+
+    private function stats(database, model)
+    {
+        var query, html = "", iLoop, data, year, month, colours = [
             "visitors": "#00c129",
             "unique": "#1D8CF8",
             "bot": "#E14ECA"
@@ -563,54 +513,26 @@ class Pages extends Controller
         return html;
     }
 
-    public function editHtml(model)
+    private function templatesSelect(database, model = null)
     {
-        return "";
-    }
+        var select = [], selected = null, data;
+        let data = database->all("SELECT * FROM templates WHERE deleted_at IS NULL ORDER BY `default` DESC, name");
+        var iLoop = 0;
 
-    public function index(string path)
-    {
-        var titles, tiles, database, html, query, data;
-        let titles = new Titles();
-        let database = new Database(this->cfg);
-        let tiles = new Tiles();
-        
-        let html = titles->page("Pages", "pages");
-
-        if (isset(_GET["deleted"])) {
-            let html .= this->saveSuccess("I've deleted the page");
+        if (model) {
+            let selected = model;
+        } elseif (isset(_POST["template_id"])) {
+            let selected = _POST["template_id"];
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/events' class='round icon icon-events' title='Events'>&nbsp;</a>
-            <a href='/dumb-dog/products' class='round icon icon-products' title='Products'>&nbsp;</a>
-            <a href='/dumb-dog/comments' class='round icon icon-comments' title='Comments'>&nbsp;</a>
-            <a href='/dumb-dog/files' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
-            <a href='/dumb-dog/templates' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>
-        </div>";
-
-        let html .= this->tags(path, "pages");
-
-        let html .= "<div id='pages'>";
-
-        let data = [];
-        let query = "SELECT * FROM pages WHERE type='page'";
-        if (isset(_GET["tag"])) {
-            let query .= " AND tags like :tag";
-            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        while (iLoop < count(data)) {
+            let select[data[iLoop]->id] = data[iLoop]->name;
+            if (data[iLoop]->{"default"} && empty(selected)) {
+                let selected = data[iLoop]->id;
+            }
+            let iLoop = iLoop + 1;
         }
-        let query .= " ORDER BY name";
-        let html = html . tiles->build(
-            database->all(query, data),
-            "/dumb-dog/" . path . "/edit/"
-        );
 
-        return html . "</div>";
-    }
-
-    public function recover(string path)
-    {
-        return this->triggerRecover(path, "pages");
+        return this->createInputSelect("template", "template_id", select, true, selected);
     }
 }

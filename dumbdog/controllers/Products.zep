@@ -33,6 +33,7 @@ use DumbDog\Ui\Gfx\Titles;
 class Products extends Pages
 {
     public global_url = "/dumb-dog/products";
+    public required = ["name", "url", "template_id", "code", "price", "stock"];
     
     public function add(string path, string type = "product")
     {
@@ -42,6 +43,7 @@ class Products extends Pages
     public function addHtml()
     {
         return 
+            this->createInputText("code", "code", "the product code", true) .
             this->createInputText("price", "price", "the price", true) .
             this->createInputText("stock", "stock", "the stock", true);
     }
@@ -54,6 +56,7 @@ class Products extends Pages
     public function editHtml(model)
     {
         return 
+            this->createInputText("code", "code", "the product code", true, model->code) .
             this->createInputText("price", "price", "the price", true, model->price) .
             this->createInputText("stock", "stock", "the stock", true, model->stock);
     }

@@ -63,7 +63,7 @@ class Exception extends \Exception
             header("HTTP/1.1 500 Internal Server Error");
         }
 
-        let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") . "<body id='error' class='error'><main>";
+        let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") . "<body id='error' class='error'><div class='background-image'></div><main>";
         let html .= titles->page("bad doggie!", "error");
         let html .= "<div class='box'>
             <div class='box-body'>
