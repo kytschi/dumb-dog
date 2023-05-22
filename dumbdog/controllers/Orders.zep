@@ -28,7 +28,6 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
 
 class Orders extends Controller
@@ -46,10 +45,29 @@ class Orders extends Controller
         let database = new Database(this->cfg);
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM orders WHERE id=:id", data);
-
         if (empty(model)) {
             throw new NotFoundException("Order not found");
         }
+
+        let model->items = database->all(
+            "SELECT
+                order_products.*,
+                pages.name,
+                pages.content,
+                pages.meta_keywords,
+                pages.meta_description,
+                pages.meta_author,
+                pages.tags,
+                pages.code,
+                pages.stock 
+            FROM 
+                order_products 
+            LEFT JOIN pages ON pages.id=order_products.product_id 
+            WHERE order_id=:order_id AND order_products.deleted_at IS NULL AND pages.deleted_at IS NULL",
+            [
+                "order_id": model->id
+            ]
+        );
 
         let html = titles->page("Edit the order", "edit");
         if (model->deleted_at) {
@@ -86,7 +104,50 @@ class Orders extends Controller
                 <span>the order</span>
             </div>
             <div class='box-body'>
+                <div class='input-group'>
+                    <span>Status</span>
+                    <p style='padding:0; margin: 0'><span style='float: left;' class='status status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
+                </div>
+                <table class='table wfull'>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th width='100px'>Qty</th>
+                            <th width='120px'>Price</th>
+                            <th width='120px'>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+        var item;
+        for item in model->items {
+            let html .= "<tr>
+                <td>" . item->name . "</td>
+                <td>" . item->quantity . "</td>
+                <td>" . item->price . "</td>
+                <td>" . item->total . "</td>
+            </tr>";
+        }
                 
+        let html .= "</tbody>
+                    <tfoot>
+                        <tr>
+                            <td class='blank' colspan='2'>&nbsp;</td>
+                            <td class='total'>Sub-total</td>
+                            <td>" . model->sub_total . "</td>
+                        </tr>
+                        <tr>
+                            <td class='blank' colspan='2'>&nbsp;</td>
+                            <td class='total'>Tax</td>
+                            <td>" . model->sub_total_tax . "</td>
+                        </tr>
+                        <tr>
+                            <td class='blank' colspan='2'>&nbsp;</td>
+                            <td class='total'>Total</td>
+                            <td>" . model->total . "</td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
             <div class='box-footer'>
                 <a href='/dumb-dog/orders' class='button-blank'>cancel</a>
@@ -99,30 +160,47 @@ class Orders extends Controller
 
     public function index(string path)
     {
-        var titles, table, database, html;
+        var titles, database, html, data, item;
         let titles = new Titles();
         
         let html = titles->page("Orders", "orders");
 
         if (isset(_GET["deleted"])) {
-            let html .= this->saveSuccess("I've deleted the user");
+            let html .= this->saveSuccess("I've deleted the order");
         }
 
         let database = new Database(this->cfg);
 
-        let table = new Table(this->cfg);
-        let html = html . table->build(
-            [
-                "quantity",
-                "sub_total",
-                "sub_total_tax",
-                "total",
-                "status"
-            ],
-            database->all("SELECT * FROM orders ORDER BY created_at DESC"),
-            "/dumb-dog/orders/edit/"
-        );
+        let html .= "
+            <table class='table wfull'>
+                <thead>
+                    <tr>
+                        <th width='120px'>Order no.</th>
+                        <th>Details</th>
+                        <th width='140px'>Total</th>
+                        <th width='120px'>Status</th>
+                        <th width='100px'>Date</th>
+                        <th width='100px'>Tools</th>
+                    </tr>
+                </thead>
+                <tbody>";
+        
+        let data = database->all("SELECT * FROM orders ORDER BY created_at DESC");
 
+        for item in data {
+            let html .= "<tr" . (item->deleted_at ? " class='deleted'" : "") . ">
+                <td>" . item->order_number . "</td>
+                <td>&nbsp;</td>
+                <td>" . item->total . "</td>
+                <td><span class='status status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
+                <td>" . date("d/m/Y", strtotime(item->created_at)) . "</td>
+                <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='mini icon icon-edit' title='edit me'>&nbsp;</a></td>
+            </tr>";
+        }
+
+        let html .= "</tbody>
+        </table>";
+        
         return html;
     }
 

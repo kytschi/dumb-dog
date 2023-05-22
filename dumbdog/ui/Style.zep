@@ -49,6 +49,7 @@ class Style
             --box-success-background-colour: #1FD4AF;
             --box-active-background-colour: #71C2FF;
             --box-deleted-background-colour: #8B8B8B;
+            --box-disabled-background-colour: #c2c2c2;
             --box-warning-background-colour: #F08966;
             --box-border-colour: #030202;
             --box-title-background-colour: #EB9691;
@@ -73,6 +74,8 @@ class Style
             --text-heading-border-colour: #030202;
             --text-heading-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
             --text-required-colour: #fca8a4;
+            --text-disabled: #a2a2a2;
+            --text-deleted: #f44f46;
         } " . this->tagify() . "
         
         /* Fonts */
@@ -465,6 +468,17 @@ class Style
             text-align: left;
             border-right: 3px solid var(--box-title-border-colour);
         }
+        .table tr.deleted {
+            color: var(--text-deleted);
+            text-decoration: line-through;
+        }
+        .table tr .blank {
+            background-color: var(--box-disabled-background-colour);
+        }
+        .table tr .total {
+            background-color: var(--box-title-background-colour);
+            text-align: right;
+        }
         .box-title img {
             width: 80px;
             margin-right: 10px;
@@ -640,6 +654,23 @@ class Style
         .product-price {
             color: #fff;
             background-color: var(--box-success-background-colour);
+        }
+
+        /* Statuses */
+        .status {
+            padding: 15px 20px;
+            border-radius: 20px;
+            background-color: var(--box-active-background-colour);
+            display: block;
+            text-align: center;
+        }
+        .status-basket {
+            background-color: var(--box-warning-background-colour);
+        }
+        .deleted .status {
+            color: var(--text-disabled) !important;
+            text-decoration: none !important;
+            background-color: var(--box-deleted-background-colour) !important;
         }
                 
         /* Text */
