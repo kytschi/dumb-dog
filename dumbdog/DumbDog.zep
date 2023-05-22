@@ -31,6 +31,7 @@ use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Messages;
+use DumbDog\Controllers\Orders;
 use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Products;
 use DumbDog\Controllers\Settings;
@@ -118,6 +119,7 @@ class DumbDog
             "Events": new Events(this->cfg),
             "Files": new Files(this->cfg),
             "Messages": new Messages(this->cfg),
+            "Orders": new Orders(this->cfg),
             "Pages": new Pages(this->cfg),
             "Products": new Products(this->cfg),
             "Settings": new Settings(this->cfg),
@@ -396,6 +398,26 @@ class DumbDog
                 "Users",
                 "index",
                 "users"
+            ],
+            "/orders/delete": [
+                "Orders",
+                "delete",
+                "delete the order"
+            ],
+            "/orders/edit": [
+                "Orders",
+                "edit",
+                "edit the order"
+            ],
+            "/orders/recover": [
+                "Orders",
+                "recover",
+                "recover the order"
+            ],
+            "/orders": [
+                "Orders",
+                "index",
+                "orders"
             ]
         ];                                
 
@@ -465,6 +487,8 @@ class DumbDog
             let id = "templates-bk";
         } elseif (strpos(location, "user") !== false) {
             let id = "users-bk";
+        } elseif (strpos(location, "order") !== false) {
+            let id = "orders-bk";
         }
 
         echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><div class='background-image'></div><main>";

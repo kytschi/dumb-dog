@@ -207,6 +207,172 @@ class DumbDog
         return database->all(query . where, data);
     }
 
+    public function addToBasket(string product_code, int quantity)
+    {
+        var database, product, order_product, status, data = [], sub_total = 0.00, sub_total_tax = 0.00, total = 0.00;
+        let database = new Database(this->cfg);
+
+        let product = database->get(
+            "SELECT * FROM pages WHERE code=:code AND deleted_at IS NULL",
+            ["code": product_code]
+        );
+        if (empty(product)) {
+            throw new Exception("Failed to find the product");
+        }
+
+        if (quantity <= 0) {
+            let quantity = 1;
+        }
+
+        if (!isset(_SESSION["dd_basket"])) {
+            var id, security, status;
+            let security = new Security(this->cfg);
+            let id = security->uuid();
+            let status = database->execute(
+                "INSERT INTO orders 
+                    (id, created_at, created_by, updated_at, updated_by)
+                VALUES
+                    (:id, NOW(), :created_by, NOW(), :updated_by)",
+                [
+                    "id": id,
+                    "created_by": this->system_uuid,
+                    "updated_by": this->system_uuid
+                ]
+            );
+            if (!is_bool(status)) {
+                throw new Exception("Failed to create the basket");
+            }
+
+            let _SESSION["dd_basket"] = id;
+            session_write_close();
+        }
+
+        let order_product = database->get(
+            "SELECT * FROM order_products WHERE order_id=:order_id AND product_id=:product_id",
+            [
+                "order_id": _SESSION["dd_basket"],
+                "product_id": product->id
+            ]
+        );
+
+        let total = product->price * quantity;
+        let sub_total = total;
+        let sub_total_tax = 0;
+
+        let data = [
+            "order_id": _SESSION["dd_basket"],
+            "product_id": product->id,
+            "price": product->price,
+            "quantity": quantity,
+            "sub_total": sub_total,
+            "sub_total_tax": sub_total_tax,
+            "total": total,
+            "updated_by": this->system_uuid
+        ];
+        
+        if (order_product) {
+            if (product->stock < order_product->stock) {
+                let quantity += quantity;
+            }
+            let status = database->execute(
+                "UPDATE
+                    order_products
+                SET
+                    quantity=:quantity,
+                    price=:price,
+                    sub_total=:sub_total,
+                    sub_total_tax=:sub_total_tax,
+                    total=:total,
+                    updated_by=:updated_by,
+                    updated_at=NOW(),
+                    deleted_at=NULL,
+                    deleted_by=NULL
+                WHERE 
+                    order_id=:order_id AND
+                    product_id=:product_id",
+                data
+            );
+        } else {
+            let data["created_by"] = this->system_uuid;
+            let status = database->execute(
+                "INSERT INTO order_products 
+                    (
+                        id,
+                        order_id,
+                        product_id,
+                        price,
+                        quantity,
+                        sub_total,
+                        sub_total_tax,
+                        total,
+                        created_at,
+                        created_by,
+                        updated_at,
+                        updated_by
+                    )
+                VALUES
+                    (
+                        UUID(),
+                        :order_id,
+                        :product_id,
+                        :price,
+                        :quantity,
+                        :sub_total,
+                        :sub_total_tax,
+                        :total,
+                        NOW(),
+                        :created_by,
+                        NOW(),
+                        :updated_by
+                    )",
+                data
+            );
+        }
+
+        if (!is_bool(status)) {
+            throw new Exception("Failed to add the product to the basket");
+        }
+
+        this->updateBasket();
+    }
+
+    public function basket()
+    {
+        if (!isset(_SESSION["dd_basket"])) {
+            return null;
+        }
+
+        var database, model;
+        let database = new Database(this->cfg);
+
+        let model = database->get(
+            "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
+            ["id": _SESSION["dd_basket"]]
+        );
+
+        let model->items = database->all(
+            "SELECT
+                order_products.*,
+                pages.name,
+                pages.content,
+                pages.meta_keywords,
+                pages.meta_description,
+                pages.meta_author,
+                pages.tags,
+                pages.code,
+                pages.stock 
+            FROM 
+                order_products 
+            LEFT JOIN pages ON pages.id=order_products.product_id 
+            WHERE order_id=:order_id AND order_products.deleted_at IS NULL AND pages.deleted_at IS NULL",
+            [
+                "order_id": model->id
+            ]
+        );
+                
+        return model;
+    }
+
     public function bookAppointment(array data)
     {
         var database, model, security;
@@ -349,5 +515,79 @@ class DumbDog
     public function products(array filters = [])
     {
         return this->pageQuery(filters, "product");
+    }
+
+    public function removeFromBasket(string id)
+    {
+        var database, product, status;
+        let database = new Database(this->cfg);
+
+        let product = database->get(
+            "SELECT * FROM order_products WHERE id=:id AND deleted_at IS NULL",
+            ["id": id]
+        );
+        if (empty(product)) {
+            throw new Exception("Failed to find the product");
+        }
+
+        let status = database->execute(
+            "DELETE FROM order_products WHERE id=:id",
+            [
+                "id": product->id
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception("Failed to remove the product from the basket");
+        }
+
+        this->updateBasket();
+    }
+
+    private function updateBasket()
+    {
+        var database, products, status;
+        let database = new Database(this->cfg);
+
+        let products = database->get(
+            "SELECT
+                SUM(total) AS total,
+                SUM(sub_total_tax) AS sub_total_tax,
+                SUM(sub_total) AS sub_total,
+                SUM(quantity) AS quantity
+            FROM
+                order_products
+            WHERE 
+                order_id=:order_id AND deleted_at IS NULL",
+            [
+                "order_id": _SESSION["dd_basket"]
+            ]
+        );
+
+        let status = database->execute(
+            "UPDATE
+                orders 
+            SET
+                sub_total=:sub_total,
+                sub_total_tax=:sub_total_tax,
+                total=:total,
+                quantity=:quantity,
+                updated_by=:updated_by,
+                updated_at=NOW()
+            WHERE 
+                id=:id",
+            [
+                "id": _SESSION["dd_basket"],
+                "total": products->total,
+                "sub_total": products->sub_total,
+                "sub_total_tax": products->sub_total_tax,
+                "quantity": products->quantity,
+                "updated_by": this->system_uuid
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception("Failed to update the basket");
+        }
     }
 }

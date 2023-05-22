@@ -111,6 +111,7 @@ class Pages extends Controller
                             parent_id,
                             price,
                             stock,
+                            code,
                             created_at,
                             created_by,
                             updated_at,
@@ -133,6 +134,7 @@ class Pages extends Controller
                             :parent_id,
                             :price,
                             :stock,
+                            :code,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -162,7 +164,7 @@ class Pages extends Controller
 
         let html .= this->createInputSwitch("live", "status") . 
             this->createInputText("url", "url", "how will I be reached", true) .
-            this->createInputText("title", "title", "give me a name", true) .
+            this->createInputText("title", "name", "give me a name", true) .
             this->templatesSelect(database) . 
             this->createInputWysiwyg("content", "content", "the content") .        
             this->addHtml();
@@ -302,7 +304,8 @@ class Pages extends Controller
                             tags=:tags,
                             parent_id=:parent_id,
                             price=:price,
-                            stock=:stock 
+                            stock=:stock,
+                            code=:code 
                         WHERE id=:id",
                         data
                     );
@@ -328,7 +331,7 @@ class Pages extends Controller
 
         let html .= this->createInputSwitch("live", "status", false, model->status) . 
             this->createInputText("url", "url", "how will I be reached", true, model->url) .
-            this->createInputText("title", "title", "give me a name", true, model->name) .
+            this->createInputText("title", "name", "give me a name", true, model->name) .
             this->templatesSelect(database, model->template_id) . 
             this->createInputWysiwyg("content", "content", "the content", false, model->content) . 
             this->editHtml(model);

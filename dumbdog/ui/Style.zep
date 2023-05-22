@@ -126,66 +126,72 @@ class Style
             background-color: #92ddd6;
         }
         #bk .background-image, #dashboard-bk .background-image {
-            background-position: bottom 0px right -12000px;
+            background-position: bottom 0px right -13200px;
         }
         #page-bk {
             background-color: #3c6794;
         }
         #page-bk .background-image {
-            background-position: bottom 0px right -10800px;
+            background-position: bottom 0px right -12000px;
         }
         #events-bk {
             background-color: #67cbda;
         }
         #events-bk .background-image {
-            background-position: bottom 0px right -9600px;
+            background-position: bottom 0px right -10800px;
         }
         #appointments-bk {
             background-color: #25B5B6;
         }
         #appointments-bk .background-image {
-            background-position: bottom 0px right -8400px;
+            background-position: bottom 0px right -9600px;
         }
         #products-bk {
             background-color: #fbdee3;
         }
         #products-bk .background-image {
-            background-position: bottom 0px right -7200px;
+            background-position: bottom 0px right -8400px;
         }
         #settings-bk {
             background-color: #C7D9E5;
         }
         #settings-bk .background-image {
-            background-position: bottom 0px right -6000px;
+            background-position: bottom 0px right -7200px;
         }
         #templates-bk {
             background-color: #597566;
         }
         #templates-bk .background-image {
-            background-position: bottom 0px right -4800px;
+            background-position: bottom 0px right -6000px;
         }
         #themes-bk {
             background-color: #B4B5BA;
         }
         #themes-bk .background-image {
-            background-position: bottom 0px right -3600px;
+            background-position: bottom 0px right -4800px;
         }
         #users-bk {
             background-color: #f5ded6;
         }
         #users-bk .background-image {
-            background-position: bottom 0px right -2400px;
+            background-position: bottom 0px right -3600px;
         }
         #page-not-found {
             background-color: #fff;
         }
         #page-not-found .background-image {
-            background-position: bottom 0px right -1200px;
+            background-position: bottom 0px right -2400px;
         }
         #error {
             background-color: #92ddd6;
         }
         #error .background-image {
+            background-position: bottom 0px right -1200px;
+        }
+        #orders-bk {
+            background-color: #506eb6;
+        }
+        #orders-bk .background-image {
             background-position: bottom 0px right 0px;
         }        
         main {
@@ -849,6 +855,9 @@ class Style
         }
         .icon-products::before {
             background-position: -64px -192px;
+        }
+        .icon-orders::before {
+            background-position: -128px -192px;
         }
         </style>";
     }
