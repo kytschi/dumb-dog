@@ -79,6 +79,26 @@ class Controller
         </div>";
     }
 
+    public function createInputSelect(string label, string var_name, array data, bool required = false, selected = "")
+    {
+        var html = "", item, key;
+
+        if (empty(selected)) {
+            let selected = isset(_POST[var_name]) ? _POST[var_name] : "";
+        }
+
+        let html .= "<div class='input-group'>
+                <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+                <select name='" . var_name . "'>";
+
+        for key, item in data {
+            let html .= "<option value='" . key . "'" . ((selected == key) ? " selected='selected'" : "") . ">" . item . "</option>";
+        }
+
+        let html .= "</select></div>";
+        return html;
+    }
+
     public function createInputSwitch(string label, string var_name, bool required = false, selected = false)
     {
         return "<div class='input-group'>
@@ -95,7 +115,7 @@ class Controller
                 </div>";
     }
 
-    public function createInputText(string label, string var_name, string placeholder, bool required = false, value = null)
+    public function createInputText(string label, string var_name, string placeholder, bool required = false, value = null, style = "")
     {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
@@ -106,8 +126,8 @@ class Controller
             <input
                 type='text'
                 name='" . var_name . "' 
-                placeholder='' 
-                value=\"" . value . "\"'>
+                placeholder='' " . (style ? " class='" . style . "'" : "") .
+                "value=\"" . value . "\"'>
         </div>";
     }
 
