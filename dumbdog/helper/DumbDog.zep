@@ -176,38 +176,37 @@ class DumbDog
 
     public function appointments(array filters = [])
     {
-        var database, query, where, data = [];
+        var database, query, data = [];
         let database = new Database(this->cfg);
 
-        let query = "
-        SELECT * FROM appointments";
-        let where = " WHERE free_slot=1 AND appointments.deleted_at IS NULL";
+        let query = "SELECT * FROM appointments WHERE free_slot=1 AND appointments.deleted_at IS NULL";
 
         if (count(filters)) {
             var key, value;
             for key, value in filters {
                 switch (key) {
                     case "order":
-                        let where .= " " . value;
+                        let query .= " " . value;
                         break;
                     case "where":
                         if (isset(value["query"])) {
-                            let where .= " AND " . value["query"];
+                            let query .= " AND " . value["query"];
                         }
                         if (isset(value["data"])) {
                             let data = value["data"];
                         }
                         break;
                     default:
+                        let query .= "";
                         continue;
                 }
             }
         }
 
-        return database->all(query . where, data);
+        return database->all(query, data);
     }
 
-    public function addToBasket(string product_code, int quantity)
+    public function basketAddTo(string product_code, int quantity)
     {
         var database, product, order_product, status, data = [], sub_total = 0.00, sub_total_tax = 0.00, total = 0.00;
         let database = new Database(this->cfg);
@@ -249,7 +248,7 @@ class DumbDog
                     (:id, :order_number, NOW(), :created_by, NOW(), :updated_by)",
                 [
                     "id": id,
-                    "order_number": sprintf("%08d", data->order_number),
+                    "order_number": sprintf("%08d", (!data->order_number ? 1 : data->order_number)),
                     "created_by": this->system_uuid,
                     "updated_by": this->system_uuid
                 ]
@@ -391,6 +390,139 @@ class DumbDog
         );
                 
         return model;
+    }
+
+    public function basketAddBilling(array data)
+    {
+        return this->basketAddAddress(data);
+    }
+
+    public function basketAddShipping(array data)
+    {
+        return this->basketAddAddress(data, "shipping");
+    }
+
+    private function basketAddAddress(array data, string type = "billing")
+    {
+        if (!isset(_SESSION["dd_basket"])) {
+            throw new Exception("Basket not found", 404);
+        }
+
+        var database, model, status, security;
+        let database = new Database(this->cfg);
+        let security = new Security(this->cfg);
+
+        let model = database->get(
+            "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
+            ["id": _SESSION["dd_basket"]]
+        );
+
+        if (empty(model)) {
+            unset(_SESSION["dd_basket"]);
+            throw new Exception("Basket not found", 404);
+        }
+
+        var key, required = ["name", "address_line_1"];
+        for key in required {
+            if (!isset(data[key])) {
+                throw new Exception("Missing required data");
+            } elseif (empty(data[key])) {
+                throw new Exception("Missing required data");
+            }
+        }
+
+        let status = database->execute(
+            "INSERT INTO order_addresses
+            (
+                id,
+                order_id,
+                type,
+                name,
+                address_line_1,
+                address_line_2,
+                city,
+                county,
+                postcode,
+                country,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by
+            ) 
+            VALUES
+            (
+                UUID(),
+                :order_id,
+                :type,
+                :name,
+                :address_line_1,
+                :address_line_2,
+                :city,
+                :county,
+                :postcode,
+                :country,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by
+            )
+            ON DUPLICATE KEY UPDATE
+                name=:name,
+                address_line_1=:address_line_1,
+                address_line_2=:address_line_2,
+                city=:city,
+                county=:county,
+                postcode=:postcode,
+                country=:country,
+                updated_at=NOW(),
+                updated_by=:updated_by",
+            [
+                "order_id": model->id,
+                "type": type,
+                "name": security->encrypt(data["name"]),
+                "address_line_1": security->encrypt(data["address_line_1"]),
+                "address_line_2": security->encrypt(isset(data["address_line_2"]) ? data["address_line_2"] : ""),
+                "city": security->encrypt(data["city"]),
+                "county": security->encrypt(data["county"]),
+                "postcode": security->encrypt(data["postcode"]),
+                "country": security->encrypt(data["country"]),
+                "created_by": this->system_uuid,
+                "updated_by": this->system_uuid
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception(status);
+        }
+
+        return true;
+    }
+
+    public function basketRemoveFrom(string id)
+    {
+        var database, product, status;
+        let database = new Database(this->cfg);
+
+        let product = database->get(
+            "SELECT * FROM order_products WHERE id=:id AND deleted_at IS NULL",
+            ["id": id]
+        );
+        if (empty(product)) {
+            throw new Exception("Failed to find the product");
+        }
+
+        let status = database->execute(
+            "DELETE FROM order_products WHERE id=:id",
+            [
+                "id": product->id
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception("Failed to remove the product from the basket");
+        }
+
+        this->updateBasket();
     }
 
     public function bookAppointment(array data)
@@ -535,33 +667,6 @@ class DumbDog
     public function products(array filters = [])
     {
         return this->pageQuery(filters, "product");
-    }
-
-    public function removeFromBasket(string id)
-    {
-        var database, product, status;
-        let database = new Database(this->cfg);
-
-        let product = database->get(
-            "SELECT * FROM order_products WHERE id=:id AND deleted_at IS NULL",
-            ["id": id]
-        );
-        if (empty(product)) {
-            throw new Exception("Failed to find the product");
-        }
-
-        let status = database->execute(
-            "DELETE FROM order_products WHERE id=:id",
-            [
-                "id": product->id
-            ]
-        );
-
-        if (!is_bool(status)) {
-            throw new Exception("Failed to remove the product from the basket");
-        }
-
-        this->updateBasket();
     }
 
     private function updateBasket()
