@@ -137,7 +137,7 @@ class Dashboard extends Controller
         });
         </script>";
 
-        let html .= "<div style='display:flex;column-gap: 20px;'>";
+        let html .= "<div class='row'>";
 
         let model = "SELECT count(id) AS total, bot FROM stats WHERE bot IS NOT NULL ";
         let model .= "GROUP BY bot ORDER BY total DESC";

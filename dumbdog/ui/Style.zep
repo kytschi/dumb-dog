@@ -422,6 +422,7 @@ class Style
             background-color: var(--box-background-colour);
             margin-bottom: 40px;
             border-collapse: collapse;
+            min-width: 50%;
         }
         #login.box {
             width: 50%;
@@ -435,6 +436,10 @@ class Style
             font-weight: bold;
             font-family: 'heading', Helvetica, sans-serif;
             padding: 20px;
+        }
+        .row {
+            display:flex;
+            column-gap: 20px;
         }
         .box-body {
             padding: 40px 40px;

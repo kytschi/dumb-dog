@@ -28,6 +28,7 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
+use DumbDog\Helper\Security;
 use DumbDog\Ui\Gfx\Titles;
 
 class Orders extends Controller
@@ -39,10 +40,11 @@ class Orders extends Controller
 
     public function edit(string path)
     {
-        var titles, html, database, model, data = [];
+        var titles, html, database, model, data = [], security;
         let titles = new Titles();
-
         let database = new Database(this->cfg);
+        let security = new Security(this->cfg);
+
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM orders WHERE id=:id", data);
         if (empty(model)) {
@@ -64,6 +66,20 @@ class Orders extends Controller
                 order_products 
             LEFT JOIN pages ON pages.id=order_products.product_id 
             WHERE order_id=:order_id AND order_products.deleted_at IS NULL AND pages.deleted_at IS NULL",
+            [
+                "order_id": model->id
+            ]
+        );
+
+        let model->billing = database->get(
+            "SELECT * FROM order_addresses WHERE order_id=:order_id AND type='billing'",
+            [
+                "order_id": model->id
+            ]
+        );
+
+        let model->shipping = database->get(
+            "SELECT * FROM order_addresses WHERE order_id=:order_id AND type='shipping'",
             [
                 "order_id": model->id
             ]
@@ -95,73 +111,91 @@ class Orders extends Controller
             let html .= this->saveSuccess("I've updated the user");
         }
 
-        let html .= "<form method='post'><div class='box wfull";
-        if (model->deleted_at) {
-            let html .= " deleted";
-        }
-        let html .= "'>
-            <div class='box-title'>
-                <span>the order</span>
-            </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>Status</span>
-                    <p style='padding:0; margin: 0'><span style='float: left;' class='status status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
+        let html .= "
+        <form method='post'>
+            <div class='box wfull" . (model->deleted_at ? " deleted" : "") . "'>
+                <div class='box-title'>
+                    <span>the order</span>
                 </div>
-                <table class='table wfull'>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th width='100px'>Qty</th>
-                            <th width='120px'>Price</th>
-                            <th width='120px'>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>";
+                <div class='box-body'>
+                    <div class='input-group'>
+                        <span>Status</span>
+                        <p style='padding:0; margin: 0'><span style='float: left;' class='status status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
+                    </div>
+                    <table class='table wfull'>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th width='100px'>Qty</th>
+                                <th width='120px'>Price</th>
+                                <th width='120px'>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>";
 
-        var item;
-        for item in model->items {
-            let html .= "<tr>
-                <td>" . item->name . "</td>
-                <td>" . item->quantity . "</td>
-                <td>" . item->price . "</td>
-                <td>" . item->total . "</td>
-            </tr>";
-        }
-                
-        let html .= "</tbody>
-                    <tfoot>
-                        <tr>
-                            <td class='blank' colspan='2'>&nbsp;</td>
-                            <td class='total'>Sub-total</td>
-                            <td>" . model->sub_total . "</td>
-                        </tr>
-                        <tr>
-                            <td class='blank' colspan='2'>&nbsp;</td>
-                            <td class='total'>Tax</td>
-                            <td>" . model->sub_total_tax . "</td>
-                        </tr>
-                        <tr>
-                            <td class='blank' colspan='2'>&nbsp;</td>
-                            <td class='total'>Total</td>
-                            <td>" . model->total . "</td>
-                        </tr>
-                    </tfoot>
-                </table>
+            var item;
+            for item in model->items {
+                let html .= "<tr>
+                    <td>" . item->name . "</td>
+                    <td>" . item->quantity . "</td>
+                    <td>" . item->price . "</td>
+                    <td>" . item->total . "</td>
+                </tr>";
+            }
+                    
+            let html .= "</tbody>
+                        <tfoot>
+                            <tr>
+                                <td class='blank' colspan='2'>&nbsp;</td>
+                                <td class='total'>Sub-total</td>
+                                <td>" . model->sub_total . "</td>
+                            </tr>
+                            <tr>
+                                <td class='blank' colspan='2'>&nbsp;</td>
+                                <td class='total'>Tax</td>
+                                <td>" . model->sub_total_tax . "</td>
+                            </tr>
+                            <tr>
+                                <td class='blank' colspan='2'>&nbsp;</td>
+                                <td class='total'>Total</td>
+                                <td>" . model->total . "</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class='box-footer'>
+                    <a href='/dumb-dog/orders' class='button-blank'>cancel</a>
+                    <button type='submit' name='save'>save</button>
+                </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/orders' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+            <div class='row'>
+                <div class='box" . (model->deleted_at ? " deleted" : "") . "'>
+                    <div class='box-title'>
+                        <span>billing</span>
+                    </div>
+                    <div class='box-body'>
+                        " . this->createInputText("name", "billing_name", "their name", true, security->decrypt(model->billing->name)) .
+                    "</div>
+                </div>
+                <div class='box" . (model->deleted_at ? " deleted" : "") . "'>
+                    <div class='box-title'>
+                        <span>shipping</span>
+                    </div>
+                    <div class='box-body'>
+                        " . this->createInputText("name", "shipping_name", "their name", true, security->decrypt(model->shipping->name)) .
+                    "</div>
+                </div>
             </div>
-        </div></form>";
+        </form>";
 
         return html;
     }
 
     public function index(string path)
     {
-        var titles, database, html, data, item;
+        var titles, database, html, data, item, security;
         let titles = new Titles();
+        
         
         let html = titles->page("Orders", "orders");
 
@@ -169,6 +203,7 @@ class Orders extends Controller
             let html .= this->saveSuccess("I've deleted the order");
         }
 
+        let security = new Security(this->cfg);
         let database = new Database(this->cfg);
 
         let html .= "
@@ -185,12 +220,16 @@ class Orders extends Controller
                 </thead>
                 <tbody>";
         
-        let data = database->all("SELECT * FROM orders ORDER BY created_at DESC");
+        let data = database->all("
+            SELECT orders.*, order_addresses.name 
+            FROM orders 
+            LEFT JOIN order_addresses ON order_addresses.order_id=orders.id AND order_addresses.type='billing' 
+            ORDER BY created_at DESC");
 
         for item in data {
             let html .= "<tr" . (item->deleted_at ? " class='deleted'" : "") . ">
                 <td>" . item->order_number . "</td>
-                <td>&nbsp;</td>
+                <td>" . (item->name ? security->decrypt(item->name) : "UNKNOWN") . "</td>
                 <td>" . item->total . "</td>
                 <td><span class='status status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
                 <td>" . date("d/m/Y", strtotime(item->created_at)) . "</td>
