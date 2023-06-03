@@ -47,12 +47,11 @@ class Head
             <link rel='icon' type='image/png' sizes='64x64' href='data:image/png;base64," . this->favicon() . "'>" .
             style->build() .
             "<title>" . location . " | dumb dog</title>" .
-            "<link rel='stylesheet' type='text/css' href='/assets/trumbowyg/ui/trumbowyg.min.css'>" .
             js->jquery() .
             js->jqueryUI() .
             js->tagify() . 
             js->chartjs() . 
-            "<script src='/assets/trumbowyg/trumbowyg.min.js'></script>" . 
+            js->trumbowyg() . 
             "<meta http-equiv='cache-control' content='no-cache'>
         </head>";
     }

@@ -457,6 +457,7 @@ class DumbDog
         echo "</main>";
         if (menu) {
             this->quickMenu();
+            echo javascript->trumbowygIcons();
         }
         echo "</body>" . javascript->common() . "</html>";
     }
