@@ -110,6 +110,14 @@ class DumbDog
             let path = "/dashboard";
         }
 
+        /**
+         * I'm needed for the session handling for logins etc.
+         */
+        if (session_status() === 1) {
+            session_name("dd");
+            session_start();
+        }
+
         this->secure(path);
 
         var controllers = [

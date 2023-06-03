@@ -205,8 +205,8 @@ class Controller
     /**
      * Generate a random string.
      */
-     public function randomString(int length = 64)
-     {
+    public function randomString(int length = 64)
+    {
         var keyspace = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         /*
          * If the length is less than one, throw an error.
