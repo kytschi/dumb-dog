@@ -27,13 +27,6 @@ use DumbDog\Exceptions\Exception;
 
 try {
     /**
-     * I'm needed for the session handling for logins etc.
-     */
-    if (session_status() === PHP_SESSION_NONE) {
-        session_name("dd");
-        session_start();
-    }
-    /**
      * No template engine.
      */
     $engine = null;

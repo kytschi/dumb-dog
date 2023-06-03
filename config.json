@@ -60,7 +60,7 @@
     "namespace": "dumbdog",
     "name": "DumbDog",
     "description": "The dumbest dog in the CMS pound",
-    "author": "Mike Welsh",
+    "author": "Mike Welsh hello@kytschi.com",
     "version": "0.0.4 alpha",
     "verbose": false,
     "requires": {
