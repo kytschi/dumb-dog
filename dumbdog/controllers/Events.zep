@@ -98,8 +98,8 @@ class Events extends Pages
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/events/add' class='round icon' title='Add an event'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/events/add' class='dd-link round icon' title='Add an event'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

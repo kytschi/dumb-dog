@@ -76,7 +76,7 @@ class Templates extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the template</span>
             </div>
@@ -103,8 +103,8 @@ class Templates extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/templates' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/templates' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -139,11 +139,11 @@ class Templates extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/templates' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/templates' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='round icon icon-recover' title='Recover the template'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the template'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='round icon icon-delete' title='Delete the template'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the template'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -191,7 +191,7 @@ class Templates extends Controller
             let html .= this->saveSuccess("I've updated the template");
         }
 
-        let html .= "<form method='post'><div class='box wfull";
+        let html .= "<form method='post'><div class='box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -228,8 +228,8 @@ class Templates extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/templates' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/templates' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -248,8 +248,8 @@ class Templates extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/templates/add' class='round icon' title='Add a template'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/templates/add' class='dd-link round icon' title='Add a template'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

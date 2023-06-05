@@ -41,7 +41,9 @@ class Comments extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Add a comment", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/comments' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/comments' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>
+        </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -103,7 +105,7 @@ class Comments extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the comment</span>
             </div>
@@ -113,8 +115,8 @@ class Comments extends Controller
                 this->createInputText("name", "name", "who said it?");
         let html .= this->createSelects(database);
         let html .= "</div><div class='box-footer'>
-                <a href='/dumb-dog/comments' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/comments' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div></div></form>";
 
         return html;
@@ -257,7 +259,7 @@ class Comments extends Controller
             let html .= this->saveSuccess("I've updated the comment");
         }
 
-        let html .= "<form method='post'><div class='box wfull";
+        let html .= "<form method='post'><div class='box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -272,8 +274,8 @@ class Comments extends Controller
         let html .= this->createSelects(database, model);
         let html .= "</div>
             <div class='box-footer'>
-                <a href='/dumb-dog/comments' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/comments' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -292,8 +294,8 @@ class Comments extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/comments/add' class='round icon' title='Add a comment'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/comments/add' class='dd-link round icon' title='Add a comment'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -306,7 +308,7 @@ class Comments extends Controller
             while (iLoop < count(data)) {
                 let html .= "
                 <div class='tile'>
-                    <div class='box wfull";
+                    <div class='box dd-wfull";
                     if (data[iLoop]->deleted_at) {
                         let html .= " deleted";
                     }
@@ -314,7 +316,9 @@ class Comments extends Controller
                     let html .= "'>
                         <div class='box-body'><p>" . substr(str, 0, 120) . ((strlen(str) > 120) ? "..." : "") . "</p></div>
                         <div class='box-footer'>
-                            <a href='/dumb-dog/comments/edit/" . data[iLoop]->id . "' class='round icon icon-edit' title='edit me'>&nbsp;</a>
+                            <a  href='/dumb-dog/comments/edit/" . data[iLoop]->id . "'
+                                class='dd-link round icon icon-edit'
+                                title='edit me'>&nbsp;</a>
                         </div>
                     </div>
                 </div>";

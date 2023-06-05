@@ -27,7 +27,7 @@ namespace DumbDog\Controllers;
 use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
-use DumbDog\Ui\Gfx\Tiles;
+use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
 
 class Pages extends Controller
@@ -43,7 +43,9 @@ class Pages extends Controller
 
         let html = titles->page("Create the " . type, "add");
 
-        let html .= "<div class='page-toolbar'><a href='" . this->global_url . "' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'>
+            <a href='" . this->global_url . "' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>
+        </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -159,7 +161,7 @@ class Pages extends Controller
             let html .= this->saveSuccess("I've saved the file");
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the " . type . "</span>
             </div>
@@ -175,7 +177,7 @@ class Pages extends Controller
         /* Parent page */
         let html .= this->parentSelect(type, database, null);
 
-        let html .= this->createInputText("tags", "tags", "tag the content", false, null, "tags") .
+        let html .= this->createInputText("tags", "tags", "tag the content", false, null, "tagify") .
             this->createInputSelect(
                 "menu item",
                 "menu_item",
@@ -194,8 +196,8 @@ class Pages extends Controller
         let html .= "
             </div>
             <div class='box-footer'>
-                <a href='" . this->global_url . "' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='" . this->global_url . "' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -235,12 +237,12 @@ class Pages extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='" . this->global_url ."' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
-        let html .= "<a href='" . model->url . "' target='_blank' class='round icon icon-web' title='View me live'>&nbsp;</a>";
+        let html .= "'><a href='" . this->global_url ."' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "<a href='" . model->url . "' target='_blank' class='dd-link round icon icon-web' title='View me live'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='round icon icon-recover' title='Recover the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the page'>&nbsp;</a>";
         } else {
-            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='round icon icon-delete' title='Delete the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the page'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -331,7 +333,7 @@ class Pages extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='box wfull" . (model->deleted_at ? " deleted" : "") . "'>
+        <div class='box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
             <div class='box-title'><span>the " . type . "</span></div>
             <div class='box-body'>";
 
@@ -345,7 +347,7 @@ class Pages extends Controller
         /* Parent page */
         let html .= this->parentSelect(type, database, model->parent_id, model->id);
 
-        let html .= this->createInputText("tags", "tags", "tag the content", false, model->tags, "tags") .
+        let html .= this->createInputText("tags", "tags", "tag the content", false, stripslashes(model->tags), "tagify") .
             this->createInputSelect("menu item", "menu_item", ["none", "header", "footer", "both"], false, model->menu_item) . 
             this->createInputText("meta keywords", "meta_keywords", "add some keywords if you like", false, model->meta_keywords) .
             this->createInputText("meta author", "meta_author", "add an author", false, model->meta_author) .
@@ -354,8 +356,8 @@ class Pages extends Controller
         let html .= "
             </div>
             <div class='box-footer'>
-                <a href='" . this->global_url . "' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='" . this->global_url . "' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
         
@@ -371,10 +373,10 @@ class Pages extends Controller
 
     public function index(string path)
     {
-        var titles, tiles, database, html, query, data;
+        var titles, table, database, html, query, data;
         let titles = new Titles();
         let database = new Database(this->cfg);
-        let tiles = new Tiles();
+        let table = new Table(this->cfg);
         
         let html = titles->page("Pages", "pages");
 
@@ -383,12 +385,12 @@ class Pages extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/events' class='round icon icon-events' title='Events'>&nbsp;</a>
-            <a href='/dumb-dog/products' class='round icon icon-products' title='Products'>&nbsp;</a>
-            <a href='/dumb-dog/comments' class='round icon icon-comments' title='Comments'>&nbsp;</a>
-            <a href='/dumb-dog/files' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
-            <a href='/dumb-dog/templates' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>
+            <a href='/dumb-dog/pages/add' class='dd-link round icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/events' class='dd-link round icon icon-events' title='Events'>&nbsp;</a>
+            <a href='/dumb-dog/products' class='dd-link round icon icon-products' title='Products'>&nbsp;</a>
+            <a href='/dumb-dog/comments' class='dd-link round icon icon-comments' title='Comments'>&nbsp;</a>
+            <a href='/dumb-dog/files' class='dd-link round icon icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates' class='dd-link round icon icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
 
         let html .= this->tags(path, "pages");
@@ -396,15 +398,28 @@ class Pages extends Controller
         let html .= "<div id='pages'>";
 
         let data = [];
-        let query = "SELECT * FROM pages WHERE type='page'";
+        let query = "
+            SELECT main_page.*,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM pages AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN pages AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.type='page'";
         if (isset(_GET["tag"])) {
-            let query .= " AND tags like :tag";
+            let query .= " AND main_page.tags like :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
-        let query .= " ORDER BY name";
-        let html = html . tiles->build(
+        let query .= " ORDER BY main_page.name";
+
+        let html = html . table->build(
+            [
+                "name|with_tags",
+                "parent",
+                "template"
+            ],
             database->all(query, data),
-            "/dumb-dog/" . path . "/edit/"
+            "/dumb-dog/" . path
         );
 
         return html . "</div>";

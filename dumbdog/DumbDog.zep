@@ -642,7 +642,7 @@ class DumbDog
                     <h1>" . message . "</h1>
                 </div>
                 <div class='box-footer'>
-                    <button type='button' onclick='window.history.back()'>back</button>
+                    <button type='button' class='dd-button' onclick='window.history.back()'>back</button>
                 </div>
             </div>
             ";

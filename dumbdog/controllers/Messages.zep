@@ -63,14 +63,14 @@ class Messages extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/messages' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/messages' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->status != "read") {
-            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='round icon icon-message-read' title='Mark as read'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='dd-link round icon icon-message-read' title='Mark as read'>&nbsp;</a>";
         }
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='round icon icon-recover' title='Recover the message'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the message'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='round icon icon-delete' title='Delete the message'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the message'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -115,7 +115,7 @@ class Messages extends Controller
             let html .= this->saveSuccess("I've updated the message");
         }
 
-        let html .= "<div class='box wfull";
+        let html .= "<div class='box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -158,7 +158,7 @@ class Messages extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/dashboard' class='round icon icon-up' title='Back to the dashboard'>&nbsp;</a>
+            <a href='/dumb-dog/dashboard' class='dd-link round icon icon-up' title='Back to the dashboard'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -210,15 +210,15 @@ class Messages extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='error box wfull'>
+        let html .= "<form method='post'><div class='error box dd-wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
             <div class='box-body'><p>I've read it already!</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/messages/view/" . model->id . "' class='button-blank'>cancel</a>
-                <button type='submit' name='read'>read</button>
+                 href='/dumb-dog/messages/view/" . model->id . "' class='button-blank'>cancel</a>
+                <button type='submit' name='read' class='dd-button'>read</button>
             </div>
         </div></form>";
 

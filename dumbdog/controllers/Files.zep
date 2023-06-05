@@ -41,7 +41,10 @@ class Files extends Controller
         var from = this->validFrom();
 
         let html = titles->page("Upload a file", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/files?from=" . from . "' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'>
+            <a  href='/dumb-dog/files?from=" . from . "'
+                class='dd-link round icon icon-back'
+                title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -114,7 +117,7 @@ class Files extends Controller
             let html .= this->saveSuccess("I've saved the file");
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/add?from=" . from . "' enctype='multipart/form-data'><div class='box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/files/add?from=" . from . "' enctype='multipart/form-data'><div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the file</span>
             </div>
@@ -133,8 +136,8 @@ class Files extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/files?from=" . from . "' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/files?from=" . from . "' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -206,11 +209,11 @@ class Files extends Controller
 
         var from = this->validFrom();
 
-        let html .= "'><a href='/dumb-dog/files?from=" . from . "' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/files?from=" . from . "' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "?from=" . from . "' class='round icon icon-recover' title='Recover the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "?from=" . from . "' class='dd-link round icon icon-recover' title='Recover the file'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "?from=" . from . "' class='round icon icon-delete' title='Delete the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "?from=" . from . "' class='dd-link round icon icon-delete' title='Delete the file'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -250,7 +253,7 @@ class Files extends Controller
             let html .= this->saveSuccess("I've updated the file");
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "' enctype='multipart/form-data'><div class='box wfull";
+        let html .= "<form method='post' action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "' enctype='multipart/form-data'><div class='box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -269,8 +272,8 @@ class Files extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/files?from=" . from . "' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/files?from=" . from . "' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -294,8 +297,8 @@ class Files extends Controller
         var from = this->validFrom();
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/" . from . "' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/files/add?from=" . from . "' class='round icon' title='Upload some media'>&nbsp;</a>
+            <a href='/dumb-dog/" . from . "' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/files/add?from=" . from . "' class='dd-link round icon' title='Upload some media'>&nbsp;</a>
         </div>";
 
         let html .= this->tags(path, "files");

@@ -47,8 +47,8 @@ class Settings extends Controller
 
         let html = titles->page("Site settings", "settings");
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/themes' class='round icon icon-themes' title='Managing the themes'>&nbsp;</a>
-            <a href='/dumb-dog/users' class='round icon icon-users' title='Manage the users'>&nbsp;</a>
+            <a href='/dumb-dog/themes' class='dd-link round icon icon-themes' title='Managing the themes'>&nbsp;</a>
+            <a href='/dumb-dog/users' class='dd-link round icon icon-users' title='Manage the users'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
@@ -95,7 +95,7 @@ class Settings extends Controller
             let html .= this->saveSuccess("I've updated the settings");
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the settings</span>
             </div>
@@ -153,7 +153,7 @@ class Settings extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <button type='submit' name='save'>save</button>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
