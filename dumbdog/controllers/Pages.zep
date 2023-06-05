@@ -56,6 +56,9 @@ class Pages extends Controller
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
                     let data["url"] = str_replace(" ", "-", strtolower(rtrim(_POST["url"], "/")));
+                    if (empty(data["url"])) {
+                        let data["url"] = "/";
+                    }
                     let data["content"] = this->cleanContent(_POST["content"]);
                     let data["menu_item"] = _POST["menu_item"];
                     let data["template_id"] = _POST["template_id"];
@@ -251,6 +254,9 @@ class Pages extends Controller
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
                     let data["url"] = str_replace(" ", "-", strtolower(rtrim(_POST["url"], "/")));
+                    if (empty(data["url"])) {
+                        let data["url"] = "/";
+                    }
                     let data["content"] = this->cleanContent(_POST["content"]);
                     let data["menu_item"] = _POST["menu_item"];
                     let data["template_id"] = _POST["template_id"];
