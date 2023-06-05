@@ -428,7 +428,7 @@ class DumbDog
                 "orders"
             ]
         ];                                
-
+        
         for url, route in routes {
             if (strpos(path, url) !== false) {
                 let controller = controllers[route[0]];

@@ -571,6 +571,9 @@ class DumbDog
             var key, value;
             for key, value in filters {
                 switch (key) {
+                    case "random":
+                        let where .= " ORDER BY RAND() LIMIT " . intval(value);
+                        break;
                     case "order":
                         let where .= " " . value;
                         break;
