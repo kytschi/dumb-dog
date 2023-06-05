@@ -73,10 +73,10 @@ class Products extends Pages
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/products/add' class='round icon' title='Add a product'>&nbsp;</a>
-            <a href='/dumb-dog/files?from=products' class='round icon icon-files' title='Managing the files and media'>&nbsp;</a>
-            <a href='/dumb-dog/templates?from=products' class='round icon icon-templates' title='Managing the templates'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/products/add' class='dd-link round icon' title='Add a product'>&nbsp;</a>
+            <a href='/dumb-dog/files?from=products' class='dd-link round icon icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates?from=products' class='dd-link round icon icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

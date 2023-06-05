@@ -40,7 +40,7 @@ class Tiles
             let iLoop = 0;
             while (iLoop < count(data)) {
                 let html .= "<div class='tile'>
-                    <div class='box wfull";
+                    <div class='box dd-wfull";
                 if (data[iLoop]->deleted_at) {
                     let html .= " deleted";
                 }
@@ -69,9 +69,9 @@ class Tiles
                 if (property_exists(data[iLoop], "tags")) {
                     if (!empty(data[iLoop]->tags)) {
                         var tag;
-                        let html .= "<div class='box-tags'>";
+                        let html .= "<div class='dd-tags'>";
                         for tag in json_decode(data[iLoop]->tags) {
-                            let html .= "<span class='tag'>" . tag->value . "</span>";
+                            let html .= "<span class='dd-tag'>" . tag->value . "</span>";
                         }
                         let html .= "</div>";
                     }
@@ -85,7 +85,7 @@ class Tiles
                     }
                 }
                 if (property_exists(data[iLoop], "url")) {
-                    let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='round icon icon-web' title='View me live'>&nbsp;</a>";
+                    let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='dd-link round icon icon-web' title='View me live'>&nbsp;</a>";
                 }
                 if (property_exists(data[iLoop], "filename")) {
                     if (data[iLoop]->filename) {
@@ -96,7 +96,7 @@ class Tiles
                 if (from) {
                     let link_url .= "?from=" . from;
                 }
-                let html .="<a href='" . link_url . "' class='round icon icon-edit' title='edit me'>&nbsp;</a>
+                let html .="<a href='" . link_url . "' class='dd-link round icon icon-edit' title='edit me'>&nbsp;</a>
                         </div>
                     </div>
                 </div>";

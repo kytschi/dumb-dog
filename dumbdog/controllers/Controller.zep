@@ -115,8 +115,14 @@ class Controller
                 </div>";
     }
 
-    public function createInputText(string label, string var_name, string placeholder, bool required = false, value = null, style = "")
-    {
+    public function createInputText(
+        string label,
+        string var_name,
+        string placeholder,
+        bool required = false,
+        value = null,
+        string style = ""
+    ) -> string {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
         }
@@ -127,7 +133,7 @@ class Controller
                 type='text'
                 name='" . var_name . "' 
                 placeholder='' " . (style ? " class='" . style . "'" : "") .
-                "value=\"" . value . "\"'>
+                "value='" . value . "'>
         </div>";
     }
 
@@ -193,7 +199,7 @@ class Controller
 
     public function missingRequired(string message = "Missing required fields")
     {
-        return "<div class='error box wfull'>
+        return "<div class='error box dd-wfull'>
         <div class='box-title'>
             <span>double check your inputs</span>
         </div>
@@ -242,7 +248,7 @@ class Controller
 
     public function saveFailed(string message)
     {
-        return "<div class='error box wfull'>
+        return "<div class='error box dd-wfull'>
         <div class='box-title'>
             <span>save error</span>
         </div>
@@ -253,7 +259,7 @@ class Controller
 
     public function saveSuccess(string message)
     {
-        return "<div class='success box wfull'>
+        return "<div class='success box dd-wfull'>
         <div class='box-title'>
             <span>save all done</span>
         </div>
@@ -270,7 +276,7 @@ class Controller
         let data = database->all("SELECT tags FROM " . table . " WHERE tags IS NOT NULL AND tags != ''");
 
         if (data) {
-            let html .= "<div id='tags'>";
+            let html .= "<div id='dd-tags'>";
             var selected = "";
             if (isset(_GET["tag"])) {
                 let selected = urldecode(_GET["tag"]);
@@ -291,7 +297,7 @@ class Controller
                 if (selected == tag) {
                     let url = path;
                 }
-                let html .= "<a href='/dumb-dog" . url . "' class='tag". 
+                let html .= "<a href='/dumb-dog" . url . "' class='dd-link dd-tag". 
                     (selected == tag ? " selected" : "") . "'>" . 
                     tag .
                     (selected == tag ? " <span>x</span>" : "") . 
@@ -342,7 +348,7 @@ class Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog/" . table . "/delete/" . model->id . "?from=" . from . "'><div class='error box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/" . table . "/delete/" . model->id . "?from=" . from . "'><div class='error box dd-wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
@@ -353,8 +359,9 @@ class Controller
         let html .= "like I bury my bone...</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "' class='button-blank'>cancel</a>
-                <button type='submit' name='delete'>delete</button>
+                <a  href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "'
+                    class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='delete' class='dd-button'>delete</button>
             </div>
         </div></form>";
 
@@ -396,7 +403,7 @@ class Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog/" . table . "/recover/" . model->id . "?from=" . from . "'><div class='error box wfull'>
+        let html .= "<form method='post' action='/dumb-dog/" . table . "/recover/" . model->id . "?from=" . from . "'><div class='error box dd-wfull'>
             <div class='box-title'>
                 <span>are your sure?</span>
             </div>
@@ -409,8 +416,9 @@ class Controller
         let html .= "...</p>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "' class='button-blank'>cancel</a>
-                <button type='submit' name='recover'>recover</button>
+                <a  href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "'
+                    class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='recover' class='dd-button'>recover</button>
             </div>
         </div></form>";
 

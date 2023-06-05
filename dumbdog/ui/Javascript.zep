@@ -78,7 +78,7 @@ class Javascript
             $('.datepicker').datepicker({
                 dateFormat: 'dd/mm/yy'
             });
-            $('.tags').tagify();
+            $('.tagify').tagify();
         });
         </script>";
     }

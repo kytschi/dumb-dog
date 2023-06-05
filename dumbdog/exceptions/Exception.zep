@@ -70,7 +70,7 @@ class Exception extends \Exception
                 <p>" . this->getMessage() . "</p>
             </div>
             <div class='box-footer'>
-                <button type='button' onclick='window.history.back()'>back</button>
+                <button type='button' class='dd-button' onclick='window.history.back()'>back</button>
             </div>
         </div>";
         let html .= "</main></body>" . javascript->logo() . "</html>";

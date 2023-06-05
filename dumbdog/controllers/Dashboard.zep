@@ -50,8 +50,8 @@ class Dashboard extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/messages' class='round icon icon-messages' title='Messages'>&nbsp;</a>
-            <a href='/dumb-dog/orders' class='round icon icon-orders' title='Orders'>&nbsp;</a>
+            <a href='/dumb-dog/messages' class='dd-link round icon icon-messages' title='Messages'>&nbsp;</a>
+            <a href='/dumb-dog/orders' class='dd-link round icon icon-orders' title='Orders'>&nbsp;</a>
         </div>";
 
         var colours = [
@@ -287,7 +287,7 @@ class Dashboard extends Controller
                 <div class='input-group'><span>captcha<span class='required'>*</span></span>" . captcha->draw() . "</div>
             </div>
             <div class='box-footer'>
-                <button type='submit' name='login'>login</button>
+                <button type='submit' name='login' class='dd-button'>login</button>
             </div>
         </div></form>";
 

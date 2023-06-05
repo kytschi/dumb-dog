@@ -113,7 +113,7 @@ class Appointments extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='box wfull'>
+        <div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the appointment</span>
             </div>
@@ -157,7 +157,7 @@ class Appointments extends Controller
         "</div>
             <div class='box-footer'>
                 <a href='/dumb-dog/appointments' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -251,7 +251,7 @@ class Appointments extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='box wfull";
+        <div class='box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -299,7 +299,7 @@ class Appointments extends Controller
         "</div>
             <div class='box-footer'>
                 <a href='/dumb-dog/appointments' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -342,8 +342,8 @@ class Appointments extends Controller
                 <span>
                     " . date("F Y", strtotime(date . "-01")) . "
                 </span>
-                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='icon icon-prev'>&nbsp;</a>
-                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='icon icon-next'>&nbsp;</a>
+                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='dd-link icon icon-prev'>&nbsp;</a>
+                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='dd-link icon icon-next'>&nbsp;</a>
             </div>
         </div><div id='calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

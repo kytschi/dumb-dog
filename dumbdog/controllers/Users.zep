@@ -38,7 +38,9 @@ class Users extends Controller
         var titles, html;
         let titles = new Titles();
         let html = titles->page("Add a user", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/users' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='page-toolbar'>
+            <a href='/dumb-dog/users' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>
+        </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -107,7 +109,7 @@ class Users extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box wfull'>
+        let html .= "<form method='post'><div class='box dd-wfull'>
             <div class='box-title'>
                 <span>the user</span>
             </div>
@@ -130,8 +132,8 @@ class Users extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/users' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/users' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -164,11 +166,11 @@ class Users extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/users' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/users' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='round icon icon-recover' title='Recover the user'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the user'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='round icon icon-delete' title='Delete the user'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the user'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -217,7 +219,7 @@ class Users extends Controller
             let html .= this->saveSuccess("I've updated the user");
         }
 
-        let html .= "<form method='post'><div class='box wfull";
+        let html .= "<form method='post'><div class='box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
@@ -244,8 +246,8 @@ class Users extends Controller
                 </div>
             </div>
             <div class='box-footer'>
-                <a href='/dumb-dog/users' class='button-blank'>cancel</a>
-                <button type='submit' name='save'>save</button>
+                <a href='/dumb-dog/users' class='dd-link button-blank'>cancel</a>
+                <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
 
@@ -264,7 +266,7 @@ class Users extends Controller
         }
 
         let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/users/add' class='round icon' title='Add a user'>&nbsp;</a>
+            <a href='/dumb-dog/users/add' class='dd-link round icon' title='Add a user'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);

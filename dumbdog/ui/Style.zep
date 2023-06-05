@@ -103,14 +103,14 @@ class Style
             width:100%;
             overflow-x: hidden;
         }
-        a, a:hover, a:visited {
+        .dd-link, .dd-link:hover, .dd-link:visited {
             color: var(--body-text-colour);
             text-decoration: none;
         }
-        a:hover {
+        .dd-link:hover {
             text-decoration: underline;
         }
-        .button:hover, .mini:hover {
+        .dd-button:hover, .mini:hover {
             text-decoration: none;
         }
         /* Backgrounds */
@@ -286,6 +286,7 @@ class Style
             -moz-box-shadow: none;
             -webkit-box-shadow: none;
         }
+        /* Input switch */
         .switcher {
             font-size: 0pt !important;
         }
@@ -342,14 +343,14 @@ class Style
             font-size: 44pt;
             line-height: 34pt;
         }
-        button, .button-blank, .button {
+        .button-blank, .dd-button {
             padding: 10px 40px;
         }
         .default-item {
             vertical-align: middle;
             padding: 30px 0px 0px 0px;
         }
-        .button, button, .button-blank {
+        .dd-button, .button-blank {
             background-color: var(--button-background-colour);
             border: 3px solid var(--button-border-colour);
             cursor: pointer;
@@ -359,7 +360,7 @@ class Style
             background: none !important;
             border: 0 !important;
         }
-        button:hover, .button:hover {
+        .dd-button:hover {
             background-color: var(--button-hover-background-colour);
         }
         .button-blank:hover {
@@ -411,12 +412,12 @@ class Style
         .mini.icon-edit::before {
             background-position: -160px -40px !important;
         }
-        .deleted .round, .deleted .button, .deleted button {
+        .deleted .round, .deleted .dd-button {
             background-color: var(--box-deleted-background-colour);
         }
 
-        /* Box */
-        .box, .table {
+        /* Box and Table*/
+        .box, .dd-table {
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
@@ -456,31 +457,32 @@ class Style
             display: flex;
             flex-direction: row;
         }
-        .box-title, .table th, .table td {
+        .box-title, .dd-table th, .dd-table td {
             padding: 20px;
             border-bottom: 3px solid var(--box-title-border-colour);
         }
-        .box-title, .table th {
+        .box-title, .dd-table th {
             background-color: var(--box-title-background-colour);
             font-size: 48pt;
             font-weight: bold;
             font-family: 'heading', Helvetica, sans-serif;
         }
-        .table th {
+        .dd-table th {
             font-size: 32pt;
         }
-        .table th, .table td {
+        .dd-table th, .dd-table td {
             text-align: left;
+            vertical-align: top;
             border-right: 3px solid var(--box-title-border-colour);
         }
-        .table tr.deleted {
+        .dd-table tr.deleted {
             color: var(--text-deleted);
             text-decoration: line-through;
         }
-        .table tr .blank {
+        .dd-table tr .blank {
             background-color: var(--box-disabled-background-colour);
         }
-        .table tr .total {
+        .dd-table tr .total {
             background-color: var(--box-title-background-colour);
             text-align: right;
         }
@@ -503,6 +505,7 @@ class Style
         .warning.alert {
             background-color: var(--box-warning-background-colour);
         }
+
         /* Quick menu */
         #quick-menu-button {                
             position: fixed;
@@ -714,7 +717,7 @@ class Style
         }
 
         /* Sizes */
-        .wfull {
+        .dd-wfull {
             width: 100%;
         }
 
@@ -768,11 +771,16 @@ class Style
             float: left;
             width: 100%;
         }
-        .tile .box-body .box-tags, #tags {
+        .tile .box-body .thumb img {
+            width: 100%;
+        }
+
+        /* Tags */
+        .dd-tags, #dd-tags {
             margin-top: 10px;
             margin-bottom: 10px;
         }
-        .tile .box-body .box-tags .tag, #tags .tag {
+        .dd-tags .dd-tag, #dd-tags .dd-tag {
             float: left;
             margin-right: 5px;
             margin-bottom: 5px;
@@ -781,13 +789,12 @@ class Style
             background-color: #fff;
             border: 3px solid var(--box-title-background-colour);
         }
-        .tag.selected {
-            color: #fff;
+        .dd-tag.selected, .dd-tag:hover {
+            color: #fff !important;
             background-color: var(--box-title-background-colour) !important;
+            text-decoration: none !important;
         }
-        .tile .box-body .thumb img {
-            width: 100%;
-        }
+
         /* Icons */
         .icon {
             width: 64px;

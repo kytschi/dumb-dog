@@ -36,16 +36,16 @@ class Table
         let this->cfg = cfg;
     }
 
-    public function build(array columns, array data, string url = "")
+    public function build(array columns, array data, string url = "", string from = "")
     {
         var titles, html;
         
-        let html = "<div id='table'>";
+        let html = "<div id='dd-table'>";
         if (count(data)) {
-            var iLoop, iLoop_head, key, splits, security;
+            var iLoop, iLoop_head, key, splits, security, with_tags;
             let security = new Security(this->cfg);
             let iLoop_head = 0;
-            let html .= "<table class='table wfull'><thead><tr>";
+            let html .= "<table class='dd-table dd-wfull'><thead><tr>";
             while (iLoop_head < count(columns)) {
                 let splits = explode("|", columns[iLoop_head]);
                 let html .= "<th>" . str_replace("_", " ", splits[0]) . "</th>";
@@ -62,6 +62,7 @@ class Table
 
                 let iLoop_head = 0;
                 while (iLoop_head < count(columns)) {
+                    let with_tags = false;
                     let splits = explode("|", columns[iLoop_head]);
                     let key = splits[0];
                     let key = data[iLoop]->{key};
@@ -74,16 +75,36 @@ class Table
                             case "decrypt":
                                 let key = security->decrypt(key);
                                 break;
+                            case "with_tags":
+                                let with_tags = true;
+                                break;
                         }
                     }
                     
-                    let html .= "<td>" . key . "</td>";
+                    let html .= "<td>" . key;
+                    if (property_exists(data[iLoop], "tags") && with_tags) {
+                        if (!empty(data[iLoop]->tags)) {
+                            var tag;
+                            let html .= "<p class='dd-tags'>";
+                            for tag in json_decode(data[iLoop]->tags) {
+                                let html .= "<a href='" . url . "?tag=" . urlencode(tag->value) . "' class='dd-link dd-tag'>" . tag->value . "</a>";
+                            }
+                            let html .= "</p>";
+                        }
+                    }
+                    let html .= "</td>";
                     let iLoop_head = iLoop_head + 1;
                 }
 
-                let html .= "<td><a href='" . url . data[iLoop]->id . "' class='mini icon icon-edit' title='edit me'>&nbsp;</a></td>";
-
+                let html .= "<td>
+                    <a  href='" . url . "/edit/" . data[iLoop]->id . "'
+                        class='dd-link mini icon icon-edit'
+                        title='edit me'>&nbsp;</a>
+                    </td>";
                 let html .= "</tr>";
+
+                
+
                 let iLoop = iLoop + 1;
             }
             let html .= "</tbody></table>";

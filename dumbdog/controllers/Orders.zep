@@ -93,11 +93,11 @@ class Orders extends Controller
         if (model->deleted_at) {
             let html .= " deleted";
         }
-        let html .= "'><a href='/dumb-dog/orders' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/orders' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/orders/recover/" . model->id . "' class='round icon icon-recover' title='Recover the order'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/orders/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the order'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/orders/delete/" . model->id . "' class='round icon icon-delete' title='Delete the order'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/orders/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the order'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -113,7 +113,7 @@ class Orders extends Controller
 
         let html .= "
         <form method='post'>
-            <div class='box wfull" . (model->deleted_at ? " deleted" : "") . "'>
+            <div class='box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
                 <div class='box-title'>
                     <span>the order</span>
                 </div>
@@ -122,7 +122,7 @@ class Orders extends Controller
                         <span>Status</span>
                         <p style='padding:0; margin: 0'><span style='float: left;' class='status status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
                     </div>
-                    <table class='table wfull'>
+                    <table class='dd-table dd-wfull'>
                         <thead>
                             <tr>
                                 <th>Product</th>
@@ -164,8 +164,8 @@ class Orders extends Controller
                     </table>
                 </div>
                 <div class='box-footer'>
-                    <a href='/dumb-dog/orders' class='button-blank'>cancel</a>
-                    <button type='submit' name='save'>save</button>
+                    <a href='/dumb-dog/orders' class='dd-link button-blank'>cancel</a>
+                    <button type='submit' name='save' class='dd-button'>save</button>
                 </div>
             </div>
             <div class='row'>
@@ -207,7 +207,7 @@ class Orders extends Controller
         let database = new Database(this->cfg);
 
         let html .= "
-            <table class='table wfull'>
+            <table class='dd-table dd-wfull'>
                 <thead>
                     <tr>
                         <th width='120px'>Order no.</th>
@@ -233,7 +233,7 @@ class Orders extends Controller
                 <td>" . item->total . "</td>
                 <td><span class='status status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
                 <td>" . date("d/m/Y", strtotime(item->created_at)) . "</td>
-                <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='mini icon icon-edit' title='edit me'>&nbsp;</a></td>
+                <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='dd-link mini icon icon-edit' title='edit me'>&nbsp;</a></td>
             </tr>";
         }
 
