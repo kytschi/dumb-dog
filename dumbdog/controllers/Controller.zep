@@ -58,8 +58,46 @@ class Controller
         return "<script type='text/javascript'>console.log('DUMB DOG ERROR:', '" . str_replace(["\n", "\r\n"], "", strip_tags(message)) . "');</script>";
     }
 
-    public function createInputDate(string label, string var_name, string placeholder, bool required = false, value = null)
+    public function createFilename()
     {
+        return this->randomString(16) .
+            "-" .
+            str_replace([" ", "\"", "'", "’", "&", ":", ";"], "-", strtolower(_FILES["file"]["name"]));
+    }
+
+    public function createInput(
+        string label,
+        string var_name,
+        string placeholder,
+        bool required = false,
+        value = "",
+        string style = "",
+        string type = "text"
+    ) -> string {
+        if (empty(value)) {
+            let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
+            if (type == "password") {
+                let value = "";
+            }
+        }
+
+        return "<div class='dd-input-group'>
+            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
+            <input
+                type='" . type . "'
+                name='" . var_name . "' 
+                placeholder=\"" . placeholder.  "\"" . (style ? " class='" . style . "'" : "") .
+                "value='" . value . "'>
+        </div>";
+    }
+
+    public function createInputDate(
+        string label,
+        string var_name,
+        string placeholder,
+        bool required = false,
+        value = null
+    ) -> string {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : date("Y-m-d"));
         }
@@ -77,6 +115,28 @@ class Controller
                 placeholder='' 
                 value='" . value . "'>
         </div>";
+    }
+
+    public function createInputFile(
+        string label,
+        string var_name,
+        string placeholder,
+        bool required = false,
+        value = "",
+        string style = ""
+    ) -> string {
+        return this->createInput(label, var_name, placeholder, required, value, style, "file");
+    }
+
+    public function createInputPassword(
+        string label,
+        string var_name,
+        string placeholder,
+        bool required = false,
+        value = "",
+        string style = ""
+    ) -> string {
+        return this->createInput(label, var_name, placeholder, required, value, style, "password");
     }
 
     public function createInputSelect(string label, string var_name, array data, bool required = false, selected = "")
@@ -120,21 +180,10 @@ class Controller
         string var_name,
         string placeholder,
         bool required = false,
-        value = null,
+        value = "",
         string style = ""
     ) -> string {
-        if (empty(value)) {
-            let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
-        }
-
-        return "<div class='dd-input-group'>
-            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
-            <input
-                type='text'
-                name='" . var_name . "' 
-                placeholder='' " . (style ? " class='" . style . "'" : "") .
-                "value='" . value . "'>
-        </div>";
+        return this->createInput(label, var_name, placeholder, required, value, style, "text");
     }
 
     public function createInputTextarea(string label, string var_name, string placeholder, bool required = false, value = null)
@@ -163,6 +212,40 @@ class Controller
                 placeholder='" . placeholder . "'" . (required ? " required='required'" : "") . 
             ">" . value . "</textarea>
         </div>";
+    }
+
+    private function createThumb(string filename)
+    {
+        var width, height, desired_width = 400, desired_height, upload, save;
+
+        let filename = "thumb-" . filename;
+        
+        switch (_FILES["file"]["type"]) {
+            case "image/jpeg":
+                let upload = imagecreatefromjpeg(_FILES["file"]["tmp_name"]);
+                break;
+            case "image/png":
+                let upload = imagecreatefrompng(_FILES["file"]["tmp_name"]);
+                break;
+            default:
+                return;
+        }
+
+        let width = imagesx(upload);
+        let height = imagesy(upload);
+
+        let desired_height = floor(height * (desired_width / width));
+        let save = imagecreatetruecolor(desired_width, desired_height);
+        imagecopyresampled(save, upload, 0, 0, 0, 0, desired_width, desired_height, width, height);
+
+        switch (_FILES["file"]["type"]) {
+            case "image/jpeg":
+                imagejpeg(save, getcwd() . "/website/files/" . filename, 60);
+                break;
+            case "image/png":
+                imagepng(save, getcwd() . "/website/files/" . filename, 6);
+                break;
+        }
     }
 
     public function dateToSql(string str)
@@ -263,6 +346,24 @@ class Controller
         <div class='dd-box-body'>
             <p>" . message . "</p>
         </div></div>";
+    }
+
+    public function saveFile(string filename)
+    {
+        if (this->cfg->save_mode == false) {
+            return;
+        }
+
+        if (empty(_FILES["file"]["tmp_name"])) {
+            throw new \Exception("Failed to upload the file");
+        }
+
+        copy(
+            _FILES["file"]["tmp_name"],
+            getcwd() . "/website/files/" . filename
+        );
+
+        this->createThumb(filename);
     }
 
     public function saveSuccess(string message)

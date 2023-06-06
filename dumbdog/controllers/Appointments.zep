@@ -388,7 +388,8 @@ class Appointments extends Controller
                     if (entry->free_slot) {
                         let html .= " dd-calendar-free-slot";
                     }
-                    let html .= "'><a href='/dumb-dog/appointments/edit/" . entry->id . "'><small>" .date("H:i", strtotime(entry->on_date));
+                    let html .= "'><a href='/dumb-dog/appointments/edit/" . entry->id . "' class='dd-link'>
+                        <small>" .date("H:i", strtotime(entry->on_date));
                     if (entry->free_slot) {
                         let html .= "&nbsp;<span>free slot</span>";
                     }

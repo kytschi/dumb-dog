@@ -67,11 +67,18 @@ class Users extends Controller
                         let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
                         let data["created_by"] = this->getUserId();
                         let data["updated_by"] = this->getUserId();
+                        let data["file"] = null;
+
+                        if (!empty(_FILES["file"])) {
+                            let data["file"] = this->createFilename();
+                            this->saveFile(data["file"]);
+                        }
 
                         let status = database->execute(
                             "INSERT INTO users 
                                 (
                                     id,
+                                    file,
                                     name,
                                     nickname,
                                     `password`,
@@ -84,6 +91,7 @@ class Users extends Controller
                             VALUES 
                                 (
                                     UUID(),
+                                    :file,
                                     :name,
                                     :nickname,
                                     :password,
@@ -109,28 +117,18 @@ class Users extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='dd-box dd-wfull'>
+        let html .= "<form method='post' enctype='multipart/form-data'>
+        <div class='dd-box dd-wfull'>
             <div class='dd-box-title'>
                 <span>the user</span>
             </div>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>username<span class='dd-required'>*</span></span>
-                    <input type='text' name='name' placeholder='what is their username?' value=''>
-                </div>
-                <div class='dd-input-group'>
-                    <span>nickname</span>
-                    <input type='text' name='nickname' placeholder='what shall I call them?' value=''>
-                </div>
-                <div class='dd-input-group'>
-                    <span>password<span class='dd-required'>*</span></span>
-                    <input type='password' name='password' placeholder='sssh, it's our secret!' value=''>
-                </div>
-                <div class='dd-input-group'>
-                    <span>password check<span class='dd-required'>*</span></span>
-                    <input type='password' name='password_check' placeholder='same again please!' value=''>
-                </div>
-            </div>
+            <div class='dd-box-body'>" .
+                this->createInputText("username", "name", "what is their username?", true) .
+                this->createInputText("nickname", "nickname", "what shall I call them?", true) .
+                this->createInputFile("picture", "file", "upload a picture?") .
+                this->createInputPassword("password", "password", "sssh, it's our secret!") .
+                this->createInputPassword("password check", "password_check", "same again please!") .
+            "</div>
             <div class='dd-box-footer'>
                 <a href='/dumb-dog/users' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
@@ -152,7 +150,11 @@ class Users extends Controller
 
         let database = new Database(this->cfg);
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM users WHERE id=:id", data);
+        let model = database->get("SELECT
+            *,
+            CONCAT('/website/files/thumb-', file) AS thumbnail 
+        FROM users 
+        WHERE id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("User not found");
@@ -181,7 +183,16 @@ class Users extends Controller
                 if (!this->validate(_POST, ["name", "nickname"])) {
                     let html .= this->missingRequired();
                 } else {
-                    let query = "UPDATE users SET name=:name, nickname=:nickname, updated_at=NOW(), updated_by=:updated_by";
+                    let query = "
+                        UPDATE
+                            users
+                        SET 
+                            name=:name,
+                            nickname=:nickname,
+                            updated_at=NOW(),
+                            updated_by=:updated_by,
+                            file=:file
+                    ";
                 
                     if (isset(_POST["password"]) && isset(_POST["password_check"])) {
                         if (!empty(_POST["password"]) && !empty(_POST["password_check"])) {
@@ -196,6 +207,12 @@ class Users extends Controller
                     let data["name"] = _POST["name"];
                     let data["nickname"] = _POST["nickname"];
                     let data["updated_by"] = this->getUserId();
+                    let data["file"] = null;
+
+                    if (!empty(_FILES["file"])) {
+                        let data["file"] = this->createFilename();
+                        this->saveFile(data["file"]);
+                    }
 
                     let query .= " WHERE id=:id";
 
@@ -219,37 +236,37 @@ class Users extends Controller
             let html .= this->saveSuccess("I've updated the user");
         }
 
-        let html .= "<form method='post'><div class='dd-box dd-wfull";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'>
-            <div class='dd-box-title'>
-                <span>the user</span>
+        let html .= "<form method='post' enctype='multipart/form-data'>
+            <div class='dd-box dd-wfull";
+            if (model->deleted_at) {
+                let html .= " dd-deleted";
+            }
+            let html .= "'>
+                <div class='dd-box-title'>
+                    <span>the user</span>
+                </div>
+                <div class='dd-box-body'>" .
+                    this->createInputText("username", "name", "what is their username?", true, model->name) .
+                    this->createInputText("nickname", "nickname", "what shall I call them?", true, model->nickname) .
+                    this->createInputFile("picture", "file", "upload a picture?");
+
+            if (!empty(model->file)) {
+                let html .= "<div class='dd-input-group dd-user'>
+                    <div class='dd-thumb'>
+                        <img src='" . model->thumbnail . "'>
+                    </div>
+                </div>";
+            }
+            
+            let html .= this->createInputPassword("password", "password", "sssh, it's our secret!") .
+                    this->createInputPassword("password check", "password_check", "same again please!") .
+                "</div>
+                <div class='dd-box-footer'>
+                    <a href='/dumb-dog/users' class='dd-link dd-button-blank'>cancel</a>
+                    <button type='submit' name='save' class='dd-button'>save</button>
+                </div>
             </div>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>username<span class='dd-required'>*</span></span>
-                    <input type='text' name='name' placeholder='what is their username?' value='" . model->name . "'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>nickname</span>
-                    <input type='text' name='nickname' placeholder='what shall I call them?' value='" . model->nickname . "'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>password</span>
-                    <input type='password' name='password' placeholder='sssh, it's our secret!' value=''>
-                </div>
-                <div class='dd-input-group'>
-                    <span>password check</span>
-                    <input type='password' name='password_check' placeholder='same again please!' value=''>
-                </div>
-            </div>
-            <div class='dd-box-footer'>
-                <a href='/dumb-dog/users' class='dd-link dd-button-blank'>cancel</a>
-                <button type='submit' name='save' class='dd-button'>save</button>
-            </div>
-        </div></form>";
+        </form>";
 
         return html;
     }

@@ -55,9 +55,8 @@ class Files extends Controller
                     let html .= this->missingRequired();
                 } else {
                     var filename;
-                    let filename = this->randomString(16) .
-                        "-" .
-                        str_replace([" ", "\"", "'", "’", "&", ":", ";"], "-", strtolower(_FILES["file"]["name"]));
+                    let filename = this->createFilename();
+                    
                     let data["name"] = _POST["name"];
                     let data["filename"] = filename;
                     let data["mime_type"] = _FILES["file"]["type"];
@@ -65,17 +64,7 @@ class Files extends Controller
                     let data["updated_by"] = this->getUserId();
                     let data["tags"] = this->isTagify(_POST["tags"]);
 
-                    if (this->cfg->save_mode != false) {
-                        if (empty(_FILES["file"]["tmp_name"])) {
-                            throw new \Exception("Failed to upload the file");
-                        }
-                        copy(
-                            _FILES["file"]["tmp_name"],
-                            getcwd() . "/website/files/" . filename
-                        );
-
-                        this->createThumb(filename);
-                    }
+                    this->saveFile(filename);
 
                     let status = database->execute(
                         "INSERT INTO files 
@@ -144,40 +133,6 @@ class Files extends Controller
         </form>";
 
         return html;
-    }
-
-    private function createThumb(string filename)
-    {
-        var width, height, desired_width = 400, desired_height, upload, save;
-
-        let filename = "thumb-" . filename;      
-        
-        switch (_FILES["file"]["type"]) {
-            case "image/jpeg":
-                let upload = imagecreatefromjpeg(_FILES["file"]["tmp_name"]);
-                break;
-            case "image/png":
-                let upload = imagecreatefrompng(_FILES["file"]["tmp_name"]);
-                break;
-            default:
-                return;
-        }
-
-        let width = imagesx(upload);
-        let height = imagesy(upload);
-
-        let desired_height = floor(height * (desired_width / width));
-        let save = imagecreatetruecolor(desired_width, desired_height);
-        imagecopyresampled(save, upload, 0, 0, 0, 0, desired_width, desired_height, width, height);
-
-        switch (_FILES["file"]["type"]) {
-            case "image/jpeg":
-                imagejpeg(save, getcwd() . "/website/files/" . filename, 60);
-                break;
-            case "image/png":
-                imagepng(save, getcwd() . "/website/files/" . filename, 6);
-                break;
-        }
     }
 
     public function delete(string path)
@@ -255,7 +210,10 @@ class Files extends Controller
             let html .= this->saveSuccess("I've updated the file");
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "' enctype='multipart/form-data'>
+        let html .= "<form
+            method='post'
+            action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "'
+            enctype='multipart/form-data'>
         <div class='dd-box dd-wfull";
         if (model->deleted_at) {
             let html .= " dd-deleted";

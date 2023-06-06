@@ -252,7 +252,6 @@ class Dashboard extends Controller
                     } else {
                         let data["name"] = _POST["name"];
                         
-                        
                         let database = new Database(this->cfg);
                         let model = database->get("SELECT * FROM users WHERE name=:name", data);
                         if (empty(model)) {
@@ -274,22 +273,24 @@ class Dashboard extends Controller
             }
         }
 
-        let html .= "<form method='post'><div id='dd-login' class='dd-box'>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>username<span class='dd-required'>*</span></span>
-                    <input type='text' name='name' placeholder='what is your username?'>
+        let html .= "<form method='post' action='/dumb-dog" . path . "?from=" . urlencode(trim(path, "/")) . "'>
+            <div id='dd-login' class='dd-box'>
+                <div class='dd-box-body'>
+                    <div class='dd-input-group'>
+                        <span>username<span class='dd-required'>*</span></span>
+                        <input type='text' name='name' placeholder='what is your username?'>
+                    </div>
+                    <div class='dd-input-group'>
+                        <span>password<span class='dd-required'>*</span></span>
+                        <input type='password' name='password' placeholder='your secret password please'>
+                    </div>
+                    <div class='dd-input-group'><span>captcha<span class='dd-required'>*</span></span>" . captcha->draw() . "</div>
                 </div>
-                <div class='dd-input-group'>
-                    <span>password<span class='dd-required'>*</span></span>
-                    <input type='password' name='password' placeholder='your secret password please'>
+                <div class='dd-box-footer'>
+                    <button type='submit' name='login' class='dd-button'>login</button>
                 </div>
-                <div class='dd-input-group'><span>captcha<span class='dd-required'>*</span></span>" . captcha->draw() . "</div>
             </div>
-            <div class='dd-box-footer'>
-                <button type='submit' name='login' class='dd-button'>login</button>
-            </div>
-        </div></form>";
+        </form>";
 
         return html;
     }
