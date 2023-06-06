@@ -72,7 +72,7 @@ class Pages extends Controller
                     let data["type"] = type;
                     let data["event_on"] = null;                    
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
-                    let data["tags"] = _POST["tags"];
+                    let data["tags"] = this->isTagify(_POST["tags"]);
                     let data["parent_id"] = _POST["parent_id"];
                     let data["price"] = 0.00;
                     let data["stock"] = 0;
@@ -268,7 +268,7 @@ class Pages extends Controller
                     let data["updated_by"] = this->getUserId();
                     let data["event_on"] = null;
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
-                    let data["tags"] = _POST["tags"];
+                    let data["tags"] = this->isTagify(_POST["tags"]);
                     let data["parent_id"] = _POST["parent_id"];
                     let data["price"] = 0.00;
                     let data["stock"] = 0;
