@@ -40,7 +40,9 @@ class Appointments extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Add an appointment", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/appointments' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/appointments' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
+        </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -113,14 +115,14 @@ class Appointments extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='box dd-wfull'>
-            <div class='box-title'>
+        <div class='dd-box dd-wfull'>
+            <div class='dd-box-title'>
                 <span>the appointment</span>
             </div>
-            <div class='box-body'>";
+            <div class='dd-box-body'>";
         let html .= this->createInputSwitch("free slot", "free_slot", false, isset(_POST["free_slot"]) ? _POST["free_slot"] : false);
-        let html .= "<div class='input-group'>
-                    <span>for user<span class='required'>*</span></span>
+        let html .= "<div class='dd-input-group'>
+                    <span>for user<span class='dd-required'>*</span></span>
                     <select name='user_id'>";
 
         var iLoop = 0, selected = "", data;
@@ -145,8 +147,8 @@ class Appointments extends Controller
 
         let html .= 
                 this->createInputDate("when its happening", "on_date", "leave a comment?", true) .
-                "<div class='input-group'>
-                    <span>what time, enter as hour:minutes<span class='required'>*</span></span>
+                "<div class='dd-input-group'>
+                    <span>what time, enter as hour:minutes<span class='dd-required'>*</span></span>
                     <input type='text' name='on_time' placeholder='24 hour time please' value='" .
                     (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : "00:00") . "'>
                 </div> " .
@@ -155,8 +157,8 @@ class Appointments extends Controller
                 this->createInputText("number", "with_number", "give me their number if possible") .
                 this->createInputTextarea("details", "content", "any details?") . 
         "</div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/appointments' class='button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/appointments' class='dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -188,15 +190,16 @@ class Appointments extends Controller
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/appointments' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'>
+            <a href='/dumb-dog/appointments' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/appointments/recover/" . model->id . "' class='round icon icon-recover' title='Recover the appointment'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/appointments/recover/" . model->id . "' class='dd-round dd-icon dd-icon-recover' title='Recover the appointment'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/appointments/delete/" . model->id . "' class='round icon icon-delete' title='Delete the appointment'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/appointments/delete/" . model->id . "' class='dd-round dd-icon dd-icon-delete' title='Delete the appointment'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -251,18 +254,18 @@ class Appointments extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='box dd-wfull";
+        <div class=dd-box dd-wfull";
         if (model->deleted_at) {
             let html .= " deleted";
         }
         let html .= "'>
-            <div class='box-title'>
+            <div class='dd-box-title'>
                 <span>the appointment</span>
             </div>
-            <div class='box-body'>";
+            <div class='dd-box-body'>";
         let html .= this->createInputSwitch("free slot", "free_slot", false, model->free_slot);
-        let html .= "<div class='input-group'>
-                    <span>for user<span class='required'>*</span></span>
+        let html .= "<div class='dd-input-group'>
+                    <span>for user<span class='dd-required'>*</span></span>
                     <select name='user_id'>";
 
         var iLoop = 0, selected = "";
@@ -287,8 +290,8 @@ class Appointments extends Controller
 
         let html .= 
                 this->createInputDate("when its happening", "on_date", "leave a comment?", true, model->on_date) .
-                "<div class='input-group'>
-                    <span>what time, enter as hour:minutes<span class='required'>*</span></span>
+                "<div class='dd-input-group'>
+                    <span>what time, enter as hour:minutes<span class='dd-required'>*</span></span>
                     <input type='text' name='on_time' placeholder='24 hour time please' value='" .
                     (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : date("H:i", strtotime(model->on_date))) . "'>
                 </div> " .
@@ -297,8 +300,8 @@ class Appointments extends Controller
                 this->createInputText("number", "with_number", "give me their number if possible", false, model->with_number) .
                 this->createInputTextarea("details", "content", "any details?", false, model->content) . 
         "</div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/appointments' class='button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/appointments' class='dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -320,8 +323,8 @@ class Appointments extends Controller
             let html .= this->saveSuccess("I've deleted the appointment");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/appointments/add' class='round icon' title='Add an appointment'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/appointments/add' class='dd-round dd-icon' title='Add an appointment'>&nbsp;</a>
         </div>";
 
         var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date;
@@ -337,18 +340,18 @@ class Appointments extends Controller
             let today = intval(date("d"));
         }
         
-        let html .= "<div id='calendar-month'>
+        let html .= "<div id='dd-calendar-month'>
             <div>
                 <span>
                     " . date("F Y", strtotime(date . "-01")) . "
                 </span>
-                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='dd-link icon icon-prev'>&nbsp;</a>
-                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='dd-link icon icon-next'>&nbsp;</a>
+                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='dd-link dd-icon dd-icon-prev'>&nbsp;</a>
+                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='dd-link dd-icon dd-icon-next'>&nbsp;</a>
             </div>
-        </div><div id='calendar'>";
+        </div><div id='dd-calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         while(iLoop < count(days)) {
-            let html .= "<div class='calendar-day'>" . days[iLoop] . "</div>";
+            let html .= "<div class='dd-calendar-day'>" . days[iLoop] . "</div>";
             if (days[iLoop] == start) {
                 let blanks = iLoop;
             }
@@ -358,7 +361,7 @@ class Appointments extends Controller
         if (blanks) {
             let iLoop = 0;
             while(iLoop < blanks) {
-                let html .= "<div class='calendar-blank'></div>";
+                let html .= "<div class='dd-calendar-blank'></div>";
                 let iLoop = iLoop + 1;
             }
         }
@@ -366,13 +369,13 @@ class Appointments extends Controller
         let days = cal_days_in_month(CAL_GREGORIAN, date("m"), date("Y"));
         let iLoop = 1;
         while(iLoop <= days) {
-            let html .= "<div class='calendar-entry";
+            let html .= "<div class='dd-calendar-entry";
             if (iLoop == today) {
-                let html .= " calendar-today";
+                let html .= " dd-calendar-today";
             } elseif (iLoop < today) {
-                let html .= " calendar-blank";
+                let html .= " dd-calendar-blank";
             }
-            let html .= "'><div class='calendar-date'>" . iLoop ."</div>";
+            let html .= "'><div class='dd-calendar-date'>" . iLoop ."</div>";
             let data = database->all(
                 "SELECT * FROM appointments WHERE on_date BETWEEN CONCAT(:on_date, ' 00:00') AND CONCAT(:on_date, ' 23:59') ORDER BY on_date",
                 [
@@ -381,9 +384,9 @@ class Appointments extends Controller
             );
             if (data) {
                 for entry in data {
-                    let html .= "<div class='calendar-event";
+                    let html .= "<div class='dd-calendar-event";
                     if (entry->free_slot) {
-                        let html .= " calendar-free-slot";
+                        let html .= " dd-calendar-free-slot";
                     }
                     let html .= "'><a href='/dumb-dog/appointments/edit/" . entry->id . "'><small>" .date("H:i", strtotime(entry->on_date));
                     if (entry->free_slot) {

@@ -33,22 +33,22 @@ class Tiles
     {
         var titles, html;
         
-        let html = "<div id='tiles'>";
+        let html = "<div id='dd-tiles'>";
 
         if (count(data)) {
             var iLoop, link_url;
             let iLoop = 0;
             while (iLoop < count(data)) {
-                let html .= "<div class='tile'>
-                    <div class='box dd-wfull";
+                let html .= "<div class='dd-tile'>
+                    <div class='dd-box dd-wfull";
                 if (data[iLoop]->deleted_at) {
                     let html .= " deleted";
                 }
                 let html .= "'>
-                        <div class='box-title'>
+                        <div class='dd-box-title'>
                             <span>" . data[iLoop]->name . "</span>
                         </div>
-                        <div class='box-body'><div class='thumb'>";
+                        <div class='dd-box-body'><div class='dd-thumb'>";
                 if (property_exists(data[iLoop], "filename")) {
                     if (data[iLoop]->filename) {
                         let html .= "<img src='/website/files/thumb-" . data[iLoop]->filename . "' alt='" . data[iLoop]->name . "'>";
@@ -58,12 +58,12 @@ class Tiles
                 let html .= "</div>";
                 if (property_exists(data[iLoop], "stock")) {
                     if (data[iLoop]->stock) {
-                        let html .= "<span class='product-stock' title='In stock'>" . data[iLoop]->stock . "</span>";
+                        let html .= "<span class='dd-product-stock' title='In stock'>" . data[iLoop]->stock . "</span>";
                     }
                 }
                 if (property_exists(data[iLoop], "price")) {
                     if (data[iLoop]->price) {
-                        let html .= "<span class='product-price' title='Product price'>&pound;" . data[iLoop]->price . "</span>";
+                        let html .= "<span class='dd-product-price' title='Product price'>&pound;" . data[iLoop]->price . "</span>";
                     }
                 }
                 if (property_exists(data[iLoop], "tags")) {
@@ -78,25 +78,31 @@ class Tiles
                 }
                 let html .= "</div>
 
-                        <div class='box-footer'>";
+                        <div class='dd-box-footer'>";
                 if (property_exists(data[iLoop], "default")) {
                     if (data[iLoop]->{"default"}) {
-                        let html .= "<span class='default-item'>*default*</span>";
+                        let html .= "<span class='dd-default-item'>*default*</span>";
                     }
                 }
                 if (property_exists(data[iLoop], "url")) {
-                    let html .= "<a href='" . data[iLoop]->url . "' target='_blank' class='dd-link round icon icon-web' title='View me live'>&nbsp;</a>";
+                    let html .= "<a 
+                        href='" . data[iLoop]->url . "' 
+                        target='_blank' 
+                        class='dd-link dd-round dd-icon dd-icon-web' 
+                        title='View me live'>&nbsp;</a>";
                 }
                 if (property_exists(data[iLoop], "filename")) {
                     if (data[iLoop]->filename) {
-                        let html .= "<span onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")' class='round icon icon-copy' title='Copy URL to clipboard'>&nbsp;</span>";
+                        let html .= "<span 
+                            onclick='copyTextToClipboard(\"/website/files/".  data[iLoop]->filename . "\")'
+                            class='dd-round dd-icon dd-icon-copy' title='Copy URL to clipboard'>&nbsp;</span>";
                     }
                 }
                 let link_url = url . data[iLoop]->id;
                 if (from) {
                     let link_url .= "?from=" . from;
                 }
-                let html .="<a href='" . link_url . "' class='dd-link round icon icon-edit' title='edit me'>&nbsp;</a>
+                let html .="<a href='" . link_url . "' class='dd-link dd-round dd-icon dd-icon-edit' title='Edit me'>&nbsp;</a>
                         </div>
                     </div>
                 </div>";

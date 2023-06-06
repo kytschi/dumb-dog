@@ -28,6 +28,6 @@ class Box
 {
     public function build(string title)
     {
-        return "<div class='box'><div class='box-title'><span>" . title . "</span></div><div class='box-body'></div></div>";
+        return "<div class='dd-box'><div class='dd-box-title'><span>" . title . "</span></div><div class='dd-box-body'></div></div>";
     }
 }

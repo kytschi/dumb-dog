@@ -63,13 +63,16 @@ class Exception extends \Exception
             header("HTTP/1.1 500 Internal Server Error");
         }
 
-        let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") . "<body id='error' class='error'><div class='background-image'></div><main>";
+        let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") .
+            "<body id='dd-error' class='dd-error'>
+                <div class='background-image'></div>
+                <main>";
         let html .= titles->page("bad doggie!", "error");
-        let html .= "<div class='box'>
-            <div class='box-body'>
+        let html .= "<div class='dd-box'>
+            <div class='dd-box-body'>
                 <p>" . this->getMessage() . "</p>
             </div>
-            <div class='box-footer'>
+            <div class='dd-box-footer'>
                 <button type='button' class='dd-button' onclick='window.history.back()'>back</button>
             </div>
         </div>";

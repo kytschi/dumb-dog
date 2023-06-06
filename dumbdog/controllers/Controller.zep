@@ -68,8 +68,8 @@ class Controller
             let value = date("d/m/Y", strtotime(value));
         }
 
-        return "<div class='input-group'>
-            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+        return "<div class='dd-input-group'>
+            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
             <input
                 class='datepicker' 
                 type='text'
@@ -87,8 +87,8 @@ class Controller
             let selected = isset(_POST[var_name]) ? _POST[var_name] : "";
         }
 
-        let html .= "<div class='input-group'>
-                <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+        let html .= "<div class='dd-input-group'>
+                <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
                 <select name='" . var_name . "'>";
 
         for key, item in data {
@@ -101,14 +101,14 @@ class Controller
 
     public function createInputSwitch(string label, string var_name, bool required = false, selected = false)
     {
-        return "<div class='input-group'>
-                    <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
-                    <div class='switcher'>
+        return "<div class='dd-input-group'>
+                    <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
+                    <div class='dd-switcher'>
                         <label>
                             <input type='checkbox' name='" . var_name . "' value='1' " . (selected ? " checked='checked'" : "") . ">
                             <span>
-                                <small class='switcher-on'></small>
-                                <small class='switcher-off'></small>
+                                <small class='dd-switcher-on'></small>
+                                <small class='dd-switcher-off'></small>
                             </span>
                         </label>
                     </div>
@@ -127,8 +127,8 @@ class Controller
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
         }
 
-        return "<div class='input-group'>
-            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+        return "<div class='dd-input-group'>
+            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
             <input
                 type='text'
                 name='" . var_name . "' 
@@ -142,8 +142,8 @@ class Controller
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
         }
-        return "<div class='input-group'>
-            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+        return "<div class='dd-input-group'>
+            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
             <textarea
                 name='" . var_name . "' rows='4' 
                 placeholder='" . placeholder . "'" . (required ? " required='required'" : "") . 
@@ -156,8 +156,8 @@ class Controller
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
         }
-        return "<div class='input-group'>
-            <span>" . label . (required ? "<span class='required'>*</span>" : "") . "</span>
+        return "<div class='dd-input-group'>
+            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
             <textarea
                 class='wysiwyg' name='" . var_name . "' rows='7' 
                 placeholder='" . placeholder . "'" . (required ? " required='required'" : "") . 
@@ -178,7 +178,7 @@ class Controller
 
     public function deletedState(string message)
     {
-        return "<div class='deleted alert'><span>deleted</span></div>";
+        return "<div class='dd-deleted dd-alert'><span>deleted</span></div>";
     }
 
     public function getPageId(string path)
@@ -199,11 +199,11 @@ class Controller
 
     public function missingRequired(string message = "Missing required fields")
     {
-        return "<div class='error box dd-wfull'>
-        <div class='box-title'>
+        return "<div class='dd-error dd-box dd-wfull'>
+        <div class='dd-box-title'>
             <span>double check your inputs</span>
         </div>
-        <div class='box-body'>
+        <div class='dd-box-body'>
             <p>" . message . "</p>
         </div></div>";
     }
@@ -248,22 +248,22 @@ class Controller
 
     public function saveFailed(string message)
     {
-        return "<div class='error box dd-wfull'>
-        <div class='box-title'>
+        return "<div class='dd-error dd-box dd-wfull'>
+        <div class='dd-box-title'>
             <span>save error</span>
         </div>
-        <div class='box-body'>
+        <div class='dd-box-body'>
             <p>" . message . "</p>
         </div></div>";
     }
 
     public function saveSuccess(string message)
     {
-        return "<div class='success box dd-wfull'>
-        <div class='box-title'>
+        return "<div class='success dd-box dd-wfull'>
+        <div class='dd-box-title'>
             <span>save all done</span>
         </div>
-        <div class='box-body'>
+        <div class='dd-box-body'>
             <p>" . message . "</p>
         </div></div>";
     }
@@ -348,19 +348,20 @@ class Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog/" . table . "/delete/" . model->id . "?from=" . from . "'><div class='error box dd-wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'><p>I'll bury you ";
+        let html .= "<form method='post' action='/dumb-dog/" . table . "/delete/" . model->id . "?from=" . from . "'>
+            <div class='dd-error dd-box dd-wfull'>
+                <div class='dd-box-title'>
+                    <span>are your sure?</span>
+                </div>
+                <div class='dd-box-body'><p>I'll bury you ";
         if (model->name) {
             let html .= "<strong>" . model->name . "</strong> ";
         }
         let html .= "like I bury my bone...</p>
             </div>
-            <div class='box-footer'>
+            <div class='dd-box-footer'>
                 <a  href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "'
-                    class='dd-link button-blank'>cancel</a>
+                    class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='delete' class='dd-button'>delete</button>
             </div>
         </div></form>";
@@ -403,11 +404,12 @@ class Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog/" . table . "/recover/" . model->id . "?from=" . from . "'><div class='error box dd-wfull'>
-            <div class='box-title'>
-                <span>are your sure?</span>
-            </div>
-            <div class='box-body'><p>";
+        let html .= "<form method='post' action='/dumb-dog/" . table . "/recover/" . model->id . "?from=" . from . "'>
+            <div class='dd-error dd-box dd-wfull'>
+                <div class='dd-box-title'>
+                    <span>are your sure?</span>
+                </div>
+                <div class='dd-box-body'><p>";
         if (model->name) {
             let html .= "Dig up <strong>" . model->name . "</strong>";
         } else {
@@ -415,9 +417,9 @@ class Controller
         }
         let html .= "...</p>
             </div>
-            <div class='box-footer'>
+            <div class='dd-box-footer'>
                 <a  href='/dumb-dog/" . table . "/edit/" . model->id . "?from=" . from . "'
-                    class='dd-link button-blank'>cancel</a>
+                    class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='recover' class='dd-button'>recover</button>
             </div>
         </div></form>";

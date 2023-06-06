@@ -41,9 +41,9 @@ class Files extends Controller
         var from = this->validFrom();
 
         let html = titles->page("Upload a file", "add");
-        let html .= "<div class='page-toolbar'>
+        let html .= "<div class='dd-page-toolbar'>
             <a  href='/dumb-dog/files?from=" . from . "'
-                class='dd-link round icon icon-back'
+                class='dd-link dd-round dd-icon dd-icon-back'
                 title='Back to list'>&nbsp;</a></div>";
 
         if (!empty(_POST)) {
@@ -117,29 +117,31 @@ class Files extends Controller
             let html .= this->saveSuccess("I've saved the file");
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/add?from=" . from . "' enctype='multipart/form-data'><div class='box dd-wfull'>
-            <div class='box-title'>
-                <span>the file</span>
-            </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>name<span class='required'>*</span></span>
-                    <input type='text' name='name' placeholder='give me a name' value=''>
+        let html .= "<form method='post' action='/dumb-dog/files/add?from=" . from . "' enctype='multipart/form-data'>
+            <div class='dd-box dd-wfull'>
+                <div class='dd-box-title'>
+                    <span>the file</span>
                 </div>
-                <div class='input-group'>
-                    <span>file<span class='required'>*</span></span>
-                    <input type='file' name='file' placeholder='upload a file' value=''>
+                <div class='dd-box-body'>
+                    <div class='dd-input-group'>
+                        <span>name<span class='dd-required'>*</span></span>
+                        <input type='text' name='name' placeholder='give me a name' value=''>
+                    </div>
+                    <div class='dd-input-group'>
+                        <span>file<span class='dd-required'>*</span></span>
+                        <input type='file' name='file' placeholder='upload a file' value=''>
+                    </div>
+                    <div class='dd-input-group'>
+                        <span>tags</span>
+                        <input type='text' name='tags' class='tags' placeholder='tag the file' value=''>
+                    </div>
                 </div>
-                <div class='input-group'>
-                    <span>tags</span>
-                    <input type='text' name='tags' class='tags' placeholder='tag the file' value=''>
+                <div class='dd-box-footer'>
+                    <a href='/dumb-dog/files?from=" . from . "' class='dd-link dd-button-blank'>cancel</a>
+                    <button type='submit' name='save' class='dd-button'>save</button>
                 </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/files?from=" . from . "' class='dd-link button-blank'>cancel</a>
-                <button type='submit' name='save' class='dd-button'>save</button>
-            </div>
-        </div></form>";
+        </form>";
 
         return html;
     }
@@ -202,18 +204,18 @@ class Files extends Controller
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
 
         var from = this->validFrom();
 
-        let html .= "'><a href='/dumb-dog/files?from=" . from . "' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/files?from=" . from . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "?from=" . from . "' class='dd-link round icon icon-recover' title='Recover the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/recover/" . model->id . "?from=" . from . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the file'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "?from=" . from . "' class='dd-link round icon icon-delete' title='Delete the file'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/files/delete/" . model->id . "?from=" . from . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the file'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -253,26 +255,27 @@ class Files extends Controller
             let html .= this->saveSuccess("I've updated the file");
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "' enctype='multipart/form-data'><div class='box dd-wfull";
+        let html .= "<form method='post' action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "' enctype='multipart/form-data'>
+        <div class='dd-box dd-wfull";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
         let html .= "'>
-            <div class='box-title'>
+            <div class='dd-box-title'>
                 <span>the file</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>name<span class='required'>*</span></span>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
+                    <span>name<span class='dd-required'>*</span></span>
                     <input type='text' name='name' placeholder='the file name' value='" . model->name . "'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>tags</span>
                     <input type='text' name='tags' class='tags' placeholder='tag the file' value='" . model->tags . "'>
                 </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/files?from=" . from . "' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/files?from=" . from . "' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -296,9 +299,9 @@ class Files extends Controller
 
         var from = this->validFrom();
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/" . from . "' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/files/add?from=" . from . "' class='dd-link round icon' title='Upload some media'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/" . from . "' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/files/add?from=" . from . "' class='dd-link dd-round dd-icon' title='Upload some media'>&nbsp;</a>
         </div>";
 
         let html .= this->tags(path, "files");

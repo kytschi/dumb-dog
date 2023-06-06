@@ -43,8 +43,8 @@ class Pages extends Controller
 
         let html = titles->page("Create the " . type, "add");
 
-        let html .= "<div class='page-toolbar'>
-            <a href='" . this->global_url . "' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='" . this->global_url . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
@@ -161,11 +161,11 @@ class Pages extends Controller
             let html .= this->saveSuccess("I've saved the file");
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull'>
-            <div class='box-title'>
+        let html .= "<form method='post'><div class='dd-box dd-wfull'>
+            <div class='dd-box-title'>
                 <span>the " . type . "</span>
             </div>
-            <div class='box-body'>";
+            <div class='dd-box-body'>";
 
         let html .= this->createInputSwitch("live", "status") . 
             this->createInputText("url", "url", "how will I be reached", true) .
@@ -195,8 +195,8 @@ class Pages extends Controller
 
         let html .= "
             </div>
-            <div class='box-footer'>
-                <a href='" . this->global_url . "' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='" . this->global_url . "' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -233,16 +233,16 @@ class Pages extends Controller
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='" . this->global_url ."' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
-        let html .= "<a href='" . model->url . "' target='_blank' class='dd-link round icon icon-web' title='View me live'>&nbsp;</a>";
+        let html .= "'><a href='" . this->global_url ."' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "<a href='" . model->url . "' target='_blank' class='dd-link dd-round dd-icon dd-icon-web' title='View me live'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the page'>&nbsp;</a>";
         } else {
-            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the page'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url ."/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the page'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -333,9 +333,9 @@ class Pages extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
-            <div class='box-title'><span>the " . type . "</span></div>
-            <div class='box-body'>";
+        <div class='dd-box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
+            <div class='dd-box-title'><span>the " . type . "</span></div>
+            <div class='dd-box-body'>";
 
         let html .= this->createInputSwitch("live", "status", false, model->status) . 
             this->createInputText("url", "url", "how will I be reached", true, model->url) .
@@ -355,8 +355,8 @@ class Pages extends Controller
 
         let html .= "
             </div>
-            <div class='box-footer'>
-                <a href='" . this->global_url . "' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='" . this->global_url . "' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -384,18 +384,18 @@ class Pages extends Controller
             let html .= this->saveSuccess("I've deleted the page");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages/add' class='dd-link round icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/events' class='dd-link round icon icon-events' title='Events'>&nbsp;</a>
-            <a href='/dumb-dog/products' class='dd-link round icon icon-products' title='Products'>&nbsp;</a>
-            <a href='/dumb-dog/comments' class='dd-link round icon icon-comments' title='Comments'>&nbsp;</a>
-            <a href='/dumb-dog/files' class='dd-link round icon icon-files' title='Managing the files and media'>&nbsp;</a>
-            <a href='/dumb-dog/templates' class='dd-link round icon icon-templates' title='Managing the templates'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/pages/add' class='dd-link dd-round dd-icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/events' class='dd-link dd-round dd-icon dd-icon-events' title='Events'>&nbsp;</a>
+            <a href='/dumb-dog/products' class='dd-link dd-round dd-icon dd-icon-products' title='Products'>&nbsp;</a>
+            <a href='/dumb-dog/comments' class='dd-link dd-round dd-icon dd-icon-comments' title='Comments'>&nbsp;</a>
+            <a href='/dumb-dog/files' class='dd-link dd-round dd-icon dd-icon-files' title='Managing the files and media'>&nbsp;</a>
+            <a href='/dumb-dog/templates' class='dd-link dd-round dd-icon dd-icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
 
         let html .= this->tags(path, "pages");
 
-        let html .= "<div id='pages'>";
+        let html .= "<div id='dd-pages'>";
 
         let data = [];
         let query = "
@@ -500,7 +500,7 @@ class Pages extends Controller
                 let query[iLoop][] = month->{year};
             }
         }
-        let html .= "<div class='box'><div class='box-title'><span>annual stats</span></div><div class='box-body'>
+        let html .= "<div class='dd-box'><div class='dd-box-title'><span>annual stats</span></div><div class='dd-box-body'>
         <canvas id='visitors' width='600' height='200'></canvas></div></div>
         <script type='text/javascript'>
         var ctx = document.getElementById('visitors').getContext('2d');

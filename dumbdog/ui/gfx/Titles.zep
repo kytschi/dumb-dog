@@ -28,15 +28,15 @@ class Titles
 {
     public function noResults()
     {
-        return "<div><h2 class='no-results'><span>no results</span></h2></div>";
+        return "<div><h2 class='dd-h2 no-results'><span>no results</span></h2></div>";
     }
 
     public function page(string title, string image = "")
     {
         var html;
-        let html = "<h1 class='page-title'><span";
+        let html = "<h1 class='dd-h1 dd-page-title'><span";
         if (image) {
-            let html .= " class='icon icon-" . image . "'";
+            let html .= " class='dd-icon dd-icon-" . image . "'";
         }
         return html . ">" . title . "</span></h1>";
     }

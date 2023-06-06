@@ -27,7 +27,7 @@ namespace DumbDog\Controllers;
 use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
-use DumbDog\Ui\Gfx\Tiles;
+use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
 
 class Events extends Pages
@@ -88,8 +88,9 @@ class Events extends Pages
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
+        var titles, table, database, html, query, data;
         let titles = new Titles();
+        let table = new Table(this->cfg);
         
         let html = titles->page("Events", "events");
 
@@ -97,17 +98,34 @@ class Events extends Pages
             let html .= this->saveSuccess("I've deleted the event");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/events/add' class='dd-link round icon' title='Add an event'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/pages' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/events/add' class='dd-link dd-round dd-icon' title='Add an event'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
+        let data = [];
+        let query = "
+            SELECT main_page.*,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM pages AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN pages AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.type='event'";
+        if (isset(_GET["tag"])) {
+            let query .= " AND main_page.tags like :tag";
+            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        }
+        let query .= " ORDER BY main_page.name";
 
-        let tiles = new Tiles();
-        let html = html . tiles->build(
-            database->all("SELECT * FROM pages WHERE type='event' ORDER BY name"),
-            "/dumb-dog/events/edit/"
+        let html = html . table->build(
+            [
+                "name|with_tags",
+                "event_on|event_date"
+            ],
+            database->all(query, data),
+            "/dumb-dog/" . path
         );
 
         return html;

@@ -472,37 +472,41 @@ class DumbDog
         let head = new Head(this->cfg);
         let javascript = new Javascript();
 
-        let id = "bk";
+        let id = "dd-bk";
         
         if (strpos(location, "page not") !== false) {
-            let id = "page-not-found";
+            let id = "dd-page-not-found";
         } elseif (strpos(location, "offline") !== false) {
-            let id = "error";
+            let id = "dd-error";
         } elseif (strpos(location, "page") !== false) {
-            let id = "page-bk";
+            let id = "dd-page-bk";
         } elseif (strpos(location, "appointment") !== false) {
-            let id = "appointments-bk";
+            let id = "dd-appointments-bk";
         } elseif (strpos(location, "product") !== false) {
-            let id = "products-bk";
+            let id = "dd-products-bk";
         } elseif (strpos(location, "dashboard") !== false) {
-            let id = "dashboard-bk";
+            let id = "dd-dashboard-bk";
         } elseif (strpos(location, "event") !== false) {
-            let id = "events-bk";
+            let id = "dd-events-bk";
         } elseif (strpos(location, "settings") !== false) {
-            let id = "settings-bk";
+            let id = "dd-settings-bk";
         } elseif (strpos(location, "theme") !== false) {
-            let id = "themes-bk";
+            let id = "dd-themes-bk";
         } elseif (strpos(location, "template") !== false) {
-            let id = "templates-bk";
+            let id = "dd-templates-bk";
         } elseif (strpos(location, "user") !== false) {
-            let id = "users-bk";
+            let id = "dd-users-bk";
         } elseif (strpos(location, "order") !== false) {
-            let id = "orders-bk";
+            let id = "dd-orders-bk";
         }
 
-        echo "<!DOCTYPE html><html lang='en'>" . head->build(location) . "<body id='" . id . "'><div class='background-image'></div><main>";
+        echo "<!DOCTYPE html>
+            <html lang='en'>" . head->build(location) .
+            "<body id='" . id . "'>
+            <div class='dd-background-image'></div>
+            <main class='dd-main'>";
         if (this->cfg->save_mode == false) {
-            echo "<div class='warning alert'><span>saving is currently disabled</span></div>";
+            echo "<div class='dd-warning dd-alert'><span>saving is currently disabled</span></div>";
         }
         echo javascript->logo();
     }
@@ -633,15 +637,15 @@ class DumbDog
     {
         if (backend) {
             return "
-            <div class='box'>
-                <div class='box-title'>
+            <div class='dd-box'>
+                <div class='dd-box-title'>
                     <img src='/assets/dumbdog.png'>
                     <span>dang it!</span>
                 </div>
-                <div class='box-body'>
-                    <h1>" . message . "</h1>
+                <div class='dd-box-body'>
+                    <h1 class='dd-h1'>" . message . "</h1>
                 </div>
-                <div class='box-footer'>
+                <div class='dd-box-footer'>
                     <button type='button' class='dd-button' onclick='window.history.back()'>back</button>
                 </div>
             </div>
@@ -663,7 +667,7 @@ class DumbDog
 
         this->ddHead("offline", 404);
         echo titles->page("offline", "/assets/dumbdog.png");
-        echo "<div class='box'><div class='box-body'><h3>*yawn* Let me sleep a little longer will you...</h3></div></div>";
+        echo "<div class='dd-box'><div class='dd-box-body'><h3 class='dd-h3'>*yawn* Let me sleep a little longer will you...</h3></div></div>";
         this->ddFooter(false);        
     }
 
@@ -674,20 +678,20 @@ class DumbDog
         let controller = new Appointments(this->cfg);
         let database = new Database(this->cfg);
 
-        echo "<div id='quick-menu' style='display: none'>
-            <a href='/dumb-dog/pages/add' class='round icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/pages' class='round icon icon-pages' title='Managing the content'>&nbsp;</a>
-            <a href='/dumb-dog/appointments' class='round icon icon-appointments' title='Go to the appointments'>&nbsp;</a>
-            <a href='/dumb-dog' class='round icon icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
-            <a href='/dumb-dog/settings' class='round icon icon-settings' title='Site wide settings'>&nbsp;</a>
-            <a href='/dumb-dog/give-up' class='round icon icon-logout' title='Log me out'>&nbsp;</a>
+        echo "<div id='dd-quick-menu' style='display: none'>
+            <a href='/dumb-dog/pages/add' class='dd-round dd-icon' title='Add a page'>&nbsp;</a>
+            <a href='/dumb-dog/pages' class='dd-round dd-icon dd-icon-pages' title='Managing the content'>&nbsp;</a>
+            <a href='/dumb-dog/appointments' class='dd-round dd-icon dd-icon-appointments' title='Go to the appointments'>&nbsp;</a>
+            <a href='/dumb-dog' class='dd-round dd-icon dd-icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
+            <a href='/dumb-dog/settings' class='dd-round dd-icon dd-icon-settings' title='Site wide settings'>&nbsp;</a>
+            <a href='/dumb-dog/give-up' class='dd-round dd-icon dd-icon-logout' title='Log me out'>&nbsp;</a>
         </div>
-        <div id='quick-menu-button'>
-            <div class='round icon icon-dumbdog' onclick='showQuickMenu()'>&nbsp;</div>";
+        <div id='dd-quick-menu-button'>
+            <div class='dd-round dd-icon dd-icon-dumbdog' onclick='showQuickMenu()'>&nbsp;</div>";
         
         let messages = database->get("SELECT count(id) AS total FROM messages WHERE status='unread'");
         if (messages->total) {
-            echo "<div id='message-count'><a href='/dumb-dog/messages'>new messages</a><span></span></div>";
+            echo "<div id='dd-message-count'><a href='/dumb-dog/messages'>new messages</a><span></span></div>";
         }
 
         let appointments = database->get(
@@ -697,7 +701,7 @@ class DumbDog
             ]
         );
         if (appointments->total) {
-            echo "<div id='appointments'><a href='/dumb-dog/appointments'>new appointments</a><span></span></div>";
+            echo "<div id='dd-appointments'><a href='/dumb-dog/appointments'>new appointments</a><span></span></div>";
         }
 
         echo "</div>";
