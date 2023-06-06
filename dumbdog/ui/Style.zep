@@ -636,8 +636,10 @@ class Style
         .dd-calendar-free-slot {
             background-color: #F2845F;
         }
-        .dd-calendar-free-slot small span {
+        .dd-calendar-free-slot small span, .dd-calendar-free-slot a {
             color: #fff;
+        }
+        .dd-calendar-free-slot small span {
             font-weight: bold;
         }
 
@@ -757,15 +759,18 @@ class Style
         .dd-tile .dd-box-body {
             padding: 20px 10px;
         }
-        .dd-tile .dd-box-body .dd-thumb {
-            overflow: hidden;
-        }
         .dd-tile .dd-box-body .dd-box-tags {
             float: left;
             width: 100%;
         }
-        .dd-tile .dd-box-body .dd-thumb img {
+        .dd-thumb {
+            overflow: hidden;
+        }
+        .dd-thumb img {
             width: 100%;
+        }
+        .dd-user .dd-thumb {
+            width: 200px;
         }
 
         /* Tags */

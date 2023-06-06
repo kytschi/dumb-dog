@@ -179,7 +179,14 @@ class DumbDog
         var database, query, data = [];
         let database = new Database(this->cfg);
 
-        let query = "SELECT * FROM appointments WHERE free_slot=1 AND appointments.deleted_at IS NULL";
+        let query = "SELECT
+            appointments.*,
+            users.nickname AS user, 
+            IFNULL(CONCAT('/website/files/', users.file), '') AS filename,
+            IFNULL(CONCAT('/website/files/thumb-', users.file), '') AS thumbnail  
+        FROM appointments 
+        LEFT JOIN users ON users.id=appointments.user_id 
+        WHERE appointments.free_slot=1 AND appointments.deleted_at IS NULL";
 
         if (count(filters)) {
             var key, value;

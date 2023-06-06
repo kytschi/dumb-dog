@@ -39,7 +39,7 @@ class Exception extends \Exception
 
         let this->code = code;
     }
-
+    
     /**
      * Override the default string to we can have our grumpy cat.
      */
@@ -73,7 +73,13 @@ class Exception extends \Exception
                 <p>" . this->getMessage() . "</p>
             </div>
             <div class='dd-box-footer'>
-                <button type='button' class='dd-button' onclick='window.history.back()'>back</button>
+                <a class='dd-button'";
+        if (isset(_GET["from"])) {
+            let html .= " href='/dumb-dog/" . urldecode(_GET["from"]) . "'";
+        } else {
+            let html .= " onclick='window.history.back()'";
+        }
+        let html .= ">back</a>
             </div>
         </div>";
         let html .= "</main></body>" . javascript->logo() . "</html>";
