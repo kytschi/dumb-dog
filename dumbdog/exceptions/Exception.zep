@@ -65,8 +65,8 @@ class Exception extends \Exception
 
         let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") .
             "<body id='dd-error' class='dd-error'>
-                <div class='background-image'></div>
-                <main>";
+                <div class='dd-background-image'></div>
+                <main class='dd-main'>";
         let html .= titles->page("bad doggie!", "error");
         let html .= "<div class='dd-box'>
             <div class='dd-box-body'>

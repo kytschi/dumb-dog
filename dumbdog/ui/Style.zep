@@ -339,7 +339,7 @@ class Style
         }
 
         /* Buttons */
-        .dd-default-item, .dd-button-blank  {
+        .dd-default-item, .dd-button-blank, .dd-button  {
             color: var(--button-text-colour);
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 44pt;
@@ -464,10 +464,10 @@ class Style
             color: var(--text-deleted);
             text-decoration: line-through;
         }
-        .dd-table tr .blank {
+        .dd-table tr .dd-blank {
             background-color: var(--box-disabled-background-colour);
         }
-        .dd-table tr .total {
+        .dd-table tr .dd-total {
             background-color: var(--box-title-background-colour);
             text-align: right;
         }

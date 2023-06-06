@@ -1,7 +1,7 @@
 #!/bin/bash
 versions=("7.4" "8.0" "8.1" "8.2")
 for version in ${versions[@]}; do
-    printf "Building for PHP $version\n"
+    printf "Building Dumb Dog for PHP $version\n"
     if [ -f "/usr/bin/php$version" ]; then
         sudo update-alternatives --set php /usr/bin/php$version
         sudo update-alternatives --set php-config /usr/bin/php-config$version

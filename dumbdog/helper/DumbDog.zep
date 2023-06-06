@@ -623,7 +623,27 @@ class DumbDog
 
     private function pageQuery(array filters, string type = "page")
     {
-        var database, query, where, data = [];
+        var database, query, where, data = [], order = "",
+        valid_columns = [
+            "url",
+            "name",
+            "status",
+            "meta_keywords",
+            "meta_author",
+            "meta_description",
+            "type",
+            "event_on",
+            "event_length",
+            "price",
+            "stock",
+            "code",
+            "created_at",
+            "updated_at"
+        ],
+        valid_dir = [
+            "ASC",
+            "DESC"
+        ];
         let database = new Database(this->cfg);
 
         let query = "
@@ -644,7 +664,18 @@ class DumbDog
                         let data["parent_id"] = value;
                         break;
                     case "order":
-                        let where .= " " . value;
+                        var splits, check, id = 0;
+                        let splits = explode(" ", value);
+                        let check = reset(splits);
+                        if (in_array(check, valid_columns)) {
+                            let order = " ORDER BY ". check;
+                            let id = count(splits);
+                            let id -= 1;
+                            let check = splits[id];
+                            if (in_array(strtoupper(check), valid_dir)) {
+                                let order .= " ". check;
+                            }
+                        }
                         break;
                     case "tag":
                         let where .= " AND tags like :tag";
@@ -663,8 +694,8 @@ class DumbDog
                 }
             }
         }
-
-        return database->all(query . where, data);
+        
+        return database->all(query . where . order, data);
     }
 
     public function products(array filters = [])

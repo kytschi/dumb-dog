@@ -197,6 +197,14 @@ class Controller
         return this->system_uuid;
     }
 
+    public function isTagify(string tags)
+    {
+        if (strpos(tags, "[{") !== false) {
+            return tags;
+        }
+        return "";
+    }
+
     public function missingRequired(string message = "Missing required fields")
     {
         return "<div class='dd-error dd-box dd-wfull'>
@@ -283,10 +291,11 @@ class Controller
             }
             var tag, json, value, url, tags = [];
             for tag in data {
-                let json = json_decode(tag->tags);
-                if (empty(json)) {
+                let json = json_decode(tag->tags, false, 512, JSON_THROW_ON_ERROR);
+                if (empty(json) || !is_array(json)) {
                     continue;
                 }
+
                 for value in json {
                     let tags[value->value] = value->value;
                 }

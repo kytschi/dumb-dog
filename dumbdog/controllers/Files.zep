@@ -63,7 +63,7 @@ class Files extends Controller
                     let data["mime_type"] = _FILES["file"]["type"];
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
-                    let data["tags"] = _POST["tags"];
+                    let data["tags"] = this->isTagify(_POST["tags"]);
 
                     if (this->cfg->save_mode != false) {
                         if (empty(_FILES["file"]["tmp_name"])) {
@@ -133,7 +133,7 @@ class Files extends Controller
                     </div>
                     <div class='dd-input-group'>
                         <span>tags</span>
-                        <input type='text' name='tags' class='tags' placeholder='tag the file' value=''>
+                        <input type='text' name='tags' class='tagify' placeholder='tag the file' value=''>
                     </div>
                 </div>
                 <div class='dd-box-footer'>
@@ -227,7 +227,7 @@ class Files extends Controller
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
-                    let data["tags"] = _POST["tags"];
+                    let data["tags"] = this->isTagify(_POST["tags"]);
                     let data["updated_by"] = this->getUserId();
 
                     let database = new Database(this->cfg);
@@ -271,7 +271,7 @@ class Files extends Controller
                 </div>
                 <div class='dd-input-group'>
                     <span>tags</span>
-                    <input type='text' name='tags' class='tags' placeholder='tag the file' value='" . model->tags . "'>
+                    <input type='text' name='tags' class='tagify' placeholder='tag the file' value='" . model->tags . "'>
                 </div>
             </div>
             <div class='dd-box-footer'>
