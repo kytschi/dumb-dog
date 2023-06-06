@@ -110,94 +110,10 @@ class Style
         .dd-link:hover {
             text-decoration: underline;
         }
-        .dd-button:hover, .mini:hover {
+        .dd-button:hover, .dd-mini:hover {
             text-decoration: none;
         }
-        /* Backgrounds */
-        .background-image {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 1200px;
-            height: 1200px;
-            overflow: hidden;
-            background-image: url('data:image/jpeg;base64," . this->backgrounds() . "');
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-        #bk, #dashboard-bk {
-            background-color: #92ddd6;
-        }
-        #bk .background-image, #dashboard-bk .background-image {
-            background-position: bottom 0px right -13200px;
-        }
-        #page-bk {
-            background-color: #3c6794;
-        }
-        #page-bk .background-image {
-            background-position: bottom 0px right -12000px;
-        }
-        #events-bk {
-            background-color: #67cbda;
-        }
-        #events-bk .background-image {
-            background-position: bottom 0px right -10800px;
-        }
-        #appointments-bk {
-            background-color: #25B5B6;
-        }
-        #appointments-bk .background-image {
-            background-position: bottom 0px right -9600px;
-        }
-        #products-bk {
-            background-color: #fbdee3;
-        }
-        #products-bk .background-image {
-            background-position: bottom 0px right -8400px;
-        }
-        #settings-bk {
-            background-color: #C7D9E5;
-        }
-        #settings-bk .background-image {
-            background-position: bottom 0px right -7200px;
-        }
-        #templates-bk {
-            background-color: #597566;
-        }
-        #templates-bk .background-image {
-            background-position: bottom 0px right -6000px;
-        }
-        #themes-bk {
-            background-color: #B4B5BA;
-        }
-        #themes-bk .background-image {
-            background-position: bottom 0px right -4800px;
-        }
-        #users-bk {
-            background-color: #f5ded6;
-        }
-        #users-bk .background-image {
-            background-position: bottom 0px right -3600px;
-        }
-        #page-not-found {
-            background-color: #fff;
-        }
-        #page-not-found .background-image {
-            background-position: bottom 0px right -2400px;
-        }
-        #error {
-            background-color: #92ddd6;
-        }
-        #error .background-image {
-            background-position: bottom 0px right -1200px;
-        }
-        #orders-bk {
-            background-color: #506eb6;
-        }
-        #orders-bk .background-image {
-            background-position: bottom 0px right 0px;
-        }        
-        main {
+        .dd-main {
             position: relative;
             margin: 0 auto;
             width: 100%;
@@ -209,22 +125,22 @@ class Style
         }
 
         /* Inputs */
-        .input-group {
+        .dd-input-group {
             display: flex;
             flex-direction: column;
             flex: 100%;
             margin-bottom: 30px;
         }
-        .input-group > span {
+        .dd-input-group > span {
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 56pt;
             line-height: 44pt;
         }
-        input, textarea, select, .trumbowyg-editor, td {
+        .dd-input-group input, .dd-input-group textarea, .dd-input-group select, .trumbowyg-editor, td {
             font-family: Helvetica, sans-serif !important;
             font-size: 14pt !important;
         }
-        input, textarea, select {
+        .dd-input-group input, .dd-input-group textarea, .dd-input-group select {
             padding: 10px;
         }
         .trumbowyg-editor,
@@ -279,25 +195,111 @@ class Style
         .trumbowyg-dropdown-formatting button {
             line-height: 35px !important;
         }
-        input:focus, textarea:focus, select:focus {
+        .dd-input-group input:focus, .dd-input-group textarea:focus, .dd-input-group select:focus {
             border:1px solid var(--input-border-focus-colour);
             outline: none;
             box-shadow: none;
             -moz-box-shadow: none;
             -webkit-box-shadow: none;
         }
+
+        /* Backgrounds */
+        .dd-background-image {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 1200px;
+            height: 1200px;
+            overflow: hidden;
+            background-image: url('data:image/jpeg;base64," . this->backgrounds() . "');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        #dd-bk, #dd-dashboard-bk {
+            background-color: #92ddd6;
+        }
+        #dd-bk .dd-background-image, #dd-dashboard-bk .dd-background-image {
+            background-position: bottom 0px right -13200px;
+        }
+        #dd-page-bk {
+            background-color: #3c6794;
+        }
+        #dd-page-bk .dd-background-image {
+            background-position: bottom 0px right -12000px;
+        }
+        #dd-events-bk {
+            background-color: #67cbda;
+        }
+        #dd-events-bk .dd-background-image {
+            background-position: bottom 0px right -10800px;
+        }
+        #dd-appointments-bk {
+            background-color: #25B5B6;
+        }
+        #dd-appointments-bk .dd-background-image {
+            background-position: bottom 0px right -9599px;
+        }
+        #dd-products-bk {
+            background-color: #fbdee3;
+        }
+        #dd-products-bk .dd-background-image {
+            background-position: bottom 0px right -8400px;
+        }
+        #dd-settings-bk {
+            background-color: #C7D9E5;
+        }
+        #dd-settings-bk .dd-background-image {
+            background-position: bottom 0px right -7200px;
+        }
+        #dd-templates-bk {
+            background-color: #597566;
+        }
+        #dd-templates-bk .dd-background-image {
+            background-position: bottom 0px right -6000px;
+        }
+        #dd-themes-bk {
+            background-color: #B4B5BA;
+        }
+        #dd-themes-bk .dd-background-image {
+            background-position: bottom 0px right -4800px;
+        }
+        #dd-users-bk {
+            background-color: #f5ded6;
+        }
+        #dd-users-bk .dd-background-image {
+            background-position: bottom 0px right -3600px;
+        }
+        #dd-page-not-found {
+            background-color: #fff;
+        }
+        #dd-page-not-found .dd-background-image {
+            background-position: bottom 0px right -2400px;
+        }
+        #dd-error {
+            background-color: #92ddd6;
+        }
+        #dd-error .dd-background-image {
+            background-position: bottom 0px right -1200px;
+        }
+        #dd-orders-bk {
+            background-color: #506eb6;
+        }
+        #dd-orders-bk .dd-background-image {
+            background-position: bottom 0px right 0px;
+        }
+
         /* Input switch */
-        .switcher {
+        .dd-switcher {
             font-size: 0pt !important;
         }
-        .switcher label * {
+        .dd-switcher label * {
             vertical-align: middle;
             overflow: hidden;
         }
-        .switcher input {
+        .dd-switcher input {
             display: none;
         }
-        .switcher label input + span {
+        .dd-switcher label input + span {
             position: relative;
             display: inline-block;
             margin-right: 10px;
@@ -307,7 +309,7 @@ class Style
             border:1px solid var(--input-border-colour);
             transition: all 0.3s ease-in-out;
         }
-        .switcher label input + span small {
+        .dd-switcher label input + span small {
             position: absolute;
             display: block;
             width: 50%;
@@ -322,63 +324,58 @@ class Style
             text-align: center;
             user-select: none;
         }
-        .switcher label input:checked + span {
+        .dd-switcher label input:checked + span {
             background-color: var(--box-background-colour);
         }
-        .switcher label input:checked + span small {
+        .dd-switcher label input:checked + span small {
             background-color: var(--button-background-colour);
             left: 50%;
         }
-        .switcher label input:checked + span .switcher-off {
+        .dd-switcher label input:checked + span .dd-switcher-off {
             display: none;
         }
-        .switcher label input:checked + span .switcher-on {
+        .dd-switcher label input:checked + span .dd-switcher-on {
             display: block;
         }
 
         /* Buttons */
-        button, .default-item, .button-blank  {
+        .dd-default-item, .dd-button-blank  {
             color: var(--button-text-colour);
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 44pt;
             line-height: 34pt;
         }
-        .button-blank, .dd-button {
+        .dd-button-blank, .dd-button {
             padding: 10px 40px;
         }
-        .default-item {
+        .dd-default-item {
             vertical-align: middle;
             padding: 30px 0px 0px 0px;
         }
-        .dd-button, .button-blank {
+        .dd-button, .dd-button-blank {
             background-color: var(--button-background-colour);
             border: 3px solid var(--button-border-colour);
             cursor: pointer;
             text-decoration: none;
         }
-        .button-blank {
+        .dd-button-blank {
             background: none !important;
             border: 0 !important;
         }
         .dd-button:hover {
             background-color: var(--button-hover-background-colour);
         }
-        .button-blank:hover {
+        .dd-button-blank:hover {
             color: var(--button-hover-background-colour);
         }
-        .page-toolbar, #tags {
+        .dd-page-toolbar {
             margin-bottom: 20px !important;
-        }
-        #tags {
-            width: 100%;
-        }
-        .page-toolbar {
             display: flex;
         }
-        .page-toolbar .round {
+        .dd-page-toolbar .dd-round {
             margin-right: 20px;
         }
-        .round {
+        .dd-round {
             display: block;
             height: 100px !important;
             width: 100px !important;
@@ -391,33 +388,16 @@ class Style
             border: 3px solid var(--button-border-colour);
             cursor: pointer;
         }
-        .round img {
+        .dd-round img {
             margin-top: 20px;
             width: 60px;
         }
-        .mini {
-            display: block;
-            cursor: pointer;
-            width: 40px !important;
-            height: 40px !important;
-        }
-        .mini.icon::before {
-            width: 40px !important;
-            height: 40px !important;
-            left: 0px !important;
-            top: 0px !important;
-            background-size: 400px 400px;
-            
-        }
-        .mini.icon-edit::before {
-            background-position: -160px -40px !important;
-        }
-        .deleted .round, .deleted .dd-button {
+        .dd-deleted .dd-round, .dd-deleted .dd-button {
             background-color: var(--box-deleted-background-colour);
         }
 
         /* Box and Table*/
-        .box, .dd-table {
+        .dd-box, .dd-table {
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
@@ -425,10 +405,15 @@ class Style
             border-collapse: collapse;
             min-width: 50%;
         }
-        #login.box {
+        .dd-box {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+        }
+        #dd-login.dd-box {
             width: 50%;
         }
-        .alert {
+        .dd-alert {
             border: 3px solid var(--box-border-colour);
             box-shadow: var(--box-shadow);
             background-color: var(--box-background-colour);
@@ -438,30 +423,30 @@ class Style
             font-family: 'heading', Helvetica, sans-serif;
             padding: 20px;
         }
-        .row {
+        .dd-row {
             display:flex;
             column-gap: 20px;
         }
-        .box-body {
+        .dd-box-body {
             padding: 40px 40px;
         }
-        .box-footer {
+        .dd-box-footer {
             padding: 0 40px 40px 40px;
             display: flex;
             justify-content: flex-end;
         }
-        .box-footer a, .box-footer button {
+        .dd-box-footer a, .dd-box-footer button {
             margin-left: 20px;
         }
-        .box-title {
+        .dd-box-title {
             display: flex;
             flex-direction: row;
         }
-        .box-title, .dd-table th, .dd-table td {
+        .dd-box-title, .dd-table th, .dd-table td {
             padding: 20px;
             border-bottom: 3px solid var(--box-title-border-colour);
         }
-        .box-title, .dd-table th {
+        .dd-box-title, .dd-table th {
             background-color: var(--box-title-background-colour);
             font-size: 48pt;
             font-weight: bold;
@@ -475,7 +460,7 @@ class Style
             vertical-align: top;
             border-right: 3px solid var(--box-title-border-colour);
         }
-        .dd-table tr.deleted {
+        .dd-table tr.dd-deleted {
             color: var(--text-deleted);
             text-decoration: line-through;
         }
@@ -486,41 +471,49 @@ class Style
             background-color: var(--box-title-background-colour);
             text-align: right;
         }
-        .box-title img {
+        .dd-tools {
+            width: 120px;
+            text-align: right;
+        }
+        .dd-tools a {
+            float: right;
+            margin-left: 5px;
+        }
+        .dd-box-title img {
             width: 80px;
             margin-right: 10px;
         }
-        .error .box-body, .success .box-body {
+        .dd-error .dd-box-body, .success .dd-box-body {
             font-family: 'heading', Helvetica, sans-serif;
             font-size: 56pt;
             text-transform: uppercase;
         }
-        .error .box-body p, .success .box-body p {
+        .dd-error .dd-box-body p, .success .dd-box-body p {
             padding: 0;
             margin: 0;
         }
-        .deleted.alert, .deleted .box-title {
+        .dd-deleted.dd-alert, .dd-deleted .dd-box-title {
             background-color: var(--box-deleted-background-colour);
         }
-        .warning.alert {
+        .dd-warning.dd-alert {
             background-color: var(--box-warning-background-colour);
         }
 
         /* Quick menu */
-        #quick-menu-button {                
+        #dd-quick-menu-button {                
             position: fixed;
             right: 30px;
             top: 30px;
             z-index: 100;
         }
-        #quick-menu {
+        #dd-quick-menu {
             position: fixed;
             right: 55px;
             top: 140px;
             width: 80px;
             z-index: 101;
         }
-        #quick-menu .round, #quick-menu-button .round, .page-toolbar .round {
+        #dd-quick-menu .dd-round, #dd-quick-menu-button .dd-round, .dd-page-toolbar .dd-round {
             display: block;
             height: 100px;
             width: 100px;
@@ -530,19 +523,20 @@ class Style
             overflow: hidden;
             box-shadow: var(--button-shadow);
         }
-        #quick-menu .round, .page-toolbar .round  {
+        #dd-quick-menu .dd-round, .dd-page-toolbar .dd-round  {
             margin-bottom: 10px;
         }
-        #quick-menu img, .page-toolbar img {
+        #dd-quick-menu img, .dd-page-toolbar img {
             margin-top: 20px;
             width: 60px;
         }
-        #quick-menu-button img {
+        #dd-quick-menu-button img {
             margin-top: 22px;
             width: 80px;
         }
         
-        #message-count, #appointments {
+        /* Mesage count */
+        #dd-message-count, #dd-appointments {
             border-radius: 40px;
             background-color: #fff;
             padding: 15px 20px 10px 20px;
@@ -556,7 +550,7 @@ class Style
             font-size: 36pt;
             line-height: 26pt;
         }
-        #message-count span, #appointments span {
+        #dd-message-count span, #dd-appointments span {
             content: '';
             position: absolute;
             display: block;
@@ -568,134 +562,133 @@ class Style
             background-repeat: no-repeat;
             background-position: -256px -128px;
         }
-        #appointments {
+        #dd-appointments {
             margin-left: -244px;
             margin-top: -34px;
         }
-        #appointments span {
+        #dd-appointments span {
             margin-left: 164px;
             margin-top: -61px;
             background-position: -512px -128px;
         }
 
         /* Calendar */
-        #calendar {
+        #dd-calendar {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             border-top: 3px solid var(--text-heading-border-colour);
             border-left: 3px solid var(--text-heading-border-colour);
         }
-        #calendar-month {
+        #dd-calendar-month {
             font-family: 'heading', Helvetica, sans-serif;
             font-size: 56pt;
             line-height: 56pt;
             margin-top: 20px;
             margin-bottom: 20px;
         }
-        #calendar-month a, #calendar-month span {
+        #dd-calendar-month a, #dd-calendar-month span {
             float: left;
             margin-right: 10px;
         }
-        #calendar-month span {
+        #dd-calendar-month span {
             padding-top: 7px !important;
         }
-        #calendar-month div {
+        #dd-calendar-month div {
             float: left;
             padding-bottom: 10px !important;
         }
-        #calendar-month a {
+        #dd-calendar-month a {
             display: block;
             width: 64px;
             height: 64px;
         }
-        #calendar-month a:hover {
+        #dd-calendar-month a:hover {
             text-decoration: none;
         }
-        #calendar-month a:before {
+        #dd-calendar-month a:before {
             top: 10px !important;
             left: 0 !important;
         }
-        #calendar .calendar-entry, #calendar .calendar-day, #calendar .calendar-blank {
+        #dd-calendar .dd-calendar-entry, #dd-calendar .dd-calendar-day, #dd-calendar .dd-calendar-blank {
             padding: 10px;
             background-color: #fff;
             border-bottom: 3px solid var(--text-heading-border-colour);
             border-right: 3px solid var(--text-heading-border-colour);
         }
-        #calendar .calendar-blank {
+        #dd-calendar .dd-calendar-blank {
             background-color: #dfdfdf;
         }
-        .calendar-today {
+        .dd-calendar-today {
             color: var(--box-active-background-colour);
             font-weight: bold;
         }
-        #calendar .calendar-entry {
+        #dd-calendar .dd-calendar-entry {
             display: flex;
             flex-direction: column;
         }
-        .calendar-event {
+        .dd-calendar-event {
             padding: 10px;
             background-color: var(--box-active-background-colour);
             margin-top: 5px;
             color: var(--body-text-colour);
             font-weight: normal;
         }
-        .calendar-free-slot {
+        .dd-calendar-free-slot {
             background-color: #F2845F;
         }
-
-        .calendar-free-slot small span {
+        .dd-calendar-free-slot small span {
             color: #fff;
             font-weight: bold;
         }
 
         /* Products */
-        .product-stock, .product-price {
+        .dd-product-stock, .dd-product-price {
             padding: 10px;
             border-radius: 15px;
             margin-top: 10px;
             margin-right: 10px;
         }
-        .product-stock {
+        .dd-product-stock {
             color: #fff;
             background-color: var(--box-success-background-colour);
         }
-        .product-price {
+        .dd-product-price {
             color: #fff;
             background-color: var(--box-success-background-colour);
         }
 
         /* Statuses */
-        .status {
+        .dd-status {
             padding: 15px 20px;
             border-radius: 20px;
             background-color: var(--box-active-background-colour);
             display: block;
             text-align: center;
         }
-        .status-basket {
+        .dd-status-basket {
             background-color: var(--box-warning-background-colour);
         }
-        .deleted .status {
+        .dd-deleted .dd-status {
             color: var(--text-disabled) !important;
             text-decoration: none !important;
             background-color: var(--box-deleted-background-colour) !important;
         }
                 
         /* Text */
-        h1, h2, h3, h4, h5, h6 {
+        .dd-h1, .dd-h2, .dd-h3, .dd-h4, .dd-h5, .dd-h6 {
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 56pt;
             margin: 20px 0 50px 0;
         }
-        h1 {
+        .dd-h1 {
             font-size: 78pt;
             line-height: 78pt;
         }
-        h2 {
+        .dd-h2 {
             font-size: 56pt;
             line-height: 56pt;
         }
-        .page-title span, .no-results span, .page-sub-title span, #calendar-month div {
+        .dd-page-title span, .no-results span, .dd-page-sub-title span, #dd-calendar-month div {
             background-color: var(--text-heading-background-colour);
             border: 3px solid var(--text-heading-border-colour);
             margin: 0;
@@ -705,13 +698,13 @@ class Style
             background-position: 20px 20px;
             background-size: 64px;
         }
-        .page-title span.icon {
+        .dd-page-title span.dd-icon {
             padding: 0px 40px 10px 100px;
         }
-        .page-sub-title span {
+        .dd-page-sub-title span {
             padding: 20px 40px;
         }
-        .required {
+        .dd-required {
             padding-top: 10px;
             color: var(--text-required-colour);
         }
@@ -723,7 +716,7 @@ class Style
 
         /* Tiles */
         @media only screen and (min-width: 480px) {
-            #tiles {
+            #dd-tiles {
                 -moz-column-count: 2;
                 -webkit-column-count: 2;
                 column-count: 2;
@@ -731,7 +724,7 @@ class Style
         }
 
         @media only screen and (min-width: 768px) {
-            #tiles {
+            #dd-tiles {
                 -moz-column-count: 2;
                 -webkit-column-count: 2;
                 column-count: 2;
@@ -739,39 +732,39 @@ class Style
         }
 
         @media only screen and (min-width: 960px) {
-            #tiles {
+            #dd-tiles {
                 -moz-column-count: 3;
                 -webkit-column-count: 3;
                 column-count: 3;
             }
-            #pages #tiles {
+            #dd-pages #dd-tiles {
                 -moz-column-count: 2;
                 -webkit-column-count: 2;
                 column-count: 2;
             }
         }
 
-        #tiles {
+        #dd-tiles {
             column-gap: 40px;
         }
 
-        .tile {
+        .dd-tile {
             display: inline-block;
             break-inside: avoid-column;
             margin: 0 0 40px 0;
             width: 100%;
         }
-        .tile .box-body {
+        .dd-tile .dd-box-body {
             padding: 20px 10px;
         }
-        .tile .box-body .thumb {
+        .dd-tile .dd-box-body .dd-thumb {
             overflow: hidden;
         }
-        .tile .box-body .box-tags {
+        .dd-tile .dd-box-body .dd-box-tags {
             float: left;
             width: 100%;
         }
-        .tile .box-body .thumb img {
+        .dd-tile .dd-box-body .dd-thumb img {
             width: 100%;
         }
 
@@ -796,12 +789,12 @@ class Style
         }
 
         /* Icons */
-        .icon {
+        .dd-icon {
             width: 64px;
             height: 64px;
             position: relative;
         }
-        .icon::before {
+        .dd-icon::before {
             content: '';
             position: absolute;
             width: 64px;
@@ -814,92 +807,111 @@ class Style
             background-repeat: no-repeat;
             background-position: 0 0;
         }
-        .icon-dumbdog::before {
+        .dd-mini {
+            display: block;
+            cursor: pointer;
+            width: 40px !important;
+            height: 40px !important;
+        }
+        .dd-mini.dd-icon::before {
+            width: 40px !important;
+            height: 40px !important;
+            left: 0px !important;
+            top: 0px !important;
+            background-size: 400px 400px;
+        }
+        .dd-icon-dumbdog::before {
             width: 80px;
             height: 68px;
             left: 14px;
             top: 16px;
             background-position: -512px -64px;
         }
-        .icon-pages::before {
+        .dd-icon-pages::before {
             background-position: -512px 0px;
         }
-        .icon-dashboard::before {
+        .dd-icon-dashboard::before {
             background-position: -384px -64px;
         }
-        .icon-settings::before {
+        .dd-icon-settings::before {
             background-position: -384px 0px;
         }
-        .icon-logout::before {
+        .dd-icon-logout::before {
             background-position: -576px 0px;
         }
-        .icon-users::before {
+        .dd-icon-users::before {
             background-position: -192px 0px;
         }
-        .icon-login::before {
+        .dd-icon-login::before {
             background-position: 0px -64px;
         }
-        .icon-files::before {
+        .dd-icon-files::before {
             background-position: -128px -64px;
         }
-        .icon-templates::before {
+        .dd-icon-templates::before {
             background-position: -320px 0px;
         }
-        .icon-back::before {
+        .dd-icon-back::before {
             background-position: -64px 0px;
         }
-        .icon-web::before {
+        .dd-icon-web::before {
             background-position: -128px 0px;
         }
-        .icon-recover::before {
+        .dd-mini.dd-icon-web::before {
+            background-position: -80px 0px;
+        }
+        .dd-icon-recover::before {
             background-position: -448px 0px;
         }
-        .icon-delete::before {
+        .dd-icon-delete::before {
             background-position: -320px -64px;
         }
-        .icon-themes::before {
+        .dd-icon-themes::before {
             background-position: -256px 0px;
         }
-        .icon-copy::before {
+        .dd-icon-copy::before {
             background-position: -448px -64px;
         }
-        .icon-edit::before {
+        .dd-icon-edit::before {
             background-position: -256px -64px;
         }
-        .icon-error::before {
+        .dd-mini.dd-icon-edit::before {
+            background-position: -160px -40px !important;
+        }
+        .dd-icon-error::before {
             background-position: -192px -64px;
         }
-        .icon-events::before {
+        .dd-icon-events::before {
             background-position: 0px -128px;
         }
-        .icon-up::before {
+        .dd-icon-up::before {
             background-position: -64px -128px;
         }
-        .icon-comments::before {
+        .dd-icon-comments::before {
             background-position: -128px -128px;
         }
-        .icon-messages::before {
+        .dd-icon-messages::before {
             background-position: -192px -128px;
         }
-        .icon-message-read::before {
+        .dd-icon-message-read::before {
             background-position: -320px -128px;
         }
-        .icon-message-view::before {
+        .dd-icon-message-view::before {
             background-position: -384px -128px;
         }
-        .icon-appointments::before {
+        .dd-icon-appointments::before {
             background-position: -448px -128px;
         }
-        .icon-next::before {
+        .dd-icon-next::before {
             background-position: -576px -128px;
         }
-        .icon-prev::before {
+        .dd-icon-prev::before {
             background-position: 0 -192px;
         }
-        .icon-products::before {
+        .dd-icon-products::before {
             background-position: -64px -192px;
         }
-        .icon-orders::before {
+        .dd-icon-orders::before {
             background-position: -128px -192px;
         }
         </style>";

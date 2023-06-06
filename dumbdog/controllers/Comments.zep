@@ -41,8 +41,8 @@ class Comments extends Controller
         let database = new Database(this->cfg);
 
         let html = titles->page("Add a comment", "add");
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/comments' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/comments' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
@@ -105,17 +105,18 @@ class Comments extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull'>
-            <div class='box-title'>
-                <span>the comment</span>
-            </div>
-            <div class='box-body'>" .
-                this->createInputSwitch("can go live", "reviewed", false) .
-                this->createInputWysiwyg("content", "content", "the comment", true) .
-                this->createInputText("name", "name", "who said it?");
+        let html .= "<form method='post'>
+            <div class='dd-box dd-wfull'>
+                <div class='dd-box-title'>
+                    <span>the comment</span>
+                </div>
+                <div class='dd-box-body'>" .
+                    this->createInputSwitch("can go live", "reviewed", false) .
+                    this->createInputWysiwyg("content", "content", "the comment", true) .
+                    this->createInputText("name", "name", "who said it?");
         let html .= this->createSelects(database);
-        let html .= "</div><div class='box-footer'>
-                <a href='/dumb-dog/comments' class='dd-link button-blank'>cancel</a>
+        let html .= "</div><div class='dd-box-footer'>
+                <a href='/dumb-dog/comments' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div></div></form>";
 
@@ -126,7 +127,7 @@ class Comments extends Controller
     {
         var data, html;
 
-        let html = "<div class='input-group'>
+        let html = "<div class='dd-input-group'>
             <span>attach to page</span>
             <select name='page_id'><option value=''>not required</option>";
 
@@ -151,7 +152,7 @@ class Comments extends Controller
         let html .= "
                     </select>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>user said it</span>
                     <select name='user_id'><option value=''>not required</option>";
 
@@ -201,15 +202,16 @@ class Comments extends Controller
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/comments' class='round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'>
+            <a href='/dumb-dog/comments' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/comments/recover/" . model->id . "' class='round icon icon-recover' title='Recover the comment'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/comments/recover/" . model->id . "' class='dd-round dd-icon dd-icon-recover' title='Recover the comment'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/comments/delete/" . model->id . "' class='round icon icon-delete' title='Delete the comment'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/comments/delete/" . model->id . "' class='dd-round dd-icon dd-icon-delete' title='Delete the comment'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -259,22 +261,22 @@ class Comments extends Controller
             let html .= this->saveSuccess("I've updated the comment");
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull";
+        let html .= "<form method='post'><div class='dd-box dd-wfull";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
         let html .= "'>
-            <div class='box-title'>
+            <div class='dd-box-title'>
                 <span>the comment</span>
             </div>
-            <div class='box-body'>" .
+            <div class='dd-box-body'>" .
                 this->createInputSwitch("can go live", "reviewed", false, model->reviewed) .
                 this->createInputWysiwyg("content", "content", "the comment", true, model->content) .
                 this->createInputText("name", "name", "who said it?", false, model->name);
         let html .= this->createSelects(database, model);
         let html .= "</div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/comments' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/comments' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -293,31 +295,31 @@ class Comments extends Controller
             let html .= this->saveSuccess("I've deleted the comment");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/comments/add' class='dd-link round icon' title='Add a comment'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/pages' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/comments/add' class='dd-link dd-round dd-icon' title='Add a comment'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
 
-        let html .= "<div id='tiles'>";
+        let html .= "<div id='dd-tiles'>";
         let data = database->all("SELECT * FROM comments");
         if (count(data)) {
             var iLoop, str;
             let iLoop = 0;
             while (iLoop < count(data)) {
                 let html .= "
-                <div class='tile'>
-                    <div class='box dd-wfull";
+                <div class='dd-tile'>
+                    <div class='dd-box dd-wfull";
                     if (data[iLoop]->deleted_at) {
-                        let html .= " deleted";
+                        let html .= " dd-deleted";
                     }
                     let str = strip_tags(data[iLoop]->content);
                     let html .= "'>
-                        <div class='box-body'><p>" . substr(str, 0, 120) . ((strlen(str) > 120) ? "..." : "") . "</p></div>
-                        <div class='box-footer'>
+                        <div class='dd-box-body'><p>" . substr(str, 0, 120) . ((strlen(str) > 120) ? "..." : "") . "</p></div>
+                        <div class='dd-box-footer'>
                             <a  href='/dumb-dog/comments/edit/" . data[iLoop]->id . "'
-                                class='dd-link round icon icon-edit'
+                                class='dd-link dd-round dd-icon dd-icon-edit'
                                 title='edit me'>&nbsp;</a>
                         </div>
                     </div>

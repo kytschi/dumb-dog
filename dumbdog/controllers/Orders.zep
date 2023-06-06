@@ -89,15 +89,15 @@ class Orders extends Controller
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
         }
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/orders' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/orders' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/orders/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the order'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/orders/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the order'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/orders/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the order'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/orders/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the order'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -113,14 +113,14 @@ class Orders extends Controller
 
         let html .= "
         <form method='post'>
-            <div class='box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
-                <div class='box-title'>
+            <div class='dd-box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
+                <div class='dd-box-title'>
                     <span>the order</span>
                 </div>
-                <div class='box-body'>
-                    <div class='input-group'>
+                <div class='dd-box-body'>
+                    <div class='dd-input-group'>
                         <span>Status</span>
-                        <p style='padding:0; margin: 0'><span style='float: left;' class='status status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
+                        <p style='padding:0; margin: 0'><span style='float: left;' class='dd-status dd-status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
                     </div>
                     <table class='dd-table dd-wfull'>
                         <thead>
@@ -163,25 +163,25 @@ class Orders extends Controller
                         </tfoot>
                     </table>
                 </div>
-                <div class='box-footer'>
-                    <a href='/dumb-dog/orders' class='dd-link button-blank'>cancel</a>
+                <div class='dd-box-footer'>
+                    <a href='/dumb-dog/orders' class='dd-link dd-button-blank'>cancel</a>
                     <button type='submit' name='save' class='dd-button'>save</button>
                 </div>
             </div>
-            <div class='row'>
-                <div class='box" . (model->deleted_at ? " deleted" : "") . "'>
-                    <div class='box-title'>
+            <div class='dd-row'>
+                <div class='dd-box" . (model->deleted_at ? " deleted" : "") . "'>
+                    <div class='dd-box-title'>
                         <span>billing</span>
                     </div>
-                    <div class='box-body'>
+                    <div class='dd-box-body'>
                         " . this->createInputText("name", "billing_name", "their name", true, security->decrypt(model->billing->name)) .
                     "</div>
                 </div>
-                <div class='box" . (model->deleted_at ? " deleted" : "") . "'>
-                    <div class='box-title'>
+                <div class='dd-box" . (model->deleted_at ? " deleted" : "") . "'>
+                    <div class='dd-box-title'>
                         <span>shipping</span>
                     </div>
-                    <div class='box-body'>
+                    <div class='dd-box-body'>
                         " . this->createInputText("name", "shipping_name", "their name", true, security->decrypt(model->shipping->name)) .
                     "</div>
                 </div>
@@ -227,13 +227,13 @@ class Orders extends Controller
             ORDER BY created_at DESC");
 
         for item in data {
-            let html .= "<tr" . (item->deleted_at ? " class='deleted'" : "") . ">
+            let html .= "<tr" . (item->deleted_at ? " class='dd-deleted'" : "") . ">
                 <td>" . item->order_number . "</td>
                 <td>" . (item->name ? security->decrypt(item->name) : "UNKNOWN") . "</td>
                 <td>" . item->total . "</td>
-                <td><span class='status status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
+                <td><span class='dd-status dd-status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
                 <td>" . date("d/m/Y", strtotime(item->created_at)) . "</td>
-                <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='dd-link mini icon icon-edit' title='edit me'>&nbsp;</a></td>
+                <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='dd-link mini dd-icon dd-icon-edit' title='edit me'>&nbsp;</a></td>
             </tr>";
         }
 

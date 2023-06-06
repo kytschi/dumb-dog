@@ -46,12 +46,12 @@ class Dashboard extends Controller
         let data["id"] = _SESSION["dd"];
         let model = database->get("SELECT * FROM users WHERE id=:id", data);
         if (model) {
-            let html .= "<h2 class='page-sub-title'><span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span></h2>";
+            let html .= "<h2 class='dd-h2 dd-page-sub-title'><span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span></h2>";
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/messages' class='dd-link round icon icon-messages' title='Messages'>&nbsp;</a>
-            <a href='/dumb-dog/orders' class='dd-link round icon icon-orders' title='Orders'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/messages' class='dd-link dd-round dd-icon dd-icon-messages' title='Messages'>&nbsp;</a>
+            <a href='/dumb-dog/orders' class='dd-link dd-round dd-icon dd-icon-orders' title='Orders'>&nbsp;</a>
         </div>";
 
         var colours = [
@@ -103,7 +103,7 @@ class Dashboard extends Controller
                 let values[value][] = titles->{model};
             }
         }
-        let html .= "<div class='box'><div class='box-title'><span>annual stats</span></div><div class='box-body'>
+        let html .= "<div class='dd-box'><div class='dd-box-title'><span>annual stats</span></div><div class='dd-box-body'>
         <canvas id='visitors' width='600' height='200'></canvas></div></div>
         <script type='text/javascript'>
         var ctx = document.getElementById('visitors').getContext('2d');
@@ -137,7 +137,7 @@ class Dashboard extends Controller
         });
         </script>";
 
-        let html .= "<div class='row'>";
+        let html .= "<div class='dd-row'>";
 
         let model = "SELECT count(id) AS total, bot FROM stats WHERE bot IS NOT NULL ";
         let model .= "GROUP BY bot ORDER BY total DESC";
@@ -147,7 +147,7 @@ class Dashboard extends Controller
         let model = count(data) * 30;
         let value = (model < 200) ? 200 : model;
 
-        let html .= "<div class='box'><div class='box-title'><span>bots</span></div><div class='box-body'>
+        let html .= "<div class='dd-box'><div class='dd-box-title'><span>bots</span></div><div class='dd-box-body'>
         <canvas id='bots' width='505' height='" . value . "'></canvas></div></div>
         <script type='text/javascript'>
         var ctx_bots = document.getElementById('bots').getContext('2d');
@@ -198,7 +198,7 @@ class Dashboard extends Controller
         let data = database->all(model);
 
         
-        let html .= "<div class='box'><div class='box-title'><span>referrers</span></div><div class='box-body'>
+        let html .= "<div class='dd-box'><div class='dd-box-title'><span>referrers</span></div><div class='dd-box-body'>
         <canvas id='referrers' width='505' height='400'></canvas></div></div></div>
         <script type='text/javascript'>
         var ctx_referrers = document.getElementById('referrers').getContext('2d');
@@ -274,19 +274,19 @@ class Dashboard extends Controller
             }
         }
 
-        let html .= "<form method='post'><div id='login' class='box'>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>username<span class='required'>*</span></span>
+        let html .= "<form method='post'><div id='dd-login' class='dd-box'>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
+                    <span>username<span class='dd-required'>*</span></span>
                     <input type='text' name='name' placeholder='what is your username?'>
                 </div>
-                <div class='input-group'>
-                    <span>password<span class='required'>*</span></span>
+                <div class='dd-input-group'>
+                    <span>password<span class='dd-required'>*</span></span>
                     <input type='password' name='password' placeholder='your secret password please'>
                 </div>
-                <div class='input-group'><span>captcha<span class='required'>*</span></span>" . captcha->draw() . "</div>
+                <div class='dd-input-group'><span>captcha<span class='dd-required'>*</span></span>" . captcha->draw() . "</div>
             </div>
-            <div class='box-footer'>
+            <div class='dd-box-footer'>
                 <button type='submit' name='login' class='dd-button'>login</button>
             </div>
         </div></form>";

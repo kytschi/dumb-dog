@@ -35,10 +35,10 @@ class Javascript
     {
         return "<script type='text/javascript'>
         function showQuickMenu() {
-            if (document.getElementById('quick-menu').style.display == 'none') {
-                document.getElementById('quick-menu').style.display = 'block';
+            if (document.getElementById('dd-quick-menu').style.display == 'none') {
+                document.getElementById('dd-quick-menu').style.display = 'block';
             } else {
-                document.getElementById('quick-menu').style.display = 'none';
+                document.getElementById('dd-quick-menu').style.display = 'none';
             }
         }
         function fallbackCopyTextToClipboard(text) {

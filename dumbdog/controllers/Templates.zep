@@ -28,7 +28,7 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Tiles;
+use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
 
 class Templates extends Controller
@@ -38,7 +38,9 @@ class Templates extends Controller
         var titles, html;
         let titles = new Titles();
         let html = titles->page("Add a template", "add");
-        let html .= "<div class='page-toolbar'><a href='/dumb-dog/templates' class='round icon icon-back' title='Back to list'>&nbsp;</a></div>";
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/templates' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
+        </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -76,34 +78,34 @@ class Templates extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull'>
-            <div class='box-title'>
+        let html .= "<form method='post'><div class='dd-box dd-wfull'>
+            <div class='dd-box-title'>
                 <span>the template</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>name<span class='required'>*</span></span>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
+                    <span>name<span class='dd-required'>*</span></span>
                     <input type='text' name='name' placeholder='give me a name' value=''>
                 </div>
-                <div class='input-group'>
-                    <span>file<span class='required'>*</span></span>
+                <div class='dd-input-group'>
+                    <span>file<span class='dd-required'>*</span></span>
                     <input type='text' name='file' placeholder='where am I located and with what file?' value=''>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>default</span>
-                    <div class='switcher'>
+                    <div class='dd-switcher'>
                         <label>
                             <input type='checkbox' name='default' value='1'>
                             <span>
-                                <small class='switcher-on'></small>
-                                <small class='switcher-off'></small>
+                                <small class='dd-switcher-on'></small>
+                                <small class='dd-switcher-off'></small>
                             </span>
                         </label>
                     </div>
                 </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/templates' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/templates' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -135,15 +137,15 @@ class Templates extends Controller
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/templates' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/templates' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the template'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the template'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the template'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the template'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -191,26 +193,26 @@ class Templates extends Controller
             let html .= this->saveSuccess("I've updated the template");
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull";
+        let html .= "<form method='post'><div class='dd-box dd-wfull";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
         let html .= "'>
-            <div class='box-title'>
+            <div class='dd-box-title'>
                 <span>the template</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>name<span class='required'>*</span></span>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
+                    <span>name<span class='dd-required'>*</span></span>
                     <input type='text' name='name' placeholder='make sure to set a name' value='" . model->name . "'>
                 </div>
-                <div class='input-group'>
-                    <span>file<span class='required'>*</span></span>
+                <div class='dd-input-group'>
+                    <span>file<span class='dd-required'>*</span></span>
                     <input type='text' name='file' placeholder='where am I located and with what file?' value='" . model->file . "'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>default</span>
-                    <div class='switcher'>
+                    <div class='dd-switcher'>
                         <label>
                             <input type='checkbox' name='default' value='1'";
 
@@ -220,15 +222,15 @@ class Templates extends Controller
                 
                 let html .= ">
                             <span>
-                                <small class='switcher-on'></small>
-                                <small class='switcher-off'></small>
+                                <small class='dd-switcher-on'></small>
+                                <small class='dd-switcher-off'></small>
                             </span>
                         </label>
                     </div>
                 </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/templates' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/templates' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -238,8 +240,9 @@ class Templates extends Controller
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
+        var titles, table, database, html;
         let titles = new Titles();
+        let table = new Table(this->cfg);
         
         let html = titles->page("Templates", "templates");
 
@@ -247,17 +250,20 @@ class Templates extends Controller
             let html .= this->saveSuccess("I've deleted the template");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/pages' class='dd-link round icon icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/templates/add' class='dd-link round icon' title='Add a template'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/pages' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='/dumb-dog/templates/add' class='dd-link dd-round dd-icon' title='Add a template'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
 
-        let tiles = new Tiles();
-        let html = html . tiles->build(
-            database->all("SELECT * FROM templates"),
-            "/dumb-dog/templates/edit/"
+        let html .= table->build(
+            [
+                "name",
+                "default|bool"
+            ],
+            database->all("SELECT * FROM templates ORDER BY `default` DESC, name ASC"),
+            "/dumb-dog/templates"
         );
 
         return html;

@@ -59,18 +59,18 @@ class Messages extends Controller
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/messages' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/messages' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->status != "read") {
-            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='dd-link round icon icon-message-read' title='Mark as read'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-message-read' title='Mark as read'>&nbsp;</a>";
         }
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the message'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the message'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the message'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the message'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -115,28 +115,28 @@ class Messages extends Controller
             let html .= this->saveSuccess("I've updated the message");
         }
 
-        let html .= "<div class='box dd-wfull";
+        let html .= "<div class='dd-box dd-wfull";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
         let html .= "'>
-            <div class='box-title'>
+            <div class='dd-box-title'>
                 <span>the message</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
                     <span>from</span>
                     <input value='" . security->decrypt(model->from_name) . "' readonly='readonly'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>email</span>
                     <input value='" . security->decrypt(model->from_email) . "' readonly='readonly'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>number</span>
                     <input value='" . security->decrypt(model->from_number) . "' readonly='readonly'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>message</span>
                     <textarea readonly='readonly'>" . security->decrypt(model->message) . "</textarea>
                 </div>
@@ -157,8 +157,8 @@ class Messages extends Controller
             let html .= this->saveSuccess("I've deleted the message");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/dashboard' class='dd-link round icon icon-up' title='Back to the dashboard'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/dashboard' class='dd-link dd-round dd-icon dd-icon-up' title='Back to the dashboard'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -210,14 +210,14 @@ class Messages extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='error box dd-wfull'>
-            <div class='box-title'>
+        let html .= "<form method='post'><div class='dd-error dd-box dd-wfull'>
+            <div class='dd-box-title'>
                 <span>are your sure?</span>
             </div>
-            <div class='box-body'><p>I've read it already!</p>
+            <div class='dd-box-body'><p>I've read it already!</p>
             </div>
-            <div class='box-footer'>
-                 href='/dumb-dog/messages/view/" . model->id . "' class='button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                 href='/dumb-dog/messages/view/" . model->id . "' class='dd-button-blank'>cancel</a>
                 <button type='submit' name='read' class='dd-button'>read</button>
             </div>
         </div></form>";

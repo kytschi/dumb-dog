@@ -46,9 +46,9 @@ class Settings extends Controller
         }
 
         let html = titles->page("Site settings", "settings");
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/themes' class='dd-link round icon icon-themes' title='Managing the themes'>&nbsp;</a>
-            <a href='/dumb-dog/users' class='dd-link round icon icon-users' title='Manage the users'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/themes' class='dd-link dd-round dd-icon dd-icon-themes' title='Managing the themes'>&nbsp;</a>
+            <a href='/dumb-dog/users' class='dd-link dd-round dd-icon dd-icon-users' title='Manage the users'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
@@ -95,32 +95,32 @@ class Settings extends Controller
             let html .= this->saveSuccess("I've updated the settings");
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull'>
-            <div class='box-title'>
+        let html .= "<form method='post'><div class='dd-box dd-wfull'>
+            <div class='dd-box-title'>
                 <span>the settings</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
                     <span>online</span>
-                    <div class='switcher'>
+                    <div class='dd-switcher'>
                         <label>
-                            <input type='checkbox' name='status' value='1'";
+                            <input type='checkbox' name='dd-status' value='1'";
                 if (model->{"status"} == "online") {
                     let html .= " checked='checked'";
                 }
                 
                 let html .= ">
                             <span>
-                                <small class='switcher-on'></small>
-                                <small class='switcher-off'></small>
+                                <small class='dd-switcher-on'></small>
+                                <small class='dd-switcher-off'></small>
                             </span>
                         </label>
                     </div>
                 </div>";
             let html .= this->createInputText("name", "name", "make sure to set a name", true, model->name);
             let html .= "
-                <div class='input-group'>
-                    <span>theme<span class='required'>*</span></span>
+                <div class='dd-input-group'>
+                    <span>theme<span class='dd-required'>*</span></span>
                     <select name='theme_id'>";
         let data = database->all("SELECT * FROM themes WHERE deleted_at IS NULL ORDER BY `default` DESC");
         var iLoop = 0;
@@ -135,24 +135,24 @@ class Settings extends Controller
         let html .= "
                     </select>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>meta author</span>
                     <input type='text' name='meta_author' placeholder='who made this?' value='" . model->meta_author . "'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>meta keywords</span>
                     <input type='text' name='meta_keywords' placeholder='list some keywords for the site' value='" . model->meta_keywords . "'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>meta description</span>
                     <textarea name='meta_description' placeholder='describe the site a bit'>" . model->meta_description . "</textarea>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>robots.txt</span>
                     <textarea name='robots_txt' placeholder='some text for robots'>" . model->robots_txt . "</textarea>
                 </div>
             </div>
-            <div class='box-footer'>
+            <div class='dd-box-footer'>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";

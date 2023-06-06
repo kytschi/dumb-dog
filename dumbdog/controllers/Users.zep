@@ -38,8 +38,8 @@ class Users extends Controller
         var titles, html;
         let titles = new Titles();
         let html = titles->page("Add a user", "add");
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/users' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/users' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
@@ -109,30 +109,30 @@ class Users extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull'>
-            <div class='box-title'>
+        let html .= "<form method='post'><div class='dd-box dd-wfull'>
+            <div class='dd-box-title'>
                 <span>the user</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>username<span class='required'>*</span></span>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
+                    <span>username<span class='dd-required'>*</span></span>
                     <input type='text' name='name' placeholder='what is their username?' value=''>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>nickname</span>
                     <input type='text' name='nickname' placeholder='what shall I call them?' value=''>
                 </div>
-                <div class='input-group'>
-                    <span>password<span class='required'>*</span></span>
+                <div class='dd-input-group'>
+                    <span>password<span class='dd-required'>*</span></span>
                     <input type='password' name='password' placeholder='sssh, it's our secret!' value=''>
                 </div>
-                <div class='input-group'>
-                    <span>password check<span class='required'>*</span></span>
+                <div class='dd-input-group'>
+                    <span>password check<span class='dd-required'>*</span></span>
                     <input type='password' name='password_check' placeholder='same again please!' value=''>
                 </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/users' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/users' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -162,15 +162,15 @@ class Users extends Controller
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
         }
-        let html .= "<div class='page-toolbar";
+        let html .= "<div class='dd-page-toolbar";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/users' class='dd-link round icon icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='/dumb-dog/users' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='dd-link round icon icon-recover' title='Recover the user'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/users/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the user'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='dd-link round icon icon-delete' title='Delete the user'>&nbsp;</a>";
+            let html .= "<a href='/dumb-dog/users/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the user'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -219,34 +219,34 @@ class Users extends Controller
             let html .= this->saveSuccess("I've updated the user");
         }
 
-        let html .= "<form method='post'><div class='box dd-wfull";
+        let html .= "<form method='post'><div class='dd-box dd-wfull";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
         let html .= "'>
-            <div class='box-title'>
+            <div class='dd-box-title'>
                 <span>the user</span>
             </div>
-            <div class='box-body'>
-                <div class='input-group'>
-                    <span>username<span class='required'>*</span></span>
+            <div class='dd-box-body'>
+                <div class='dd-input-group'>
+                    <span>username<span class='dd-required'>*</span></span>
                     <input type='text' name='name' placeholder='what is their username?' value='" . model->name . "'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>nickname</span>
                     <input type='text' name='nickname' placeholder='what shall I call them?' value='" . model->nickname . "'>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>password</span>
                     <input type='password' name='password' placeholder='sssh, it's our secret!' value=''>
                 </div>
-                <div class='input-group'>
+                <div class='dd-input-group'>
                     <span>password check</span>
                     <input type='password' name='password_check' placeholder='same again please!' value=''>
                 </div>
             </div>
-            <div class='box-footer'>
-                <a href='/dumb-dog/users' class='dd-link button-blank'>cancel</a>
+            <div class='dd-box-footer'>
+                <a href='/dumb-dog/users' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -265,8 +265,8 @@ class Users extends Controller
             let html .= this->saveSuccess("I've deleted the user");
         }
 
-        let html .= "<div class='page-toolbar'>
-            <a href='/dumb-dog/users/add' class='dd-link round icon' title='Add a user'>&nbsp;</a>
+        let html .= "<div class='dd-page-toolbar'>
+            <a href='/dumb-dog/users/add' class='dd-link dd-round dd-icon' title='Add a user'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
