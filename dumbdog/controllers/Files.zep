@@ -106,7 +106,10 @@ class Files extends Controller
             let html .= this->saveSuccess("I've saved the file");
         }
 
-        let html .= "<form method='post' action='/dumb-dog/files/add?from=" . from . "' enctype='multipart/form-data'>
+        let html .= "<form 
+            method='post'
+            action='/dumb-dog/files/add?from=" . from . "&back=" . urlencode(path) . "'
+            enctype='multipart/form-data'>
             <div class='dd-box dd-wfull'>
                 <div class='dd-box-title'>
                     <span>the file</span>
@@ -212,7 +215,7 @@ class Files extends Controller
 
         let html .= "<form
             method='post'
-            action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "'
+            action='/dumb-dog/files/edit/" . model->id . "?from=" . from . "&back=" . urlencode(path) . "'
             enctype='multipart/form-data'>
         <div class='dd-box dd-wfull";
         if (model->deleted_at) {

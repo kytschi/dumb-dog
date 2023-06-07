@@ -273,7 +273,7 @@ class Dashboard extends Controller
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog" . path . "?from=" . urlencode(trim(path, "/")) . "'>
+        let html .= "<form method='post' action='/dumb-dog" . path . "?back=" . urlencode(trim(path, "/")) . "'>
             <div id='dd-login' class='dd-box'>
                 <div class='dd-box-body'>
                     <div class='dd-input-group'>

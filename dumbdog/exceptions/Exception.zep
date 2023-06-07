@@ -74,8 +74,12 @@ class Exception extends \Exception
             </div>
             <div class='dd-box-footer'>
                 <a class='dd-button'";
-        if (isset(_GET["from"])) {
-            let html .= " href='/dumb-dog/" . urldecode(_GET["from"]) . "'";
+        if (isset(_GET["back"])) {
+            var from;
+            if (isset(_GET["from"])) {
+                let from = "?from=" . _GET["from"];
+            }
+            let html .= " href='/dumb-dog" . urldecode(_GET["back"]) . from . "'";
         } else {
             let html .= " onclick='window.history.back()'";
         }
