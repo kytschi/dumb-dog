@@ -57,6 +57,7 @@ class Appointments extends Controller
                     let data["with_number"] = _POST["with_number"];
                     let data["content"] = _POST["content"];
                     let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
+                    let data["appointment_length"] = isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null;
                     let data["on_date"] = this->dateToSql(_POST["on_date"] . " " . _POST["on_time"] . ":00");
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
@@ -147,11 +148,27 @@ class Appointments extends Controller
 
         let html .= 
                 this->createInputDate("when its happening", "on_date", "leave a comment?", true) .
-                "<div class='dd-input-group'>
-                    <span>what time, enter as hour:minutes<span class='dd-required'>*</span></span>
-                    <input type='text' name='on_time' placeholder='24 hour time please' value='" .
-                    (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : "00:00") . "'>
-                </div> " .
+                this->createInputText(
+                    "what time, enter as hour:minutes",
+                    "on_time",
+                    "24 hour time please",
+                    true,
+                    (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : "")
+                ) .
+                this->createInputSelect(
+                    "how long for",
+                    "appointment_length",
+                    [
+                        "1": "1 hour",
+                        "2": "2 hours",
+                        "4": "4 hours",
+                        "all_day": "all day",
+                        "daily": "daily",
+                        "weekly": "weekly",
+                        "monthly": "monthly",
+                        "annually": "annually"
+                    ]
+                ) .
                 this->createInputText("label", "name", "give me a label", true) .
                 this->createInputText("email", "with_email", "give me their email if possible") . 
                 this->createInputText("number", "with_number", "give me their number if possible") .
@@ -216,6 +233,7 @@ class Appointments extends Controller
                     let data["with_number"] = _POST["with_number"];
                     let data["content"] = _POST["content"];
                     let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
+                    let data["appointment_length"] = isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null;
                     let data["on_date"] = this->dateToSql(_POST["on_date"] . " " . _POST["on_time"] . ":00");
                     let data["updated_by"] = this->getUserId();
 
@@ -229,7 +247,8 @@ class Appointments extends Controller
                                 with_number=:with_number, 
                                 content=:content, 
                                 on_date=:on_date, 
-                                free_slot=:free_slot, 
+                                free_slot=:free_slot,
+                                appointment_length=:appointment_length, 
                                 updated_at=NOW(), 
                                 updated_by=:updated_by
                             WHERE id=:id",
@@ -290,11 +309,29 @@ class Appointments extends Controller
 
         let html .= 
                 this->createInputDate("when its happening", "on_date", "leave a comment?", true, model->on_date) .
-                "<div class='dd-input-group'>
-                    <span>what time, enter as hour:minutes<span class='dd-required'>*</span></span>
-                    <input type='text' name='on_time' placeholder='24 hour time please' value='" .
-                    (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : date("H:i", strtotime(model->on_date))) . "'>
-                </div> " .
+                this->createInputText(
+                    "what time, enter as hour:minutes",
+                    "on_time",
+                    "24 hour time please",
+                    true,
+                    (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : date("H:i", strtotime(model->on_date)))
+                ) .
+                this->createInputSelect(
+                    "how long for",
+                    "appointment_length",
+                    [
+                        "1": "1 hour",
+                        "2": "2 hours",
+                        "4": "4 hours",
+                        "all_day": "all day",
+                        "daily": "daily",
+                        "weekly": "weekly",
+                        "monthly": "monthly",
+                        "annually": "annually"
+                    ],
+                    false,
+                    model->appointment_length
+                ) .
                 this->createInputText("label", "name", "give me a label", true, model->name) .
                 this->createInputText("email", "with_email", "give me their email if possible", false, model->with_email) . 
                 this->createInputText("number", "with_number", "give me their number if possible", false, model->with_number) .
