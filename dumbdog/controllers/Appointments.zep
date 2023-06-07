@@ -75,6 +75,7 @@ class Appointments extends Controller
                                     content,
                                     on_date,
                                     free_slot,
+                                    appointment_length,
                                     created_at,
                                     created_by,
                                     updated_at,
@@ -90,6 +91,7 @@ class Appointments extends Controller
                                     :content,
                                     :on_date,
                                     :free_slot,
+                                    :appointment_length,
                                     NOW(),
                                     :created_by,
                                     NOW(),
@@ -112,7 +114,7 @@ class Appointments extends Controller
         }
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("I've updated the appointment");
+            let html .= this->saveSuccess("I've created the appointment");
         }
 
         let html .= "<form method='post'>
