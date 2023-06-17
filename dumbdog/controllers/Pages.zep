@@ -57,7 +57,7 @@ class Pages extends Controller
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
-                    let data["url"] = str_replace(" ", "-", strtolower(rtrim(_POST["url"], "/")));
+                    let data["url"] = this->cleanUrl(_POST["url"]);
                     if (empty(data["url"])) {
                         let data["url"] = "/";
                     }
@@ -255,7 +255,7 @@ class Pages extends Controller
                 } else {
                     let data["status"] = isset(_POST["status"]) ? "live" : "offline";
                     let data["name"] = _POST["name"];
-                    let data["url"] = str_replace(" ", "-", strtolower(rtrim(_POST["url"], "/")));
+                    let data["url"] = this->cleanUrl(_POST["url"]);
                     if (empty(data["url"])) {
                         let data["url"] = "/";
                     }
@@ -337,7 +337,7 @@ class Pages extends Controller
             <div class='dd-box-title'><span>the " . type . "</span></div>
             <div class='dd-box-body'>";
 
-        let html .= this->createInputSwitch("live", "status", false, model->status) . 
+        let html .= this->createInputSwitch("live", "status", false, (model->status=="live" ? 1 : 0)) . 
             this->createInputText("url", "url", "how will I be reached", true, model->url) .
             this->createInputText("title", "name", "give me a name", true, model->name) .
             this->templatesSelect(database, model->template_id) . 
