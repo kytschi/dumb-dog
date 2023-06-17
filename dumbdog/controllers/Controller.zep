@@ -53,6 +53,27 @@ class Controller
         return content;
     }
 
+    public function cleanUrl(string url)
+    {
+        if (strpos(url, "https://") === 0) {
+            return url;
+        } elseif (strpos(url, "http://") === 0) {
+            return url;
+        } elseif (strpos(url, "www.") === 0) {
+            return url;
+        } elseif (strpos(url, "ftp://") === 0) {
+            return url;
+        } elseif (strpos(url, "sftp://") === 0) {
+            return url;
+        }
+
+        return preg_replace(
+            "~[^-a-zA-Z0-9-/?&=]+~",
+            "-",
+            strtolower(rtrim(url, "/"))
+        );
+    }
+
     public function consoleLogError(string message)
     {
         return "<script type='text/javascript'>console.log('DUMB DOG ERROR:', '" . str_replace(["\n", "\r\n"], "", strip_tags(message)) . "');</script>";
