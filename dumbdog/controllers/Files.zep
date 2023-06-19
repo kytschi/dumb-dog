@@ -114,20 +114,12 @@ class Files extends Controller
                 <div class='dd-box-title'>
                     <span>the file</span>
                 </div>
-                <div class='dd-box-body'>
-                    <div class='dd-input-group'>
-                        <span>name<span class='dd-required'>*</span></span>
-                        <input type='text' name='name' placeholder='give me a name' value=''>
-                    </div>
-                    <div class='dd-input-group'>
-                        <span>file<span class='dd-required'>*</span></span>
-                        <input type='file' name='file' placeholder='upload a file' value=''>
-                    </div>
-                    <div class='dd-input-group'>
-                        <span>tags</span>
-                        <input type='text' name='tags' class='tagify' placeholder='tag the file' value=''>
-                    </div>
-                </div>
+                <div class='dd-box-body'>";
+        let html .= 
+                this->createInputText("name", "name", "the file name", true) .
+                this->createInputFile("file", "file", "upload a file", true) .
+                this->createInputText("tags", "tags", "tag the content", false, null, "tagify");
+        let html .= "</div>
                 <div class='dd-box-footer'>
                     <a href='/dumb-dog/files?from=" . from . "' class='dd-link dd-button-blank'>cancel</a>
                     <button type='submit' name='save' class='dd-button'>save</button>
@@ -175,6 +167,9 @@ class Files extends Controller
         } else {
             let html .= "<a href='/dumb-dog/files/delete/" . model->id . "?from=" . from . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the file'>&nbsp;</a>";
         }
+        let html .= "<span 
+            onclick='copyTextToClipboard(\"/website/files/".  model->filename . "\")'
+            class='dd-round dd-icon dd-icon-copy' title='Copy URL to clipboard'>&nbsp;</span>";
         let html .= "</div>";
 
         if (!empty(_POST)) {
@@ -225,16 +220,11 @@ class Files extends Controller
             <div class='dd-box-title'>
                 <span>the file</span>
             </div>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>name<span class='dd-required'>*</span></span>
-                    <input type='text' name='name' placeholder='the file name' value='" . model->name . "'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>tags</span>
-                    <input type='text' name='tags' class='tagify' placeholder='tag the file' value='" . model->tags . "'>
-                </div>
-            </div>
+            <div class='dd-box-body'>";
+        let html .= 
+            this->createInputText("name", "name", "the file name", true, model->name) .
+            this->createInputText("tags", "tags", "tag the content", false, model->tags, "tagify");
+        let html .= "</div>
             <div class='dd-box-footer'>
                 <a href='/dumb-dog/files?from=" . from . "' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>

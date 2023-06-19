@@ -102,7 +102,7 @@ class Database
             return errors;
         }
 
-        return status;
+        return status ? true : false;
     }
 
     public function get(string query, array data = [])

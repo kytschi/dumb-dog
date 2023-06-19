@@ -101,6 +101,12 @@ class Controller
                 let value = "";
             }
         }
+        
+        if (style == "tagify" && value) {
+            let value = "value='" . str_replace("'", "&#39;", value) . "'";
+        } else {
+            let value = "value=\"" . value . "\"";
+        }
 
         return "<div class='dd-input-group'>
             <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
@@ -108,7 +114,7 @@ class Controller
                 type='" . type . "'
                 name='" . var_name . "' 
                 placeholder=\"" . placeholder.  "\"" . (style ? " class='" . style . "'" : "") .
-                "value='" . value . "'>
+                value . ">
         </div>";
     }
 
@@ -422,6 +428,7 @@ class Controller
                     let tags[value->value] = value->value;
                 }
             }
+            asort(tags);
 
             for tag in tags {
                 let url = path . "?tag=" . urlencode(tag);

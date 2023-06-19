@@ -42,7 +42,7 @@ class Tiles
                 let html .= "<div class='dd-tile'>
                     <div class='dd-box dd-wfull";
                 if (data[iLoop]->deleted_at) {
-                    let html .= " deleted";
+                    let html .= " dd-deleted";
                 }
                 let html .= "'>
                         <div class='dd-box-title'>

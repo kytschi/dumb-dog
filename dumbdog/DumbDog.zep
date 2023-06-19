@@ -54,9 +54,9 @@ class DumbDog
 {
     private cfg;
     private template_engine = null;
-    private version = "0.0.4 alpha";
+    private version = "0.0.5 alpha";
 
-    public function __construct(string cfg_file, template_engine = null)
+    public function __construct(string cfg_file, template_engine = null, bool migrations = false)
     {
         var cfg;
         let cfg = new \stdClass();
@@ -69,9 +69,14 @@ class DumbDog
             let cfg->save_mode = true;
         }
         let this->cfg = cfg;
-        let this->template_engine = template_engine;
-
         define("VERSION", this->version);
+
+        if (migrations) {
+            this->runMigrations();
+            return;
+        }
+
+        let this->template_engine = template_engine;
 
         var parsed, path, err, backend = false;
         let parsed = parse_url(_SERVER["REQUEST_URI"]);
@@ -722,6 +727,72 @@ class DumbDog
             header("Content-Type: text/plain");
             echo settings->robots_txt;
         }
+    }
+
+    private function runMigrations()
+    {
+        var migration, migrations, err, found, database;
+        let database = new Database(this->cfg);
+
+        echo "Running migrations\n";
+        let migration = shell_exec("ls ../migrations/*.sql");
+        if (empty(migration)) {
+            echo "Nothing to migrate!\n";
+            return;
+        }
+        let migrations = explode("\n", migration);
+        if (!count(migrations)) {
+            echo "Nothing to migrate!\n";
+            return;
+        }
+
+        for migration in migrations {
+            if (empty(migration)) {
+                continue;
+            }
+
+            try {
+                let found = database->get(
+                    "SELECT * FROM migrations WHERE migration=:migration",
+                    [
+                        "migration": basename(migration)
+                    ]
+                );
+            } catch \Exception, err {
+                let found = false;
+            }
+
+            if (found) {
+                continue;
+            }
+
+            try {
+                let found = database->execute(
+                    file_get_contents(migration)
+                );
+                if (!is_bool(found)) {
+                    echo "Failed to run the migration " . basename(migration) .
+                        "\n Error: ". found . "\n";
+                } else {
+                    echo basename(migration) . " successfully run\n";
+                }
+                let found = database->execute(
+                    "INSERT INTO migrations (migration, created_at) VALUES (:migration, NOW())",
+                    [
+                        "migration": basename(migration)
+                    ],
+                    true
+                );
+                if (!is_bool(found)) {
+                    echo "Failed to save the migration " . basename(migration) .
+                        " in the migrations table\n Error: ". found . "\n";
+                }
+            } catch \Exception, err {
+                echo "Failed to run the migration " . basename(migration) .
+                    "\n Error: " . err->getMessage() . "\n";
+            }
+        }
+        echo "Migrations complete\n";
     }
 
     private function secure(string path)
