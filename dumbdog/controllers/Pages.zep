@@ -429,7 +429,12 @@ class Pages extends Controller
     {
         var select = ["": "no parent"], selected = null, data;
         let data = database->all(
-            "SELECT * FROM pages WHERE type ='" . type . "'" . (exclude ? " AND id != '" . exclude . "'" : "") . " ORDER BY name"
+            "SELECT 
+                *,
+                CONCAT(name, ' (', type, ')') AS name 
+            FROM 
+                pages " . (exclude ? " WHERE id != '" . exclude . "'" : "") . " 
+            ORDER BY name"
         );
         var iLoop = 0;
 
