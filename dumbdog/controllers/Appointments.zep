@@ -277,7 +277,7 @@ class Appointments extends Controller
         let html .= "<form method='post'>
         <div class=dd-box dd-wfull";
         if (model->deleted_at) {
-            let html .= " deleted";
+            let html .= " dd-deleted";
         }
         let html .= "'>
             <div class='dd-box-title'>

@@ -333,7 +333,7 @@ class Pages extends Controller
         }
 
         let html .= "<form method='post'>
-        <div class='dd-box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
+        <div class='dd-box dd-wfull" . (model->deleted_at ? " dd-deleted" : "") . "'>
             <div class='dd-box-title'><span>the " . type . "</span></div>
             <div class='dd-box-body'>";
 
@@ -347,7 +347,7 @@ class Pages extends Controller
         /* Parent page */
         let html .= this->parentSelect(type, database, model->parent_id, model->id);
 
-        let html .= this->createInputText("tags", "tags", "tag the content", false, stripslashes(model->tags), "tagify") .
+        let html .= this->createInputText("tags", "tags", "tag the content", false, model->tags, "tagify") .
             this->createInputSelect("menu item", "menu_item", ["none", "header", "footer", "both"], false, model->menu_item) . 
             this->createInputText("meta keywords", "meta_keywords", "add some keywords if you like", false, model->meta_keywords) .
             this->createInputText("meta author", "meta_author", "add an author", false, model->meta_author) .

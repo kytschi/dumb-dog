@@ -113,7 +113,7 @@ class Orders extends Controller
 
         let html .= "
         <form method='post'>
-            <div class='dd-box dd-wfull" . (model->deleted_at ? " deleted" : "") . "'>
+            <div class='dd-box dd-wfull" . (model->deleted_at ? " dd-deleted" : "") . "'>
                 <div class='dd-box-title'>
                     <span>the order</span>
                 </div>
@@ -169,7 +169,7 @@ class Orders extends Controller
                 </div>
             </div>
             <div class='dd-row'>
-                <div class='dd-box" . (model->deleted_at ? " deleted" : "") . "'>
+                <div class='dd-box" . (model->deleted_at ? " dd-deleted" : "") . "'>
                     <div class='dd-box-title'>
                         <span>billing</span>
                     </div>
@@ -177,7 +177,7 @@ class Orders extends Controller
                         " . this->createInputText("name", "billing_name", "their name", true, security->decrypt(model->billing->name)) .
                     "</div>
                 </div>
-                <div class='dd-box" . (model->deleted_at ? " deleted" : "") . "'>
+                <div class='dd-box" . (model->deleted_at ? " dd-deleted" : "") . "'>
                     <div class='dd-box-title'>
                         <span>shipping</span>
                     </div>
