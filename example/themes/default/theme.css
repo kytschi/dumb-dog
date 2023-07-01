@@ -3,11 +3,11 @@
 /* Fonts */
 @font-face {
     font-family: 'heading';
-    src: url('/assets/heading.ttf') format('truetype');
+    src: url('/website/assets/heading.ttf') format('truetype');
 }
 @font-face {
     font-family: 'subheading';
-    src: url('/assets/body.ttf') format('truetype');
+    src: url('/website/assets/body.ttf') format('truetype');
 }
 html, body {
     color: var(--body-text-colour);
