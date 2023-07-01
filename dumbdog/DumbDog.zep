@@ -768,7 +768,9 @@ class DumbDog
 
             try {
                 let found = database->execute(
-                    file_get_contents(migration)
+                    file_get_contents(migration),
+                    [],
+                    true
                 );
                 if (!is_bool(found)) {
                     echo "Failed to run the migration " . basename(migration) .
