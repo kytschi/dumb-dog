@@ -1,4 +1,4 @@
-CREATE TABLE quiet_connections.migrations (
+CREATE TABLE migrations (
 	id INT auto_increment NOT NULL,
 	migration varchar(255) NOT NULL,
 	created_at DATETIME NOT NULL,
