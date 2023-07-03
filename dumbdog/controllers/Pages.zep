@@ -393,6 +393,37 @@ class Pages extends Controller
             <a href='/dumb-dog/templates' class='dd-link dd-round dd-icon dd-icon-templates' title='Managing the templates'>&nbsp;</a>
         </div>";
 
+        let html .= "
+            <form id='dd-search-box' action='" . this->global_url . "' method='post'>
+                <table class='dd-table dd-wfull'>
+                    <tr>
+                        <td>
+                            <input 
+                                class='dd-form-input dd-wfull'
+                                name='q'
+                                type='text' 
+                                placeholder='Search the pages'
+                                value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
+                        </td>
+                    </tr>
+                    <tfoot>
+                        <tr>
+                            <td>";
+        if (isset(_POST["q"])) {
+            let html .= "<a href='" . this->global_url . "' class='dd-button-blank'>clear</a>";
+        }
+        let html .= "
+                                <button 
+                                    type='submit'
+                                    name='search' 
+                                    value='search' 
+                                    class='dd-button'>search</button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </form>";
+
         let html .= this->tags(path, "pages");
 
         let html .= "<div id='dd-pages'>";
@@ -406,6 +437,10 @@ class Pages extends Controller
             LEFT JOIN templates ON templates.id=main_page.template_id 
             LEFT JOIN pages AS parent_page ON parent_page.id=main_page.parent_id 
             WHERE main_page.type='page'";
+        if (isset(_POST["q"])) {
+            let query .= " AND main_page.name LIKE :query";
+            let data["query"] = "%" . _POST["q"] . "%";
+        }
         if (isset(_GET["tag"])) {
             let query .= " AND main_page.tags like :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 

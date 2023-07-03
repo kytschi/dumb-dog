@@ -108,7 +108,7 @@ class DumbDog
                 this->frontend(path);
             }
         } catch NotFoundException, err {
-            this->ddHead("", 404);
+            this->ddHead(strtolower(err->getMessage()), 404);
             echo this->notFound(backend, err->getMessage());
             this->ddFooter();
         } catch \Exception, err {
@@ -651,10 +651,13 @@ class DumbDog
     private function notFound(bool backend = true, string message = "page is not found")
     {
         if (backend) {
+            var head;
+            let head = new Head(this->cfg);
+
             return "
             <div class='dd-box'>
                 <div class='dd-box-title'>
-                    <img src='/assets/dumbdog.png'>
+                    <img src='data:image/png;base64," . head->favicon() . "'>
                     <span>dang it!</span>
                 </div>
                 <div class='dd-box-body'>
@@ -670,7 +673,7 @@ class DumbDog
             let titles = new Titles();
 
             this->ddHead("page not found", 404);
-            echo titles->page("page not found", "/assets/dumbdog.png");
+            echo titles->page("page not found", "dumbdog");
             this->ddFooter(false);
         }
     }
