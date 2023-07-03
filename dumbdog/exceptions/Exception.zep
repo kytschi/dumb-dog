@@ -31,13 +31,15 @@ use DumbDog\Ui\Gfx\Titles;
 class Exception extends \Exception
 {
     public code;
+    public cli;
     
-	public function __construct(string message, int code = 500)
+	public function __construct(string message, int code = 500, bool cli = false)
 	{
         //Trigger the parent construct.
         parent::__construct(message, code);
 
         let this->code = code;
+        let this->cli = cli;
     }
     
     /**
@@ -50,6 +52,10 @@ class Exception extends \Exception
         let titles = new Titles();
         let head = new Head(new \stdClass());
         let javascript = new Javascript();
+
+        if (this->cli) {
+            return "ERROR: " . this->getMessage();
+        }
 
         if (headers_sent()) {
             return "<p><strong>DUMB DOG ERROR</strong><br/>" . this->getMessage() . "</p>";

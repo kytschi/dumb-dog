@@ -56,29 +56,39 @@ class DumbDog
     private template_engine = null;
     private version = "0.0.5 alpha";
 
-    public function __construct(string cfg_file, template_engine = null, bool migrations = false)
+    public function __construct(string cfg_file, template_engine = null, string migrations_folder = "")
     {
-        var cfg;
+        var cfg, err;
         let cfg = new \stdClass();
 
         if (!file_exists(cfg_file)) {
-            throw new Exception("Failed to load the config file");
+            throw new Exception(
+                "Failed to load the config file",
+                (!empty(migrations_folder) ? true : false)
+            );
         }
-        let cfg = json_decode(file_get_contents(cfg_file));
-        if (!property_exists(cfg, "save_mode")) {
-            let cfg->save_mode = true;
+        try {
+            let cfg = json_decode(file_get_contents(cfg_file), false, 512, JSON_THROW_ON_ERROR);
+            if (!property_exists(cfg, "save_mode")) {
+                let cfg->save_mode = true;
+            }
+        } catch \Exception, err {
+            throw new Exception(
+                "Failed to decode the JSON in config file",
+                (!empty(migrations_folder) ? true : false)
+            );
         }
         let this->cfg = cfg;
         define("VERSION", this->version);
 
-        if (migrations) {
-            this->runMigrations();
+        if (!empty(migrations_folder)) {
+            this->runMigrations(migrations_folder);
             return;
         }
 
         let this->template_engine = template_engine;
 
-        var parsed, path, err, backend = false;
+        var parsed, path, backend = false;
         let parsed = parse_url(_SERVER["REQUEST_URI"]);
         let path = "/" . trim(parsed["path"], "/");
 
@@ -729,13 +739,13 @@ class DumbDog
         }
     }
 
-    private function runMigrations()
+    private function runMigrations(string migrations_folder)
     {
         var migration, migrations, err, found, database;
         let database = new Database(this->cfg);
 
         echo "Running migrations\n";
-        let migration = shell_exec("ls ../migrations/*.sql");
+        let migration = shell_exec("ls " . rtrim(migrations_folder, "/") . "/*.sql");
         if (empty(migration)) {
             echo "Nothing to migrate!\n";
             return;
