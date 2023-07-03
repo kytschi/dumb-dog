@@ -206,39 +206,43 @@ class Orders extends Controller
         let security = new Security(this->cfg);
         let database = new Database(this->cfg);
 
-        let html .= "
-            <table class='dd-table dd-wfull'>
-                <thead>
-                    <tr>
-                        <th width='120px'>Order no.</th>
-                        <th>Details</th>
-                        <th width='140px'>Total</th>
-                        <th width='120px'>Status</th>
-                        <th width='100px'>Date</th>
-                        <th width='100px'>Tools</th>
-                    </tr>
-                </thead>
-                <tbody>";
-        
         let data = database->all("
             SELECT orders.*, order_addresses.name 
             FROM orders 
             LEFT JOIN order_addresses ON order_addresses.order_id=orders.id AND order_addresses.type='billing' 
             ORDER BY created_at DESC");
+        if (data) {
+            let html .= "
+                <table class='dd-table dd-wfull'>
+                    <thead>
+                        <tr>
+                            <th width='120px'>Order no.</th>
+                            <th>Details</th>
+                            <th width='140px'>Total</th>
+                            <th width='120px'>Status</th>
+                            <th width='100px'>Date</th>
+                            <th width='100px'>Tools</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+            
+            for item in data {
+                let html .= "<tr" . (item->deleted_at ? " class='dd-deleted'" : "") . ">
+                    <td>" . item->order_number . "</td>
+                    <td>" . (item->name ? security->decrypt(item->name) : "UNKNOWN") . "</td>
+                    <td>" . item->total . "</td>
+                    <td><span class='dd-status dd-status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
+                    <td>" . date("d/m/Y", strtotime(item->created_at)) . "</td>
+                    <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='dd-link dd-mini dd-icon dd-icon-edit' title='edit me'>&nbsp;</a></td>
+                </tr>";
+            }
 
-        for item in data {
-            let html .= "<tr" . (item->deleted_at ? " class='dd-deleted'" : "") . ">
-                <td>" . item->order_number . "</td>
-                <td>" . (item->name ? security->decrypt(item->name) : "UNKNOWN") . "</td>
-                <td>" . item->total . "</td>
-                <td><span class='dd-status dd-status-" . str_replace(" ", "-", item->status) . "'>" . item->status . "</span></td>
-                <td>" . date("d/m/Y", strtotime(item->created_at)) . "</td>
-                <td><a href='/dumb-dog/orders/edit/" . item->id . "' class='dd-link mini dd-icon dd-icon-edit' title='edit me'>&nbsp;</a></td>
-            </tr>";
+            let html .= "</tbody>
+            </table>";
+        } else {
+            let titles = new Titles();
+            let html = html . titles->noResults();
         }
-
-        let html .= "</tbody>
-        </table>";
         
         return html;
     }

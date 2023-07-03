@@ -36,20 +36,21 @@ class DumbDog
     protected system_uuid = "00000000-0000-0000-0000-000000000000";
 
     public captcha;
+    private database;
     public page;
     public menu;
     public site;
 
     public function __construct(object cfg, object page)
     {
-        var database, data, site, menu;
+        var data, site, menu;
 
         let this->cfg = cfg;
         let this->page = page;
 
-        let database = new Database(cfg);
+        let this->database = new Database(cfg);
 
-        let site = database->get("
+        let site = this->database->get("
         SELECT
             settings.name,
             settings.meta_keywords,
@@ -73,17 +74,17 @@ class DumbDog
         let menu->footer = [];
         let menu->both = [];
 
-        let data = database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+        let data = this->database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
         if (data) {
             let menu->header = data;
         }
 
-        let data = database->all("SELECT name, url FROM pages WHERE menu_item='footer' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+        let data = this->database->all("SELECT name, url FROM pages WHERE menu_item='footer' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
         if (data) {
             let menu->footer = data;
         }
 
-        let data = database->all("SELECT name, url FROM pages WHERE menu_item='both' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+        let data = this->database->all("SELECT name, url FROM pages WHERE menu_item='both' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
         if (data) {
             let menu->both = data;
         }
@@ -92,15 +93,14 @@ class DumbDog
 
     public function addComment(array data)
     {
-        var database, security, status;
-        let security = new Security(this->cfg);
-        let database = new Database(this->cfg);
+        var security, status;
+        let security = new Security(this->cfg);        
 
         let data["content"] = security->clean(data["content"]);
         let data["created_by"] = this->system_uuid;
         let data["updated_by"] = this->system_uuid;
 
-        let status = database->execute(
+        let status = this->database->execute(
             "INSERT INTO comments 
                 (id,
                 content,
@@ -127,9 +127,8 @@ class DumbDog
 
     public function addMessage(array data)
     {
-        var database, security, status;
-        let security = new Security(this->cfg);
-        let database = new Database(this->cfg);
+        var security, status;
+        let security = new Security(this->cfg);        
 
         let data["from_email"] = security->encrypt(data["from_email"]);
         let data["from_name"] = security->encrypt(data["from_name"]);
@@ -139,7 +138,7 @@ class DumbDog
         let data["created_by"] = this->system_uuid;
         let data["updated_by"] = this->system_uuid;
 
-        let status = database->execute(
+        let status = this->database->execute(
             "INSERT INTO messages 
                 (id,
                 subject,
@@ -176,8 +175,7 @@ class DumbDog
 
     public function appointments(array filters = [])
     {
-        var database, query, data = [];
-        let database = new Database(this->cfg);
+        var query, data = [];        
 
         let query = "SELECT
             appointments.*,
@@ -210,15 +208,14 @@ class DumbDog
             }
         }
 
-        return database->all(query, data);
+        return this->database->all(query, data);
     }
 
     public function basketAddTo(string product_code, int quantity)
     {
-        var database, product, order_product, status, data = [], sub_total = 0.00, sub_total_tax = 0.00, total = 0.00;
-        let database = new Database(this->cfg);
+        var product, order_product, status, data = [], sub_total = 0.00, sub_total_tax = 0.00, total = 0.00;
 
-        let product = database->get(
+        let product = this->database->get(
             "SELECT * FROM pages WHERE code=:code AND deleted_at IS NULL",
             ["code": product_code]
         );
@@ -231,7 +228,7 @@ class DumbDog
         }
 
         if (isset(_SESSION["dd_basket"])) {
-            let order_product = database->get(
+            let order_product = this->database->get(
                 "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
                 ["id": _SESSION["dd_basket"]]
             );
@@ -242,13 +239,13 @@ class DumbDog
         }
 
         if (!isset(_SESSION["dd_basket"])) {
-            var id, security, status;
+            var id, security;
             let security = new Security(this->cfg);
             let id = security->uuid();
 
-            let data = database->get("SELECT count(id) AS order_number FROM orders");
+            let data = this->database->get("SELECT count(id) AS order_number FROM orders");
 
-            let status = database->execute(
+            let status = this->database->execute(
                 "INSERT INTO orders 
                     (id, order_number, created_at, created_by, updated_at, updated_by)
                 VALUES
@@ -268,7 +265,7 @@ class DumbDog
             session_write_close();
         }
 
-        let order_product = database->get(
+        let order_product = this->database->get(
             "SELECT * FROM order_products WHERE order_id=:order_id AND product_id=:product_id",
             [
                 "order_id": _SESSION["dd_basket"],
@@ -295,7 +292,7 @@ class DumbDog
             if (product->stock < order_product->stock) {
                 let quantity += quantity;
             }
-            let status = database->execute(
+            let status = this->database->execute(
                 "UPDATE
                     order_products
                 SET
@@ -315,7 +312,7 @@ class DumbDog
             );
         } else {
             let data["created_by"] = this->system_uuid;
-            let status = database->execute(
+            let status = this->database->execute(
                 "INSERT INTO order_products 
                     (
                         id,
@@ -363,10 +360,9 @@ class DumbDog
             return null;
         }
 
-        var database, model;
-        let database = new Database(this->cfg);
+        var model;
 
-        let model = database->get(
+        let model = this->database->get(
             "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
             ["id": _SESSION["dd_basket"]]
         );
@@ -376,7 +372,7 @@ class DumbDog
             return null;
         }
 
-        let model->items = database->all(
+        let model->items = this->database->all(
             "SELECT
                 order_products.*,
                 pages.name,
@@ -415,11 +411,10 @@ class DumbDog
             throw new Exception("Basket not found", 404);
         }
 
-        var database, model, status, security;
-        let database = new Database(this->cfg);
+        var model, status, security;
         let security = new Security(this->cfg);
 
-        let model = database->get(
+        let model = this->database->get(
             "SELECT * FROM orders WHERE id=:id AND deleted_at IS NULL",
             ["id": _SESSION["dd_basket"]]
         );
@@ -438,13 +433,14 @@ class DumbDog
             }
         }
 
-        let status = database->execute(
+        let status = this->database->execute(
             "INSERT INTO order_addresses
             (
                 id,
                 order_id,
                 type,
                 name,
+                email,
                 address_line_1,
                 address_line_2,
                 city,
@@ -462,6 +458,7 @@ class DumbDog
                 :order_id,
                 :type,
                 :name,
+                :email,
                 :address_line_1,
                 :address_line_2,
                 :city,
@@ -487,6 +484,7 @@ class DumbDog
                 "order_id": model->id,
                 "type": type,
                 "name": security->encrypt(data["name"]),
+                "email": security->encrypt(data["email"]),
                 "address_line_1": security->encrypt(data["address_line_1"]),
                 "address_line_2": security->encrypt(isset(data["address_line_2"]) ? data["address_line_2"] : ""),
                 "city": security->encrypt(data["city"]),
@@ -505,12 +503,42 @@ class DumbDog
         return true;
     }
 
+    public function basketCheckedout()
+    {
+        var basket, status;
+        let basket = this->basket();
+
+        if (empty(basket)) {
+            throw new Exception("Basket not found");
+        }
+
+        let status = this->database->execute(
+            "UPDATE
+                orders 
+            SET
+                status='processing',
+                updated_by=:updated_by,
+                updated_at=NOW()
+            WHERE 
+                id=:id",
+            [
+                "id": basket->id,
+                "updated_by": this->system_uuid
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception("Failed to update the basket");
+        }
+
+        unset(_SESSION["dd_basket"]);
+    }
+
     public function basketRemoveFrom(string id)
     {
-        var database, product, status;
-        let database = new Database(this->cfg);
+        var product, status;
 
-        let product = database->get(
+        let product = this->database->get(
             "SELECT * FROM order_products WHERE id=:id AND deleted_at IS NULL",
             ["id": id]
         );
@@ -518,7 +546,7 @@ class DumbDog
             throw new Exception("Failed to find the product");
         }
 
-        let status = database->execute(
+        let status = this->database->execute(
             "DELETE FROM order_products WHERE id=:id",
             [
                 "id": product->id
@@ -534,11 +562,10 @@ class DumbDog
 
     public function bookAppointment(array data)
     {
-        var database, model, security;
+        var model, security;
         let security = new Security(this->cfg);
-        let database = new Database(this->cfg);
 
-        let model = database->get(
+        let model = this->database->get(
             "SELECT * FROM appointments WHERE free_slot=1 AND id=:id",
             ["id": data["id"]]
         );
@@ -549,7 +576,7 @@ class DumbDog
         let data["updated_by"] = this->system_uuid;
         let data["content"] = security->clean(data["content"]);
         
-        return database->execute(
+        return this->database->execute(
             "UPDATE appointments SET 
                 name=:name,
                 content=:content, 
@@ -563,8 +590,7 @@ class DumbDog
 
     public function comments(array filters = [])
     {
-        var database, query, where, data = [];
-        let database = new Database(this->cfg);
+        var query, where, data = [];
 
         let query = "
         SELECT
@@ -598,7 +624,7 @@ class DumbDog
             }
         }
 
-        return database->all(query . where, data);
+        return this->database->all(query . where, data);
     }
 
     public function events(array filters = [])
@@ -608,8 +634,7 @@ class DumbDog
 
     public function filesByTag(string tag)
     {
-        var database, query;
-        let database = new Database(this->cfg);
+        var query;
 
         let query = "
         SELECT
@@ -620,7 +645,7 @@ class DumbDog
         FROM files 
         WHERE tags like :tag AND deleted_at IS NULL";
 
-        return database->all(query, ["tag": "%{\"value\":\"" . tag . "\"}%"]);
+        return this->database->all(query, ["tag": "%{\"value\":\"" . tag . "\"}%"]);
     }
 
     public function pages(array filters = [])
@@ -630,7 +655,7 @@ class DumbDog
 
     private function pageQuery(array filters, string type = "page")
     {
-        var database, query, where, data = [], order = "",
+        var query, where, data = [], order = "",
         valid_columns = [
             "url",
             "name",
@@ -651,8 +676,7 @@ class DumbDog
             "ASC",
             "DESC"
         ];
-        let database = new Database(this->cfg);
-
+        
         let query = "
         SELECT
             pages.*,
@@ -702,7 +726,7 @@ class DumbDog
             }
         }
         
-        return database->all(query . where . order, data);
+        return this->database->all(query . where . order, data);
     }
 
     public function products(array filters = [])
@@ -712,10 +736,9 @@ class DumbDog
 
     private function updateBasket()
     {
-        var database, products, status;
-        let database = new Database(this->cfg);
-
-        let products = database->get(
+        var products, status;
+        
+        let products = this->database->get(
             "SELECT
                 SUM(total) AS total,
                 SUM(sub_total_tax) AS sub_total_tax,
@@ -730,7 +753,7 @@ class DumbDog
             ]
         );
 
-        let status = database->execute(
+        let status = this->database->execute(
             "UPDATE
                 orders 
             SET

@@ -136,11 +136,16 @@ class Style
             font-size: 56pt;
             line-height: 44pt;
         }
-        .dd-input-group input, .dd-input-group textarea, .dd-input-group select, .trumbowyg-editor, td {
+        .dd-input-group input,
+        .dd-input-group textarea,
+        .dd-input-group select,
+        .trumbowyg-editor,
+        td,
+        .dd-form-input {
             font-family: Helvetica, sans-serif !important;
             font-size: 14pt !important;
         }
-        .dd-input-group input, .dd-input-group textarea, .dd-input-group select {
+        .dd-input-group input, .dd-input-group textarea, .dd-input-group select, .dd-form-input {
             padding: 10px;
         }
         .trumbowyg-editor,
@@ -201,6 +206,33 @@ class Style
             box-shadow: none;
             -moz-box-shadow: none;
             -webkit-box-shadow: none;
+        }
+
+        /* Search Box */
+        #dd-search-box {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #dd-search-box table {
+            width: 100%;
+            background-color: #fff;
+        }
+
+        #dd-search-box input {
+            width: calc(100% - 23px);
+        }
+
+        #dd-search-box table td {
+            border: 0 !important;
+        }
+
+        #dd-search-box table tfoot td {
+            text-align: right;
+        }
+
+        #dd-search-box .dd-button {
+            margin-left: 10px;
         }
 
         /* Backgrounds */
