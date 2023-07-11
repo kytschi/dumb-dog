@@ -94,7 +94,7 @@ class DumbDog
     public function addComment(array data)
     {
         var security, status;
-        let security = new Security(this->cfg);        
+        let security = new Security(this->cfg);
 
         let data["content"] = security->clean(data["content"]);
         let data["created_by"] = this->system_uuid;
@@ -472,6 +472,7 @@ class DumbDog
             )
             ON DUPLICATE KEY UPDATE
                 name=:name,
+                email=:email,
                 address_line_1=:address_line_1,
                 address_line_2=:address_line_2,
                 city=:city,
@@ -732,6 +733,13 @@ class DumbDog
     public function products(array filters = [])
     {
         return this->pageQuery(filters, "product");
+    }
+
+    public function randomString(int length = 64)
+    {
+        var security;
+        let security = new Security(this->cfg);
+        return security->randomString(length);
     }
 
     private function updateBasket()

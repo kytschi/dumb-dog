@@ -108,9 +108,9 @@ class Controller
             let value = "value=\"" . value . "\"";
         }
 
-        return "<div class='dd-input-group'>
-            <span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>
-            <input
+        return "<div class='dd-input-group'>" . 
+            (label ? ("<span>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</span>") : "") .
+            "<input
                 type='" . type . "'
                 name='" . var_name . "' 
                 placeholder=\"" . placeholder.  "\"" . (style ? " class='" . style . "'" : "") .

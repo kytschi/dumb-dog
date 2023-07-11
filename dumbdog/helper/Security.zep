@@ -80,6 +80,45 @@ class Security
         return token;
     }
 
+    /**
+     * Generate a random string.
+     */
+     public function randomString(
+        int length = 64,
+        string keyspace = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    ) {
+        /*
+         * If the length is less than one, throw an error.
+         */
+        if (length < 1) {
+            throw new \Exception("Length must be a positive integer");
+        }
+
+        /*
+         * Define the pieces array.
+         */
+        var pieces = [], max, iLoop = 0, key;
+
+        /*
+         * Generate a max length passed on the keyspace.
+         */
+        let max = mb_strlen(keyspace, "8bit") - 1;
+
+        /*
+         * Loop through and build pieces.
+         */
+        while (iLoop < length) {
+            let key = random_int(0, max);
+            let pieces[] = substr(keyspace, key, 1);
+            let iLoop += 1;
+        }
+
+        /*
+         * Implode the pieces and return the random string.
+         */
+        return implode("", pieces);
+    }
+
     public function uuid()
     {
         var data;
