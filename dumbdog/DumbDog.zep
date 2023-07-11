@@ -4,7 +4,7 @@
  * @package     DumbDog\DumbDog
  * @author 		Mike Welsh
  * @copyright   2023 Mike Welsh
- * @version     0.0.4 alpha
+ * @version     0.0.5 alpha
  *
  * Copyright 2023 Mike Welsh
  * This library is free software; you can redistribute it and/or
@@ -64,6 +64,7 @@ class DumbDog
         if (!file_exists(cfg_file)) {
             throw new Exception(
                 "Failed to load the config file",
+                500,
                 (!empty(migrations_folder) ? true : false)
             );
         }
@@ -75,6 +76,7 @@ class DumbDog
         } catch \Exception, err {
             throw new Exception(
                 "Failed to decode the JSON in config file",
+                500,
                 (!empty(migrations_folder) ? true : false)
             );
         }
