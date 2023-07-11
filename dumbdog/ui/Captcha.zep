@@ -98,8 +98,6 @@ class Captcha
 			iv
         ) . "=" . base64_encode(iv);
 		
-        imagedestroy(image);
-
 		return "<div class=\"dd-captcha-img\"><img src=\"data:image/png;base64," . base64_encode(image_data) . "\" alt=\"captcha\"/></div>" .
 			"<input name=\"dd_captcha\" class=\"dd-captcha-input\" required/>" .
 			"<input name=\"_DDCAPTCHA\" type=\"hidden\" value=\"" . encrypted . "\"/>";

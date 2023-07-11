@@ -72,14 +72,14 @@ class Orders extends Controller
         );
 
         let model->billing = database->get(
-            "SELECT * FROM order_addresses WHERE order_id=:order_id AND type='billing'",
+            "SELECT * FROM order_addresses WHERE order_id=:order_id AND type='billing' ORDER BY updated_at DESC LIMIT 1",
             [
                 "order_id": model->id
             ]
         );
 
         let model->shipping = database->get(
-            "SELECT * FROM order_addresses WHERE order_id=:order_id AND type='shipping'",
+            "SELECT * FROM order_addresses WHERE order_id=:order_id AND type='shipping' ORDER BY updated_at DESC LIMIT 1",
             [
                 "order_id": model->id
             ]
@@ -120,7 +120,23 @@ class Orders extends Controller
                 <div class='dd-box-body'>
                     <div class='dd-input-group'>
                         <span>Status</span>
-                        <p style='padding:0; margin: 0'><span style='float: left;' class='dd-status dd-status-" . str_replace(" ", "-", model->status) . "'>" . model->status . "</span></p>
+                        <div style='padding:0; margin: 0'>
+                            <span 
+                                style='float: left;' 
+                                class='dd-status dd-status-" . str_replace(" ", "-", model->status) . "'>" . 
+                                model->status . 
+                            "</span>
+                            <div style='margin-left:20px;float: left;'>
+                                Change: 
+                                <select name='status' class='dd-select'>
+                                    <option value='processing' ". (model->status == "processing" ? "selected='selected'" : "") . ">processing</option>
+                                    <option value='packing' ". (model->status == "packing" ? "selected='selected'" : "") . ">packing</option>
+                                    <option value='dispatched' ". (model->status == "dispatched" ? "selected='selected'" : "") . ">dispatched</option>
+                                    <option value='basket' ". (model->status == "basket" ? "selected='selected'" : "") . ">basket</option>
+                                    <option value='cancelled' ". (model->status == "cancelled" ? "selected='selected'" : "") . ">cancelled</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <table class='dd-table dd-wfull'>
                         <thead>
@@ -142,7 +158,7 @@ class Orders extends Controller
                     <td>" . item->total . "</td>
                 </tr>";
             }
-                    
+            
             let html .= "</tbody>
                         <tfoot>
                             <tr>
@@ -174,7 +190,62 @@ class Orders extends Controller
                         <span>billing</span>
                     </div>
                     <div class='dd-box-body'>
-                        " . this->createInputText("name", "billing_name", "their name", true, security->decrypt(model->billing->name)) .
+                        " . this->createInputText(
+                            "name",
+                            "billing_name", 
+                            "their name", 
+                            true, 
+                            security->decrypt(model->billing->name)
+                        ) .
+                        this->createInputText(
+                            "email",
+                            "billing_email", 
+                            "their email", 
+                            true, 
+                            security->decrypt(model->billing->email)
+                        ) .
+                        this->createInputText(
+                            "address",
+                            "billing_address_line_1", 
+                            "first line of their address", 
+                            true, 
+                            security->decrypt(model->billing->address_line_1)
+                        ) .
+                        this->createInputText(
+                            "",
+                            "billing_address_line_2", 
+                            "second line of their address", 
+                            false, 
+                            security->decrypt(model->billing->address_line_2)
+                        ) .
+                        this->createInputText(
+                            "city",
+                            "billing_city", 
+                            "their city", 
+                            true, 
+                            security->decrypt(model->billing->city)
+                        ) .
+                        this->createInputText(
+                            "county or state",
+                            "billing_county", 
+                            "their county/state", 
+                            true, 
+                            security->decrypt(model->billing->county)
+                        ) .
+                        this->createInputText(
+                            "postcode",
+                            "billing_postcode", 
+                            "their postcode/zipcode", 
+                            true, 
+                            security->decrypt(model->billing->postcode)
+                        ) .
+                        this->createInputText(
+                            "country",
+                            "billing_country", 
+                            "their country", 
+                            true, 
+                            security->decrypt(model->billing->country)
+                        ) .
                     "</div>
                 </div>
                 <div class='dd-box" . (model->deleted_at ? " dd-deleted" : "") . "'>
@@ -182,7 +253,62 @@ class Orders extends Controller
                         <span>shipping</span>
                     </div>
                     <div class='dd-box-body'>
-                        " . this->createInputText("name", "shipping_name", "their name", true, security->decrypt(model->shipping->name)) .
+                        " . this->createInputText(
+                            "name",
+                            "shipping_name",
+                            "their name",
+                            true,
+                            security->decrypt(model->shipping->name)
+                        ) .
+                        this->createInputText(
+                            "email",
+                            "shipping_email", 
+                            "their email", 
+                            true, 
+                            security->decrypt(model->shipping->email)
+                        ) .
+                        this->createInputText(
+                            "address",
+                            "shipping_address_line_1", 
+                            "first line of their address", 
+                            true, 
+                            security->decrypt(model->shipping->address_line_1)
+                        ) .
+                        this->createInputText(
+                            "",
+                            "shipping_address_line_2", 
+                            "second line of their address", 
+                            false, 
+                            security->decrypt(model->shipping->address_line_2)
+                        ) .
+                        this->createInputText(
+                            "city",
+                            "shipping_city", 
+                            "their city", 
+                            true, 
+                            security->decrypt(model->shipping->city)
+                        ) .
+                        this->createInputText(
+                            "county or state",
+                            "shipping_county", 
+                            "their county/state", 
+                            true, 
+                            security->decrypt(model->shipping->county)
+                        ) .
+                        this->createInputText(
+                            "postcode",
+                            "shipping_postcode", 
+                            "their postcode/zipcode", 
+                            true, 
+                            security->decrypt(model->shipping->postcode)
+                        ) .
+                        this->createInputText(
+                            "country",
+                            "shipping_country", 
+                            "their country", 
+                            true, 
+                            security->decrypt(model->shipping->country)
+                        ) .
                     "</div>
                 </div>
             </div>
