@@ -51,7 +51,6 @@ class Dashboard extends Controller
 
         let html .= "<div class='dd-page-toolbar'>
             <a href='/dumb-dog/messages' class='dd-link dd-round dd-icon dd-icon-messages' title='Messages'>&nbsp;</a>
-            <a href='/dumb-dog/orders' class='dd-link dd-round dd-icon dd-icon-orders' title='Orders'>&nbsp;</a>
         </div>";
 
         var colours = [

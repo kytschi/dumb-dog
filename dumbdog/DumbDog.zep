@@ -31,9 +31,7 @@ use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Messages;
-use DumbDog\Controllers\Orders;
 use DumbDog\Controllers\Pages;
-use DumbDog\Controllers\Products;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
@@ -144,9 +142,7 @@ class DumbDog
             "Events": new Events(this->cfg),
             "Files": new Files(this->cfg),
             "Messages": new Messages(this->cfg),
-            "Orders": new Orders(this->cfg),
             "Pages": new Pages(this->cfg),
-            "Products": new Products(this->cfg),
             "Settings": new Settings(this->cfg),
             "Templates": new Templates(this->cfg),
             "Themes": new Themes(this->cfg),
@@ -268,31 +264,6 @@ class DumbDog
                 "Events",
                 "index",
                 "events"
-            ],
-            "/products/add": [
-                "Products",
-                "add",
-                "create a product"
-            ],
-            "/products/delete": [
-                "Products",
-                "delete",
-                "delete the product"
-            ],
-            "/products/edit": [
-                "Products",
-                "edit",
-                "edit the product"
-            ],
-            "/products/recover": [
-                "Products",
-                "recover",
-                "recover the product"
-            ],
-            "/products": [
-                "Products",
-                "index",
-                "products"
             ],
             "/files/add": [
                 "Files",
@@ -423,26 +394,6 @@ class DumbDog
                 "Users",
                 "index",
                 "users"
-            ],
-            "/orders/delete": [
-                "Orders",
-                "delete",
-                "delete the order"
-            ],
-            "/orders/edit": [
-                "Orders",
-                "edit",
-                "edit the order"
-            ],
-            "/orders/recover": [
-                "Orders",
-                "recover",
-                "recover the order"
-            ],
-            "/orders": [
-                "Orders",
-                "index",
-                "orders"
             ]
         ];                                
         
@@ -499,8 +450,6 @@ class DumbDog
             let id = "dd-page-bk";
         } elseif (strpos(location, "appointment") !== false) {
             let id = "dd-appointments-bk";
-        } elseif (strpos(location, "product") !== false) {
-            let id = "dd-products-bk";
         } elseif (strpos(location, "dashboard") !== false) {
             let id = "dd-dashboard-bk";
         } elseif (strpos(location, "event") !== false) {
@@ -513,8 +462,6 @@ class DumbDog
             let id = "dd-templates-bk";
         } elseif (strpos(location, "user") !== false) {
             let id = "dd-users-bk";
-        } elseif (strpos(location, "order") !== false) {
-            let id = "dd-orders-bk";
         }
 
         echo "<!DOCTYPE html>

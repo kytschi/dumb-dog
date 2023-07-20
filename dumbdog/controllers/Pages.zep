@@ -74,9 +74,6 @@ class Pages extends Controller
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
                     let data["tags"] = this->isTagify(_POST["tags"]);
                     let data["parent_id"] = _POST["parent_id"];
-                    let data["price"] = 0.00;
-                    let data["stock"] = 0;
-                    let data["code"] = null;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -85,16 +82,6 @@ class Pages extends Controller
                             let _POST["event_time"] = "00:00";
                         }
                         let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
-                    }
-
-                    if (isset(_POST["price"])) {
-                        let data["price"] = floatval(_POST["price"]);
-                    }
-                    if (isset(_POST["stock"])) {
-                        let data["stock"] = intval(_POST["stock"]);
-                    }
-                    if (isset(_POST["code"])) {
-                        let data["code"] = _POST["code"];
                     }
 
                     let status = database->execute(
@@ -114,9 +101,6 @@ class Pages extends Controller
                             event_length,
                             tags,
                             parent_id,
-                            price,
-                            stock,
-                            code,
                             created_at,
                             created_by,
                             updated_at,
@@ -137,9 +121,6 @@ class Pages extends Controller
                             :event_length,
                             :tags,
                             :parent_id,
-                            :price,
-                            :stock,
-                            :code,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -270,9 +251,6 @@ class Pages extends Controller
                     let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
                     let data["tags"] = this->isTagify(_POST["tags"]);
                     let data["parent_id"] = _POST["parent_id"];
-                    let data["price"] = 0.00;
-                    let data["stock"] = 0;
-                    let data["code"] = null;
 
                     if (isset(_POST["event_on"])) {
                         if (!isset(_POST["event_time"])) {
@@ -281,16 +259,6 @@ class Pages extends Controller
                             let _POST["event_time"] = "00:00";
                         }
                         let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
-                    }
-
-                    if (isset(_POST["price"])) {
-                        let data["price"] = floatval(_POST["price"]);
-                    }
-                    if (isset(_POST["stock"])) {
-                        let data["stock"] = intval(_POST["stock"]);
-                    }
-                    if (isset(_POST["code"])) {
-                        let data["code"] = _POST["code"];
                     }
 
                     let database = new Database(this->cfg);
@@ -310,10 +278,7 @@ class Pages extends Controller
                             event_on=:event_on,
                             event_length=:event_length,
                             tags=:tags,
-                            parent_id=:parent_id,
-                            price=:price,
-                            stock=:stock,
-                            code=:code 
+                            parent_id=:parent_id 
                         WHERE id=:id",
                         data
                     );
@@ -387,7 +352,6 @@ class Pages extends Controller
         let html .= "<div class='dd-page-toolbar'>
             <a href='/dumb-dog/pages/add' class='dd-link dd-round dd-icon' title='Add a page'>&nbsp;</a>
             <a href='/dumb-dog/events' class='dd-link dd-round dd-icon dd-icon-events' title='Events'>&nbsp;</a>
-            <a href='/dumb-dog/products' class='dd-link dd-round dd-icon dd-icon-products' title='Products'>&nbsp;</a>
             <a href='/dumb-dog/comments' class='dd-link dd-round dd-icon dd-icon-comments' title='Comments'>&nbsp;</a>
             <a href='/dumb-dog/files' class='dd-link dd-round dd-icon dd-icon-files' title='Managing the files and media'>&nbsp;</a>
             <a href='/dumb-dog/templates' class='dd-link dd-round dd-icon dd-icon-templates' title='Managing the templates'>&nbsp;</a>
