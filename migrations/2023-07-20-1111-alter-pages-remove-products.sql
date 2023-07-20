@@ -1,0 +1,4 @@
+ALTER TABLE pages DROP INDEX pages_code_IDX;
+ALTER TABLE pages DROP COLUMN price;
+ALTER TABLE pages DROP COLUMN stock;
+ALTER TABLE pages DROP COLUMN code;

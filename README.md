@@ -79,6 +79,21 @@ Have a look at the `example` website in the repository to show you a way of buil
 
 **NOW, HAVE FUN!**
 
+## Updating
+
+Either git pull, clone or download the latest from the repo to keep Janus up to date.
+
+**DO NOT FORGET TO RESTART THE PHP SERVER**
+
+### Migrations
+To update the database with the latest migrations, simply run `migrations.sh` in the `migrations` this from your terminal and any new migrations will be executed.
+
+You can run the `migrations.sh` from any location just make sure to pass in the `dumbdog.json` config file.
+
+```bash
+sh /var/www/dumbdog/migrations/migrations.sh /var/www/another-site/dumbdog.json
+```
+
 ## Template engines
 
 Dumb Dog does support some of the major templating engines out there should you want to use. Personally I'd just stick with PHP "templates" over using an engine as it's much much faster. But people love to complicate things ;-)
