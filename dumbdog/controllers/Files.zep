@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Controllers\Files
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -26,13 +26,17 @@ namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
+use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Ui\Gfx\Input;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
 
 class Files extends Controller
 {
-    public function add(string path)
+    public folder = "/website/files/";
+
+    /*public function add(string path)
     {
         var titles, html, data, database;
         let titles = new Titles();
@@ -133,8 +137,38 @@ class Files extends Controller
     public function delete(string path)
     {
         return this->triggerDelete(path, "files");
+    }*/
+
+    public function addResource(
+        string input_name,
+        string resource_id,
+        string resource_name,
+        bool delete_old = false
+    ) {
+        this->insert(input_name, resource_id, resource_name, delete_old);
     }
 
+    private function createFilename(string input_name)
+    {
+        return this->randomString(16) . "-" . this->createSlug(_FILES[input_name]["name"]);
+    }
+
+    private function createThumb(image, string filename)
+    {
+        var width, height, desired_width = 400, desired_height, save;
+        
+        let width = imagesx(image);
+        let height = imagesy(image);
+
+        let desired_height = floor(height * (desired_width / width));
+        let save = imagecreatetruecolor(desired_width, desired_height);
+        imagesavealpha(save, true);
+        imagefill(save, 0, 0, imagecolorallocatealpha(save, 0, 0, 0, 127));
+        imagecopyresampled(save, image, 0, 0, 0, 0, desired_width, desired_height, width, height);
+
+        imagewebp(save, getcwd() . this->folder . "thumb-" . filename);
+    }
+/*
     public function edit(string path)
     {
         var titles, html, database, model, data = [];
@@ -271,9 +305,138 @@ class Files extends Controller
         );
         return html;
     }
+*/
+    private function insert(
+        string input_name,
+        string resource_id = "",
+        string resource_name = "",
+        bool delete_old = false
+    ) {
+        var filename, status, data = [], input, database;
+        let input = new Input(this->cfg);
+        let filename = this->createFilename(input_name);
+        let database = new Database(this->cfg);
 
-    public function recover(string path)
+        if (delete_old) {
+            let status = database->execute("
+                UPDATE 
+                    files 
+                SET 
+                    deleted_at=NOW(),
+                    deleted_by=:deleted_by
+                WHERE 
+                    resource_id=:resource_id",
+                [
+                    "resource_id": resource_id,
+                    "deleted_by": this->getUserId()
+                ]
+            );
+            if (!is_bool(status)) {
+                throw new Exception("Filed to delete the old file in the database");
+            }
+        }
+        
+        let data["resource"] = resource_name;
+        let data["resource_id"] = resource_id;
+        let data["name"] =  _FILES[input_name]["name"];
+        let data["filename"] = this->saveFile(input_name, filename);
+        let data["mime_type"] = mime_content_type(getcwd() . this->folder . data["filename"]);
+        let data["created_by"] = this->getUserId();
+        let data["updated_by"] = this->getUserId();
+        let data["tags"] = resource_id ? "" : input->isTagify(_POST["tags"]);
+        
+        let status = database->execute(
+            "INSERT INTO files 
+                (id,
+                resource,
+                resource_id,
+                name,
+                filename,
+                mime_type,
+                tags,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by) 
+            VALUES 
+                (UUID(),
+                :resource,
+                :resource_id,
+                :name,
+                :filename,
+                :mime_type,
+                :tags,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by)",
+            data
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception("Filed to save the file in the database");
+        }
+
+        return status;
+    }
+
+    /*public function recover(string path)
     {
         return this->triggerRecover(path, "files");
+    }*/
+
+    public function saveFile(string input_name, string filename)
+    {
+        var save = true, upload;
+
+        if (this->cfg->save_mode == false) {
+            return;
+        }
+
+        if (empty(_FILES[input_name]["tmp_name"])) {
+            throw new Exception("Failed to upload the file");
+        }
+
+        switch (_FILES[input_name]["type"]) {
+            case "image/avif":
+                let upload = imagecreatefromavif(_FILES[input_name]["tmp_name"]);
+            case "image/bmp":
+                let upload = imagecreatefrombmp(_FILES[input_name]["tmp_name"]);
+                break;            
+            case "image/gif":
+                let upload = imagecreatefromgif(_FILES[input_name]["tmp_name"]);
+                break;
+            case "image/jpeg":
+                let upload = imagecreatefromjpeg(_FILES[input_name]["tmp_name"]);
+                break;
+            case "image/png":
+                let upload = imagecreatefrompng(_FILES[input_name]["tmp_name"]);
+                break;
+            case "image/webp":
+                copy(
+                    _FILES[input_name]["tmp_name"],
+                    getcwd() . this->folder . filename
+                );
+                let save = false;
+                break;
+            case "image/x-bmp":
+                let upload = imagecreatefrombmp(_FILES[input_name]["tmp_name"]);
+                break;
+            default:
+                copy(
+                    _FILES[input_name]["tmp_name"],
+                    getcwd() . this->folder . filename
+                );
+                return filename;
+        }
+
+        if (save) {
+            let filename = str_replace("." . pathinfo(filename, PATHINFO_EXTENSION), ".webp", filename);
+            imagewebp(upload, getcwd() . this->folder . filename);
+        }
+
+        this->createThumb(upload, filename);
+
+        return filename;
     }
 }

@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\DumbDog
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.5 alpha
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -24,14 +24,14 @@
 */
 namespace DumbDog;
 
-use DumbDog\Controllers\Appointments;
+//use DumbDog\Controllers\Appointments;
 use DumbDog\Controllers\Comments;
+use DumbDog\Controllers\Content;
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
-use DumbDog\Controllers\Events;
+//use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Messages;
-use DumbDog\Controllers\Pages;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
@@ -47,17 +47,28 @@ use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
 use DumbDog\Ui\Gfx\Titles;
+use DumbDog\Ui\Menu;
+use DumbDog\Ui\Routes;
 
 class DumbDog
 {
     private cfg;
+    private libs = [];
     private template_engine = null;
-    private version = "0.0.5 alpha";
+    private version = "0.0.6 alpha";
 
-    public function __construct(string cfg_file, template_engine = null, string migrations_folder = "")
-    {
+    public function __construct(
+        string cfg_file,
+        template_engine = null,
+        array libs = [],
+        string migrations_folder = ""
+    ) {
         var cfg, err;
         let cfg = new \stdClass();
+
+        let this->libs = libs;
+
+        define("VERSION", this->version);
 
         if (!file_exists(cfg_file)) {
             throw new Exception(
@@ -66,6 +77,7 @@ class DumbDog
                 (!empty(migrations_folder) ? true : false)
             );
         }
+
         try {
             let cfg = json_decode(file_get_contents(cfg_file), false, 512, JSON_THROW_ON_ERROR);
             if (!property_exists(cfg, "save_mode")) {
@@ -78,8 +90,8 @@ class DumbDog
                 (!empty(migrations_folder) ? true : false)
             );
         }
+
         let this->cfg = cfg;
-        define("VERSION", this->version);
 
         if (!empty(migrations_folder)) {
             this->runMigrations(migrations_folder);
@@ -129,6 +141,15 @@ class DumbDog
          * I'm needed for the session handling for logins etc.
          */
         if (session_status() === 1) {
+            session_set_cookie_params([
+                "secure": true,
+                "samesite": "none"
+            ]);
+
+            // Valid for four hours
+            ini_set("session.gc_maxlifetime", 14400);
+            ini_set("session.cookie_lifetime", 14400);
+
             session_name("dd");
             session_start();
         }
@@ -136,280 +157,50 @@ class DumbDog
         this->secure(path);
 
         var controllers = [
-            "Appointments": new Appointments(this->cfg),
-            "Comments": new Comments(this->cfg),
-            "Dashboard": new Dashboard(this->cfg),
-            "Events": new Events(this->cfg),
-            "Files": new Files(this->cfg),
-            "Messages": new Messages(this->cfg),
-            "Pages": new Pages(this->cfg),
-            "Settings": new Settings(this->cfg),
-            "Templates": new Templates(this->cfg),
-            "Themes": new Themes(this->cfg),
-            "Users": new Users(this->cfg)
+            //"Appointments": new Appointments(this->cfg, this->libs),
+            "Comments": new Comments(this->cfg, this->libs),
+            "Dashboard": new Dashboard(this->cfg, this->libs),
+            //"Events": new Events(this->cfg, this->libs),
+            "Files": new Files(this->cfg, this->libs),
+            "Messages": new Messages(this->cfg, this->libs),
+            "Pages": new Content(this->cfg, this->libs),
+            "Settings": new Settings(this->cfg, this->libs),
+            "Templates": new Templates(this->cfg, this->libs),
+            "Themes": new Themes(this->cfg, this->libs),
+            "Users": new Users(this->cfg, this->libs)
         ];
 
-        var routes = [
-            "/dashboard": [
-                "Dashboard",
-                "index",
-                "dashboard"
-            ],
-            "/the-pound": [
-                "Dashboard",
-                "login",
-                "login"
-            ],
-            "/give-up": [
-                "Dashboard",
-                "logout",
-                "logout"
-            ],
-            "/appointments/add": [
-                "Appointments",
-                "add",
-                "create an appointment"
-            ],
-            "/appointments/delete": [
-                "Appointments",
-                "delete",
-                "delete the appointment"
-            ],
-            "/appointments/edit": [
-                "Appointments",
-                "edit",
-                "edit the appointment"
-            ],
-            "/appointments/recover": [
-                "Appointments",
-                "recover",
-                "recover the appointment"
-            ],
-            "/appointments": [
-                "Appointments",
-                "index",
-                "appointments"
-            ],
-            "/comments/add": [
-                "Comments",
-                "add",
-                "create a comment"
-            ],
-            "/comments/delete": [
-                "Comments",
-                "delete",
-                "delete the comment"
-            ],
-            "/comments/edit": [
-                "Comments",
-                "edit",
-                "edit the comment"
-            ],
-            "/comments/recover": [
-                "Comments",
-                "recover",
-                "recover the comment"
-            ],
-            "/comments": [
-                "Comments",
-                "index",
-                "comments"
-            ],
-            "/pages/add": [
-                "Pages",
-                "add",
-                "create a page"
-            ],
-            "/pages/delete": [
-                "Pages",
-                "delete",
-                "delete the page"
-            ],
-            "/pages/edit": [
-                "Pages",
-                "edit",
-                "edit the page"
-            ],
-            "/pages/recover": [
-                "Pages",
-                "recover",
-                "recover the page"
-            ],
-            "/pages": [
-                "Pages",
-                "index",
-                "pages"
-            ],
-            "/events/add": [
-                "Events",
-                "add",
-                "create an event"
-            ],
-            "/events/delete": [
-                "Events",
-                "delete",
-                "delete the event"
-            ],
-            "/events/edit": [
-                "Events",
-                "edit",
-                "edit the event"
-            ],
-            "/events/recover": [
-                "Events",
-                "recover",
-                "recover the event"
-            ],
-            "/events": [
-                "Events",
-                "index",
-                "events"
-            ],
-            "/files/add": [
-                "Files",
-                "add",
-                "create a file"
-            ],
-            "/files/delete": [
-                "Files",
-                "delete",
-                "delete the file"
-            ],
-            "/files/edit": [
-                "Files",
-                "edit",
-                "edit the file"
-            ],
-            "/files/recover": [
-                "Pages",
-                "recover",
-                "recover the file"
-            ],
-            "/files": [
-                "Files",
-                "index",
-                "files"
-            ],
-            "/messages/delete": [
-                "Messages",
-                "delete",
-                "delete the message"
-            ],
-            "/messages/view": [
-                "Messages",
-                "view",
-                "view the message"
-            ],
-            "/messages/read": [
-                "Messages",
-                "read",
-                "mark the message as read"
-            ],
-            "/messages/recover": [
-                "Messages",
-                "recover",
-                "recover the message"
-            ],
-            "/messages": [
-                "Messages",
-                "index",
-                "messages"
-            ],
-            "/templates/add": [
-                "Templates",
-                "add",
-                "add a template"
-            ],
-            "/templates/delete": [
-                "Templates",
-                "delete",
-                "delete the template"
-            ],
-            "/templates/edit": [
-                "Templates",
-                "edit",
-                "edit the template"
-            ],
-            "/templates/recover": [
-                "Templates",
-                "recover",
-                "recover the template"
-            ],
-            "/templates": [
-                "Templates",
-                "index",
-                "templates"
-            ],
-            "/themes/add": [
-                "Themes",
-                "add",
-                "add a theme"
-            ],
-            "/themes/delete": [
-                "Themes",
-                "delete",
-                "delete the theme"
-            ],
-            "/themes/edit": [
-                "Themes",
-                "edit",
-                "edit the theme"
-            ],
-            "/themes/recover": [
-                "Themes",
-                "recover",
-                "recover the theme"
-            ],
-            "/themes": [
-                "Themes",
-                "index",
-                "themes"
-            ],
-            "/settings": [
-                "Settings",
-                "index",
-                "settings"
-            ],
-            "/users/add": [
-                "Users",
-                "add",
-                "add a user"
-            ],
-            "/users/delete": [
-                "Users",
-                "delete",
-                "delete the user"
-            ],
-            "/users/edit": [
-                "Users",
-                "edit",
-                "edit the user"
-            ],
-            "/users/recover": [
-                "Users",
-                "recover",
-                "recover the user"
-            ],
-            "/users": [
-                "Users",
-                "index",
-                "users"
-            ]
-        ];                                
+        var routes = (new Routes())->routes;                      
         
         for url, route in routes {
-            if (strpos(path, url) !== false) {
-                let controller = controllers[route[0]];
-                let location = route[1];
-                let output = controller->{location}(path);
-                let location = route[2];
-                break;
+            if (strpos(path, url) === false) {
+                continue;
             }
+
+            if (!isset(route[0]) && !isset(route[1]) && !isset(route[2])) {
+                continue;
+            }
+
+            if (!isset(controllers[route[0]])) {
+                continue;
+            }
+
+            let controller = controllers[route[0]];
+            let location = route[1];
+
+            if (!method_exists(controller, location)) {
+                continue;
+            }
+            
+            let output = controller->{location}(path);
+            let location = route[2];
+            break;
         }
 
         if (empty(location)) {
             let code = 404;
             let output = this->notFound();
+            let location = "page not found";
         }
 
         this->ddHead(location, code);
@@ -424,8 +215,8 @@ class DumbDog
 
         echo "</main>";
         if (menu) {
-            this->quickMenu();
             echo javascript->trumbowygIcons();
+            (new Menu(this->cfg))->quickmenu();
         }
         echo "</body>" . javascript->common() . "</html>";
     }
@@ -501,11 +292,13 @@ class DumbDog
             let data["url"] = path;
             let page = database->get("
                 SELECT
-                    pages.*,
+                    content.*,
                     templates.file AS template
-                FROM pages 
-                JOIN templates ON templates.id=pages.template_id 
-                WHERE pages.url=:url AND pages.status='live' AND pages.deleted_at IS NULL", data);
+                FROM content 
+                JOIN templates ON templates.id=content.template_id 
+                WHERE content.url=:url AND content.status='live' AND content.deleted_at IS NULL",
+                data
+            );
             if (page) {
                 var file;
                 let file = page->template;
@@ -531,7 +324,7 @@ class DumbDog
                             [
                                 page,
                                 settings,
-                                new Pages(this->cfg),
+                                new Content(this->cfg, this->libs),
                                 obj
                             ]
                         );
@@ -636,42 +429,6 @@ class DumbDog
         echo titles->page("offline", "/assets/dumbdog.png");
         echo "<div class='dd-box'><div class='dd-box-body'><h3 class='dd-h3'>*yawn* Let me sleep a little longer will you...</h3></div></div>";
         this->ddFooter(false);        
-    }
-
-    private function quickMenu()
-    {
-        var database, messages, appointments, controller;
-
-        let controller = new Appointments(this->cfg);
-        let database = new Database(this->cfg);
-
-        echo "<div id='dd-quick-menu' style='display: none'>
-            <a href='/dumb-dog/pages/add' class='dd-round dd-icon' title='Add a page'>&nbsp;</a>
-            <a href='/dumb-dog/pages' class='dd-round dd-icon dd-icon-pages' title='Managing the content'>&nbsp;</a>
-            <a href='/dumb-dog/appointments' class='dd-round dd-icon dd-icon-appointments' title='Go to the appointments'>&nbsp;</a>
-            <a href='/dumb-dog' class='dd-round dd-icon dd-icon-dashboard' title='Go to the dashboard'>&nbsp;</a>
-            <a href='/dumb-dog/settings' class='dd-round dd-icon dd-icon-settings' title='Site wide settings'>&nbsp;</a>
-            <a href='/dumb-dog/give-up' class='dd-round dd-icon dd-icon-logout' title='Log me out'>&nbsp;</a>
-        </div>
-        <div id='dd-quick-menu-button'>
-            <div class='dd-round dd-icon dd-icon-dumbdog' onclick='showQuickMenu()'>&nbsp;</div>";
-        
-        let messages = database->get("SELECT count(id) AS total FROM messages WHERE status='unread'");
-        if (messages->total) {
-            echo "<div id='dd-message-count'><a href='/dumb-dog/messages'>new messages</a><span></span></div>";
-        }
-
-        let appointments = database->get(
-            "SELECT count(id) AS total FROM appointments WHERE user_id=:user_id AND on_date >= NOW() AND free_slot = 0",
-            [
-                "user_id": controller->getUserId()
-            ]
-        );
-        if (appointments->total) {
-            echo "<div id='dd-appointments'><a href='/dumb-dog/appointments'>new appointments</a><span></span></div>";
-        }
-
-        echo "</div>";
     }
 
     private function robots()
@@ -860,10 +617,10 @@ class DumbDog
 
         let pages = database->all("
                 SELECT
-                    pages.*
+                    content.*
                 FROM 
-                    pages
-                WHERE pages.status='live' AND pages.deleted_at IS NULL");
+                    content
+                WHERE content.status='live' AND content.deleted_at IS NULL");
         if (pages) {
             let iLoop = 0;
             let url = (_SERVER["HTTPS"] ? "https://" : "http://") . _SERVER["SERVER_NAME"];

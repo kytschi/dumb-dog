@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Controllers\Events
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -24,15 +24,15 @@
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Pages;
+use DumbDog\Controllers\Content;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
 
-class Events extends Pages
+class Events extends Content
 {
-    public global_url = "/dumb-dog/events";
+    /*public global_url = "/dumb-dog/events";
     
     public function add(string path, string type = "event")
     {
@@ -109,9 +109,9 @@ class Events extends Pages
             SELECT main_page.*,
             IFNULL(templates.name, 'No template') AS template, 
             IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM pages AS main_page 
+            FROM content AS main_page 
             LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN pages AS parent_page ON parent_page.id=main_page.parent_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
             WHERE main_page.type='event'";
         if (isset(_GET["tag"])) {
             let query .= " AND main_page.tags like :tag";
@@ -129,5 +129,5 @@ class Events extends Pages
         );
 
         return html;
-    }
+    }*/
 }

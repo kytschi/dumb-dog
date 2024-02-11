@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Controllers\Comments
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -33,7 +33,7 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Comments extends Controller
 {
-    public function add(string path)
+    /*public function add(string path)
     {
         var titles, html, database;
         let titles = new Titles();
@@ -131,7 +131,7 @@ class Comments extends Controller
             <span>attach to page</span>
             <select name='page_id'><option value=''>not required</option>";
 
-        let data = database->all("SELECT * FROM pages ORDER BY name");
+        let data = database->all("SELECT * FROM content ORDER BY name");
         var iLoop = 0, selected;
 
         if (model) {
@@ -335,5 +335,5 @@ class Comments extends Controller
     public function recover(string path)
     {
         return this->triggerRecover(path, "comments");
-    }
+    }*/
 }

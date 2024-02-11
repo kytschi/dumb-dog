@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Controllers\Users
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -33,7 +33,7 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Users extends Controller
 {
-    public function add(string path)
+    /*public function add(string path)
     {
         var titles, html;
         let titles = new Titles();
@@ -304,5 +304,5 @@ class Users extends Controller
     public function recover(string path)
     {
         return this->triggerRecover(path, "users");
-    }
+    }*/
 }

@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Ui\Gfx\Titles
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -28,16 +28,21 @@ class Titles
 {
     public function noResults()
     {
-        return "<div><h2 class='dd-h2 no-results'><span>no results</span></h2></div>";
+        return "
+        <div>
+            <h2 class='dd-h2 no-results'>
+                <span>no results</span>
+            </h2>
+        </div>";
     }
 
     public function page(string title, string image = "")
     {
-        var html;
-        let html = "<h1 class='dd-h1 dd-page-title'><span";
-        if (image) {
-            let html .= " class='dd-icon dd-icon-" . image . "'";
-        }
-        return html . ">" . title . "</span></h1>";
+        return "
+        <h1 class='dd-h1 dd-page-title'>
+            <span" . (image ? " class='dd-icon dd-icon-" . image . "'" : "") . ">" .
+                title .
+            "</span>
+        </h1>";
     }
 }

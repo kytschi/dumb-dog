@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Helper\DumbDog
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -74,17 +74,17 @@ class DumbDog
         let menu->footer = [];
         let menu->both = [];
 
-        let data = this->database->all("SELECT name, url FROM pages WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+        let data = this->database->all("SELECT name, url FROM content WHERE menu_item='header' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
         if (data) {
             let menu->header = data;
         }
 
-        let data = this->database->all("SELECT name, url FROM pages WHERE menu_item='footer' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+        let data = this->database->all("SELECT name, url FROM content WHERE menu_item='footer' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
         if (data) {
             let menu->footer = data;
         }
 
-        let data = this->database->all("SELECT name, url FROM pages WHERE menu_item='both' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
+        let data = this->database->all("SELECT name, url FROM content WHERE menu_item='both' AND status='live' AND deleted_at IS NULL ORDER BY created_at ASC");
         if (data) {
             let menu->both = data;
         }
@@ -330,12 +330,12 @@ class DumbDog
         
         let query = "
         SELECT
-            pages.*,
+            content.*,
             templates.file AS template
-        FROM pages 
-        JOIN templates ON templates.id=pages.template_id";
+        FROM content 
+        JOIN templates ON templates.id=content.template_id";
 
-        let where = " WHERE pages.status='live' AND pages.deleted_at IS NULL AND pages.type = '" . type . "'";
+        let where = " WHERE content.status='live' AND content.deleted_at IS NULL AND content.type = '" . type . "'";
 
         if (count(filters)) {
             var key, value;
