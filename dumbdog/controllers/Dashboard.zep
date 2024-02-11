@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Controllers\Dashboard
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -30,6 +30,7 @@ use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Ui\Captcha;
+use DumbDog\Ui\Gfx\Input;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
 
@@ -46,7 +47,10 @@ class Dashboard extends Controller
         let data["id"] = _SESSION["dd"];
         let model = database->get("SELECT * FROM users WHERE id=:id", data);
         if (model) {
-            let html .= "<h2 class='dd-h2 dd-page-sub-title'><span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span></h2>";
+            let html .= "
+            <h2 class='dd-h2 dd-page-sub-title'>
+                <span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span>
+            </h2>";
         }
 
         let html .= "<div class='dd-page-toolbar'>
@@ -102,8 +106,15 @@ class Dashboard extends Controller
                 let values[value][] = titles->{model};
             }
         }
-        let html .= "<div class='dd-box'><div class='dd-box-title'><span>annual stats</span></div><div class='dd-box-body'>
-        <canvas id='visitors' width='600' height='200'></canvas></div></div>
+        let html .= "
+        <div class='dd-box'>
+            <div class='dd-box-title'>
+                <span>annual stats</span>
+            </div>
+            <div class='dd-box-body'>
+                <canvas id='visitors' width='600' height='200'></canvas>
+            </div>
+        </div>
         <script type='text/javascript'>
         var ctx = document.getElementById('visitors').getContext('2d');
         var orders = new Chart(ctx, {
@@ -136,8 +147,6 @@ class Dashboard extends Controller
         });
         </script>";
 
-        let html .= "<div class='dd-row'>";
-
         let model = "SELECT count(id) AS total, bot FROM stats WHERE bot IS NOT NULL ";
         let model .= "GROUP BY bot ORDER BY total DESC";
         let data = database->all(model);
@@ -146,8 +155,15 @@ class Dashboard extends Controller
         let model = count(data) * 30;
         let value = (model < 200) ? 200 : model;
 
-        let html .= "<div class='dd-box'><div class='dd-box-title'><span>bots</span></div><div class='dd-box-body'>
-        <canvas id='bots' width='505' height='" . value . "'></canvas></div></div>
+        let html .= "
+        <div class='dd-box'>
+            <div class='dd-box-title'>
+                <span>bots</span>
+            </div>
+            <div class='dd-box-body'>
+                <canvas id='bots' width='505' height='" . value . "'></canvas>
+            </div>
+        </div>
         <script type='text/javascript'>
         var ctx_bots = document.getElementById('bots').getContext('2d');
         var bots = new Chart(ctx_bots, {
@@ -197,8 +213,15 @@ class Dashboard extends Controller
         let data = database->all(model);
 
         
-        let html .= "<div class='dd-box'><div class='dd-box-title'><span>referrers</span></div><div class='dd-box-body'>
-        <canvas id='referrers' width='505' height='400'></canvas></div></div></div>
+        let html .= "
+        <div class='dd-box'>
+            <div class='dd-box-title'>
+                <span>referrers</span>
+            </div>
+            <div class='dd-box-body'>
+                <canvas id='referrers' width='505' height='400'></canvas>
+            </div>
+        </div>
         <script type='text/javascript'>
         var ctx_referrers = document.getElementById('referrers').getContext('2d');
         var referrers = new Chart(ctx_referrers, {
@@ -235,7 +258,9 @@ class Dashboard extends Controller
 
     public function login(string path)
     {
-        var titles, html, database, model, data = [], captcha;
+        var titles, html, database, model, data = [], captcha, input;
+
+        let input = new Input(this->cfg);
         let titles = new Titles();
         let captcha = new Captcha();
 
@@ -274,16 +299,13 @@ class Dashboard extends Controller
 
         let html .= "<form method='post' action='/dumb-dog" . path . "?back=" . urlencode(trim(path, "/")) . "'>
             <div id='dd-login' class='dd-box'>
-                <div class='dd-box-body'>
-                    <div class='dd-input-group'>
-                        <span>username<span class='dd-required'>*</span></span>
-                        <input type='text' name='name' placeholder='what is your username?'>
-                    </div>
-                    <div class='dd-input-group'>
-                        <span>password<span class='dd-required'>*</span></span>
-                        <input type='password' name='password' placeholder='your secret password please'>
-                    </div>
-                    <div class='dd-input-group'><span>captcha<span class='dd-required'>*</span></span>" . captcha->draw() . "</div>
+                <div class='dd-box-body'>" .
+                    input->text("Username", "name", "Please enter your username", true) .
+                    input->password("Password", "password", "Please enter your password", true) .   
+                    "<div class='dd-input-group'>
+                        <label>captcha<span class='dd-required'>*</span></label>" .
+                        captcha->draw() .
+                    "</div>
                 </div>
                 <div class='dd-box-footer'>
                     <button type='submit' name='login' class='dd-button'>login</button>

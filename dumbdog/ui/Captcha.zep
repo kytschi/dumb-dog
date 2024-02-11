@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Ui\Captcha
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -98,9 +98,12 @@ class Captcha
 			iv
         ) . "=" . base64_encode(iv);
 		
-		return "<div class=\"dd-captcha-img\"><img src=\"data:image/png;base64," . base64_encode(image_data) . "\" alt=\"captcha\"/></div>" .
-			"<input name=\"dd_captcha\" class=\"dd-captcha-input\" required/>" .
-			"<input name=\"_DDCAPTCHA\" type=\"hidden\" value=\"" . encrypted . "\"/>";
+		return "
+        <div class=\"dd-captcha-img\">
+            <img src=\"data:image/png;base64," . base64_encode(image_data) . "\" alt=\"captcha\"/>
+        </div>
+        <input name=\"dd_captcha\" class=\"dd-captcha-input\" required/>
+		<input name=\"_DDCAPTCHA\" type=\"hidden\" value=\"" . encrypted . "\"/>";
 	}
 
     public function validate()

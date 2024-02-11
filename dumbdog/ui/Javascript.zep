@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Ui\Javascript
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -71,6 +71,12 @@ class Javascript
                 console.error('DUMB DOG ERROR: Could not copy text, ', err);
             });
         }
+        function scrollTo(id) {
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $(id).offset().top
+            }, 1000);
+        }
+
         $(function() {
             $('.wysiwyg').trumbowyg({
                 removeformatPasted: true
@@ -79,6 +85,47 @@ class Javascript
                 dateFormat: 'dd/mm/yy'
             });
             $('.tagify').tagify();
+
+            $('.dd-nav-tabs .dd-nav-link').click((event) => {
+                scrollTo($(event.target).data('tab'));
+            });
+
+            $('button[data-window]').click((event) => {
+                var target = event.target, iLoop = 0;
+                while(typeof($(target).data('window')) == 'undefined') {
+                    target = $(target).parent();
+                    iLoop++;
+                    if (iLoop == 3) {
+                        break;
+                    }
+                }
+                $($(target).data('window')).show();
+                scrollTo($(target).data('window'));
+            });
+
+            $('button[data-inline-popup]').click((event) => {
+                var target = event.target, iLoop = 0;
+                while(typeof($(target).data('inline-popup')) == 'undefined') {
+                    target = $(target).parent();
+                    iLoop++;
+                    if (iLoop == 3) {
+                        break;
+                    }
+                }
+                $($(target).data('inline-popup')).show();
+            });
+
+            $('button[data-inline-popup-close]').click((event) => {
+                var target = event.target, iLoop = 0;
+                while(typeof($(target).data('inline-popup-close')) == 'undefined') {
+                    target = $(target).parent();
+                    iLoop++;
+                    if (iLoop == 3) {
+                        break;
+                    }
+                }
+                $($(target).data('inline-popup-close')).hide();
+            });
         });
         </script>";
     }

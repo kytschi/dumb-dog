@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Ui\Head
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -44,9 +44,10 @@ class Head
         let style = new Style(this->cfg);
 
         return "<head>
+            <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
             <link rel='icon' type='image/png' sizes='64x64' href='data:image/png;base64," . this->favicon() . "'>" .
-            style->build() .
             "<title>" . location . " | dumb dog</title>" .
+            style->build() .
             js->jquery() .
             js->jqueryUI() .
             js->tagify() . 

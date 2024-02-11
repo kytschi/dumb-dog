@@ -3,10 +3,10 @@
  *
  * @package     DumbDog\Controllers\Database
  * @author 		Mike Welsh
- * @copyright   2023 Mike Welsh
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2023 Mike Welsh
+ * Copyright 2024 Mike Welsh
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -30,6 +30,7 @@ class Database
 {
     private cfg;
     private db;
+    public system_uuid = "00000000-0000-0000-0000-000000000000";
 
     public function __construct(object cfg)
     {
@@ -111,5 +112,13 @@ class Database
         let statement = this->db->prepare(query);
         statement->execute(data);
         return statement->fetchObject("DumbDog\\Models\\Model");
+    }
+
+    public function getUserId()
+    {
+        if (isset(_SESSION["dd"])) {
+            return _SESSION["dd"];
+        }
+        return this->system_uuid;
     }
 }
