@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -37,7 +23,7 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Content extends Controller
 {
-    public global_url = "/dumb-dog/pages";
+    public global_url = "/pages";
     public type = "page";
     public title = "Pages";
     public back_url = "";
@@ -97,6 +83,7 @@ class Content extends Controller
                             tags,
                             featured,
                             parent_id,
+                            sort,
                             created_at,
                             created_by,
                             updated_at,
@@ -123,6 +110,7 @@ class Content extends Controller
                             :tags,
                             :featured,
                             :parent_id,
+                            :sort,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -180,14 +168,21 @@ class Content extends Controller
             "content_id": id,
             "created_by": this->getUserId(),
             "updated_by": this->getUserId(),
-            "content_stack_id": null
-        ], status;
+            "content_stack_id": null,
+            "name": ""
+        ], status, key, item;
 
-        let data["name"] = reset(_POST["add_to_stack"]);
+        for key, item in _POST["add_to_stack"] {
+            if (empty(item)) {
+                continue;
+            }
+            let data["name"] = item;
+            let data["content_stack_id"] = key;
+        }
+
         if (empty(data["name"])) {
             return;
         }
-        let data["content_stack_id"] = key(_POST["add_to_stack"]);
         
         let status = this->database->execute(
             "INSERT INTO content_stacks 
@@ -382,7 +377,8 @@ class Content extends Controller
                         company_name=:company_name,
                         tags=:tags,
                         featured=:featured,
-                        parent_id=:parent_id 
+                        parent_id=:parent_id,
+                        sort=:sort  
                     WHERE id=:id",
                     data
                 );
@@ -437,7 +433,7 @@ class Content extends Controller
             let html .= "
             <div class='dd-page-toolbar'>" . 
                 button->generic(
-                    "/dumb-dog/" . this->type . "-categories",
+                    this->cfg->dumb_dog_url . "/" . this->type . "-categories",
                     "categories",
                     "categories",
                     "Click to access the " . str_replace("-", " ", this->type) . " categories"
@@ -573,6 +569,7 @@ class Content extends Controller
                                         <div class='dd-box-title'>Relationship</div>
                                         <div class='dd-box-body'>" .
                                             this->parentSelect(model->parent_id, model->id) .
+                                            input->number("Sort", "sort", "Sort the page with in the parent", false, model->sort) .
                                         "</div>
                                     </div>
                                 </div>
@@ -734,7 +731,7 @@ class Content extends Controller
         return table->build(
             this->list,
             this->database->all(query, data),
-            "/dumb-dog/" . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
 
@@ -787,69 +784,70 @@ class Content extends Controller
                         input->inputPopup("create-stack", "create_stack", "Create a new stack") .
                         "
                     </div>
-                    <div class='dd-box-body'>";
+                </div>";
 
         if (count(model->stacks)) {
-            let html .= "<div class='stacks'>";
             for key, item in model->stacks {
-                let item->stacks = this->database->all("
-                    SELECT
-                        content_stacks.*,
-                        files.id AS image_id,
-                        IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                        IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail  
-                    FROM content_stacks 
-                    LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
-                    WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL
-                    ORDER BY sort ASC");
                 let html .= "
-                    <div class='stack'>
-                        <div class='stack-header'>
-                            <h3>" . item->name . "</h3>" .
-                            input->inputPopup(
-                                "create-stack-item-" . (key + 1),
-                                "add_to_stack[" . item->id . "]",
-                                "Add to the " . item->name . " stack",
-                                "add") .
-                            button->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
-                            "
-                        </div>
-                        <div class='stack-body'>" .
-                        input->text("Name", "stack_name[]", "The name of the stack", true, item->name) .
-                        input->text("Title", "stack_title[]", "The title of the stack", false, item->title) .
-                        input->text("Sub title", "stack_sub_title[]", "The sub title for the stack", false, item->sub_title) .
-                        input->wysiwyg("Description", "stack_description[]", "The stack description", false, item->description) . 
-                        input->tags("Tags", "stack_tags[]", "Tag the content stack", false, item->tags) . 
-                        input->image("Image", "stack_image[]", "Upload an image here", false, item) . 
-                        input->number("Sort", "stack_sort[]", "Sort the stack item", false, item->sort) .
-                        input->hidden("stack_id[]", item->id) . 
-                        "<hr />" ;
-                for key_stack, item_stack in item->stacks {
-                    let html .= "
-                    <div class='sub-stack'>" .
-                        "<div class='stack-header'>
-                            <h3>" . item_stack->name . "</h3>" .
-                            button->delete(item_stack->id, "delete-stack-" . item_stack->id, "delete_stack[]") .
+                <div class='dd-box'>
+                    <div class='dd-box-title'>
+                        <span>" . item->name . "</span>
+                        <div>" .
+                        input->inputPopup(
+                            "create-stack-item-" . (key + 1),
+                            "add_to_stack[" . item->id . "]",
+                            "Add to the " . item->name . " stack",
+                            "add") .
+                        button->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
                         "</div>
-                        <div class='stack-body'>" .
-                            input->text("Name", "sub_stack_name[]", "The name of the stack", true, item_stack->name) .
-                            input->text("Title", "sub_stack_title[]", "The title of the stack", false, item_stack->title) .
-                            input->text("Sub title", "sub_stack_sub_title[]", "The sub title for the stack", false, item_stack->sub_title) .
-                            input->wysiwyg("Description", "sub_stack_description[]", "The stack description", false, item_stack->description) . 
-                            input->image("Image", "sub_stack_image[]", "Upload an image here", false, item_stack) . 
-                            input->number("Sort", "sub_stack_sort[]", "Sort the stack item", false, item_stack->sort) .
-                            input->hidden("sub_stack_id[]", item_stack->id) . 
-                        "</div>
-                    </div>";
-                }
-            let html .= "</div>
-                    </div>";
+                    </div>
+                    <div class='dd-box-body'>";
+                    let item->stacks = this->database->all("
+                        SELECT
+                            content_stacks.*,
+                            files.id AS image_id,
+                            IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
+                            IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail  
+                        FROM content_stacks 
+                        LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+                        WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL
+                        ORDER BY sort ASC");
+                    let html .= input->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name) .
+                                input->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title) .
+                                input->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title) .
+                                input->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content) . 
+                                input->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags) . 
+                                input->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item) . 
+                                input->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort) .
+                                this->stackTemplatesSelect(
+                                    item->template_id,
+                                    "stack_template[" . item->id . "]"
+                                ) . 
+                                "<h3 class='dd-mt-5 dd-mb-0'>Stack items</h3>";
+                                for key_stack, item_stack in item->stacks {
+                                    let html .= "
+                                    <div class='dd-stack'>" .
+                                        "<div class='dd-stack-title'>
+                                            <span>" . item_stack->name . "</span>" .
+                                            button->delete(item_stack->id, "delete-stack-" . item_stack->id, "delete_stack[]") .
+                                        "</div>
+                                        <div class='dd-stack-body'>" .
+                                            input->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name) .
+                                            input->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title) .
+                                            input->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title) .
+                                            input->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content) . 
+                                            input->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack) . 
+                                            input->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort) .
+                                        "</div>
+                                    </div>";
+                                }
+                let html .= "
+                    </div>
+                </div>";
             }
-            let html .= "</div>";
         }
 
-        let html .="</div>
-                </div>
+        let html .="
             </div>
         </div>";
 
@@ -883,6 +881,7 @@ class Content extends Controller
         let data["tags"] = input->isTagify(_POST["tags"]);
         let data["parent_id"] = _POST["parent_id"];
         let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
+        let data["sort"] = intval(_POST["sort"]);
 
         if (isset(_POST["event_on"])) {
             if (!isset(_POST["event_time"])) {
@@ -981,20 +980,18 @@ class Content extends Controller
         return html;
     }
 
-    private function templatesSelect(model = null)
+    private function stackTemplatesSelect(selected = null, string id = "template_id")
     {
-        var select = [], selected = null, data, input;
+        var select = [], data, input;
         let input = new Input(this->cfg);
         let data = this->database->all("
             SELECT * FROM templates 
-            WHERE deleted_at IS NULL 
+            WHERE deleted_at IS NULL AND type='content-stack'
             ORDER BY is_default DESC, name");
         var iLoop = 0;
 
-        if (model) {
-            let selected = model;
-        } elseif (isset(_POST["template_id"])) {
-            let selected = _POST["template_id"];
+        if (isset(_POST[id])) {
+            let selected = _POST[id];
         }
 
         while (iLoop < count(data)) {
@@ -1007,7 +1004,39 @@ class Content extends Controller
 
         return input->select(
             "template",
-            "template_id",
+            id,
+            "The stack's template",
+            select,
+            true,
+            selected
+        );
+    }
+
+    private function templatesSelect(selected = null, string id = "template_id")
+    {
+        var select = [], data, input;
+        let input = new Input(this->cfg);
+        let data = this->database->all("
+            SELECT * FROM templates 
+            WHERE deleted_at IS NULL AND type='page'
+            ORDER BY is_default DESC, name");
+        var iLoop = 0;
+
+        if (isset(_POST[id])) {
+            let selected = _POST[id];
+        }
+
+        while (iLoop < count(data)) {
+            let select[data[iLoop]->id] = data[iLoop]->name;
+            if (data[iLoop]->is_default && empty(selected)) {
+                let selected = data[iLoop]->id;
+            }
+            let iLoop = iLoop + 1;
+        }
+
+        return input->select(
+            "template",
+            id,
             "The page's template",
             select,
             true,
@@ -1026,39 +1055,43 @@ class Content extends Controller
             return;
         }
 
-        var key, key_sub, id, id_sub, status, data = [];
-        for key, id in _POST["stack_id"] {
+        var val, val_sub, id, id_sub, status, data = [];
+        for id, val in _POST["stack_name"] {
             let data = [
                 "id": id,
                 "name": "",
                 "title": "",
                 "sub_title": "",
-                "description": "",
+                "content": "",
                 "sort": 0,
-                "tags": ""
+                "tags": "",
+                "template_id": ""
             ];
 
-            if (!isset(_POST["stack_name"][key])) {
-                throw new ValidationException("Missing name for stack");
-            } elseif (empty(_POST["stack_name"][key])) {
+            if (empty(val)) {
                 throw new ValidationException("Missing name for stack");
             }
 
-            let data["name"] = _POST["stack_name"][key];
-            if (isset(_POST["stack_title"][key])) {
-                let data["title"] = _POST["stack_title"][key];
+            let data["name"] = val;
+            if (isset(_POST["stack_title"][id])) {
+                let data["title"] = _POST["stack_title"][id];
             }
-            if (isset(_POST["stack_sub_title"][key])) {
-                let data["sub_title"] = _POST["stack_sub_title"][key];
+            if (isset(_POST["stack_sub_title"][id])) {
+                let data["sub_title"] = _POST["stack_sub_title"][id];
             }
-            if (isset(_POST["stack_description"][key])) {
-                let data["description"] = _POST["stack_description"][key];
+            if (isset(_POST["stack_content"][id])) {
+                let data["content"] = _POST["stack_content"][id];
             }
-            if (isset(_POST["stack_sort"][key])) {
-                let data["sort"] = intval(_POST["stack_sort"][key]);
+            if (isset(_POST["stack_sort"][id])) {
+                let data["sort"] = intval(_POST["stack_sort"][id]);
             }
-            if (isset(_POST["stack_tags"][key])) {
-                let data["tags"] = input->isTagify(_POST["stack_tags"][key]);
+            if (isset(_POST["stack_tags"][id])) {
+                let data["tags"] = input->isTagify(_POST["stack_tags"][id]);
+            }
+            if (isset(_POST["stack_template"][id])) {
+                let data["template_id"] = _POST["stack_template"][id];
+            } else {
+                throw new ValidationException("Missing template for stack");
             }
 
             let status = this->database->execute(
@@ -1066,9 +1099,10 @@ class Content extends Controller
                     name=:name,
                     title=:title,
                     sub_title=:sub_title,
-                    description=:description,
+                    content=:content,
                     sort=:sort,
-                    tags=:tags 
+                    tags=:tags,
+                    template_id=:template_id 
                 WHERE id=:id",
                 data
             );
@@ -1077,15 +1111,15 @@ class Content extends Controller
                 throw new Exception("Failed to update the stack");
             }
 
-            if (isset(_FILES["stack_image"]["name"][key])) {
-                if (!empty(_FILES["stack_image"]["name"][key])) {
+            if (isset(_FILES["stack_image"]["name"][id])) {
+                if (!empty(_FILES["stack_image"]["name"][id])) {
                     let _FILES["image"] = [
-                        "name": _FILES["stack_image"]["name"][key],
-                        "full_path": _FILES["stack_image"]["full_path"][key],
-                        "type": _FILES["stack_image"]["type"][key],
-                        "tmp_name": _FILES["stack_image"]["tmp_name"][key],
-                        "error": _FILES["stack_image"]["error"][key],
-                        "size": _FILES["stack_image"]["size"][key]
+                        "name": _FILES["stack_image"]["name"][id],
+                        "full_path": _FILES["stack_image"]["full_path"][id],
+                        "type": _FILES["stack_image"]["type"][id],
+                        "tmp_name": _FILES["stack_image"]["tmp_name"][id],
+                        "error": _FILES["stack_image"]["error"][id],
+                        "size": _FILES["stack_image"]["size"][id]
                     ];
                     
                     files->addResource("image", id, "image", true);
@@ -1093,35 +1127,33 @@ class Content extends Controller
                 }
             }
 
-            if (isset(_POST["sub_stack_id"])) {
-                for key_sub, id_sub in _POST["sub_stack_id"] {
+            if (isset(_POST["sub_stack_name"])) {
+                for id_sub, val_sub in _POST["sub_stack_name"] {
                     let data = [
                         "id": id_sub,
                         "name": "",
                         "title": "",
                         "sub_title": "",
-                        "description": "",
+                        "content": "",
                         "sort": 0
                     ];
         
-                    if (!isset(_POST["sub_stack_name"][key_sub])) {
-                        throw new ValidationException("Missing name for the stack item");
-                    } elseif (empty(_POST["sub_stack_name"][key_sub])) {
+                    if (empty(val_sub)) {
                         throw new ValidationException("Missing name for the stack item");
                     }
         
-                    let data["name"] = _POST["sub_stack_name"][key_sub];
-                    if (isset(_POST["sub_stack_title"][key_sub])) {
-                        let data["title"] = _POST["sub_stack_title"][key_sub];
+                    let data["name"] = val_sub;
+                    if (isset(_POST["sub_stack_title"][id_sub])) {
+                        let data["title"] = _POST["sub_stack_title"][id_sub];
                     }
-                    if (isset(_POST["sub_stack_title"][key_sub])) {
-                        let data["sub_title"] = _POST["sub_stack_sub_title"][key_sub];
+                    if (isset(_POST["sub_stack_title"][id_sub])) {
+                        let data["sub_title"] = _POST["sub_stack_sub_title"][id_sub];
                     }
-                    if (isset(_POST["sub_stack_description"][key_sub])) {
-                        let data["description"] = _POST["sub_stack_description"][key_sub];
+                    if (isset(_POST["sub_stack_content"][id_sub])) {
+                        let data["content"] = _POST["sub_stack_content"][id_sub];
                     }
-                    if (isset(_POST["sub_stack_sort"][key_sub])) {
-                        let data["sort"] = intval(_POST["sub_stack_sort"][key_sub]);
+                    if (isset(_POST["sub_stack_sort"][id_sub])) {
+                        let data["sort"] = intval(_POST["sub_stack_sort"][id_sub]);
                     }
         
                     let status = this->database->execute(
@@ -1129,7 +1161,7 @@ class Content extends Controller
                             name=:name,
                             title=:title,
                             sub_title=:sub_title,
-                            description=:description,
+                            content=:content,
                             sort=:sort 
                         WHERE id=:id",
                         data
@@ -1139,15 +1171,15 @@ class Content extends Controller
                         throw new Exception("Failed to update the stack");
                     }
 
-                    if (isset(_FILES["sub_stack_image"]["name"][key_sub])) {
-                        if (!empty(_FILES["sub_stack_image"]["name"][key_sub])) {
+                    if (isset(_FILES["sub_stack_image"]["name"][id_sub])) {
+                        if (!empty(_FILES["sub_stack_image"]["name"][id_sub])) {
                             let _FILES["image"] = [
-                                "name": _FILES["sub_stack_image"]["name"][key_sub],
-                                "full_path": _FILES["sub_stack_image"]["full_path"][key_sub],
-                                "type": _FILES["sub_stack_image"]["type"][key],
-                                "tmp_name": _FILES["sub_stack_image"]["tmp_name"][key_sub],
-                                "error": _FILES["sub_stack_image"]["error"][key_sub],
-                                "size": _FILES["sub_stack_image"]["size"][key_sub]
+                                "name": _FILES["sub_stack_image"]["name"][id_sub],
+                                "full_path": _FILES["sub_stack_image"]["full_path"][id_sub],
+                                "type": _FILES["sub_stack_image"]["type"][id_sub],
+                                "tmp_name": _FILES["sub_stack_image"]["tmp_name"][id_sub],
+                                "error": _FILES["sub_stack_image"]["error"][id_sub],
+                                "size": _FILES["sub_stack_image"]["size"][id_sub]
                             ];
                             
                             files->addResource("image", id_sub, "image", true);

@@ -7,20 +7,6 @@
  * @version     0.0.5 alpha
  *
  * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
 */
 namespace DumbDog;
 
@@ -91,12 +77,20 @@ class DumbDog
             );
         }
 
-        let this->cfg = cfg;
+        if (!isset(cfg->dumb_dog_url)) {
+            let cfg->dumb_dog_url = "/dumb-dog";
+        }
 
+        if (!empty(cfg->dumb_dog_url)) {
+            let cfg->dumb_dog_url = "/dumb-dog";
+        }
+        
         if (!empty(migrations_folder)) {
             this->runMigrations(migrations_folder);
             return;
         }
+
+        let this->cfg = cfg;
 
         let this->template_engine = template_engine;
 
@@ -109,7 +103,7 @@ class DumbDog
         }
 
         try {
-            if (strpos(path, "/dumb-dog") !== false) {
+            if (strpos(path, this->cfg->dumb_dog_url) !== false) {
                 let backend = true;
                 this->backend(parsed["path"]);
             } elseif(path == "/robots.txt") {
@@ -131,8 +125,8 @@ class DumbDog
     private function backend(string path)
     {
         var location = "", url = "", route, output, code = 200, controller;
-        
-        let path = "/" . trim(str_replace("/dumb-dog", "", path), "/");
+
+        let path = "/" . trim(str_replace(this->cfg->dumb_dog_url, "", path), "/");
         if (path == "/") {
             let path = "/dashboard";
         }
@@ -268,8 +262,9 @@ class DumbDog
 
     private function frontend(string path)
     {
-        var database, data = [], page, settings, menu;         
+        var database, data = [], page, settings, menu, files;         
         let database = new Database(this->cfg);
+        let files = new Files(this->cfg);
         
         let settings = database->get("
             SELECT
@@ -293,9 +288,16 @@ class DumbDog
             let page = database->get("
                 SELECT
                     content.*,
-                    templates.file AS template
+                    templates.file AS template,
+                    banner.id AS banner_image_id,
+                    IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
+                    IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail 
                 FROM content 
                 JOIN templates ON templates.id=content.template_id 
+                LEFT JOIN files AS banner ON 
+                    banner.resource_id = content.id AND
+                    banner.resource='banner-image' AND
+                    banner.deleted_at IS NULL 
                 WHERE content.url=:url AND content.status='live' AND content.deleted_at IS NULL",
                 data
             );
@@ -307,6 +309,9 @@ class DumbDog
                 }
 
                 if (file_exists("./website/" . file)) {
+                    let data = ["parent_id": page->id];
+                    let page = this->pageExtra(database, page, files, data);
+
                     var obj;
                     let obj = new \stdClass();
                     let obj->header = [];
@@ -420,6 +425,108 @@ class DumbDog
         }
     }
 
+    private function pageExtra(database, page, files, data)
+    {
+        var item;
+
+        let page->children = database->all("
+            SELECT
+                content.*,
+                templates.file AS template,
+                banner.id AS banner_image_id,
+                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
+                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail 
+            FROM content 
+            JOIN templates ON templates.id=content.template_id 
+            LEFT JOIN files AS banner ON 
+                banner.resource_id = content.id AND
+                banner.resource='banner-image' AND
+                banner.deleted_at IS NULL
+            WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
+            ORDER BY content.sort ASC", 
+            data
+        );
+
+        let page->stacks = database->all("
+            SELECT
+                content_stacks.*,
+                templates.file AS template,
+                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
+            FROM content_stacks 
+            LEFT JOIN templates ON templates.id = content_stacks.template_id AND templates.deleted_at IS NULL 
+            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+            WHERE 
+                content_id='" . page->id . "' AND 
+                content_stacks.deleted_at IS NULL AND 
+                content_stack_id IS NULL
+            ORDER BY sort ASC");
+
+        for item in page->stacks {
+            let item->stacks = database->all("
+            SELECT
+                content_stacks.*,
+                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
+            FROM content_stacks 
+            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+            WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL 
+            ORDER BY sort ASC");                
+        }
+
+        switch (page->type) {
+            case "product":
+                let item = isset(_SESSION["currency"]) ? _SESSION["currency"] : "";
+                if (empty(item)) {
+                    let item = database->get("SELECT currencies.id FROM currencies WHERE is_default=1");
+                    if (!empty(item)) {
+                        let _SESSION["currency"] = item->id;
+                        let item = _SESSION["currency"];
+                    }
+                }
+                
+                let data = [];
+                let data["currency_id"] = item;
+                let item = database->get("
+                    SELECT
+                        products.stock,
+                        products.on_offer,
+                        product_prices.price,
+                        product_prices.offer_price,
+                        currencies.symbol,
+                        currencies.locale_code
+                    FROM products
+                    JOIN product_prices ON 
+                        product_prices.id = 
+                        (
+                            SELECT id
+                            FROM product_prices AS pp
+                            WHERE
+                                pp.product_id = products.id AND
+                                pp.deleted_at IS NULL AND
+                                pp.currency_id=:currencies.id 
+                            LIMIT 1
+                        )
+                    JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL 
+                    WHERE 
+                        products.content_id='" . page->id . "'",
+                    data
+                );
+                
+                if (item) {
+                    let page->stock = item->stock;
+                    let page->on_offer = item->on_offer;
+                    let page->price = item->price;
+                    let page->offer_price = item->offer_price;
+                    let page->symbol = item->symbol;
+                    let page->locale_code = item->locale_code;
+                }
+                break;
+        }
+
+        return page;
+    }
+
     private function offline()
     {
         var titles;
@@ -520,7 +627,7 @@ class DumbDog
     {
         if (!isset(_SESSION["dd"])) {
             if (path != "/the-pound") {
-                header("Location: /dumb-dog/the-pound");
+                header("Location: " . this->cfg->dumb_dog_url . "/the-pound");
                 die();
             }
         }

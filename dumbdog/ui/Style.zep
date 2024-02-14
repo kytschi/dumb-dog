@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Ui;
 
@@ -225,6 +211,11 @@ class Style
             color: var(--body-text-colour);
             word-wrap: break-word;
         }
+        .dd-stack {
+            padding: 40px 0 20px 0;
+            margin: 10px 0 0 0;
+            border-top: 1px solid var(--box-border-colour);
+        }
         #dd-login.dd-box {
             width: 50%;
         }
@@ -245,26 +236,34 @@ class Style
         .dd-box-footer a, .dd-box-footer button {
             margin-left: 20px;
         }
-        .dd-box-title {
+        .dd-box-title, .dd-stack-title {
             display: flex;
             flex-direction: row;
+            justify-content: space-between;
         }
-        .dd-box-title span {
+        .dd-box-title span, .dd-stack-title span {
+            width: 80%;
             float: left;
         }
-        .dd-box-title button {
+        .dd-box-title button, .dd-stack-title button {
+            float: right;
+            margin-left: 10px;
+        }
+        .dd-box-title div, .dd-stack-title div {
+            margin-left: auto;
             float: right;
         }
 
-        .dd-box-title, .dd-table th {
-            padding: 10px 15px 5px 15px;
-            border-bottom: 3px solid var(--box-title-border-colour);
-        }
         .dd-table td {
             padding: 15px 15px 0px 15px;
             border-bottom: 3px solid var(--box-title-border-colour);
         }
+        .dd-box-title {
+            display: inline-block;
+        }
         .dd-box-title, .dd-table th {
+            padding: 10px 15px 5px 15px;
+            border-bottom: 3px solid var(--box-title-border-colour);
             background-color: var(--box-title-background-colour);
             font-size: 38pt;
             line-height: 30pt;
@@ -1263,6 +1262,54 @@ class Style
         .dd-wfull {
             width: 100%;
         }
+
+        .dd-mb-0 {
+            margin-bottom: 0;
+        }
+
+        .dd-mb-1 {
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .dd-mb-2 {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .dd-mb-3 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .dd-mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .dd-mb-5 {
+            margin-bottom: 3rem !important;
+        }
+
+        .dd-mt-0 {
+            margin-top: 0 !important;
+        }
+        
+        .dd-mt-1 {
+            margin-top: 0.25rem !important;
+        }
+        
+        .dd-mt-2 {
+            margin-top: 0.5rem !important;
+        }
+        
+        .dd-mt-3 {
+            margin-top: 1rem !important;
+        }
+        
+        .dd-mt-4 {
+            margin-top: 1.5rem !important;
+        }
+        
+        .dd-mt-5 {
+            margin-top: 3rem !important;
+        }
         ";
     }
 
@@ -1465,6 +1512,9 @@ class Style
             margin-top: -61px;
             background-position: -512px -128px;
         }
+        .dd-text-right {
+            text-align: right !important;
+          }
         ";
     }
 
