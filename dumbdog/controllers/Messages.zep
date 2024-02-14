@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -34,6 +20,8 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Messages extends Controller
 {
+    public global_url = "/messages";
+
     public function delete(string path)
     {
         return this->triggerDelete(path, "messages");
@@ -63,14 +51,14 @@ class Messages extends Controller
         if (model->deleted_at) {
             let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/messages' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='" . this->global_url . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->status != "read") {
-            let html .= "<a href='/dumb-dog/messages/read/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-message-read' title='Mark as read'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url . "/read/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-message-read' title='Mark as read'>&nbsp;</a>";
         }
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/messages/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the message'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url . "/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the message'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/messages/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the message'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url . "/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the message'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -105,7 +93,7 @@ class Messages extends Controller
                         let html .= this->saveFailed("Failed to update the comment");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/comments/edit/" . model->id . "?saved=true");
+                        this->redirect(this->global_url . "/comments/edit/" . model->id . "?saved=true");
                     }
                 }
             }*/
@@ -158,7 +146,7 @@ class Messages extends Controller
         }
 
         let html .= "<div class='dd-page-toolbar'>
-            <a href='/dumb-dog/dashboard' class='dd-link dd-round dd-icon dd-icon-up' title='Back to the dashboard'>&nbsp;</a>
+            <a href='" . this->global_url . "/dashboard' class='dd-link dd-round dd-icon dd-icon-up' title='Back to the dashboard'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -172,7 +160,7 @@ class Messages extends Controller
                 "status"
             ],
             database->all("SELECT * FROM messages ORDER BY created_at DESC"),
-            "/dumb-dog/messages/view/"
+            this->global_url . "/view/"
         );
         return html;
     }
@@ -202,7 +190,7 @@ class Messages extends Controller
                         let html .= this->saveFailed("Failed to mark as read");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/messages/view/" . model->id);
+                        this->redirect(this->global_url . "/view/" . model->id);
                     }
                 } catch \Exception, err {
                     let html .= this->saveFailed(err->getMessage());
@@ -210,17 +198,23 @@ class Messages extends Controller
             }
         }
 
-        let html .= "<form method='post'><div class='dd-error dd-box dd-wfull'>
-            <div class='dd-box-title'>
-                <span>are your sure?</span>
+        let html .= "
+        <form method='post'>
+            <div class='dd-error dd-box dd-wfull'>
+                <div class='dd-box-title'>
+                    <span>are your sure?</span>
+                </div>
+                <div class='dd-box-body'>
+                    <p>I've read it already!</p>
+                </div>
+                <div class='dd-box-footer'>
+                    <a 
+                        href='" . this->global_url . "/view/" . model->id . "'
+                        class='dd-button-blank'>cancel</a>
+                    <button type='submit' name='read' class='dd-button'>read</button>
+                </div>
             </div>
-            <div class='dd-box-body'><p>I've read it already!</p>
-            </div>
-            <div class='dd-box-footer'>
-                 href='/dumb-dog/messages/view/" . model->id . "' class='dd-button-blank'>cancel</a>
-                <button type='submit' name='read' class='dd-button'>read</button>
-            </div>
-        </div></form>";
+        </form>";
 
         return html;
     }

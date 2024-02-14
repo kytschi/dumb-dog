@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -33,13 +19,15 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Templates extends Controller
 {
+    public global_url = "/templates";
+
     public function add(string path)
     {
         var titles, html;
         let titles = new Titles();
         let html = titles->page("Add a template", "add");
         let html .= "<div class='dd-page-toolbar'>
-            <a href='/dumb-dog/templates' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
+            <a href='" . this->global_url . "' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
@@ -105,7 +93,7 @@ class Templates extends Controller
                 </div>
             </div>
             <div class='dd-box-footer'>
-                <a href='/dumb-dog/templates' class='dd-link dd-button-blank'>cancel</a>
+                <a href='" . this->global_url . "' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -141,11 +129,11 @@ class Templates extends Controller
         if (model->deleted_at) {
             let html .= " dd-deleted";
         }
-        let html .= "'><a href='/dumb-dog/templates' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
+        let html .= "'><a href='" . this->global_url . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
         if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/templates/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the template'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url . "/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the template'>&nbsp;</a>";
         } else {
-            let html .= "<a href='/dumb-dog/templates/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the template'>&nbsp;</a>";
+            let html .= "<a href='" . this->global_url . "/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the template'>&nbsp;</a>";
         }
         let html .= "</div>";
 
@@ -183,7 +171,7 @@ class Templates extends Controller
                         let html .= this->saveFailed("Failed to update the template");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/templates/edit/" . model->id . "?saved=true");
+                        this->redirect(this->global_url . "/edit/" . model->id . "?saved=true");
                     }
                 }
             }
@@ -230,7 +218,7 @@ class Templates extends Controller
                 </div>
             </div>
             <div class='dd-box-footer'>
-                <a href='/dumb-dog/templates' class='dd-link dd-button-blank'>cancel</a>
+                <a href='" . this->global_url . "' class='dd-link dd-button-blank'>cancel</a>
                 <button type='submit' name='save' class='dd-button'>save</button>
             </div>
         </div></form>";
@@ -251,8 +239,8 @@ class Templates extends Controller
         }
 
         let html .= "<div class='dd-page-toolbar'>
-            <a href='/dumb-dog/pages' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='/dumb-dog/templates/add' class='dd-link dd-round dd-icon' title='Add a template'>&nbsp;</a>
+            <a href='" . this->cfg->dumb_dog_url . "/pages' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
+            <a href='" . this->global_url . "/add' class='dd-link dd-round dd-icon' title='Add a template'>&nbsp;</a>
         </div>";
 
         let database = new Database(this->cfg);
@@ -263,7 +251,7 @@ class Templates extends Controller
                 "default|bool"
             ],
             database->all("SELECT * FROM templates ORDER BY `default` DESC, name ASC"),
-            "/dumb-dog/templates"
+            this->global_url
         );
 
         return html;

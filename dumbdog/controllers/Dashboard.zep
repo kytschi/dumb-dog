@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -54,7 +40,10 @@ class Dashboard extends Controller
         }
 
         let html .= "<div class='dd-page-toolbar'>
-            <a href='/dumb-dog/messages' class='dd-link dd-round dd-icon dd-icon-messages' title='Messages'>&nbsp;</a>
+            <a 
+                href='" . this->cfg->dumb_dog_url  . "/messages' 
+                class='dd-link dd-round dd-icon dd-icon-messages'
+                title='Messages'>&nbsp;</a>
         </div>";
 
         var colours = [
@@ -291,13 +280,13 @@ class Dashboard extends Controller
                         }
                         let _SESSION["dd"] = model->id;
                         session_write_close();
-                        this->redirect("/dumb-dog/");
+                        this->redirect(this->cfg->dumb_dog_url);
                     }
                 }
             }
         }
 
-        let html .= "<form method='post' action='/dumb-dog" . path . "?back=" . urlencode(trim(path, "/")) . "'>
+        let html .= "<form method='post' action='" . this->cfg->dumb_dog_url . "/" . path . "?back=" . urlencode(trim(path, "/")) . "'>
             <div id='dd-login' class='dd-box'>
                 <div class='dd-box-body'>" .
                     input->text("Username", "name", "Please enter your username", true) .
@@ -321,6 +310,6 @@ class Dashboard extends Controller
         let _SESSION["dd"] = null;
         session_unset();
         session_destroy();
-        this->redirect("/dumb-dog/the-pound");
+        this->redirect(this->cfg->dumb_dog_url . "/the-pound");
     }
 }

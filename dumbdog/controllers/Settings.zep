@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -48,7 +34,7 @@ class Settings extends Controller
             throw new NotFoundException("Settings not found");
         }
 
-        let html = titles->page("Site settings");
+        let html = titles->page("Site settings", "settings");
         
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -87,7 +73,7 @@ class Settings extends Controller
                         let html .= this->saveFailed("Failed to update the settings");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/fremen/settings?saved=true");
+                        this->redirect("/dumbdog/settings?saved=true");
                     }
                 }
             }
@@ -99,25 +85,25 @@ class Settings extends Controller
 
         let html .= "
         <form method='post' enctype='multipart/form-data'>
-            <div class='tabs'>
-                <div class='tabs-content dd-col'>
+            <div class='dd-tabs dd-mt-4'>
+                <div class='dd-tabs-content dd-col'>
                     <div id='settings-tab' class='dd-row'>
                         <div class='dd-col-12'>
-                            <article class='dd-card'>
-                                <div class='dd-card-body'>" .
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
                                 input->toggle("Online", "status", false, (model->status=="online" ? 1 : 0)) . 
                                 input->text("name", "name", "make sure to set a name", true, model->name) .
                                 input->text("Domain", "domain", "Your domain, i.e. https://example.com", true, model->domain) .
                                 input->text("Contact email", "contact_email", "hello@example.com", false, model->contact_email) .
                                 input->text("Phone", "phone", "0123456789", false, model->phone) .
                             "   </div>
-                            </article>
+                            </div>
                         </div>
                     </div>
                     <div id='look-tab' class='dd-row'>
-                        <div class='col-12'>
-                            <article class='dd-card'>
-                                <div class='dd-card-body'>".
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>".
                                 input->selectDB(
                                     "Theme",
                                     "theme_id",
@@ -127,19 +113,19 @@ class Settings extends Controller
                                     model->theme_id
                                 ) .
                             "   </div>
-                            </article>
+                            </div>
                         </div>
                     </div>
                     <div id='seo-tab' class='dd-row'>
                         <div class='dd-col-12'>
-                            <article class='dd-card'>
-                                <div class='dd-card-body'>".
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>".
                                 input->text("Meta author", "meta_author", "Author of your site", false, model->meta_author) .
                                 input->text("Meta keywords", "meta_keywords", "Keywords to describe your site", false, model->meta_keywords) .
                                 input->textarea("Meta description", "meta_description", "A short description of your site", false, model->meta_description) .
                                 input->textarea("Robots txt", "robots_txt", "robots.txt configuration", false, model->robots_txt) .
                                 "</div>
-                            </article>
+                            </div>
                         </div>
                     </div>
                 </div>

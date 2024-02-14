@@ -6,21 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+  * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Ui;
 
@@ -46,7 +32,7 @@ class Menu
         <nav>
             <div class='container'>
                 <a class='navbar-brand'
-                    href='/dumb-dog'
+                    href='" . this->cfg->dumb_dog_url . "'
                     rel='tooltip' 
                     title='Go to the dashboard'
                     data-placement='bottom'>
@@ -83,7 +69,7 @@ class Menu
                             <path d='M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901'/>
                         </svg>
                     </a>
-                    <a href='/dumb-dog/messages'>
+                    <a href='" . this->cfg->dumb_dog_url . "/messages'>
                         <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
                             <path d='M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z'/>
                         </svg>";
@@ -98,7 +84,7 @@ class Menu
             echo "<span>" . total->total . "</span>";
         }
         echo "      </a>
-                    <a href='/dumb-dog/appointments'>
+                    <a href='" . this->cfg->dumb_dog_url . "/appointments'>
                         <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
                             <path d='M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M9.5 7h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5m3 0h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5M2 10.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5'/>
                         </svg>";
@@ -147,85 +133,85 @@ class Menu
                     </div>
                     <div class='dd-col-12'>
                         <div id='dd-apps'>
-                            <a href='/dumb-dog' title='Go to the dashboard' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "' title='Go to the dashboard' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-dashboard'></span>
                                     <label>Dashboard</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/pages' title='Managing the pages' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/pages' title='Managing the pages' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-pages'></span>
                                     <label>Pages</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/products' title='Managing the products' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/products' title='Managing the products' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-products'></span>
                                     <label>Products</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/menus' title='Managing the menus' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/menus' title='Managing the menus' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-menus'></span>
                                     <label>Menus</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/content-stacks' title='Managing the content stacks' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/content-stacks' title='Managing the content stacks' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-stacks'></span>
                                     <label>Content stacks</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/socials' title='Managing the social media links' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/socials' title='Managing the social media links' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-social-media'></span>
                                     <label>Social media</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/reviews' title='Managing the reviews' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/reviews' title='Managing the reviews' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-reviews'></span>
                                     <label>Reviews</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/appointments' title='Go to the appointments' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-appointments'></span>
                                     <label>Appointments</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/currencies' title='Manage the currencies' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/currencies' title='Manage the currencies' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-currencies'></span>
                                     <label>Currencies</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/taxes' title='Manage the taxes' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/taxes' title='Manage the taxes' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-taxes'></span>
                                     <label>Taxes</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/payment-gateways' title='Manage the payment gateways' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/payment-gateways' title='Manage the payment gateways' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-payment-gateways'></span>
                                     <label>Payment gateways</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/countries' title='Manage the countries' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/countries' title='Manage the countries' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-countries'></span>
                                     <label>Countries</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/settings' title='Site wide settings' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/settings' title='Site wide settings' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-settings'></span>
                                     <label>Settings</label>
                                 </div>
                             </a>
-                            <a href='/dumb-dog/logout' title='Log me out' class='dd-box'>
+                            <a href='" . this->cfg->dumb_dog_url . "/give-up' title='Log me out' class='dd-box'>
                                 <div class='dd-box-body'>
                                     <span class='dd-icon dd-icon-logout'></span>
                                     <label>Logout</label>
