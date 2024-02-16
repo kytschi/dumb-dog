@@ -16,6 +16,7 @@ use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Ui\Captcha;
+use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Input;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
@@ -24,26 +25,32 @@ class Dashboard extends Controller
 {
     public function index(string path)
     {
-        var titles, html, database, model, data = [];
+        var titles, html, model, data = [], icons;
         let titles = new Titles();
+        let icons = new Icons();
 
         let html = titles->page("Dashboard", "dashboard");
 
-        let database = new Database(this->cfg);
         let data["id"] = _SESSION["dd"];
-        let model = database->get("SELECT * FROM users WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM users WHERE id=:id", data);
         if (model) {
             let html .= "
-            <h2 class='dd-h2 dd-page-sub-title'>
-                <span>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</span>
-            </h2>";
+            <div class='dd-h2 dd-page-sub-title'>
+                <div>Whaddup " . (model->nickname ? model->nickname : model->name) . "!</div>
+            </div>";
         }
 
-        let html .= "<div class='dd-page-toolbar'>
+        let model = count(this->database->all("SELECT count(id) FROM messages WHERE status='unread' AND deleted_at IS NULL"));
+
+        let html .= "
+        <div class='dd-page-toolbar'>
             <a 
                 href='" . this->cfg->dumb_dog_url  . "/messages' 
-                class='dd-link dd-round dd-icon dd-icon-messages'
-                title='Messages'>&nbsp;</a>
+                class='dd-link dd-round'
+                title='Messages'>" .
+                icons->messages() .
+                (model ? "<span class='dd-icon-indicator'>" . model . "</span>" : "") .
+            "</a>
         </div>";
 
         var colours = [
@@ -82,7 +89,7 @@ class Dashboard extends Controller
                     strtolower(date("F", strtotime(date('Y') . "-" . data . "-01"))) . "_bot,";
             let value = value + 1;
         }
-        let data = database->all(rtrim(model, ','));
+        let data = this->database->all(rtrim(model, ','));
 
         let values = [];
         for titles in data {
@@ -138,7 +145,7 @@ class Dashboard extends Controller
 
         let model = "SELECT count(id) AS total, bot FROM stats WHERE bot IS NOT NULL ";
         let model .= "GROUP BY bot ORDER BY total DESC";
-        let data = database->all(model);
+        let data = this->database->all(model);
 
         //Height
         let model = count(data) * 30;
@@ -199,7 +206,7 @@ class Dashboard extends Controller
 
         let model = "SELECT count(id) AS total, referer FROM stats WHERE referer IS NOT NULL ";
         let model .= "GROUP BY referer ORDER BY total DESC";
-        let data = database->all(model);
+        let data = this->database->all(model);
 
         
         let html .= "
@@ -247,7 +254,7 @@ class Dashboard extends Controller
 
     public function login(string path)
     {
-        var titles, html, database, model, data = [], captcha, input;
+        var titles, html, model, data = [], captcha, input;
 
         let input = new Input(this->cfg);
         let titles = new Titles();
@@ -265,8 +272,7 @@ class Dashboard extends Controller
                     } else {
                         let data["name"] = _POST["name"];
                         
-                        let database = new Database(this->cfg);
-                        let model = database->get("SELECT * FROM users WHERE name=:name", data);
+                        let model = this->database->get("SELECT * FROM users WHERE name=:name", data);
                         if (empty(model)) {
                             throw new AccessException("hahaha, nice try! bad doggie!");
                         }

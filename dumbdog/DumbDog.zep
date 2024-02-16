@@ -17,8 +17,10 @@ use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 //use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
+use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
 use DumbDog\Controllers\Settings;
+use DumbDog\Controllers\Socials;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
@@ -84,6 +86,8 @@ class DumbDog
         if (!empty(cfg->dumb_dog_url)) {
             let cfg->dumb_dog_url = "/dumb-dog";
         }
+
+        let cfg->dumb_dog_url = rtrim(cfg->dumb_dog_url, "/");
         
         if (!empty(migrations_folder)) {
             this->runMigrations(migrations_folder);
@@ -91,7 +95,6 @@ class DumbDog
         }
 
         let this->cfg = cfg;
-
         let this->template_engine = template_engine;
 
         var parsed, path, backend = false;
@@ -156,9 +159,11 @@ class DumbDog
             "Dashboard": new Dashboard(this->cfg, this->libs),
             //"Events": new Events(this->cfg, this->libs),
             "Files": new Files(this->cfg, this->libs),
+            "Menus": new Menus(this->cfg, this->libs),
             "Messages": new Messages(this->cfg, this->libs),
             "Pages": new Content(this->cfg, this->libs),
             "Settings": new Settings(this->cfg, this->libs),
+            "Socials": new Socials(this->cfg, this->libs),
             "Templates": new Templates(this->cfg, this->libs),
             "Themes": new Themes(this->cfg, this->libs),
             "Users": new Users(this->cfg, this->libs)
@@ -405,7 +410,7 @@ class DumbDog
             <div class='dd-box'>
                 <div class='dd-box-title'>
                     <img src='data:image/png;base64," . head->favicon() . "'>
-                    <span>dang it!</span>
+                    <span class='dd-pt-2'>dang it!</span>
                 </div>
                 <div class='dd-box-body'>
                     <h1 class='dd-h1'>" . message . "</h1>

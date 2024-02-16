@@ -12,6 +12,7 @@ namespace DumbDog\Ui\Gfx;
 
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\Exception;
+use DumbDog\Ui\Gfx\Icons;
 
 class Input
 {
@@ -149,15 +150,16 @@ class Input
 
     public function inputPopup(string id, string name, string title, string label = "Create")
     {
+        var icons;
+        let icons = new Icons();
+
         return "<button
             type='button'
+            class='dd-button'
             data-inline-popup='#" . id . "'
-            titile='" . title . "'>
-            <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                <path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z'/>
-            </svg>
-            <span>" . label . "</span>
-        </button>
+            titile='" . title . "'>" . 
+            icons->add() .
+        "</button>
         <div 
             id='" . id . "' 
             class='dd-inline-popup'>
@@ -166,16 +168,13 @@ class Input
                 <div class='dd-inline-popup-buttons'>
                     <button 
                         type='button'
-                        data-inline-popup-close='#" . id . "'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                            <path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z'/>
-                        </svg>
-                    </button>
-                    <button type='submit'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                            <path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z'/>
-                        </svg>
-                    </button>
+                        class='dd-button'
+                        data-inline-popup-close='#" . id . "'>" . 
+                        icons->cancel() .
+                    "</button>
+                    <button type='submit' class='dd-button'>" . 
+                        icons->accept() .
+                    "</button>
                 </div>
             </div>
         </div>";
