@@ -11,6 +11,7 @@
 namespace DumbDog\Ui\Gfx;
 
 use DumbDog\Helper\Security;
+use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Titles;
 
 class Table
@@ -24,7 +25,8 @@ class Table
 
     public function build(array columns, array data, string url = "", string from = "")
     {
-        var titles, html = "";
+        var titles, html = "", icons;
+        let icons = new Icons();
         
         if (count(data)) {
             var iLoop, iLoop_head, key, splits, security, with_tags;
@@ -106,12 +108,12 @@ class Table
                         <td class='dd-tools'>
                             <a 
                                 href='" . url . "/edit/" . data[iLoop]->id . "'
-                                class='dd-link dd-mini dd-icon dd-icon-edit dd-float-end'
-                                title='Edit me'>&nbsp;</a>";
+                                class='dd-link dd-float-end'
+                                title='Edit me'>" . icons->edit() . "</a>";
                         if (property_exists(data[iLoop], "url")) {
                             let html .= "<a  href='" . data[iLoop]->url . "' target='_blank' 
-                                class='dd-link dd-mini dd-icon dd-icon-web dd-float-end'
-                                title='View me live'>&nbsp;</a>";
+                                class='dd-link dd-float-end'
+                                title='View me live'>" . icons->view() . "</a>";
                         }
                         let html .= "
                         </td>

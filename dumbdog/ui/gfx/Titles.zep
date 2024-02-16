@@ -10,6 +10,8 @@
 */
 namespace DumbDog\Ui\Gfx;
 
+use DumbDog\Ui\Gfx\Icons;
+
 class Titles
 {
     public function noResults()
@@ -22,13 +24,17 @@ class Titles
         </div>";
     }
 
-    public function page(string title, string image = "")
+    public function page(string title, string icon = "")
     {
+        var icons;
+        let icons = new Icons();
+
         return "
-        <h1 class='dd-h1 dd-page-title'>
-            <span" . (image ? " class='dd-icon dd-icon-" . image . "'" : "") . ">" .
-                title .
-            "</span>
-        </h1>";
+        <div class='dd-h1 dd-page-title'>
+            <div>" .
+                (icon ? icons->{icon}() : "") . 
+                "<span>" . title . "</span>
+            </div>
+        </div>";
     }
 }

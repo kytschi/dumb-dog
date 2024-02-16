@@ -419,70 +419,13 @@ class Content extends Controller
         }
 
         if (this->back_url) {
-            let html .= "<div class='dd-box'>
-                <div class='dd-box-body'>
-                    <a href='" . this->back_url . "' title='Go back' class='dd-button'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                            <path fill-rule='evenodd' d='M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z'/>
-                        </svg>
-                        <span>Back</span>
-                    </a>
-                </div>
-            </div>";
+            let html .= this->renderBack();
         } else {
-            let html .= "
-            <div class='dd-page-toolbar'>" . 
-                button->generic(
-                    this->cfg->dumb_dog_url . "/" . this->type . "-categories",
-                    "categories",
-                    "categories",
-                    "Click to access the " . str_replace("-", " ", this->type) . " categories"
-                ) .
-                button->add(this->global_url . "/add") .
-            "</div>";
+            let html .= this->renderToolbar(button);
         }
 
-        let html .= "
-        <form 
-            action='" . this->global_url . "'
-            method='post'
-            class='dd-box'>
-            <div class='dd-box-body'>
-                <div class='dd-row'>
-                    <div class='dd-col-8'>
-                        <div class='dd-input-group'>
-                            <input 
-                                class='dd-form-control'
-                                name='q'
-                                type='text' 
-                                placeholder='Search the " . (ucwords(this->type). "s") . "'
-                                value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
-                        </div>
-                    </div>
-                    <div class='dd-col-2'>
-                        <button 
-                            type='submit'
-                            name='search' 
-                            class='dd-float-end dd-button' 
-                            value='search'>
-                            search
-                        </button>";
-
-                    if (isset(_POST["q"])) {
-                        let html .= "
-                        <a 
-                            href='" . this->global_url . "' 
-                            class='dd-button dd-float-end'>
-                            clear
-                        </a>";
-                    }
-            
-        let html .= "   
-                    </div>
-                </div>
-                
-            </div>
-        </form>" .
+        let html .= 
+            this->searchBox() . 
             this->tags(path, "content") .
             this->renderList(path);
         return html;
@@ -552,7 +495,6 @@ class Content extends Controller
                             </div>
                         </div>
                     </div>
-                        
                     <div id='nav-tab' class='dd-row'>
                         <div class='dd-col-lg-6 dd-col-md-12'>
                             <div class='dd-row'>
@@ -587,7 +529,6 @@ class Content extends Controller
                             </div>
                         </div>
                     </div>
-
                     <div id='look-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
@@ -611,7 +552,7 @@ class Content extends Controller
                 <ul class='dd-col dd-nav-tabs' role='tablist'>
                     <li class='dd-nav-item' role='presentation'>
                         <button
-                            class='dd-nav-link'
+                            class='dd-button'
                             type='button'
                             role='tab'
                             data-tab='#content-tab'
@@ -621,16 +562,16 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#nav-tab'
-                            class='dd-nav-link'
+                            class='dd-button'
                             type='button'
                             role='tab'
                             aria-controls='nav-tab' 
-                            aria-selected='true'>Navigation &amp; SEO</button>
+                            aria-selected='true'>Navigation and SEO</button>
                     </li>
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#look-tab'
-                            class='dd-nav-link'
+                            class='dd-button'
                             type='button'
                             role='tab'
                             aria-controls='look-tab' 
@@ -642,7 +583,7 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#stack-tab'
-                            class='dd-nav-link'
+                            class='dd-button'
                             type='button'
                             role='tab'
                             aria-controls='stack-tab' 
@@ -651,7 +592,7 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#old-urls-tab'
-                            class='dd-nav-link'
+                            class='dd-button'
                             type='button'
                             role='tab'
                             aria-controls='old-urls-tab' 
@@ -661,12 +602,22 @@ class Content extends Controller
 
         let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
                     <li class='dd-nav-item' role='presentation'>" . 
-                        button->back(this->global_url) .   
+                        button->generic(
+                            this->global_url,
+                            "back",
+                            "back",
+                            "Go back to the list"
+                        ) .
                     "</li>";
         if (mode == "edit") {
             let html .= "
                 <li class='dd-nav-item' role='presentation'>" . 
-                    button->add(this->global_url . "/add") .   
+                    button->generic(
+                        this->global_url . "/add",
+                        "add",
+                        "add",
+                        "Create a new " . str_replace("-", " ", this->type)
+                    ) .
                 "</li>
                 <li class='dd-nav-item' role='presentation'>" .
                     button->view(model->url) .
@@ -693,6 +644,21 @@ class Content extends Controller
         return html;
     }
 
+    public function renderBack()
+    {
+        return "
+        <div class='dd-box'>
+            <div class='dd-box-body'>
+                <a href='" . this->back_url . "' title='Go back' class='dd-button'>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
+                        <path fill-rule='evenodd' d='M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z'/>
+                    </svg>
+                    <span>Back</span>
+                </a>
+            </div>
+        </div>";
+    }
+
     public function renderExtra(model)
     {
         return "";
@@ -705,11 +671,10 @@ class Content extends Controller
 
     public function renderList(string path)
     {
-        var data, query, table;
+        var data = [], query, table;
 
         let table = new Table(this->cfg);
 
-        let data = [];
         let query = "
             SELECT main_page.*,
             IFNULL(templates.name, 'No template') AS template, 
@@ -850,6 +815,74 @@ class Content extends Controller
         let html .="
             </div>
         </div>";
+
+        return html;
+    }
+
+    public function renderToolbar(button)
+    {
+        return "
+        <div class='dd-page-toolbar'>" . 
+            button->round(
+                this->cfg->dumb_dog_url . "/" . this->type . "-categories",
+                "categories",
+                "categories",
+                "Click to access the " . str_replace("-", " ", this->type) . " categories"
+            ) .
+            button->round(
+                this->global_url . "/add",
+                "add",
+                "add",
+                "Add a new " . str_replace("-", " ", this->type)
+            ) .
+        "</div>";
+    }
+
+    public function searchBox()
+    {
+        var html;
+
+        let html = "
+        <form 
+            action='" . this->global_url . "'
+            method='post'
+            class='dd-box'>
+            <div class='dd-box-body'>
+                <div class='dd-row'>
+                    <div class='dd-col-8'>
+                        <div class='dd-input-group'>
+                            <input 
+                                class='dd-form-control'
+                                name='q'
+                                type='text' 
+                                placeholder='Search the " . (ucwords(this->type). "s") . "'
+                                value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
+                        </div>
+                    </div>
+                    <div class='dd-col-2'>
+                        <button 
+                            type='submit'
+                            name='search' 
+                            class='dd-float-end dd-button' 
+                            value='search'>
+                            search
+                        </button>";
+
+                    if (isset(_POST["q"])) {
+                        let html .= "
+                        <a 
+                            href='" . this->global_url . "' 
+                            class='dd-button dd-float-end'>
+                            clear
+                        </a>";
+                    }
+            
+        let html .= "   
+                    </div>
+                </div>
+                
+            </div>
+        </form>" ;
 
         return html;
     }
