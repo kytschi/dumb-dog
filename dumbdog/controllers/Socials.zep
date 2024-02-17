@@ -318,11 +318,11 @@ class Socials extends Content
         );
     }
 
-    public function renderToolbar(button)
+    public function renderToolbar()
     {
         return "
         <div class='dd-page-toolbar'>" . 
-            button->add(this->global_url . "/add") .
+            this->buttons->add(this->global_url . "/add") .
         "</div>";
     }
 }

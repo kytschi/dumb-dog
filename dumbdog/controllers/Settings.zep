@@ -19,14 +19,11 @@ use DumbDog\Ui\Gfx\Input;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
 
-class Settings extends Controller
+class Settings extends Content
 {
     public function index(string path)
     {
-        var titles, html, model, data = [], input, button, status = false;
-        let input = new Input(this->cfg);
-        let button = new Button();
-        let titles = new Titles();
+        var html, model, data = [], status = false;
 
         let model = this->database->get("SELECT * FROM settings LIMIT 1");
 
@@ -34,7 +31,7 @@ class Settings extends Controller
             throw new NotFoundException("Settings not found");
         }
 
-        let html = titles->page("Site settings", "settings");
+        let html = this->titles->page("Site settings", "settings");
         
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -83,6 +80,8 @@ class Settings extends Controller
             let html .= this->saveSuccess("Settings have been updated");
         }
 
+        let html .= this->renderToolbar();
+
         let html .= "
         <form method='post' enctype='multipart/form-data'>
             <div class='dd-tabs dd-mt-4'>
@@ -91,11 +90,11 @@ class Settings extends Controller
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                input->toggle("Online", "status", false, (model->status=="online" ? 1 : 0)) . 
-                                input->text("name", "name", "make sure to set a name", true, model->name) .
-                                input->text("Domain", "domain", "Your domain, i.e. https://example.com", true, model->domain) .
-                                input->text("Contact email", "contact_email", "hello@example.com", false, model->contact_email) .
-                                input->text("Phone", "phone", "0123456789", false, model->phone) .
+                                this->inputs->toggle("Online", "status", false, (model->status=="online" ? 1 : 0)) . 
+                                this->inputs->text("name", "name", "make sure to set a name", true, model->name) .
+                                this->inputs->text("Domain", "domain", "Your domain, i.e. https://example.com", true, model->domain) .
+                                this->inputs->text("Contact email", "contact_email", "hello@example.com", false, model->contact_email) .
+                                this->inputs->text("Phone", "phone", "0123456789", false, model->phone) .
                             "   </div>
                             </div>
                         </div>
@@ -104,7 +103,7 @@ class Settings extends Controller
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>".
-                                input->selectDB(
+                                this->inputs->selectDB(
                                     "Theme",
                                     "theme_id",
                                     "Your current theme",
@@ -120,17 +119,17 @@ class Settings extends Controller
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>".
-                                input->text("Meta author", "meta_author", "Author of your site", false, model->meta_author) .
-                                input->text("Meta keywords", "meta_keywords", "Keywords to describe your site", false, model->meta_keywords) .
-                                input->textarea("Meta description", "meta_description", "A short description of your site", false, model->meta_description) .
-                                input->textarea("Robots txt", "robots_txt", "robots.txt configuration", false, model->robots_txt) .
+                                this->inputs->text("Meta author", "meta_author", "Author of your site", false, model->meta_author) .
+                                this->inputs->text("Meta keywords", "meta_keywords", "Keywords to describe your site", false, model->meta_keywords) .
+                                this->inputs->textarea("Meta description", "meta_description", "A short description of your site", false, model->meta_description) .
+                                this->inputs->textarea("Robots txt", "robots_txt", "robots.txt configuration", false, model->robots_txt) .
                                 "</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-dd-nav-item' role='presentation'>
+                    <li class='dd-nav-item' role='presentation'>
                         <button
                             class='dd-nav-link'
                             type='button'
@@ -146,7 +145,7 @@ class Settings extends Controller
                             role='tab'
                             data-tab='#look-tab'
                             aria-controls='look-tab' 
-                            aria-selected='true'>Look &amp; feel</button>
+                            aria-selected='true'>Look and feel</button>
                     </li>
                     <li class='dd-nav-item' role='presentation'>
                         <button
@@ -159,12 +158,25 @@ class Settings extends Controller
                     </li>
                     <li class='dd-nav-item' role='presentation'><hr/></li>
                     <li class='dd-nav-item' role='presentation'>". 
-                        button->save() .   
+                        this->buttons->save() .   
                     "</li>
                 </ul>
             </div>
         </form>";
 
         return html;
+    }
+
+    public function renderToolbar()
+    {
+        return "
+        <div class='dd-page-toolbar'>" . 
+            this->buttons->round(
+                this->cfg->dumb_dog_url . "/countries",
+                "countries",
+                "countries",
+                "Manage the countries"
+            ) .
+        "</div>";
     }
 }

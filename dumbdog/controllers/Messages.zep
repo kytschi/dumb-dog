@@ -6,115 +6,114 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Controller;
-use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Helper\Security;
 use DumbDog\Ui\Gfx\Table;
-use DumbDog\Ui\Gfx\Titles;
 
-class Messages extends Controller
+class Messages extends Content
 {
     public global_url = "/messages";
+    public list = [
+        "created_at|date",
+        "subject|decrypt",
+        "from_name|decrypt",
+        "status"
+    ];
+    public type = "message";
 
     public function delete(string path)
     {
         return this->triggerDelete(path, "messages");
     }
 
-    public function view(string path)
+    public function edit(string path)
     {
-        var titles, html, database, model, data = [], security;
+        var html, model, data = [], security;
         let security = new Security(this->cfg);
-        let titles = new Titles();
 
-        let database = new Database(this->cfg);
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM messages WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM messages WHERE id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Message not found");
         }
 
-        let html = titles->page("Viewing the message", "message-view");
+        let html = this->titles->page("Viewing the message", "messages");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='dd-page-toolbar";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'><a href='" . this->global_url . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
-        if (model->status != "read") {
-            let html .= "<a href='" . this->global_url . "/read/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-message-read' title='Mark as read'>&nbsp;</a>";
-        }
-        if (model->deleted_at) {
-            let html .= "<a href='" . this->global_url . "/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the message'>&nbsp;</a>";
-        } else {
-            let html .= "<a href='" . this->global_url . "/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the message'>&nbsp;</a>";
-        }
-        let html .= "</div>";
+        let html .= "
+        <form method='post' enctype='multipart/form-data'>
+            <div class='dd-tabs dd-mt-4'>
+                <div class='dd-tabs-content dd-col'>
+                    <div id='user-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>
+                                    <div class='dd-input-group'>
+                                        <label>From</label>
+                                        <span class='dd-form-control'>" .
+                                            security->decrypt(model->from_name) .
+                                            (security->decrypt(model->from_company) ? " @" . security->decrypt(model->from_company) : "") . 
+                                            "&nbsp;&lt;<a href='mailto:" . security->decrypt(model->from_email) . "'>" . security->decrypt(model->from_email) . "</a>" .
+                                            (security->decrypt(model->from_number) ? " | <a href='tel:" . security->decrypt(model->from_number) . "'>". security->decrypt(model->from_number) . "</a>" : "") . 
+                                            "&gt;" . 
+                                        "</span>
+                                    </div>
+                                    <div class='dd-input-group'>
+                                        <label>Message</label>
+                                        <span class='dd-form-control'>" .
+                                            security->decrypt(model->message) .
+                                        "</span>
+                                    </div>                               
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
+                    <li class='dd-dd-nav-item' role='presentation'>
+                        <button
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            data-tab='#user-tab'
+                            aria-controls='user-tab' 
+                            aria-selected='true'>Message</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'><hr/></li>";
 
-        if (!empty(_POST)) {
-            /*if (isset(_POST["save"])) {
-                var database, status = false;
+        if (this->cfg->apps->crm) {
+            let html .= "<li class='dd-nav-item' role='presentation'>". 
+                        this->buttons->generic(
+                            this->cfg->dumb_dog_url . "/messages/convert-to-lead/" . model->id,
+                            "Convert to lead",
+                            "leads",
+                            "Convert to a lead") .   
+                    "</li>";
+        }           
 
-                if (!this->validate(_POST, ["message"])) {
-                    let html .= this->missingRequired();
-                } else {
-                    let data["message"] = _POST["message"];
-                    let data["updated_by"] = this->getUserId();
+        let html .= "
+                </ul>
+            </div>
+        </form>";
 
-                    if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
-                        let status = database->execute(
-                            "UPDATE messages SET 
-                                name=:name, 
-                                page_id=:page_id,
-                                user_id=:user_id,
-                                content=:content, 
-                                updated_at=NOW(), 
-                                updated_by=:updated_by
-                            WHERE id=:id",
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
-
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to update the comment");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect(this->global_url . "/comments/edit/" . model->id . "?saved=true");
-                    }
-                }
-            }*/
-        }
-
-        if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("I've updated the message");
-        }
-
-        let html .= "<div class='dd-box dd-wfull";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'>
+        /*let html .= "'>
             <div class='dd-box-title'>
                 <span>the message</span>
             </div>
             <div class='dd-box-body'>
                 <div class='dd-input-group'>
                     <span>from</span>
-                    <input value='" . security->decrypt(model->from_name) . "' readonly='readonly'>
+                    <input value='" .  . "' readonly='readonly'>
                 </div>
                 <div class='dd-input-group'>
                     <span>email</span>
@@ -129,62 +128,57 @@ class Messages extends Controller
                     <textarea readonly='readonly'>" . security->decrypt(model->message) . "</textarea>
                 </div>
             </div>
-        </div>";
+        </div>";*/
 
         return html;
     }
 
     public function index(string path)
     {
-        var titles, database, html, table;
-        let titles = new Titles();
-        
-        let html = titles->page("Messages", "messages");
+        var html;        
+        let html = this->titles->page("Messages", "messages");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the message");
         }
 
-        let html .= "<div class='dd-page-toolbar'>
-            <a href='" . this->global_url . "/dashboard' class='dd-link dd-round dd-icon dd-icon-up' title='Back to the dashboard'>&nbsp;</a>
-        </div>";
+        let html .= this->renderToolbar();
 
-        let database = new Database(this->cfg);
-
-        let table = new Table(this->cfg);
-        let html = html . table->build(
-            [
-                "created_at|date",
-                "subject",
-                "from_name|decrypt",
-                "status"
-            ],
-            database->all("SELECT * FROM messages ORDER BY created_at DESC"),
-            this->global_url . "/view/"
-        );
+        let html .= 
+            this->searchBox() . 
+            this->tags(path, "messages") .
+            this->renderList(path);
+        
         return html;
     }
 
     public function read(string path)
     {
-        var titles, html, database, data = [], model;
-        let titles = new Titles();
+        var html, data = [], model;
 
-        let database = new Database(this->cfg);
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM messages WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM messages WHERE id=:id", data);
         if (empty(model)) {
             throw new NotFoundException("Message not found");
         }
 
-        let html = titles->page("Mark the message as read", "message-read");
+        let html = this->titles->page("Mark the message as read", "messages");
 
         if (!empty(_POST)) {
             if (isset(_POST["read"])) {
                 var status = false, err;
                 try {
-                    let data["updated_by"] = this->getUserId();
-                    let status = database->execute("UPDATE messages SET status='read', updated_at=NOW(), updated_by=:updated_by WHERE id=:id", data);
+                    let data["updated_by"] = this->database->getUserId();
+                    let status = this->database->execute(
+                        "UPDATE
+                            messages
+                        SET 
+                            status='read',
+                            updated_at=NOW(),
+                            updated_by=:updated_by 
+                        WHERE id=:id",
+                        data
+                    );
                     
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to mark as read");
@@ -223,4 +217,46 @@ class Messages extends Controller
     {
         return this->triggerRecover(path, "messages");
     }
+
+    public function renderList(string path)
+    {
+        var data = [], query, table;
+
+        let table = new Table(this->cfg);
+
+        let query = "
+            SELECT messages.* 
+            FROM messages
+            WHERE messages.id IS NOT NULL";
+        if (isset(_POST["q"])) {
+            let query .= " AND messages.subject LIKE :query";
+            let data["query"] = "%" . _POST["q"] . "%";
+        }
+        if (isset(_GET["tag"])) {
+            let query .= " AND messages.tags like :tag";
+            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        }
+        let query .= " ORDER BY messages.created_at";
+
+        return table->build(
+            this->list,
+            this->database->all(query, data),
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
+        );
+    }
+
+    public function renderToolbar()
+    {
+        return "
+        <div class='dd-page-toolbar'>" . 
+            this->buttons->round(
+                this->global_url . "/add",
+                "add",
+                "add",
+                "Add a message"
+            ) .
+        "</div>";
+    }
+
+    
 }

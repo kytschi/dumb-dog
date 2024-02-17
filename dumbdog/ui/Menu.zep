@@ -125,107 +125,125 @@ class Menu
     
         echo "<div id='dd-quick-menu' style='display: none;'>
             <div class='dd-container'>
-                <div class='dd-row'>
-                    <div id='dd-quick-menu-header' class='dd-col-12'>
-                        <button type='button' onclick='showQuickMenu()' class='dd-float-end dd-button-blank'>" .
-                            icons->cancel() .
-                        "</button>
+                <div id='dd-quick-menu-header'>
+                    <div>
+                        <input class='form-control' name='search'>
                     </div>
-                    <div class='dd-col-12'>
-                        <div id='dd-apps'>
-                            <a href='" . this->cfg->dumb_dog_url . "' title='Go to the dashboard' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->dashboard() .
-                                    "<label>Dashboard</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/messages' title='Manage the messages' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->messages() .
-                                    "<label>Messages</label>" . 
-                                    (messages ? "<span class='dd-icon-indicator'>" . messages . "</span>" : "") .
-                                "</div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/pages' title='Managing the pages' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->pages() .
-                                    "<label>Pages</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/products' title='Managing the products' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->products() .
-                                    "<label>Products</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/menus' title='Managing the menus' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->menus() .
-                                    "<label>Menus</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/content-stacks' title='Managing the content stacks' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->contentStacks() .
-                                    "<label>Content stacks</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/socials' title='Managing the social media links' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->socials() .
-                                    "<label>Social media</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/reviews' title='Managing the reviews' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->reviews() .
-                                    "<label>Reviews</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->appointments() .
-                                    "<label>Appointments</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/currencies' title='Manage the currencies' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->currencies() .
-                                    "<label>Currencies</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/taxes' title='Manage the taxes' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->taxes() .
-                                    "<label>Taxes</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/payment-gateways' title='Manage the payment gateways' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->paymentGateways() .
-                                    "<label>Payment gateways</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/countries' title='Manage the countries' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->countries() .
-                                    "<label>Countries</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/settings' title='Site wide settings' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->settings() .
-                                    "<label>Settings</label>
-                                </div>
-                            </a>
-                            <a href='" . this->cfg->dumb_dog_url . "/give-up' title='Log me out' class='dd-box'>
-                                <div class='dd-box-body'>" . 
-                                    icons->logout() .
-                                    "<label>Logout</label>
-                                </div>
-                            </a>
+                    <button type='button' onclick='showQuickMenu()' class='dd-float-end dd-button-blank'>" .
+                        icons->cancel() .
+                    "</button>
+                </div>
+                <div id='dd-apps'>
+                    <a href='" . this->cfg->dumb_dog_url . "' title='Go to the dashboard' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->dashboard() .
+                            "<label>Dashboard</label>
                         </div>
-                    </div>
+                    </a>";
+                if (this->cfg->apps->crm || this->cfg->apps->cms) {
+                    echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/messages' title='Manage the messages' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->messages() .
+                            "<label>Messages</label>" . 
+                            (messages ? "<span class='dd-icon-indicator'>" . messages . "</span>" : "") .
+                        "</div>
+                    </a>";
+                }
+                if (this->cfg->apps->cms) {
+                    echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/pages' title='Managing the pages' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->pages() .
+                            "<label>Pages</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/menus' title='Managing the menus' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->menus() .
+                            "<label>Menus</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/content-stacks' title='Managing the content stacks' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->contentStacks() .
+                            "<label>Content stacks</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/socials' title='Managing the social media links' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->socials() .
+                            "<label>Social media</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/reviews' title='Managing the reviews' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->reviews() .
+                            "<label>Reviews</label>
+                        </div>
+                    </a>";
+                }
+                if (this->cfg->apps->commerce) {
+                    echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/products' title='Managing the products' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->products() .
+                            "<label>Products</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/currencies' title='Manage the currencies' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->currencies() .
+                            "<label>Currencies</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/taxes' title='Manage the taxes' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->taxes() .
+                            "<label>Taxes</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/payment-gateways' title='Manage the payment gateways' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->paymentGateways() .
+                            "<label>Payment gateways</label>
+                        </div>
+                    </a>";
+                }
+                if (this->cfg->apps->crm) {
+                    echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/leads' title='Manage the leads' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->leads() .
+                            "<label>Leads</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->appointments() .
+                            "<label>Appointments</label>
+                        </div>
+                    </a>";
+                }
+                echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/settings' title='Site wide settings' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->settings() .
+                            "<label>Settings</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/users' title='System users' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->users() .
+                            "<label>Users</label>
+                        </div>
+                    </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/give-up' title='Log me out' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->logout() .
+                            "<label>Logout</label>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>

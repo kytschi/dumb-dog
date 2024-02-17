@@ -29,8 +29,14 @@ class Controller
         let this->cfg = cfg;
         let this->libs = libs;
         let this->database = new Database(this->cfg);
-
         let this->global_url = this->cfg->dumb_dog_url . this->global_url;
+
+        this->__globals();
+    }
+
+    public function __globals()
+    {
+        //Nothing.
     }
 
     public function cleanContent(string content)
@@ -122,55 +128,15 @@ class Controller
         return this->database->getUserId();
     }
 
-    public function isTagify(string tags)
-    {
-        if (strpos(tags, "[{") !== false) {
-            return tags;
-        }
-        return "";
-    }
-
     public function missingRequired(string message = "Missing required fields")
     {
-        return "<div class='dd-error dd-box dd-wfull'>
+        return "<div class='dd-error dd-box'>
         <div class='dd-box-title'>
             <span>double check your inputs</span>
         </div>
         <div class='dd-box-body'>
             <p>" . message . "</p>
         </div></div>";
-    }
-
-    /**
-     * Generate a random string.
-     */
-    public function randomString(int length = 64)
-    {
-        var keyspace = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        /*
-         * If the length is less than one, throw an error.
-         */
-        if (length < 1) {
-            throw new \RangeException("Length must be a positive integer");
-        }
-
-        /*
-         * Define the pieces array.
-         */
-        var pieces = [], iLoop;
-
-        /*
-         * Loop through and build pieces.
-         */
-        while (iLoop < length) {
-            let pieces[] = substr(keyspace, random_int(0, 53), 1);
-            let iLoop = iLoop + 1;
-        }
-
-        /*
-         * Implode the pieces and return the random string.
-         */
-        return implode("", pieces);
     }
 
     public function redirect(string url)
@@ -181,7 +147,7 @@ class Controller
 
     public function saveFailed(string message)
     {
-        return "<div class='dd-error dd-box dd-wfull'>
+        return "<div class='dd-error dd-box'>
         <div class='dd-box-title'>
             <span>save error</span>
         </div>
@@ -192,7 +158,7 @@ class Controller
 
     public function saveSuccess(string message)
     {
-        return "<div class='success dd-box dd-wfull'>
+        return "<div class='success dd-box'>
         <div class='dd-box-title'>
             <span>save all done</span>
         </div>
