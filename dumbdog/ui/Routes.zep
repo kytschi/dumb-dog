@@ -192,9 +192,9 @@ class Routes
             "index",
             "files"
         ],
-        "/messages/view": [
+        "/messages/edit": [
             "Messages",
-            "view",
+            "edit",
             "view the message"
         ],
         "/messages/read": [

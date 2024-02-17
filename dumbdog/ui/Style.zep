@@ -196,7 +196,7 @@ class Style
         .dd-box-title, .dd-stack-title {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
+            /*justify-content: space-between;*/
         }
         .dd-box-title span, .dd-stack-title span {
             width: 80%;
@@ -284,20 +284,24 @@ class Style
         .dd-link:hover {
             text-decoration: underline;
         }
-        .dd-default-item, .dd-button-blank, .dd-button  {
+        .dd-button-blank, .dd-button, .dd-nav-link {
             color: var(--button-text-colour);
             font-family: 'subheading', Helvetica, sans-serif;
             font-size: 32pt;
             line-height: 32pt;
+            background-color: var(--button-background-colour);
+            border: 3px solid var(--button-border-colour);
         }
         .dd-default-item {
+            color: var(--button-text-colour);
+            font-family: 'subheading', Helvetica, sans-serif;
+            font-size: 32pt;
+            line-height: 32pt;
             vertical-align: middle;
             padding: 30px 0px 0px 0px;
         }
-        .dd-button, .dd-button-blank {
+        .dd-button, .dd-button-blank, .dd-nav-link {
             padding: 5px 15px;
-            background-color: var(--button-background-colour);
-            border: 3px solid var(--button-border-colour);
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
@@ -520,16 +524,14 @@ class Style
             font-size: 38pt;
             line-height: 38pt;
         }
-        .dd-input-group input,
-        .dd-input-group textarea,
-        .dd-input-group select,
         .trumbowyg-editor,
         td,
         .dd-form-control {
             font-family: Helvetica, sans-serif !important;
             font-size: 14pt !important;
         }
-        .dd-input-group input, .dd-input-group textarea, .dd-input-group select, .dd-form-input {
+        .dd-form-control {
+            border:1px solid var(--input-border-colour);
             padding: 10px;
         }
         .dd-captcha-img img {
@@ -587,7 +589,7 @@ class Style
         .trumbowyg-dropdown-formatting button {
             line-height: 35px !important;
         }
-        .dd-input-group input:focus, .dd-input-group textarea:focus, .dd-input-group select:focus {
+        .dd-form-control:focus {
             border:1px solid var(--input-border-focus-colour);
             outline: none;
             box-shadow: none;
@@ -598,24 +600,19 @@ class Style
             width: 100%;
             margin-bottom: 20px;
         }
-
         #dd-search-box table {
             width: 100%;
             background-color: #fff;
         }
-
         #dd-search-box input {
             width: calc(100% - 23px);
         }
-
         #dd-search-box table td {
             border: 0 !important;
         }
-
         #dd-search-box table tfoot td {
             text-align: right;
         }
-
         #dd-search-box .dd-button {
             margin-left: 10px;
         }
@@ -673,7 +670,6 @@ class Style
             display: none;
             z-index: 1025;
         }
-
         .dd-inline-popup-body {                
             display: flex;
             border: 1px solid var(--input-border);
@@ -681,22 +677,18 @@ class Style
             padding: .375rem .75rem;
             background-color: var(--popup-background-color);
         }
-
         .dd-inline-popup input, .inline-popup span {
             width: calc(100% - 100px - 1.5rem) !important;
         }
-
         .dd-inline-popup span {
             display: block;
             padding-top: 5px;
         }
-
         .dd-inline-popup-buttons {
             width: 100px;
             margin-left: auto;
             text-align: right;
         }
-
         .dd-image-preview img {
             max-width: 100%;
         }
@@ -1293,6 +1285,8 @@ class Style
             -webkit-flex-wrap: wrap;
             flex-wrap: wrap;
             gap: 50px;
+            overflow-y: scroll;
+            padding-top: 20px;
         }
 
         #dd-quick-menu #dd-apps a {
@@ -1315,17 +1309,16 @@ class Style
             padding: 0 !important;
             margin: 0 !important;
         }
-
         #dd-quick-menu #dd-apps a span {
             padding-left: 50%;
         }
-
         #dd-quick-menu #dd-apps a label {
             display: block;
             width: 100%;
         }
-
         #dd-quick-menu-header {
+            position: sticky;
+            top: 10px;
             padding-top: 20px;
         }
         #dd-quick-menu-header svg {

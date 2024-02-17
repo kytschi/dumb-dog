@@ -17,6 +17,7 @@ use DumbDog\Controllers\Files;
 use DumbDog\Controllers\PaymentGateways;
 use DumbDog\Controllers\Products;
 use DumbDog\Exceptions\Exception;
+use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Security;
 use DumbDog\Ui\Captcha;
 
@@ -121,14 +122,35 @@ class DumbDog
         var security, status, err;
         let security = new Security(this->cfg);        
 
-        let data["subject"] = security->encrypt(data["subject"]);
-        let data["from_email"] = security->encrypt(data["from_email"]);
-        let data["from_name"] = security->encrypt(data["from_name"]);
-        let data["from_number"] = security->encrypt(data["from_number"]);
+        if (!isset(data["subject"])) {
+            let data["subject"] = "Web form contact";
+        } elseif (empty(data["subject"])) {
+            let data["subject"] = "Web form contact";
+        }
+
+        if (!isset(data["from_email"]) || !isset(data["from_number"]) || !isset(data["message"])) {
+            throw new ValidationException("Missing required");
+        }
+
+        let data["subject"] = security->encrypt(security->clean(data["subject"]));
+        let data["from_email"] = security->encrypt(security->clean(data["from_email"]));
+        let data["from_name"] = security->encrypt(security->clean(data["from_name"]));
         let data["message"] = security->encrypt(security->clean(data["message"]));
+
+        if (isset(data["from_number"])) {
+            let data["from_number"] = security->encrypt(security->clean(data["from_number"]));
+        } else {
+            let data["from_number"] = null;
+        }
+        if (isset(data["from_company"])) {
+            let data["from_company"] = security->encrypt(security->clean(data["from_company"]));
+        } else {
+            let data["from_company"] = null;
+        }
+        
         let data["to_name"] = this->site->name;
-        let data["created_by"] = this->database->system_uuid;
-        let data["updated_by"] = this->database->system_uuid;
+        let data["created_by"] = this->database->getUserId();
+        let data["updated_by"] = this->database->getUserId();
 
         try {
             let status = this->database->execute(
@@ -138,6 +160,7 @@ class DumbDog
                     from_email,
                     from_name,
                     from_number,
+                    from_company,
                     message,
                     to_name,
                     created_at,
@@ -150,6 +173,7 @@ class DumbDog
                     :from_email,
                     :from_name,
                     :from_number,
+                    :from_company,
                     :message,
                     :to_name,
                     NOW(),

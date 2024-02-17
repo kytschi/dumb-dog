@@ -8,6 +8,17 @@
         "username": "dumbdog",
         "password": "dumbdog"
     },
+    "apps": {
+        "cms": true,
+        "commerce": true,
+        "crm": true
+    },
+    "gateway": {
+        "stripe": {
+            "public_api_key": "",
+            "private_api_key": ""
+        }
+    },
     "dumb_dog_url": "/dumb-dog",
     "save_mode": true,
     "encryption": "GENERATE A RANDOM KEY WITH openssl rand -base64 32"

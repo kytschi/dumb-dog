@@ -14,6 +14,7 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Helper\Security;
 use DumbDog\Ui\Gfx\Input;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
@@ -136,7 +137,9 @@ class Files extends Controller
 
     private function createFilename(string input_name)
     {
-        return this->randomString(16) . "-" . this->createSlug(_FILES[input_name]["name"]);
+        var security;
+        let security = new Security(this->cfg);
+        return security->randomString(16) . "-" . this->createSlug(_FILES[input_name]["name"]);
     }
 
     private function createThumb(image, string filename)

@@ -23,6 +23,11 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Content extends Controller
 {
+    protected titles;
+    protected buttons;
+    protected inputs;
+    protected files;
+
     public global_url = "/pages";
     public type = "page";
     public title = "Pages";
@@ -36,14 +41,19 @@ class Content extends Controller
 
     public required = ["name", "title", "template_id"];
 
+    public function __globals()
+    {
+        let this->titles = new Titles();
+        let this->inputs = new Input(this->cfg);
+        let this->files = new Files(this->cfg);
+        let this->buttons = new Button();
+    }
+
     public function add(string path)
     {
-        var titles, html, data, files, input, model, path = "";
-        let files = new Files(this->cfg);
-        let titles = new Titles();
-        let input = new Input(this->cfg);
-
-        let html = titles->page("Create the " . str_replace("-", " ", this->type));
+        var html, data, model, path = "";
+        
+        let html = this->titles->page("Create the " . str_replace("-", " ", this->type));
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -59,7 +69,7 @@ class Content extends Controller
 
                     let path = this->global_url;
 
-                    let data = this->setData(data, input);
+                    let data = this->setData(data);
 
                     let status = this->database->execute(
                         "INSERT INTO content 
@@ -157,7 +167,7 @@ class Content extends Controller
         let model->template_id = "";
         let model->banner_image = "";
 
-        let html .= this->render(model, files);
+        let html .= this->render(model);
 
         return html;
     }
@@ -251,17 +261,14 @@ class Content extends Controller
 
     public function edit(string path)
     {
-        var titles, html = "", model, data = [], input, files;
-        let titles = new Titles();
-        let input = new Input(this->cfg);
-        let files = new Files(this->cfg);
-        
+        var html = "", model, data = [];
+                
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
             content.*,
                 banner.id AS banner_image_id,
-                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-',  banner.filename), '') AS banner_image
+                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-',  banner.filename), '') AS banner_image
             FROM content 
             LEFT JOIN files AS banner ON 
                 banner.resource_id = content.id AND
@@ -273,7 +280,7 @@ class Content extends Controller
             throw new NotFoundException(ucwords(str_replace("-", " ", this->type)) . " not found");
         }
 
-        let html = titles->page("Edit the " . this->type, "edit");
+        let html = this->titles->page("Edit the " . this->type, "edit");
 
         if (isset(_GET["saved"])) {
             let html .= this->saveSuccess("I've updated the " . str_replace("-", " ", this->type));
@@ -291,8 +298,8 @@ class Content extends Controller
             SELECT
                 content_stacks.*,
                 files.id AS image_id,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
             FROM content_stacks 
             LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL
             WHERE content_id='" . model->id . "' AND content_stacks.deleted_at IS NULL AND content_stack_id IS NULL
@@ -348,11 +355,11 @@ class Content extends Controller
                     }
                 }
 
-                let data = this->setData(data, input);
+                let data = this->setData(data);
 
                 if (isset(_FILES["banner_image"]["name"])) {
                     if (!empty(_FILES["banner_image"]["name"])) {
-                        files->addResource("banner_image", data["id"], "banner-image");
+                        this->files->addResource("banner_image", data["id"], "banner-image");
                     }
                 }
 
@@ -388,7 +395,7 @@ class Content extends Controller
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
-                        this->updateStacks(files, input);
+                        this->updateStacks();
                         (new OldUrls())->add(this->database, model->id);
                         let path = this->updateExtra(model, path);
                         this->redirect(path);
@@ -400,19 +407,16 @@ class Content extends Controller
         }
         
         let html .=
-            this->render(model, files, "edit") .
+            this->render(model, "edit") .
             this->stats(model);
         return html;
     }
 
     public function index(string path)
     {
-        var titles, html, button;
-        let titles = new Titles();
-        let button = new Button();
+        var html;       
         
-        
-        let html = titles->page(this->title, "pages");
+        let html = this->titles->page(this->title, "pages");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the entry");
@@ -421,7 +425,7 @@ class Content extends Controller
         if (this->back_url) {
             let html .= this->renderBack();
         } else {
-            let html .= this->renderToolbar(button);
+            let html .= this->renderToolbar();
         }
 
         let html .= 
@@ -433,8 +437,7 @@ class Content extends Controller
 
     private function parentSelect(model = null, exclude = null)
     {
-        var select = ["": "no parent"], selected = null, data, input;
-        let input = new Input(this->cfg);
+        var select = ["": "no parent"], selected = null, data;
         let data = this->database->all(
             "SELECT 
                 *,
@@ -458,7 +461,7 @@ class Content extends Controller
             let iLoop = iLoop + 1;
         }
 
-        return input->select(
+        return this->inputs->select(
             "Parent",
             "parent_id",
             "Is this page a child of another?",
@@ -468,12 +471,9 @@ class Content extends Controller
         );
     }
 
-    private function render(model, files, mode = "add")
+    private function render(model, mode = "add")
     {
-        var html, button, input;
-
-        let input = new Input(this->cfg);
-        let button = new Button();
+        var html;
 
         let html = "
         <form method='post' enctype='multipart/form-data'>
@@ -483,13 +483,13 @@ class Content extends Controller
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    input->toggle("Set live", "status", false, (model->status=="live" ? 1 : 0)) . 
-                                    input->text("Name", "name", "Name the page", true, model->name) .
-                                    input->text("Title", "title", "The page title", true, model->title) .
-                                    input->text("Sub title", "sub_title", "The page sub title", false, model->sub_title) .
-                                    input->textarea("Slogan", "slogan", "The page slogan", false, model->slogan, 500) .
-                                    input->wysiwyg("Content", "content", "The page content", false, model->content) . 
-                                    input->toggle("Feature", "featured", false, model->featured) . 
+                                    this->inputs->toggle("Set live", "status", false, (model->status=="live" ? 1 : 0)) . 
+                                    this->inputs->text("Name", "name", "Name the page", true, model->name) .
+                                    this->inputs->text("Title", "title", "The page title", true, model->title) .
+                                    this->inputs->text("Sub title", "sub_title", "The page sub title", false, model->sub_title) .
+                                    this->inputs->textarea("Slogan", "slogan", "The page slogan", false, model->slogan, 500) .
+                                    this->inputs->wysiwyg("Content", "content", "The page content", false, model->content) . 
+                                    this->inputs->toggle("Feature", "featured", false, model->featured) . 
                                 "
                                 </div>
                             </div>
@@ -502,7 +502,7 @@ class Content extends Controller
                                     <div class='dd-box'>
                                         <div class='dd-box-title'>Navigation</div>
                                         <div class='dd-box-body'>" .
-                                            input->text("Path", "url", "The path for the page", true, model->url) .
+                                            this->inputs->text("Path", "url", "The path for the page", true, model->url) .
                                         "</div>
                                     </div>
                                 </div>
@@ -511,7 +511,7 @@ class Content extends Controller
                                         <div class='dd-box-title'>Relationship</div>
                                         <div class='dd-box-body'>" .
                                             this->parentSelect(model->parent_id, model->id) .
-                                            input->number("Sort", "sort", "Sort the page with in the parent", false, model->sort) .
+                                            this->inputs->number("Sort", "sort", "Sort the page with in the parent", false, model->sort) .
                                         "</div>
                                     </div>
                                 </div>
@@ -521,10 +521,10 @@ class Content extends Controller
                             <div class='dd-box'>
                                 <div class='dd-box-title'>SEO</div>
                                 <div class='dd-box-body'>" .
-                                    input->tags("Tags", "tags", "Tag the page", false, model->tags) . 
-                                    input->text("Meta keywords", "meta_keywords", "Help search engines find the page", false, model->meta_keywords) .
-                                    input->text("Meta author", "meta_author", "The author of the page", false, model->meta_author) .
-                                    input->textarea("Meta description", "meta_description", "A short description of the page", false, model->meta_description) .
+                                    this->inputs->tags("Tags", "tags", "Tag the page", false, model->tags) . 
+                                    this->inputs->text("Meta keywords", "meta_keywords", "Help search engines find the page", false, model->meta_keywords) .
+                                    this->inputs->text("Meta author", "meta_author", "The author of the page", false, model->meta_author) .
+                                    this->inputs->textarea("Meta description", "meta_description", "A short description of the page", false, model->meta_description) .
                                 "</div>
                             </div>
                         </div>
@@ -535,7 +535,7 @@ class Content extends Controller
                                 <div class='dd-box-title'>Look and Feel</div>
                                 <div class='dd-box-body'>" .
                                     this->templatesSelect(model->template_id) . 
-                                    input->image("Banner image", "banner_image", "Upload your banner image here", false, model->banner_image) . 
+                                    this->inputs->image("Banner image", "banner_image", "Upload your banner image here", false, model->banner_image) . 
                                 "</div>
                             </div>
                         </div>
@@ -543,8 +543,8 @@ class Content extends Controller
                     this->renderExtra(model);
 
         if (mode == "edit") {
-            let html .= this->renderStacks(model, input, files, button);
-            let html .= this->renderOldUrls(model, input, button);
+            let html .= this->renderStacks(model);
+            let html .= this->renderOldUrls(model);
         }
 
         let html .= "
@@ -552,7 +552,7 @@ class Content extends Controller
                 <ul class='dd-col dd-nav-tabs' role='tablist'>
                     <li class='dd-nav-item' role='presentation'>
                         <button
-                            class='dd-button'
+                            class='dd-nav-link'
                             type='button'
                             role='tab'
                             data-tab='#content-tab'
@@ -562,7 +562,7 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#nav-tab'
-                            class='dd-button'
+                            class='dd-nav-link'
                             type='button'
                             role='tab'
                             aria-controls='nav-tab' 
@@ -571,7 +571,7 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#look-tab'
-                            class='dd-button'
+                            class='dd-nav-link'
                             type='button'
                             role='tab'
                             aria-controls='look-tab' 
@@ -583,7 +583,7 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#stack-tab'
-                            class='dd-button'
+                            class='dd-nav-link'
                             type='button'
                             role='tab'
                             aria-controls='stack-tab' 
@@ -592,7 +592,7 @@ class Content extends Controller
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             data-tab='#old-urls-tab'
-                            class='dd-button'
+                            class='dd-nav-link'
                             type='button'
                             role='tab'
                             aria-controls='old-urls-tab' 
@@ -602,7 +602,7 @@ class Content extends Controller
 
         let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
                     <li class='dd-nav-item' role='presentation'>" . 
-                        button->generic(
+                        this->buttons->generic(
                             this->global_url,
                             "back",
                             "back",
@@ -612,7 +612,7 @@ class Content extends Controller
         if (mode == "edit") {
             let html .= "
                 <li class='dd-nav-item' role='presentation'>" . 
-                    button->generic(
+                    this->buttons->generic(
                         this->global_url . "/add",
                         "add",
                         "add",
@@ -620,22 +620,22 @@ class Content extends Controller
                     ) .
                 "</li>
                 <li class='dd-nav-item' role='presentation'>" .
-                    button->view(model->url) .
+                    this->buttons->view(model->url) .
                 "</li>";
     
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    button->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    button->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
                 "</li>";
             }
         }
 
         let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        button->save() .   
+                        this->buttons->save() .   
                     "</li>
                 </ul>
             </div>
@@ -700,7 +700,7 @@ class Content extends Controller
         );
     }
 
-    public function renderOldUrls(model, input, button)
+    public function renderOldUrls(model)
     {
         var html = "", item;
 
@@ -710,7 +710,7 @@ class Content extends Controller
                 <div class='dd-box'>
                     <div class='dd-box-title'>
                         <span>Old URLs</span>" .
-                        input->inputPopup("create-old-url", "add_old_url", "Create a new old URL link") .
+                        this->inputs->inputPopup("create-old-url", "add_old_url", "Create a new old URL link") .
                         "
                     </div>
                     <div class='dd-box-body'>";
@@ -719,10 +719,10 @@ class Content extends Controller
                             let html .= "
                             <div class='dd-row mb-3'>
                                 <div class='dd-col-10'>" .
-                                    input->text("", "old_url[]", "Set the old URL", true, item->url, true) .
+                                    this->inputs->text("", "old_url[]", "Set the old URL", true, item->url, true) .
                                 "</div>
                                 <div class='dd-col-2'>" . 
-                                    button->delete(item->id, "delete-url", "delete_old_url") .
+                                    this->buttons->delete(item->id, "delete-url", "delete_old_url") .
                                 "</div>
                             </div>";
                         }
@@ -736,7 +736,7 @@ class Content extends Controller
         return html;
     }
 
-    private function renderStacks(model, input, files, button)
+    private function renderStacks(model)
     {
         var key, key_stack, item, item_stack, html = "";
 
@@ -746,7 +746,7 @@ class Content extends Controller
                 <div class='dd-box'>
                     <div class='dd-box-title'>
                         <span>Stacks</span>" .
-                        input->inputPopup("create-stack", "create_stack", "Create a new stack") .
+                        this->inputs->inputPopup("create-stack", "create_stack", "Create a new stack") .
                         "
                     </div>
                 </div>";
@@ -758,12 +758,12 @@ class Content extends Controller
                     <div class='dd-box-title'>
                         <span>" . item->name . "</span>
                         <div>" .
-                        input->inputPopup(
+                        this->inputs->inputPopup(
                             "create-stack-item-" . (key + 1),
                             "add_to_stack[" . item->id . "]",
                             "Add to the " . item->name . " stack",
                             "add") .
-                        button->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
+                        this->buttons->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
                         "</div>
                     </div>
                     <div class='dd-box-body'>";
@@ -771,19 +771,19 @@ class Content extends Controller
                         SELECT
                             content_stacks.*,
                             files.id AS image_id,
-                            IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                            IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail  
+                            IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                            IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail  
                         FROM content_stacks 
                         LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
                         WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL
                         ORDER BY sort ASC");
-                    let html .= input->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name) .
-                                input->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title) .
-                                input->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title) .
-                                input->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content) . 
-                                input->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags) . 
-                                input->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item) . 
-                                input->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort) .
+                    let html .= this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name) .
+                                this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title) .
+                                this->inputs->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title) .
+                                this->inputs->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content) . 
+                                this->inputs->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags) . 
+                                this->inputs->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item) . 
+                                this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort) .
                                 this->stackTemplatesSelect(
                                     item->template_id,
                                     "stack_template[" . item->id . "]"
@@ -794,15 +794,15 @@ class Content extends Controller
                                     <div class='dd-stack'>" .
                                         "<div class='dd-stack-title'>
                                             <span>" . item_stack->name . "</span>" .
-                                            button->delete(item_stack->id, "delete-stack-" . item_stack->id, "delete_stack[]") .
+                                            this->buttons->delete(item_stack->id, "delete-stack-" . item_stack->id, "delete_stack[]") .
                                         "</div>
                                         <div class='dd-stack-body'>" .
-                                            input->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name) .
-                                            input->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title) .
-                                            input->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title) .
-                                            input->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content) . 
-                                            input->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack) . 
-                                            input->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort) .
+                                            this->inputs->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name) .
+                                            this->inputs->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title) .
+                                            this->inputs->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title) .
+                                            this->inputs->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content) . 
+                                            this->inputs->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack) . 
+                                            this->inputs->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort) .
                                         "</div>
                                     </div>";
                                 }
@@ -819,17 +819,17 @@ class Content extends Controller
         return html;
     }
 
-    public function renderToolbar(button)
+    public function renderToolbar()
     {
         return "
         <div class='dd-page-toolbar'>" . 
-            button->round(
+            this->buttons->round(
                 this->cfg->dumb_dog_url . "/" . this->type . "-categories",
                 "categories",
                 "categories",
                 "Click to access the " . str_replace("-", " ", this->type) . " categories"
             ) .
-            button->round(
+            this->buttons->round(
                 this->global_url . "/add",
                 "add",
                 "add",
@@ -855,7 +855,7 @@ class Content extends Controller
                                 class='dd-form-control'
                                 name='q'
                                 type='text' 
-                                placeholder='Search the " . (ucwords(this->type). "s") . "'
+                                placeholder='Search the " . (strtolower(this->type). "s") . "'
                                 value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
                         </div>
                     </div>
@@ -887,7 +887,7 @@ class Content extends Controller
         return html;
     }
 
-    private function setData(data, input)
+    private function setData(data)
     {
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
@@ -911,7 +911,7 @@ class Content extends Controller
         let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
         let data["author"] = isset(_POST["author"]) ? _POST["author"] : null;
         let data["company_name"] = isset(_POST["company_name"]) ? _POST["company_name"] : null;
-        let data["tags"] = input->isTagify(_POST["tags"]);
+        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["parent_id"] = _POST["parent_id"];
         let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
         let data["sort"] = intval(_POST["sort"]);
@@ -1015,8 +1015,7 @@ class Content extends Controller
 
     private function stackTemplatesSelect(selected = null, string id = "template_id")
     {
-        var select = [], data, input;
-        let input = new Input(this->cfg);
+        var select = [], data;
         let data = this->database->all("
             SELECT * FROM templates 
             WHERE deleted_at IS NULL AND type='content-stack'
@@ -1035,7 +1034,7 @@ class Content extends Controller
             let iLoop = iLoop + 1;
         }
 
-        return input->select(
+        return this->inputs->select(
             "template",
             id,
             "The stack's template",
@@ -1047,8 +1046,7 @@ class Content extends Controller
 
     private function templatesSelect(selected = null, string id = "template_id")
     {
-        var select = [], data, input;
-        let input = new Input(this->cfg);
+        var select = [], data;
         let data = this->database->all("
             SELECT * FROM templates 
             WHERE deleted_at IS NULL AND type='page'
@@ -1067,7 +1065,7 @@ class Content extends Controller
             let iLoop = iLoop + 1;
         }
 
-        return input->select(
+        return this->inputs->select(
             "template",
             id,
             "The page's template",
@@ -1082,7 +1080,7 @@ class Content extends Controller
         return path;
     }
 
-    private function updateStacks(files, input)
+    private function updateStacks()
     {
         if (!isset(_POST["stack_name"])) {
             return;
@@ -1119,7 +1117,7 @@ class Content extends Controller
                 let data["sort"] = intval(_POST["stack_sort"][id]);
             }
             if (isset(_POST["stack_tags"][id])) {
-                let data["tags"] = input->isTagify(_POST["stack_tags"][id]);
+                let data["tags"] = this->inputs->isTagify(_POST["stack_tags"][id]);
             }
             if (isset(_POST["stack_template"][id])) {
                 let data["template_id"] = _POST["stack_template"][id];
@@ -1155,7 +1153,7 @@ class Content extends Controller
                         "size": _FILES["stack_image"]["size"][id]
                     ];
                     
-                    files->addResource("image", id, "image", true);
+                    this->files->addResource("image", id, "image", true);
                     unset(_FILES["image"]);
                 }
             }
@@ -1215,7 +1213,7 @@ class Content extends Controller
                                 "size": _FILES["sub_stack_image"]["size"][id_sub]
                             ];
                             
-                            files->addResource("image", id_sub, "image", true);
+                            this->files->addResource("image", id_sub, "image", true);
                             unset(_FILES["image"]);
                         }
                     }
