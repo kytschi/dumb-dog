@@ -18,6 +18,7 @@ use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Ui\Gfx\Button;
+use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Input;
 use DumbDog\Ui\Gfx\Table;
 use DumbDog\Ui\Gfx\Titles;
@@ -27,6 +28,7 @@ class Content extends Controller
     protected titles;
     protected buttons;
     protected inputs;
+    protected icons;
     protected files;
 
     public global_url = "/pages";
@@ -48,6 +50,7 @@ class Content extends Controller
         let this->inputs = new Input(this->cfg);
         let this->files = new Files(this->cfg);
         let this->buttons = new Button();
+        let this->icons = new Icons();
     }
 
     public function add(string path)

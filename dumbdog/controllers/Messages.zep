@@ -41,70 +41,71 @@ class Messages extends Content
     public required = ["first_name", "email", "message"];
     public type = "message";
 
-    public function save(array data)
+    public function convertToGroupsLead(string path)
     {
-        var status, err, save = [];
+        this->convertToLead(path);
+    }
 
-        if (!isset(data["subject"])) {
-            let save["subject"] = "Web form contact";
-        } elseif (empty(data["subject"])) {
-            let save["subject"] = "Web form contact";
+    public function convertToMyLead(string path)
+    {
+        this->convertToLead(path, this->database->getUserId());
+    }
+
+    private function convertToLead(string path, string user_id = null)
+    {
+        var id, model, status = false;
+        let id = this->getPageId(path);
+
+        let model = this->database->get(
+            "SELECT
+                contacts.*,
+                messages.*  
+            FROM messages 
+            JOIN contacts ON contacts.id = messages.contact_id 
+            WHERE messages.id=:id",
+            [
+                "id": id
+            ]
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Message not found");
         }
 
-        if (isset(data["full_name"])) {
-            let status = [];
-            let err = explode(" ", data["full_name"]);
-            let data["first_name"] = err[0];
-            let data["last_name"] = count(err) > 1 ? err[1] : null;
-            unset(data["full_name"]);
+        let id = this->database->uuid();
+
+        let status = this->database->execute("
+            INSERT INTO leads
+                (id, contact_id, user_id, created_by, created_at, updated_by, updated_at)
+            VALUES
+                (:id, :contact_id, :user_id, :created_by, NOW(), :updated_by, NOW())
+            ",
+            [
+                "id": id,
+                "contact_id": model->contact_id,
+                "user_id": user_id,
+                "created_by": this->database->getUserId(),
+                "updated_by": this->database->getUserId()
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new SaveException("Failed to convert the message to a lead", status);
         }
 
-        if (!this->validate(data, this->required)) {
-            throw new ValidationException("Missing required data");
+        let status = this->database->execute(
+            "UPDATE messages SET lead_id=:lead_id WHERE id=:id",
+            [
+                "lead_id": id,
+                "id": model->id
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new SaveException("Failed to update the message with the lead", status);
         }
 
-        try {
-            let save["contact_id"] = (new Contacts(this->cfg, this->libs))->save(data);
-            let save["subject"] = data["subject"];
-            let save["message"] = data["message"];
-            let save["type"] = data["type"];
-            let save["created_by"] = this->database->getUserId();
-            let save["updated_by"] = this->database->getUserId();
-
-            let save = this->database->encrypt(this->encrypt, save);
-
-            let status = this->database->execute(
-                "INSERT INTO messages 
-                    (id,
-                    contact_id,
-                    subject,
-                    message,
-                    type,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (UUID(),
-                    :contact_id,
-                    :subject,
-                    :message,
-                    :type,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
-                    save
-            );
-
-            if (!is_bool(status)) {
-                throw new SaveException("Failed to save the message", status);
-            }
-
-            return true;
-        } catch \Exception, err {
-            throw err;
-        }
+        this->redirect(this->global_url . "/edit/" . model->id);
     }
 
     public function delete(string path)
@@ -114,14 +115,13 @@ class Messages extends Content
 
     public function edit(string path)
     {
-        var html, model, data = [], security;
-        let security = new Security(this->cfg);
-
+        var html, model, data = [];
+        
         let data["id"] = this->getPageId(path);
         let model = this->database->get(
             "SELECT
                 contacts.*,
-                messages.*  
+                messages.* 
             FROM messages 
             JOIN contacts ON contacts.id = messages.contact_id 
             WHERE messages.id=:id",
@@ -186,13 +186,56 @@ class Messages extends Content
                     <li class='dd-nav-item' role='presentation'><hr/></li>";
 
         if (this->cfg->apps->crm) {
-            let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->generic(
-                            this->cfg->dumb_dog_url . "/messages/convert-to-lead/" . model->id,
-                            "Convert to lead",
-                            "leads",
-                            "Convert to a lead") .   
-                    "</li>";
+            if (model->lead_id) {
+                let html .= "
+                    <li class='dd-dd-nav-item' role='presentation'>
+                        <a
+                            class='dd-button'
+                            href='" . this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id . "'>".
+                            this->icons->leads() .
+                            "<span>Lead</span>
+                        </a>
+                    </li>";
+            } else {
+                let html .= "
+                        <li class='dd-nav-item' role='presentation'>
+                            <button
+                                type='button'
+                                class='dd-button'
+                                data-inline-popup='#convert-to-lead'
+                                titile='Convert to a lead'>" . 
+                                this->icons->leads() .
+                            "   <span>Convert to lead</span>
+                            </button>
+                            <div 
+                                id='convert-to-lead' 
+                                class='dd-inline-popup'>
+                                <div class='dd-inline-popup-body'>
+                                    <span style='width:80px;padding-top:10px;'>Lead type</span>
+                                    <div class='dd-inline-popup-buttons' style='width: 260px'>
+                                        <a 
+                                            href='" . this->cfg->dumb_dog_url . "/messages/convert-to-my-lead/" . model->id . "'
+                                            class='dd-button'
+                                            title='Convert to my lead'>" .
+                                            this->icons->contactMine() .
+                                        "</a>
+                                        <a 
+                                            href='" . this->cfg->dumb_dog_url . "/messages/convert-to-group-lead/" . model->id . "'
+                                            class='dd-button'
+                                            title='Convert and give to the group'>" .
+                                            this->icons->groups() .
+                                        "</a>
+                                        <button 
+                                            type='button'
+                                            class='dd-button'
+                                            data-inline-popup-close='#convert-to-lead'>" . 
+                                            this->icons->cancel() .
+                                        "</button>
+                                    </div>
+                                </div>
+                            </div> 
+                        </li>";
+            }
         }           
 
         let html .= "
@@ -338,5 +381,71 @@ class Messages extends Content
                 "Add a message"
             ) .
         "</div>";
+    }
+
+    public function save(array data)
+    {
+        var status, err, save = [];
+
+        if (!isset(data["subject"])) {
+            let save["subject"] = "Web form contact";
+        } elseif (empty(data["subject"])) {
+            let save["subject"] = "Web form contact";
+        }
+
+        if (isset(data["full_name"])) {
+            let status = [];
+            let err = explode(" ", data["full_name"]);
+            let data["first_name"] = err[0];
+            let data["last_name"] = count(err) > 1 ? err[1] : null;
+            unset(data["full_name"]);
+        }
+
+        if (!this->validate(data, this->required)) {
+            throw new ValidationException("Missing required data");
+        }
+
+        try {
+            let save["contact_id"] = (new Contacts(this->cfg, this->libs))->save(data);
+            let save["subject"] = data["subject"];
+            let save["message"] = data["message"];
+            let save["type"] = data["type"];
+            let save["created_by"] = this->database->getUserId();
+            let save["updated_by"] = this->database->getUserId();
+
+            let save = this->database->encrypt(this->encrypt, save);
+
+            let status = this->database->execute(
+                "INSERT INTO messages 
+                    (id,
+                    contact_id,
+                    subject,
+                    message,
+                    type,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :contact_id,
+                    :subject,
+                    :message,
+                    :type,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                    save
+            );
+
+            if (!is_bool(status)) {
+                throw new SaveException("Failed to save the message", status);
+            }
+
+            return true;
+        } catch \Exception, err {
+            throw err;
+        }
     }
 }

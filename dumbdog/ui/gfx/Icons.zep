@@ -112,6 +112,20 @@ class Icons
         </svg>";
     }
 
+    public function contactMine()
+    {
+        return "
+        <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path d='M21 12H17M19 14L19 10' fill='#DF1463' stroke='#363853' stroke-width='1.5' stroke-linecap='round' />
+            <path
+                d='M3 19.1115C3 16.6984 4.69732 14.643 7.00404 14.2627L7.21182 14.2284C9.05892 13.9239 10.9411 13.9239 12.7882 14.2284L12.996 14.2627C15.3027 14.643 17 16.6984 17 19.1115C17 20.1545 16.1815 21 15.1719 21H4.82813C3.81848 21 3 20.1545 3 19.1115Z'
+                stroke='#363853' stroke-width='1.5' />
+            <path
+                d='M14.0834 6.9375C14.0834 9.11212 12.2552 10.875 10 10.875C7.74486 10.875 5.91669 9.11212 5.91669 6.9375C5.91669 4.76288 7.74486 3 10 3C12.2552 3 14.0834 4.76288 14.0834 6.9375Z'
+                stroke='#363853' stroke-width='1.5' />
+        </svg>";
+    }
+
     public function contentStacks()
     {
         return "
@@ -292,11 +306,14 @@ class Icons
         return "
         <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
             <path
-                d='M12.0095 2.85114C14.2552 2.85114 16.0757 4.67162 16.0757 6.91731C16.0757 9.163 14.2552 10.9835 12.0095 10.9835C9.76385 10.9835 7.94336 9.163 7.94336 6.91731C7.94336 4.67162 9.76385 2.85114 12.0095 2.85114Z'
-                stroke='#DF1463' stroke-width='1.7022' />
+                d='M3 18.433C3 16.4308 4.45485 14.7254 6.43204 14.4098L6.61013 14.3814C8.19336 14.1287 9.80664 14.1287 11.3899 14.3814L11.568 14.4098C13.5451 14.7254 15 16.4308 15 18.433C15 19.2984 14.2984 20 13.433 20H4.56697C3.70156 20 3 19.2984 3 18.433Z'
+                stroke='#363853' stroke-width='1.5' />
             <path
-                d='M5.93745 17.5707L5.5386 18.9382C5.2162 20.0435 6.04522 21.1489 7.19665 21.1489H16.8226C17.974 21.1489 18.803 20.0435 18.4806 18.9382L18.0818 17.5707C17.2946 14.8719 14.8208 13.0165 12.0096 13.0165C9.19842 13.0165 6.72458 14.8719 5.93745 17.5707Z'
-                stroke='#1C1C1C' stroke-width='1.7022' />
+                d='M12.5 7.5C12.5 9.433 10.933 11 9 11C7.067 11 5.5 9.433 5.5 7.5C5.5 5.567 7.067 4 9 4C10.933 4 12.5 5.567 12.5 7.5Z'
+                stroke='#363853' stroke-width='1.5' />
+            <path
+                d='M15 11C16.933 11 18.5 9.433 18.5 7.5C18.5 5.567 16.933 4 15 4M17.3899 20H19.433C20.2984 20 21 19.2984 21 18.433C21 16.4308 19.5451 14.7254 17.568 14.4098V14.4098C17.4494 14.3909 17.3293 14.3814 17.2093 14.3814C16.8895 14.3814 16.7902 14.3814 16.2412 14.3814'
+                stroke='#363853' stroke-width='1.5' stroke-linecap='round' />
         </svg>";
     }
 
@@ -544,7 +561,8 @@ class Icons
 
     public function dumbdog()
     {
-        return "UklGRvQIAABXRUJQVlA4WAoAAAAQAAAATwAAOAAAQUxQSJgCAAABkLZtexnpE3pSbduZ17Zt27Zt
+        return "<img width='80px' height='57px' 
+        src='data:image/webp;base64,UklGRvQIAABXRUJQVlA4WAoAAAAQAAAATwAAOAAAQUxQSJgCAAABkLZtexnpE3pSbduZ17Zt27Zt
 27Zt27Y/2bZtcz07Sl7MpJ0+jYgJgBATAgCComky2KOarkjTGVvuf/wV8evDk20zmhfP7BCwSIky
 VBx+Ktzrp4zb74t9fGLtqKYZdWtJ6QYceBPl9jPzqfvbgjQCAEiKbAEhxUUXs2LMroT6uNtvn+1p
 oBBiithk4ZIeaQEgxUdm1e8fWcCvG9ObUe0eY4x57x858JwhdO/KaSTbPobd1YRLG+Fm+P35ODLe
@@ -584,6 +602,6 @@ oj8ZzZ11+ALkUYX+2qb3sJWdPl6/EDQLT/JICDp2kxCjZVqzMdlIGKoMfza2EqtUlHU7nSI/yBl9
 RAAx+6KoYf00a4MDMuc5dlhQ/FEjohB0oZA5wfwRVYJkX8giPI+37OVpVMUQBZzBI5S+VqDAeIRN
 9DrwWjQZdoGhpQh8tr+15HKO6c5be+Z6KOANyTIkSQ7D1P2ChaHFgyZYY8iLPtJN2sN/iol/9Kbd
 pEKUifoQ0knqOhnZRKDaXNW1AHG2/HKbjai1j1aEZ5P5VZUb/RIadri3moBHMLPY+WU01YcQnJjo
-zf0OYVMe82TMvzytT4mP2UMAAAA=";
+zf0OYVMe82TMvzytT4mP2UMAAAA='/>";
     }
 }

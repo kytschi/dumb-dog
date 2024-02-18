@@ -192,6 +192,16 @@ class Routes
             "index",
             "files"
         ],
+        "/messages/convert-to-group-lead": [
+            "Messages",
+            "convertToGroupsLead",
+            "group lead"
+        ],
+        "/messages/convert-to-my-lead": [
+            "Messages",
+            "convertToMyLead",
+            "my lead"
+        ],
         "/messages/edit": [
             "Messages",
             "edit",
