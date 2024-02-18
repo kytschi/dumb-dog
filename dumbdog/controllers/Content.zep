@@ -15,6 +15,7 @@ use DumbDog\Controllers\Files;
 use DumbDog\Controllers\OldUrls;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Ui\Gfx\Button;
 use DumbDog\Ui\Gfx\Input;
