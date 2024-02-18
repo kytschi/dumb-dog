@@ -192,6 +192,21 @@ class Routes
             "index",
             "files"
         ],
+        "/leads/add": [
+            "Leads",
+            "add",
+            "create a lead"
+        ],
+        "/leads/edit": [
+            "Leads",
+            "edit",
+            "manage the lead"
+        ],
+        "/leads": [
+            "Leads",
+            "index",
+            "leads"
+        ],
         "/messages/convert-to-group-lead": [
             "Messages",
             "convertToGroupsLead",

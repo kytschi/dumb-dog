@@ -17,6 +17,7 @@ use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 //use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
+use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
 use DumbDog\Controllers\Settings;
@@ -160,6 +161,7 @@ class DumbDog
             "Dashboard": new Dashboard(this->cfg, this->libs),
             //"Events": new Events(this->cfg, this->libs),
             "Files": new Files(this->cfg, this->libs),
+            "Leads": new Leads(this->cfg, this->libs),
             "Menus": new Menus(this->cfg, this->libs),
             "Messages": new Messages(this->cfg, this->libs),
             "Pages": new Content(this->cfg, this->libs),

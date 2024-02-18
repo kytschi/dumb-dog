@@ -90,19 +90,23 @@ class Database
         }
     }
 
-    public function encrypt(array encrypt, array data)
+    public function encrypt(encrypt, array data = [])
     {
         var key;
 
-        for key in encrypt {
-            if (!isset(data[key])) {
-                continue;
+        if (!is_array(encrypt)) {
+            return this->security->encrypt(this->security->clean(encrypt));
+        } else {
+            for key in encrypt {
+                if (!isset(data[key])) {
+                    continue;
+                }
+
+                let data[key] = this->security->encrypt(this->security->clean(data[key]));
             }
 
-            let data[key] = this->security->encrypt(this->security->clean(data[key]));
+            return data;
         }
-
-        return data;
     }
 
     public function execute(string query, array data = [], bool always_save = false)
@@ -134,6 +138,32 @@ class Database
         let statement = this->db->prepare(query);
         statement->execute(data);
         return statement->fetchObject("DumbDog\\Models\\Model");
+    }
+
+    public function isAdmin()
+    {
+        return this->get("
+            SELECT groups.slug
+            FROM users
+            JOIN groups ON groups.id AND users.group_id 
+            WHERE users.id=:id AND groups.slug IN ('su', 'admin')",
+            [
+                "id": this->getUserId()
+            ]
+        ) ? true : false;
+    }
+
+    public function isManager()
+    {
+        return this->get("
+            SELECT groups.slug
+            FROM users
+            JOIN groups ON groups.id AND users.group_id 
+            WHERE users.id=:id AND groups.slug IN ('su', 'admin', 'manager')",
+            [
+                "id": this->getUserId()
+            ]
+        ) ? true : false;
     }
 
     public function getUserId()
