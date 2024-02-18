@@ -248,8 +248,8 @@ class Menu
             </div>
         </div>
         <div id='dd-quick-menu-button' onclick='showQuickMenu()'>
-            <div class='dd-round dd-icon-dumbdog'>
-                <img src='data:image/webp;base64," . icons->dumbdog() . "'/>" .
+            <div class='dd-round dd-icon-dumbdog'>" .
+                icons->dumbdog() .
                 (messages ? "<span class='dd-icon-indicator'></span>" : "") .
             "</div>
         </div>";

@@ -672,7 +672,7 @@ class Style
         }
         .dd-inline-popup-body {                
             display: flex;
-            border: 1px solid var(--input-border);
+            border: 1px solid var(--input-border-colour);
             border-radius: .375rem;
             padding: .375rem .75rem;
             background-color: var(--popup-background-color);
@@ -1459,14 +1459,19 @@ class Style
             word-wrap: break-word;
             vertical-align: middle;
         }
-        .dd-page-title div svg, .dd-page-title div span {
+        .dd-page-title div img, .dd-page-title div svg, .dd-page-title div span {
             float: left;
+        }
+        .dd-page-title div svg, .dd-page-title div img {
+            margin-right: 20px;
+        }
+        .dd-page-title img {
+            margin-top: 10px;
         }
         .dd-page-title div svg {
             fill: var(--button-svg-fill-colour);
             width: 64px;
             height: 64px;
-            margin-right: 20px;
         }
         .dd-required {
             line-height: 24pt;

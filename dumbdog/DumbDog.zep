@@ -34,6 +34,7 @@ use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
+use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Titles;
 use DumbDog\Ui\Menu;
 use DumbDog\Ui\Routes;
@@ -404,14 +405,14 @@ class DumbDog
     private function notFound(bool backend = true, string message = "page is not found")
     {
         if (backend) {
-            var head;
-            let head = new Head(this->cfg);
+            var icons;
+            let icons = new Icons();
 
             return "
             <div class='dd-box'>
-                <div class='dd-box-title'>
-                    <img src='data:image/png;base64," . head->favicon() . "'>
-                    <span class='dd-pt-2'>dang it!</span>
+                <div class='dd-box-title'>".
+                    icons->dumbdog() .
+                    "<span class='dd-pt-2'>dang it!</span>
                 </div>
                 <div class='dd-box-body'>
                     <h1 class='dd-h1'>" . message . "</h1>
