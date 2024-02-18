@@ -21,13 +21,18 @@ class Security
         let this->cfg = cfg;
     }
 
-    public function clean(string str)
+    public function clean(str)
     {
+        if (empty(str)) {
+            return str;
+        }
         return filter_var(rawurldecode(str), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     }
 
     public function decrypt(str)
     {
+        var key, iv, token;
+
         if (empty(this->cfg->encryption)) {
             throw new Exception("Invalid encryption key in config");
         }
@@ -36,19 +41,19 @@ class Security
             return str;
         }
 
-        var key, iv, token, splits;
-
-        let splits = explode("::", str);
-        let str = splits[0];
-        let iv = hex2bin(splits[1]);
+        let key = explode("::", str);
+        let str = key[0];
+        let iv = hex2bin(key[1]);
         let key = openssl_digest(this->cfg->encryption, "SHA256", true);
         let token = openssl_decrypt(str, "aes128", key, 0, iv);
     
         return token;
     }
 
-    public function encrypt(string str)
+    public function encrypt(str)
     {
+        var key, iv, token;
+
         if (empty(this->cfg->encryption)) {
             throw new Exception("Invalid encryption key in config");
         }
@@ -56,8 +61,6 @@ class Security
         if (empty(str)) {
             return str;
         }
-
-        var key, iv, token;
 
         let key = openssl_digest(this->cfg->encryption, "SHA256", true);
         let iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length("aes128"));

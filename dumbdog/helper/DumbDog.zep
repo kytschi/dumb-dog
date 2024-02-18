@@ -14,6 +14,7 @@ use DumbDog\Controllers\Basket;
 use DumbDog\Controllers\Content;
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Files;
+use DumbDog\Controllers\Messages;
 use DumbDog\Controllers\PaymentGateways;
 use DumbDog\Controllers\Products;
 use DumbDog\Exceptions\Exception;
@@ -24,6 +25,7 @@ use DumbDog\Ui\Captcha;
 class DumbDog
 {
     private cfg;
+    private libs;
     public captcha;
     private database;
     public basket;
@@ -51,11 +53,12 @@ class DumbDog
         "DESC"
     ];
 
-    public function __construct(object cfg, object page)
+    public function __construct(object cfg, object page, array libs = [])
     {
         var site;
 
         let this->cfg = cfg;
+        let this->libs = libs;
         let this->page = page;
         let this->database = new Database(cfg);
 
@@ -119,78 +122,8 @@ class DumbDog
 
     public function addMessage(array data)
     {
-        var security, status, err;
-        let security = new Security(this->cfg);        
-
-        if (!isset(data["subject"])) {
-            let data["subject"] = "Web form contact";
-        } elseif (empty(data["subject"])) {
-            let data["subject"] = "Web form contact";
-        }
-
-        if (!isset(data["from_email"]) || !isset(data["from_number"]) || !isset(data["message"])) {
-            throw new ValidationException("Missing required");
-        }
-
-        let data["subject"] = security->encrypt(security->clean(data["subject"]));
-        let data["from_email"] = security->encrypt(security->clean(data["from_email"]));
-        let data["from_name"] = security->encrypt(security->clean(data["from_name"]));
-        let data["message"] = security->encrypt(security->clean(data["message"]));
-
-        if (isset(data["from_number"])) {
-            let data["from_number"] = security->encrypt(security->clean(data["from_number"]));
-        } else {
-            let data["from_number"] = null;
-        }
-        if (isset(data["from_company"])) {
-            let data["from_company"] = security->encrypt(security->clean(data["from_company"]));
-        } else {
-            let data["from_company"] = null;
-        }
-        
-        let data["to_name"] = this->site->name;
-        let data["created_by"] = this->database->getUserId();
-        let data["updated_by"] = this->database->getUserId();
-
-        try {
-            let status = this->database->execute(
-                "INSERT INTO messages 
-                    (id,
-                    subject,
-                    from_email,
-                    from_name,
-                    from_number,
-                    from_company,
-                    message,
-                    to_name,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (UUID(),
-                    :subject,
-                    :from_email,
-                    :from_name,
-                    :from_number,
-                    :from_company,
-                    :message,
-                    :to_name,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
-                data
-            );
-
-            if (!is_bool(status)) {
-                return false;
-            }
-
-            return true;
-        } catch Exception, err {
-            throw new Exception("Failed to save the message", err);
-        }
+        let data["type"] = "inbox";
+        return (new Messages(this->cfg, this->libs))->save(data);
     }
 
     private function addStacks(data)

@@ -1,5 +1,5 @@
 /**
- * Dumb Dog messages builder
+ * Dumb Dog messages
  *
  * @package     DumbDog\Controllers\Messages
  * @author 		Mike Welsh
@@ -10,22 +10,102 @@
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Controller;
+use DumbDog\Controllers\Contacts;
+use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
+use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Security;
 use DumbDog\Ui\Gfx\Table;
 
 class Messages extends Content
 {
+    public decrypt = [
+        "subject",
+        "message",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "website",
+        "position"
+    ];
+    public encrypt = ["subject", "message"];
     public global_url = "/messages";
     public list = [
         "created_at|date",
         "subject|decrypt",
-        "from_name|decrypt",
+        "full_name",
         "status"
     ];
+    public required = ["first_name", "email", "message"];
     public type = "message";
+
+    public function save(array data)
+    {
+        var status, err, save = [];
+
+        if (!isset(data["subject"])) {
+            let save["subject"] = "Web form contact";
+        } elseif (empty(data["subject"])) {
+            let save["subject"] = "Web form contact";
+        }
+
+        if (isset(data["full_name"])) {
+            let status = [];
+            let err = explode(" ", data["full_name"]);
+            let data["first_name"] = err[0];
+            let data["last_name"] = count(err) > 1 ? err[1] : null;
+            unset(data["full_name"]);
+        }
+
+        if (!this->validate(data, this->required)) {
+            throw new ValidationException("Missing required data");
+        }
+
+        try {
+            let save["contact_id"] = (new Contacts(this->cfg, this->libs))->save(data);
+            let save["subject"] = data["subject"];
+            let save["message"] = data["message"];
+            let save["type"] = data["type"];
+            let save["created_by"] = this->database->getUserId();
+            let save["updated_by"] = this->database->getUserId();
+
+            let save = this->database->encrypt(this->encrypt, save);
+
+            let status = this->database->execute(
+                "INSERT INTO messages 
+                    (id,
+                    contact_id,
+                    subject,
+                    message,
+                    type,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :contact_id,
+                    :subject,
+                    :message,
+                    :type,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                    save
+            );
+
+            if (!is_bool(status)) {
+                throw new SaveException("Failed to save the message", status);
+            }
+
+            return true;
+        } catch \Exception, err {
+            throw err;
+        }
+    }
 
     public function delete(string path)
     {
@@ -38,10 +118,24 @@ class Messages extends Content
         let security = new Security(this->cfg);
 
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("SELECT * FROM messages WHERE id=:id", data);
+        let model = this->database->get(
+            "SELECT
+                contacts.*,
+                messages.*  
+            FROM messages 
+            JOIN contacts ON contacts.id = messages.contact_id 
+            WHERE messages.id=:id",
+            data
+        );
 
         if (empty(model)) {
             throw new NotFoundException("Message not found");
+        }
+
+        let model = this->database->decrypt(this->decrypt, model);
+        let model->full_name = model->first_name;
+        if (!empty(model->last_name)) {
+            let model->full_name = model->full_name . " " . model->last_name;
         }
 
         let html = this->titles->page("Viewing the message", "messages");
@@ -61,17 +155,17 @@ class Messages extends Content
                                     <div class='dd-input-group'>
                                         <label>From</label>
                                         <span class='dd-form-control'>" .
-                                            security->decrypt(model->from_name) .
-                                            (security->decrypt(model->from_company) ? " @" . security->decrypt(model->from_company) : "") . 
-                                            "&nbsp;&lt;<a href='mailto:" . security->decrypt(model->from_email) . "'>" . security->decrypt(model->from_email) . "</a>" .
-                                            (security->decrypt(model->from_number) ? " | <a href='tel:" . security->decrypt(model->from_number) . "'>". security->decrypt(model->from_number) . "</a>" : "") . 
+                                            model->full_name .
+                                            (model->company ? " @" . model->company : "") . 
+                                            "&nbsp;&lt;<a href='mailto:" . model->email . "'>" . model->email . "</a>" .
+                                            (model->phone ? " | <a href='tel:" . model->phone . "'>". model->phone . "</a>" : "") . 
                                             "&gt;" . 
                                         "</span>
                                     </div>
                                     <div class='dd-input-group'>
                                         <label>Message</label>
                                         <span class='dd-form-control'>" .
-                                            security->decrypt(model->message) .
+                                            model->message .
                                         "</span>
                                     </div>                               
                                 </div>
@@ -105,30 +199,6 @@ class Messages extends Content
                 </ul>
             </div>
         </form>";
-
-        /*let html .= "'>
-            <div class='dd-box-title'>
-                <span>the message</span>
-            </div>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>from</span>
-                    <input value='" .  . "' readonly='readonly'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>email</span>
-                    <input value='" . security->decrypt(model->from_email) . "' readonly='readonly'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>number</span>
-                    <input value='" . security->decrypt(model->from_number) . "' readonly='readonly'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>message</span>
-                    <textarea readonly='readonly'>" . security->decrypt(model->message) . "</textarea>
-                </div>
-            </div>
-        </div>";*/
 
         return html;
     }
@@ -225,8 +295,11 @@ class Messages extends Content
         let table = new Table(this->cfg);
 
         let query = "
-            SELECT messages.* 
+            SELECT
+                contacts.*,
+                messages.*
             FROM messages
+            JOIN contacts ON contacts.id = messages.contact_id 
             WHERE messages.id IS NOT NULL";
         if (isset(_POST["q"])) {
             let query .= " AND messages.subject LIKE :query";
@@ -238,9 +311,18 @@ class Messages extends Content
         }
         let query .= " ORDER BY messages.created_at";
 
+        let data = this->database->all(query, data);
+        for query in data {
+            if (isset(query->first_name) && isset(query->last_name)) {
+                let query->full_name = this->database->decrypt(query->first_name) . " " . this->database->decrypt(query->last_name);
+            } elseif (isset(query["first_name"])) {
+                let query->full_name = this->database->decrypt(query->first_name);
+            }
+        }
+
         return table->build(
             this->list,
-            this->database->all(query, data),
+            data,
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
@@ -257,6 +339,4 @@ class Messages extends Content
             ) .
         "</div>";
     }
-
-    
 }

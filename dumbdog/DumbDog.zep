@@ -325,7 +325,8 @@ class DumbDog
 
                     eval("$DUMBDOG = new DumbDog\\Helper\\DumbDog(
                         json_decode('" . json_encode(this->cfg) . "', false, 512, JSON_THROW_ON_ERROR),
-                        json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR)
+                        json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR),
+                        json_decode('" . json_encode(this->libs) . "', false, 512, JSON_THROW_ON_ERROR)
                     );");
                                                 
                     if (!empty(this->template_engine)) {

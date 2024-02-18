@@ -11,11 +11,13 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Exceptions\CfgException;
+use DumbDog\Helper\Security;
 
 class Database
 {
     private cfg;
     private db;
+    private security;
     public system_uuid = "00000000-0000-0000-0000-000000000000";
 
     public function __construct(object cfg)
@@ -59,6 +61,7 @@ class Database
                 
         let this->cfg = cfg;
         let this->db = new \PDO(connection, username, password);
+        let this->security = new Security(cfg);
     }
 
     public function all(string query, array data = [])
@@ -67,6 +70,39 @@ class Database
         let statement = this->db->prepare(query);
         statement->execute(data);
         return statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Model");
+    }
+
+    public function decrypt(decrypt, model = null)
+    {
+        var key;
+
+        if (!is_array(decrypt)) {
+            return this->security->decrypt(decrypt);
+        } else {
+            for key in decrypt {
+                if (!isset(model->{key})) {
+                    continue;
+                }
+
+                let model->{key} = this->security->decrypt(model->{key});
+            }
+            return model;
+        }
+    }
+
+    public function encrypt(array encrypt, array data)
+    {
+        var key;
+
+        for key in encrypt {
+            if (!isset(data[key])) {
+                continue;
+            }
+
+            let data[key] = this->security->encrypt(this->security->clean(data[key]));
+        }
+
+        return data;
     }
 
     public function execute(string query, array data = [], bool always_save = false)
