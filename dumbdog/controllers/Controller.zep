@@ -11,6 +11,7 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Notes;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
@@ -20,6 +21,7 @@ class Controller
 {   
     protected cfg;
     protected libs;
+    protected notes;
     public database;
 
     public global_url = "";
@@ -30,6 +32,8 @@ class Controller
         let this->libs = libs;
         let this->database = new Database(this->cfg);
         let this->global_url = this->cfg->dumb_dog_url . this->global_url;
+
+        let this->notes = new Notes(this->cfg);
 
         this->__globals();
     }
@@ -76,9 +80,14 @@ class Controller
         );
     }
 
-    public function consoleLogError(string message)
+    public function consoleLogError(message)
     {
-        return "<script type='text/javascript'>console.log('DUMB DOG ERROR:', '" . str_replace(["\n", "\r\n"], "", strip_tags(message)) . "');</script>";
+        return "<script type='text/javascript'>
+            console.log(
+                'DUMB DOG ERROR:',
+                '" . str_replace(["\n", "\r\n"], "", strip_tags(message)) . "'
+            );
+        </script>";
     }
 
     public function createSlug(string value)
@@ -297,14 +306,14 @@ class Controller
 
     public function validate(array data, array checks)
     {
-        var iLoop = 0;
-        while (iLoop < count(checks)) {
-            if (!isset(data[checks[iLoop]])) {
+        var key;
+
+        for key in checks {
+            if (!isset(data[key])) {
                 return false;
-            } elseif (empty(data[checks[iLoop]])) {
+            } elseif (empty(data[key])) {
                 return false;
             }
-            let iLoop = iLoop + 1;
         }
         return true;
     }

@@ -39,6 +39,7 @@ class Messages extends Content
         "status"
     ];
     public required = ["first_name", "email", "message"];
+    public title = "Messages";
     public type = "message";
 
     public function convertToGroupsLead(string path)
@@ -243,25 +244,6 @@ class Messages extends Content
             </div>
         </form>";
 
-        return html;
-    }
-
-    public function index(string path)
-    {
-        var html;        
-        let html = this->titles->page("Messages", "messages");
-
-        if (isset(_GET["deleted"])) {
-            let html .= this->saveSuccess("I've deleted the message");
-        }
-
-        let html .= this->renderToolbar();
-
-        let html .= 
-            this->searchBox() . 
-            this->tags(path, "messages") .
-            this->renderList(path);
-        
         return html;
     }
 

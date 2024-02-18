@@ -38,7 +38,7 @@ class Button
         <a
             href='" . url ."'
             title='Back to list'
-            class='dd-round'>" . 
+            class='dd-button'>" . 
             this->icons->back() .
             "<span>Back</span>
         </a>";
