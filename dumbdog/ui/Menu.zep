@@ -129,7 +129,7 @@ class Menu
                     <div>
                         <input class='form-control' name='search'>
                     </div>
-                    <button type='button' onclick='showQuickMenu()' class='dd-float-end dd-button-blank'>" .
+                    <button type='button' onclick='showQuickMenu()' class='dd-float-right dd-button-blank'>" .
                         icons->cancel() .
                     "</button>
                 </div>

@@ -309,9 +309,11 @@ class Controller
         var key;
 
         for key in checks {
-            if (!isset(data[key])) {
-                return false;
-            } elseif (empty(data[key])) {
+            if (isset(data[key])) {
+                if (empty(data[key])) {
+                    return false;
+                }   
+            } else {
                 return false;
             }
         }

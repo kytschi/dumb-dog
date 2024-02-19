@@ -53,7 +53,8 @@ class Button
         string entry,
         string id = "delete",
         string name = "delete",
-        string title = "Delete the entry"
+        string title = "Delete the entry",
+        bool mini = false
     ) {
         return "<button
             type='button'
@@ -61,8 +62,8 @@ class Button
             data-inline-popup='#" . id . "'
             titile='" . title . "'>" . 
             this->icons->delete() .
-            "<span>Delete</span>
-        </button>
+            (!mini ? "<span>Delete</span>" : "") .
+        "</button>
         <div id='" . id . "' class='dd-inline-popup dd-delete-warning'>
             <div class='dd-inline-popup-body'>
                 <span>Are you sure?</span>

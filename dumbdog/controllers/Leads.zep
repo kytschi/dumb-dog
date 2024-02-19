@@ -116,14 +116,16 @@ class Leads extends Content
 
     public function edit(string path)
     {
-        var html, model, data = [], controller;
+        var html, model, data = [], contacts, err;
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
                 users.nickname AS owner,
                 contacts.*,
-                leads.id 
+                leads.id,
+                leads.contact_id,
+                leads.ranking 
             FROM leads
             JOIN contacts ON contacts.id = leads.contact_id 
             LEFT JOIN users ON users.id = leads.user_id 
@@ -143,68 +145,39 @@ class Leads extends Content
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let controller = new Contacts(this->cfg, this->libs);
+        let contacts = new Contacts(this->cfg, this->libs);
 
         let model = this->database->decrypt(
-            controller->encrypt,
+            contacts->encrypt,
             model
         );
 
         if (!empty(_POST)) {
-            var status = false, err;
+            let path = this->global_url . "/edit/" . model->id;
 
-            if (!this->validate(_POST, controller->required)) {
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("leads", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("leads", path);
+                }
+            }
+
+            if (!this->validate(_POST, contacts->required)) {
                 let html .= this->missingRequired();
             } else {
-                let path = this->global_url . "/edit/" . model->id;
-
-                if (isset(_POST["delete"])) {
-                    if (!empty(_POST["delete"])) {
-                        this->triggerDelete("leads", path);
-                    }
-                }
-
-                if (isset(_POST["recover"])) {
-                    if (!empty(_POST["recover"])) {
-                        this->triggerRecover("leads", path);
-                    }
-                }
-
-                if (isset(_POST["note"])) {
-                    if (!empty(_POST["note"])) {
-                        this->notes->save(model->id);
-                    }
-                }
-
-                let path = path . "?saved=true";
-
-                let data = this->setData(data);
                 
-                /*let status = this->database->execute(
-                    "UPDATE menus SET 
-                        name=:name,
-                        title=:title,
-                        alt=:alt,
-                        url=:url,
-                        content_id=:content_id,
-                        parent_id=:parent_id,
-                        new_window=:new_window,
-                        tags=:tags,
-                        updated_at=NOW(),
-                        updated_by=:updated_by 
-                    WHERE id=:id",
-                    data
-                );*/
-            
-                if (!is_bool(status)) {
-                    let html .= this->saveFailed("Failed to update the lead");
-                    let html .= this->consoleLogError(status);
-                } else {
-                    try {
-                        this->redirect(path);
-                    } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
-                    }
+                this->notes->actions(model->id);
+                let data = this->setData(data);
+                try {
+                    contacts->update(model->contact_id);
+                    this->redirect(path . "?saved=true");
+                } catch ValidationException, err {
+                    this->missingRequired(err->getMessage());
                 }
             }
         }
@@ -223,6 +196,43 @@ class Leads extends Content
 
         let html = "
         <form method='post' enctype='multipart/form-data'>
+            <div class='dd-row'>
+                <div class='dd-col-12'>
+                    <div class='dd-box'>
+                        <div class='dd-box-title'>
+                            <span>Ranking</span>
+                        </div>
+                        <div class='dd-box-body dd-flex'>
+                            <div class='dd-switcher'>
+                                <label>
+                                    <input 
+                                        type='radio'
+                                        name='ranking' 
+                                        value='poor' " . 
+                                        (model->ranking == "poor" ? " checked='checked'" : "") . ">
+                                    <span>" .
+                                        this->icons->rankingPoor() .
+                                    "   Good
+                                    </span>
+                                </label>
+                            </div>
+                            <div class='dd-switcher'>
+                                <label>
+                                    <input 
+                                        type='radio'
+                                        name='ranking' 
+                                        value='good' " . 
+                                        (model->ranking == "good" ? " checked='checked'" : "") . ">
+                                    <span>" .
+                                        this->icons->rankingGood() .
+                                    "   Good
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class='dd-tabs'>
                 <div class='dd-tabs-content dd-col'>
                     <div id='lead-tab' class='dd-row'>
@@ -244,7 +254,16 @@ class Leads extends Content
                                         <div class='dd-col-6'>" .
                                             this->inputs->text("Phone", "phone", "Set their phone", false, model->phone) .
                                         "</div>
+                                    </div> 
+                                    <div class='dd-row'>
+                                        <div class='dd-col-6'>" .
+                                            
+                                        "</div>
+                                        <div class='dd-col-6'>" .
+                                            this->inputs->text("Position", "position", "What is their position?", false, model->position) .
+                                        "</div>
                                     </div>" . 
+                                    this->inputs->text("Website", "website", "Do they have a website?", false, model->website) .
                                     this->inputs->tags("Tags", "tags", "Tag the menu", false, model->tags) . 
                                 "</div>
                             </div>
@@ -294,13 +313,18 @@ class Leads extends Content
                         this->buttons->back(this->global_url) .   
                     "</li>";
         if (mode == "edit") {
+            if (model->website) {
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
+                    this->buttons->view(model->website) .
+                "</li>";
+            }
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }
