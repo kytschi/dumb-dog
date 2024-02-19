@@ -108,11 +108,11 @@ class Table
                         <td class='dd-tools'>
                             <a 
                                 href='" . url . "/edit/" . data[iLoop]->id . "'
-                                class='dd-link dd-float-end'
+                                class='dd-link dd-float-right'
                                 title='Edit me'>" . icons->edit() . "</a>";
                         if (property_exists(data[iLoop], "url")) {
                             let html .= "<a  href='" . data[iLoop]->url . "' target='_blank' 
-                                class='dd-link dd-float-end'
+                                class='dd-link dd-float-right'
                                 title='View me live'>" . icons->view() . "</a>";
                         }
                         let html .= "

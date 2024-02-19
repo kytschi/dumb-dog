@@ -1113,10 +1113,10 @@ class Style
                 max-width: 1320px;
             }
         }
-        .dd-float-start {
+        .dd-float-left {
             float: left;
         }
-        .dd-float-end {
+        .dd-float-right {
             float: right;
         }
 
@@ -1239,6 +1239,19 @@ class Style
         
         .dd-pb-5 {
             padding-bottom: 3rem !important;
+        }
+
+        .dd-flex {
+            -ms-box-orient: horizontal;
+            display: -webkit-box;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: -moz-flex;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-wrap: wrap;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         ";
     }

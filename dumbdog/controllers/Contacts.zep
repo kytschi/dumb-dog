@@ -83,9 +83,66 @@ class Contacts extends Content
             );
 
             if (!is_bool(status)) {
-                throw new SaveException("Failed to save the message", status);
+                throw new SaveException("Failed to save the contact", status);
             }
             return save["id"];
+        } catch \Exception, err {
+            throw err;
+        }
+    }
+
+    public function update(string id)
+    {
+        var status, err, save = [], 
+            post = [
+                "title",
+                "first_name",
+                "last_name",
+                "email",
+                "phone",
+                "website",
+                "position",
+                "tags"
+            ];
+
+        if (!this->validate(_POST, this->required)) {
+            throw new ValidationException("Missing required data");
+        }
+
+        for status in post {
+            if (isset(_POST[status])) {
+                let save[status] = _POST[status];
+            } else {
+                let save[status] = null;
+            }
+        }
+
+        let save["id"] = id;
+        let save["updated_by"] = this->database->getUserid();
+        let save["tags"] = this->inputs->isTagify(save["tags"]);
+
+        let save = this->database->encrypt(this->encrypt, save);
+
+        try {
+            let status = this->database->execute(
+                "UPDATE contacts SET
+                    title=:title,
+                    first_name=:first_name,
+                    last_name=:last_name,
+                    email=:email,
+                    phone=:phone,
+                    website=:website,
+                    position=:position,
+                    tags=:tags,
+                    updated_at=NOW(),
+                    updated_by=:updated_by
+                WHERE id=:id",
+                    save
+            );
+
+            if (!is_bool(status)) {
+                throw new SaveException("Failed to update the contact", status);
+            }
         } catch \Exception, err {
             throw err;
         }

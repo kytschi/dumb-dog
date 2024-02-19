@@ -19,6 +19,7 @@ use DumbDog\Controllers\PaymentGateways;
 use DumbDog\Controllers\Products;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\ValidationException;
+use DumbDog\Helper\Dates;
 use DumbDog\Helper\Security;
 use DumbDog\Ui\Captcha;
 
@@ -496,30 +497,7 @@ class DumbDog
         string unknown = "Unknown",
         bool seconds = true
     ) {
-        var timestamp, err;
-
-        try {
-            if (empty(datetime)) {
-                if (today) {
-                    return today ? date(time ? (seconds ? "d/m/Y H:i:s" : "d/m/Y H:i") : "d/m/Y") : unknown;
-                }
-                return unknown;
-            }
-
-            if (strtolower(datetime) == "unknown") {
-                return unknown;
-            }
-            let timestamp = strtotime(datetime);
-            if (empty(timestamp)) {
-                let timestamp = strtotime("NOW");
-            }
-            return date(
-                time ? (seconds ? "d/m/Y H:i:s" : "d/m/Y H:i") : "d/m/Y",
-                timestamp
-            );
-        } catch Exception, err {
-            return err ? "Failed to render the date" : "Failed to render the date";
-        }
+        return (new Dates())->prettyDate(datetime, time, today, unknown, seconds);
     }
 
     public function prettyDateFull(
@@ -529,27 +507,7 @@ class DumbDog
         string unknown = "Unknown",
         bool seconds = true
     ) {
-        var timestamp, err;
-
-        try {
-            if (empty(datetime)) {
-                if (today) {
-                    return today ? date(time ? (seconds ? "M dS, Y H:i:s" : "M dS, Y H:i") : "M dS, Y") : unknown;
-                }
-                return unknown;
-            }
-            if (strtolower(datetime) == "unknown") {
-                return unknown;
-            }
-
-            let timestamp = strtotime(datetime);
-            if (empty(timestamp)) {
-                let timestamp = strtotime("NOW");
-            }
-            return date(time ? "M jS, Y H:i" : "M jS, Y", timestamp);
-        } catch Exception, err {
-            return err ? "Failed to render the date" : "Failed to render the date";
-        }
+        return (new Dates())->prettyDateFull(datetime, time, today, unknown, seconds);
     }
 
     public function products(array filters = [])

@@ -867,7 +867,7 @@ class Content extends Controller
                         <button 
                             type='submit'
                             name='search' 
-                            class='dd-float-end dd-button' 
+                            class='dd-float-right dd-button' 
                             value='search'>
                             search
                         </button>";
@@ -876,7 +876,7 @@ class Content extends Controller
                         let html .= "
                         <a 
                             href='" . this->global_url . "' 
-                            class='dd-button dd-float-end'>
+                            class='dd-button dd-float-right'>
                             clear
                         </a>";
                     }
