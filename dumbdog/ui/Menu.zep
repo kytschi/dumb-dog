@@ -172,7 +172,7 @@ class Menu
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/socials' title='Managing the social media links' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->socials() .
+                            icons->socialmedia() .
                             "<label>Social media</label>
                         </div>
                     </a>
