@@ -420,7 +420,7 @@ class Content extends Controller
     {
         var html;       
         
-        let html = this->titles->page(this->title, "pages");
+        let html = this->titles->page(this->title, strtolower(str_replace(" ", "", this->title)));
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the entry");
