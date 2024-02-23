@@ -32,52 +32,38 @@ class Leads extends Content
 
     public function add(string path)
     {
-        var html, data;
-                
-        let html = this->titles->page("Create a menu", "menus");
+        var html, data, status = false, contacts;
+        
+        let contacts = new Contacts(this->cfg, this->libs);
+
+        let html = this->titles->page("Create a lead", "leads");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var status = false;
                 let data = [];
 
                 if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
-                    let data["id"] = this->database->uuid();
-                    let data["name"] = _POST["name"];
-                    let data["title"] = _POST["title"];
-                    let data["alt"] = _POST["alt"];
-                    let data["url"] = _POST["url"];
-                    let data["content_id"] = _POST["content_id"];
-                    let data["parent_id"] = _POST["parent_id"];
-                    let data["created_by"] = this->getUserId();
-                    let data["updated_by"] = this->getUserId();
-                    let data["tags"] = this->inputs->isTagify(_POST["tags"]);
+                    let data["contact_id"] = contacts->save(this->setData(data, true));
+                    let data["user_id"] = this->database->getUserId();
+                    let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO menus 
+                        "INSERT INTO leads 
                             (id,
-                            name,
-                            title,
-                            alt,
-                            url,
-                            tags,
-                            parent_id,
-                            content_id,
+                            contact_id,
+                            user_id,
+                            ranking,
                             created_at,
                             created_by,
                             updated_at,
                             updated_by) 
                         VALUES 
-                            (:id,
-                            :name,
-                            :title,
-                            :alt,
-                            :url,
-                            :tags,
-                            :parent_id,
-                            :content_id,
+                            (UUID(),
+                            :contact_id,
+                            :user_id,
+                            :ranking,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -102,12 +88,7 @@ class Leads extends Content
         var model;
         let model = new \stdClass();
         let model->deleted_at = null;
-        let model->name = "";
-        let model->title = "";
-        let model->alt = "";
-        let model->url = "";
-        let model->sort = "";
-        let model->content_id = "";
+        let model->ranking = "ok";
 
         let html .= this->render(model);
 
@@ -116,7 +97,7 @@ class Leads extends Content
 
     public function edit(string path)
     {
-        var html, model, data = [], contacts, err;
+        var html, model, data = [], contacts, err, status = false;
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
@@ -173,11 +154,27 @@ class Leads extends Content
                 
                 this->notes->actions(model->id);
                 let data = this->setData(data);
-                try {
-                    contacts->update(model->contact_id);
-                    this->redirect(path . "?saved=true");
-                } catch ValidationException, err {
-                    this->missingRequired(err->getMessage());
+                let status = this->database->execute(
+                    "UPDATE leads 
+                    SET 
+                        user_id=:user_id,
+                        ranking=:ranking,
+                        updated_by=:updated_by,
+                        updated_at=NOW()
+                    WHERE id=:id",
+                    data
+                );
+
+                if (!is_bool(status)) {
+                    let html .= this->saveFailed("Failed to save the menu");
+                    let html .= this->consoleLogError(status);
+                } else {
+                    try {
+                        contacts->update(model->contact_id);
+                        this->redirect(path . "?saved=true");
+                    } catch ValidationException, err {
+                        this->missingRequired(err->getMessage());
+                    }
                 }
             }
         }
@@ -203,7 +200,21 @@ class Leads extends Content
                             <span>Ranking</span>
                         </div>
                         <div class='dd-box-body dd-flex'>
-                            <div class='dd-switcher'>
+                            <div class='dd-radio'>
+                                <label>
+                                    <input 
+                                        type='radio'
+                                        name='ranking' 
+                                        value='terrible' " . 
+                                        (model->ranking == "terrible" ? " checked='checked'" : "") . ">
+                                    <span>" .
+                                        this->icons->rankingTerrible() .
+                                    "   <small class='dd-radio-on'>Terrible</small>
+                                        <small class='dd-radio-off'>Terrible</small>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class='dd-radio'>
                                 <label>
                                     <input 
                                         type='radio'
@@ -212,11 +223,26 @@ class Leads extends Content
                                         (model->ranking == "poor" ? " checked='checked'" : "") . ">
                                     <span>" .
                                         this->icons->rankingPoor() .
-                                    "   Good
+                                    "   <small class='dd-radio-on'>Poor</small>
+                                        <small class='dd-radio-off'>Poor</small>
                                     </span>
                                 </label>
                             </div>
-                            <div class='dd-switcher'>
+                            <div class='dd-radio'>
+                                <label>
+                                    <input 
+                                        type='radio'
+                                        name='ranking' 
+                                        value='ok' " . 
+                                        (model->ranking == "ok" ? " checked='checked'" : "") . ">
+                                    <span>" .
+                                        this->icons->rankingOK() .
+                                    "   <small class='dd-radio-on'>OK</small>
+                                        <small class='dd-radio-off'>OK</small>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class='dd-radio'>
                                 <label>
                                     <input 
                                         type='radio'
@@ -225,7 +251,22 @@ class Leads extends Content
                                         (model->ranking == "good" ? " checked='checked'" : "") . ">
                                     <span>" .
                                         this->icons->rankingGood() .
-                                    "   Good
+                                    "   <small class='dd-radio-on'>Good</small>
+                                        <small class='dd-radio-off'>Good</small>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class='dd-radio'>
+                                <label>
+                                    <input 
+                                        type='radio'
+                                        name='ranking' 
+                                        value='excellent' " . 
+                                        (model->ranking == "excellent" ? " checked='checked'" : "") . ">
+                                    <span>" .
+                                        this->icons->rankingExcellent() .
+                                    "   <small class='dd-radio-on'>Excellent</small>
+                                        <small class='dd-radio-off'>Excellent</small>
                                     </span>
                                 </label>
                             </div>
@@ -240,6 +281,9 @@ class Leads extends Content
                             <div class='dd-box'>
                                 <div class='dd-box-body'>
                                     <div class='dd-row'>
+                                        <div class='dd-col-12'>" . 
+                                            this->userSelect() .
+                                        "</div>
                                         <div class='dd-col-6'>" .
                                             this->inputs->text("First name", "first_name", "Set their first name", true, model->first_name) .
                                         "</div>
@@ -256,8 +300,21 @@ class Leads extends Content
                                         "</div>
                                     </div> 
                                     <div class='dd-row'>
-                                        <div class='dd-col-6'>" .
-                                            
+                                        <div class='dd-col-6'>" . 
+                                            this->inputs->select(
+                                                "Title",
+                                                "title",
+                                                "Their title",
+                                                [
+                                                    "": "Unknown",
+                                                    "mr": "Mr",
+                                                    "ms": "Ms",
+                                                    "mrs": "Mrs",
+                                                    "dr": "Dr"
+                                                ],
+                                                false,
+                                                model->title
+                                            ) .
                                         "</div>
                                         <div class='dd-col-6'>" .
                                             this->inputs->text("Position", "position", "What is their position?", false, model->position) .
@@ -392,8 +449,53 @@ class Leads extends Content
         "</div>";
     }
 
-    private function setData(data)
+    private function setData(array data, bool add = false)
     {
+        if (add) {
+            let data["title"] = _POST["title"];
+            let data["last_name"] = _POST["last_name"];
+            let data["email"] = _POST["email"];
+            let data["phone"] = _POST["phone"];
+            let data["website"] = _POST["website"];
+            let data["position"] = _POST["position"];
+            let data["tags"] = _POST["tags"];
+        } else {
+            let data["ranking"] = _POST["ranking"];
+            let data["user_id"] = _POST["user_id"];
+            let data["updated_by"] = this->database->getUserId();
+        }
+
         return data;
+    }
+
+    private function userSelect(model = null, exclude = null)
+    {
+        var select = ["": "available to all"], selected = null, data;
+        let data = this->database->all(
+            "SELECT *
+            FROM users  
+            ORDER BY nickname"
+        );
+        var iLoop = 0;
+
+        if (model) {
+            let selected = model;
+        } elseif (isset(_POST["user_id"])) {
+            let selected = _POST["user_id"];
+        }
+
+        while (iLoop < count(data)) {
+            let select[data[iLoop]->id] = data[iLoop]->nickname;
+            let iLoop = iLoop + 1;
+        }
+
+        return this->inputs->select(
+            "Owner",
+            "user_id",
+            "Who owns this lead?",
+            select,
+            false,
+            selected
+        );
     }
 }

@@ -619,11 +619,11 @@ class Style
         .dd-switcher {
             font-size: 0pt !important;
         }
-        .dd-switcher label * {
+        .dd-switcher label *, .dd-radio label * {
             vertical-align: middle;
             overflow: hidden;
         }
-        .dd-switcher input {
+        .dd-switcher input, .dd-radio input {
             display: none;
         }
         .dd-switcher label input + span {
@@ -635,6 +635,7 @@ class Style
             background-color: var(--box-background-colour);
             border:1px solid var(--input-border-colour);
             transition: all 0.3s ease-in-out;
+            color: var(--body-text-colour);
         }
         .dd-switcher label input + span small {
             position: absolute;
@@ -651,7 +652,7 @@ class Style
             text-align: center;
             user-select: none;
         }
-        .dd-switcher label input:checked + span {
+        .dd-switcher label input:checked + span, .dd-radio label input:checked + span {
             background-color: var(--box-background-colour);
         }
         .dd-switcher label input:checked + span small {
@@ -664,6 +665,47 @@ class Style
         .dd-switcher label input:checked + span .dd-switcher-on {
             display: block;
         }
+
+        .dd-radio {
+            margin-right: 10px;
+        }
+        .dd-radio svg {
+            cursor: pointer;
+        }
+        .dd-radio label input + span {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            background-color: var(--box-background-colour);
+            transition: all 0.3s ease-in-out;
+            color: var(--body-text-colour);
+        }
+        .dd-radio label input + span small {
+            overflow: hidden;
+            cursor: pointer;
+            color: var(--button-background-colour-disabled);
+            transition: all .15s ease;
+            box-shadow: none;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            padding-top: 4px;
+            user-select: none;
+        }
+        .dd-radio label span .dd-radio-on {
+            display: none;
+        }
+        .dd-radio label input:checked + span small {
+            color: var(--button-background-colour);
+        }
+        .dd-radio label input:checked + span .dd-radio-off {
+            display: none;
+        }
+        .dd-radio label input:checked + span .dd-radio-on {
+            display: block;
+        }
+
         .dd-inline-popup {
             position: absolute;
             right: 100px;
