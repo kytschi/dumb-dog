@@ -39,7 +39,26 @@ class Table
                     <tr>";
                         while (iLoop_head < count(columns)) {
                             let splits = explode("|", columns[iLoop_head]);
-                            let html .= "<th>" . str_replace("_", " ", splits[0]) . "</th>";
+                            let key = str_replace("_", " ", splits[0]);
+
+                            if (isset(splits[1])) {
+                                if (
+                                    !in_array(
+                                        splits[1],
+                                        [
+                                            "bool",
+                                            "date",
+                                            "decrypt",
+                                            "event_date",
+                                            "with_tags"
+                                        ]
+                                    )
+                                ) {
+                                    let key = splits[1];
+                                }
+                            }
+
+                            let html .= "<th>" . key . "</th>";
                             let iLoop_head = iLoop_head + 1;
                         }
                         let html .= "

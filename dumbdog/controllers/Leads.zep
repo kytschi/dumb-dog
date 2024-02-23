@@ -21,6 +21,7 @@ class Leads extends Content
 {
     public global_url = "/leads";
     public list = [
+        "icon|ranking",
         "full_name|with_tags",
         "email|decrypt",
         "phone|decrypt",
@@ -89,6 +90,7 @@ class Leads extends Content
         let model = new \stdClass();
         let model->deleted_at = null;
         let model->ranking = "ok";
+        let model->user_id= "";
 
         let html .= this->render(model);
 
@@ -282,7 +284,7 @@ class Leads extends Content
                                 <div class='dd-box-body'>
                                     <div class='dd-row'>
                                         <div class='dd-col-12'>" . 
-                                            this->userSelect() .
+                                            this->userSelect(model->user_id) .
                                         "</div>
                                         <div class='dd-col-6'>" .
                                             this->inputs->text("First name", "first_name", "Set their first name", true, model->first_name) .
@@ -406,7 +408,8 @@ class Leads extends Content
             SELECT 
                 users.nickname AS owner,
                 contacts.*,
-                leads.id 
+                leads.id,
+                leads.ranking  
             FROM leads
             JOIN contacts ON contacts.id = leads.contact_id 
             LEFT JOIN users ON users.id = leads.user_id 
@@ -431,6 +434,27 @@ class Leads extends Content
                 let query->full_name = this->database->decrypt(query->first_name) . " " . this->database->decrypt(query->last_name);
             } elseif (isset(query["first_name"])) {
                 let query->full_name = this->database->decrypt(query->first_name);
+            }
+
+            switch (query->ranking) {
+                case "excellent":
+                    let query->icon = this->icons->rankingExcellent();
+                    break;
+                case "good":
+                    let query->icon = this->icons->rankingGood();
+                    break;
+                case "ok":
+                    let query->icon = this->icons->rankingOK();
+                    break;
+                case "poor":
+                    let query->icon = this->icons->rankingPoor();
+                    break;
+                case "terrible":
+                    let query->icon = this->icons->rankingTerrible();
+                    break;
+                default:
+                    let query->icon = query->ranking;
+                    break;
             }
         }
 
@@ -468,9 +492,9 @@ class Leads extends Content
         return data;
     }
 
-    private function userSelect(model = null, exclude = null)
+    private function userSelect(selected = null)
     {
-        var select = ["": "available to all"], selected = null, data;
+        var select = ["": "available to all"], data;
         let data = this->database->all(
             "SELECT *
             FROM users  
@@ -478,9 +502,7 @@ class Leads extends Content
         );
         var iLoop = 0;
 
-        if (model) {
-            let selected = model;
-        } elseif (isset(_POST["user_id"])) {
+        if (isset(_POST["user_id"])) {
             let selected = _POST["user_id"];
         }
 
