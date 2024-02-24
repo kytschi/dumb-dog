@@ -47,8 +47,8 @@ class Content extends Controller
     public function __globals()
     {
         let this->titles = new Titles();
-        let this->inputs = new Input(this->cfg);
-        let this->files = new Files(this->cfg);
+        let this->inputs = new Input();
+        let this->files = new Files();
         let this->buttons = new Button();
         let this->icons = new Icons();
     }
@@ -677,7 +677,7 @@ class Content extends Controller
     {
         var data = [], query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let query = "
             SELECT main_page.*,

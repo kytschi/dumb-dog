@@ -18,9 +18,9 @@ class Input
 {
     protected cfg;
 
-    public function __construct(object cfg)
+    public function __construct()
     {
-        let this->cfg = cfg;
+        let this->cfg = constant("CFG");
     }
 
     public function date(
@@ -258,7 +258,7 @@ class Input
     ) {
         var database, results, data = [], iLoop = 0;
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let results = database->all(query);
 
         while (iLoop < count(results)) {

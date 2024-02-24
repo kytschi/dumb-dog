@@ -23,7 +23,7 @@ class Appointments extends Controller
     {
         var titles, html, database;
         let titles = new Titles();
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let html = titles->page("Add an appointment", "add");
         let html .= "<div class='dd-page-toolbar'>
@@ -49,7 +49,7 @@ class Appointments extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
+                        let database = new Database();
                         let status = database->execute(
                             "INSERT INTO appointments 
                                 (
@@ -181,7 +181,7 @@ class Appointments extends Controller
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM appointments WHERE id=:id", data);
 
@@ -226,7 +226,7 @@ class Appointments extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
+                        let database = new Database();
                         let status = database->execute(
                             "UPDATE appointments SET 
                                 user_id=:user_id,
@@ -338,7 +338,7 @@ class Appointments extends Controller
     {
         var titles, tiles, database, html;
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let titles = new Titles();
         let tiles = new Tiles();
         

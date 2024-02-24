@@ -44,7 +44,7 @@ class Templates extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
+                        let database = new Database();
                         let status = database->execute(
                             "INSERT INTO templates 
                                 (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
@@ -111,7 +111,7 @@ class Templates extends Controller
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM templates WHERE id=:id", data);
 
@@ -150,7 +150,7 @@ class Templates extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
+                        let database = new Database();
                         if (data["default"]) {
                             let status = database->execute(
                                 "UPDATE templates SET `default`=0, updated_at=NOW(), updated_by=:updated_by",
@@ -230,7 +230,7 @@ class Templates extends Controller
     {
         var titles, table, database, html;
         let titles = new Titles();
-        let table = new Table(this->cfg);
+        let table = new Table();
         
         let html = titles->page("Templates", "templates");
 
@@ -243,7 +243,7 @@ class Templates extends Controller
             <a href='" . this->global_url . "/add' class='dd-link dd-round dd-icon' title='Add a template'>&nbsp;</a>
         </div>";
 
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let html .= table->build(
             [

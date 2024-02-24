@@ -124,7 +124,7 @@ class Products extends Content
     private function countriesSelect(selected)
     {
         var select = [], data, input;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let data = this->database->all("
             SELECT * FROM countries 
             ORDER BY is_default DESC, name");
@@ -151,7 +151,7 @@ class Products extends Content
     private function currenciesSelect(selected)
     {
         var select = [], data, input;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let data = this->database->all("
             SELECT * FROM currencies 
             ORDER BY is_default DESC, name");
@@ -181,7 +181,7 @@ class Products extends Content
     public function get(array filters = [])
     {
         var query, where, join, data = [], order = "", item, item_sub, key, files;
-        let files = new Files(this->cfg);
+        let files = new Files();
         
         let query = "
         SELECT
@@ -294,7 +294,7 @@ class Products extends Content
     public function renderExtra(model)
     {
         var input, data, item, button, html;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let button = new Button();
 
         let model->price = 0;
@@ -429,7 +429,7 @@ class Products extends Content
     {
         var data, query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let data = [];
         let query = "
@@ -461,7 +461,7 @@ class Products extends Content
     private function taxesSelect(selected)
     {
         var select = [], data, input;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let data = this->database->all("
             SELECT * FROM taxes 
             ORDER BY is_default DESC, name");

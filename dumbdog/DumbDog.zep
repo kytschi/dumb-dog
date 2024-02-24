@@ -33,6 +33,7 @@ use DumbDog\Engines\Twig;
 use DumbDog\Engines\Volt;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Helper\DumbDog as Helper;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
 use DumbDog\Ui\Gfx\Icons;
@@ -58,6 +59,7 @@ class DumbDog
 
         let this->libs = libs;
 
+        define("LIBS", this->libs);
         define("VERSION", this->version);
 
         if (!file_exists(cfg_file)) {
@@ -97,6 +99,7 @@ class DumbDog
         }
 
         let this->cfg = cfg;
+        define("CFG", this->cfg);
         let this->template_engine = template_engine;
 
         var parsed, path, backend = false;
@@ -156,20 +159,20 @@ class DumbDog
         this->secure(path);
 
         var controllers = [
-            //"Appointments": new Appointments(this->cfg, this->libs),
-            "Comments": new Comments(this->cfg, this->libs),
-            "Dashboard": new Dashboard(this->cfg, this->libs),
-            //"Events": new Events(this->cfg, this->libs),
-            "Files": new Files(this->cfg, this->libs),
-            "Leads": new Leads(this->cfg, this->libs),
-            "Menus": new Menus(this->cfg, this->libs),
-            "Messages": new Messages(this->cfg, this->libs),
-            "Pages": new Content(this->cfg, this->libs),
-            "Settings": new Settings(this->cfg, this->libs),
-            "Socials": new Socials(this->cfg, this->libs),
-            "Templates": new Templates(this->cfg, this->libs),
-            "Themes": new Themes(this->cfg, this->libs),
-            "Users": new Users(this->cfg, this->libs)
+            //"Appointments": new Appointments(),
+            "Comments": new Comments(),
+            "Dashboard": new Dashboard(),
+            //"Events": new Events(),
+            "Files": new Files(),
+            "Leads": new Leads(),
+            "Menus": new Menus(),
+            "Messages": new Messages(),
+            "Pages": new Content(),
+            "Settings": new Settings(),
+            "Socials": new Socials(),
+            "Templates": new Templates(),
+            "Themes": new Themes(),
+            "Users": new Users()
         ];
 
         var routes = (new Routes())->routes;                      
@@ -218,7 +221,7 @@ class DumbDog
         echo "</main>";
         if (menu) {
             echo javascript->trumbowygIcons();
-            (new Menu(this->cfg))->quickmenu();
+            (new Menu())->quickmenu();
         }
         echo "</body>" . javascript->common() . "</html>";
     }
@@ -230,7 +233,7 @@ class DumbDog
         }
 
         var head, javascript, id;
-        let head = new Head(this->cfg);
+        let head = new Head();
         let javascript = new Javascript();
 
         let id = "dd-bk";
@@ -271,8 +274,8 @@ class DumbDog
     private function frontend(string path)
     {
         var database, data = [], page, settings, menu, files;         
-        let database = new Database(this->cfg);
-        let files = new Files(this->cfg);
+        let database = new Database();
+        let files = new Files();
         
         let settings = database->get("
             SELECT
@@ -326,19 +329,16 @@ class DumbDog
                     let obj->footer = [];
                     let obj->both = [];
 
-                    eval("$DUMBDOG = new DumbDog\\Helper\\DumbDog(
-                        json_decode('" . json_encode(this->cfg) . "', false, 512, JSON_THROW_ON_ERROR),
-                        json_decode('" . json_encode(page, JSON_HEX_APOS | JSON_INVALID_UTF8_SUBSTITUTE) . "', false, 512, JSON_THROW_ON_ERROR),
-                        json_decode('" . json_encode(this->libs) . "', false, 512, JSON_THROW_ON_ERROR)
-                    );");
-                                                
+                    define("DUMBDOG", new Helper(page));
+                    eval("$DUMBDOG = constant('DUMBDOG');");
+                                                                    
                     if (!empty(this->template_engine)) {
                         this->template_engine->render(
                             page->template,
                             [
                                 page,
                                 settings,
-                                new Content(this->cfg, this->libs),
+                                new Content(),
                                 obj
                             ]
                         );
@@ -550,7 +550,7 @@ class DumbDog
     private function robots()
     {
         var database, settings;
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let settings = database->get("
                 SELECT
@@ -567,7 +567,7 @@ class DumbDog
     private function runMigrations(string migrations_folder)
     {
         var migration, migrations, err, found, database;
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         echo "Running migrations\n";
         let migration = shell_exec("ls " . rtrim(migrations_folder, "/") . "/*.sql");
@@ -729,7 +729,7 @@ class DumbDog
     private function sitemap()
     {
         var database, pages, iLoop, url;
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let pages = database->all("
                 SELECT

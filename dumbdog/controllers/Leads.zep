@@ -12,9 +12,11 @@ namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Contacts;
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\Messages;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
+use DumbDog\Helper\Dates;
 use DumbDog\Ui\Gfx\Table;
 
 class Leads extends Content
@@ -35,7 +37,7 @@ class Leads extends Content
     {
         var html, data, status = false, contacts;
         
-        let contacts = new Contacts(this->cfg, this->libs);
+        let contacts = new Contacts();
 
         let html = this->titles->page("Create a lead", "leads");
 
@@ -128,7 +130,7 @@ class Leads extends Content
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let contacts = new Contacts(this->cfg, this->libs);
+        let contacts = new Contacts();
 
         let model = this->database->decrypt(
             contacts->encrypt,
@@ -330,6 +332,7 @@ class Leads extends Content
                     </div>";
 
         if (mode == "edit") {
+            let html .= this->renderMessages(model->id);
             let html .= this->notes->render(model->id);
         }
 
@@ -402,7 +405,7 @@ class Leads extends Content
     {
         var data = [], query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let query = "
             SELECT 
@@ -463,6 +466,86 @@ class Leads extends Content
             data,
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    private function renderMessages(string lead_id)
+    {
+        var message, data, html, dates, messages;
+
+        let dates = new Dates();
+        let messages = new Messages();
+
+        let data = this->database->all(
+            "SELECT 
+                contacts.*,
+                messages.* 
+            FROM messages 
+            JOIN contacts ON contacts.id = messages.contact_id 
+            WHERE messages.lead_id=:lead_id AND messages.deleted_at IS NULL",
+            [
+                "lead_id": lead_id
+            ]
+        );
+
+        let html = "
+        <div id='messages-tab' class='dd-row'>
+            <div class='dd-col-12'>
+                <div class='dd-box'>
+                    <div class='dd-box-title'>Messages</div>
+                    <div class='dd-box-body'>
+                        <div class='dd-row'>";
+        if (count(data)) {
+            for message in data {
+                let message = this->database->decrypt(messages->decrypt, message);
+                let html .= "
+                            <div class='dd-col-12 dd-note'>
+                                <div class='dd-row'>
+                                    <div class='dd-message-header dd-pb-3'>
+                                        <div class='dd-float-left'>
+                                            <p>" . message->subject . "</p>
+                                        </div>
+                                        <div class='dd-float-right'>" .
+                                        this->buttons->delete(
+                                            message->id,
+                                            "delete_message",
+                                            "delete_message",
+                                            "Delete the message",
+                                            true
+                                        ) . 
+                                    "   </div>
+                                    </div>
+                                    <div class='dd-message-body'>
+                                        <div class='dd-input-group'>
+                                            <label>From</label>
+                                            <span class='dd-form-control'>" .
+                                                message->full_name .
+                                                (message->company ? " @" . message->company : "") . 
+                                                "&nbsp;&lt;<a href='mailto:" . message->email . "'>" . message->email . "</a>" .
+                                                (message->phone ? " | <a href='tel:" . message->phone . "'>". message->phone . "</a>" : "") . 
+                                                "&gt;" . 
+                                            "</span>
+                                        </div>
+                                        <div class='dd-input-group'>
+                                            <label>Message</label>
+                                            <span class='dd-form-control'>" .
+                                                message->message .
+                                            "</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>";
+            }
+        } else {
+            let html .= "<div class='dd-col-12 dd-note'><strong>No messages</strong></div>";
+        }
+                        
+        let html .= "   </div>
+                    </div>
+                </div>
+            </div>
+        </div>";
+
+        return html;
     }
 
     public function renderToolbar()

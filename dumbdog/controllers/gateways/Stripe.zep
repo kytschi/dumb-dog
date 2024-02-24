@@ -24,7 +24,7 @@ class Stripe extends Controller
         header("Content-Type: application/json");
 
         try {
-            let basket = (new Basket(this->cfg))->get();
+            let basket = (new Basket())->get();
             
             let settings = this->database->get("SELECT * FROM settings LIMIT 1");
             let stripe = this->getLib("stripe");
@@ -65,7 +65,7 @@ class Stripe extends Controller
     {
         var stripe, json, session, err, basket, status = false;
 
-        let basket = (new Basket(this->cfg))->get();
+        let basket = (new Basket())->get();
         let stripe = this->getLib("stripe");
         header("Content-Type: application/json");
 

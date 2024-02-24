@@ -26,14 +26,14 @@ class Controller
 
     public global_url = "";
 
-    public function __construct(object cfg, array libs = [])
+    public function __construct()
     {
-        let this->cfg = cfg;
-        let this->libs = libs;
-        let this->database = new Database(this->cfg);
+        let this->cfg = constant("CFG");
+        let this->libs = constant("LIBS");
+        let this->database = new Database();
         let this->global_url = this->cfg->dumb_dog_url . this->global_url;
 
-        let this->notes = new Notes(this->cfg);
+        let this->notes = new Notes();
 
         this->__globals();
     }
@@ -199,7 +199,7 @@ class Controller
     {
         var database, data, html = "";
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data = database->all("SELECT tags FROM " . table . " WHERE tags IS NOT NULL AND tags != ''");
 
         if (data) {

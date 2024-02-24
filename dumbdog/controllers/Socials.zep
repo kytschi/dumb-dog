@@ -34,9 +34,9 @@ class Socials extends Content
     public function add(string path)
     {
         var titles, html, data, files, input;
-        let files = new Files(this->cfg);
+        let files = new Files();
         let titles = new Titles();
-        let input = new Input(this->cfg);
+        let input = new Input();
 
         let html = titles->page("Create the social media link", "socials");
 
@@ -116,8 +116,8 @@ class Socials extends Content
     {
         var titles, html, model, data = [], input, files;
         let titles = new Titles();
-        let input = new Input(this->cfg);
-        let files = new Files(this->cfg);
+        let input = new Input();
+        let files = new Files();
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
@@ -215,7 +215,7 @@ class Socials extends Content
     {
         var html, button, input;
 
-        let input = new Input(this->cfg);
+        let input = new Input();
         let button = new Button();
 
         let html = "
@@ -295,7 +295,7 @@ class Socials extends Content
     {
         var data = [], query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let query = "
             SELECT * 

@@ -187,7 +187,7 @@ class Basket extends Controller
     private function create(string currency_id, tax_id)
     {
         var id, security, data, status;
-        let security = new Security(this->cfg);
+        let security = new Security();
         let id = this->database->uuid();
 
         let data = this->database->get("SELECT count(id) AS order_number FROM orders");
@@ -223,7 +223,7 @@ class Basket extends Controller
             return null;
         }
 
-        let security = new Security(this->cfg);
+        let security = new Security();
 
         let model = this->database->get(
             "SELECT
@@ -335,7 +335,7 @@ class Basket extends Controller
             }
         }
 
-        let security = new Security(this->cfg);
+        let security = new Security();
         let basket = this->get();
 
         let model = this->database->get(

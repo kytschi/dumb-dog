@@ -292,7 +292,7 @@ class Users extends Content
     {
         var data = [], query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let query = "
             SELECT

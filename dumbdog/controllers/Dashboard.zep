@@ -256,7 +256,7 @@ class Dashboard extends Controller
     {
         var titles, html, model, data = [], captcha, input;
 
-        let input = new Input(this->cfg);
+        let input = new Input();
         let titles = new Titles();
         let captcha = new Captcha();
 

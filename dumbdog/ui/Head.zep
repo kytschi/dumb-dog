@@ -17,9 +17,9 @@ class Head
 {
     private cfg;
 
-    public function __construct(object cfg)
+    public function __construct()
     {
-        let this->cfg = cfg;    
+        let this->cfg = constant("CFG");   
     }
 
     public function build(string location)
@@ -27,7 +27,7 @@ class Head
         var style, js;
 
         let js = new Javascript();
-        let style = new Style(this->cfg);
+        let style = new Style();
 
         return "<head>
             <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>

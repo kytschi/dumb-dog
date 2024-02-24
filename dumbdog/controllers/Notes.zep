@@ -24,11 +24,11 @@ class Notes
     protected inputs;
     protected icons;
 
-    public function __construct(object cfg)
+    public function __construct()
     {
         let this->buttons = new Button();
-        let this->database = new Database(cfg);
-        let this->inputs = new Input(cfg);
+        let this->database = new Database();
+        let this->inputs = new Input();
         let this->icons = new Icons();
     }
 
