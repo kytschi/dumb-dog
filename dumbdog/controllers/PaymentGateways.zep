@@ -10,31 +10,23 @@
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Controller;
-use DumbDog\Controllers\Files;
+use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Security;
-use DumbDog\Ui\Gfx\Button;
-use DumbDog\Ui\Gfx\Input;
-use DumbDog\Ui\Gfx\Table;
-use DumbDog\Ui\Gfx\Titles;
 
-class PaymentGateways extends Controller
+class PaymentGateways extends Content
 {
-    public global_url = "/DumbDog/payment-gateways";
+    public global_url = "/payment-gateways";
     public type = "payment-gateway";
     public required = ["name", "title"];
 
     public function add(string path)
     {
-        var titles, html, data, files, input;
-        let files = new Files();
-        let titles = new Titles();
-        let input = new Input();
+        var html, data;
 
-        let html = titles->page("Create the payment gateway");
+        let html = this->titles->page("Create the payment gateway");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -107,11 +99,8 @@ class PaymentGateways extends Controller
 
     public function edit(string path)
     {
-        var titles, html, model, data = [], input, files;
-        let titles = new Titles();
-        let input = new Input();
-        let files = new Files();
-
+        var html, model, data = [];
+        
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
@@ -123,7 +112,7 @@ class PaymentGateways extends Controller
             throw new NotFoundException("Payment gateway not found");
         }
 
-        let html = titles->page("Edit the payment gateway");
+        let html = this->titles->page("Edit the payment gateway");
 
         if (isset(_GET["saved"])) {
             let html .= this->saveSuccess("Payment gateway has been updated");
@@ -208,81 +197,29 @@ class PaymentGateways extends Controller
 
     public function index(string path)
     {
-        var titles, table, html, query, data, button;
-        let titles = new Titles();
-        let button = new Button();
-        let table = new Table();
+        var html;       
         
-        let html = titles->page("Payment gateways");
+        let html = this->titles->page("Payment gateways");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the payment gateway");
         }
 
-        let html .= "
-            <form class='card' action='" . this->global_url . "' method='post'>
-                <div class='card-body'>
-                    <div class='flex two'>
-                        <div class='full half-1000'>
-                            <input 
-                                class='w-100'
-                                name='q'
-                                type='text' 
-                                placeholder='Search the " . (ucwords(this->type). "s") . "'
-                                value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
-                        </div>
-                        <div>";
-                        if (isset(_POST["q"])) {
-                            let html .= "<a href='" . this->global_url . "' class='button-blank float-start'>clear</a>";
-                        }
-            
-            let html .= "   <button 
-                                type='submit'
-                                name='search' 
-                                class='float-start' 
-                                value='search'>search</button>
-                            <div class='float-end'>" . 
-                                button->add(this->global_url . "/add") .
-                            "</div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </form>";
-
-        let html .= this->tags(path, "content");
-
-        let html .= "<article class='card'><div class='card-body'>";
-
-        let data = [];
-        let query = "
-            SELECT payment_gateways.* FROM payment_gateways";
-        if (isset(_POST["q"])) {
-            let query .= " AND payment_gateways.name LIKE :query";
-            let data["query"] = "%" . _POST["q"] . "%";
+        if (this->back_url) {
+            let html .= this->renderBack();
+        } else {
+            let html .= this->renderToolbar();
         }
-        let query .= " ORDER BY payment_gateways.name";
 
-        let html .= table->build(
-            [
-                "name",
-                "title",
-                "description"
-            ],
-            this->database->all(query, data),
-            "/DumbDog/" . ltrim(path, "/")
-        );
-
-        return html . "</div></article>";
+        let html .= 
+            this->inputs->searchBox(this->global_url, "Search the payment gateways") .
+            this->renderList(path);
+        return html;
     }
 
     private function render(model, mode = "add")
     {
-        var html, button, input;
-
-        let input = new Input();
-        let button = new Button();
-
+        var html;
         let html = "
         <form method='post' enctype='multipart/form-data'>
             <div class='tabs'>
@@ -291,12 +228,12 @@ class PaymentGateways extends Controller
                         <div class='col-12'>
                             <article class='card'>
                                 <div class='card-body'>" .
-                                    input->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
-                                    input->toggle("Default", "is_default", false, model->is_default) . 
-                                    input->text("Name", "name", "Name the payment gateway", true, model->name) .
-                                    input->text("Title", "title", "The display title for the payment gateway", true, model->title) .
-                                    input->textarea("Description", "description", "The display description", false, model->description) .
-                                    input->text("Slug", "slug", "Slug to help internally identify", false, model->slug) .
+                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Default", "is_default", false, model->is_default) . 
+                                    this->inputs->text("Name", "name", "Name the payment gateway", true, model->name) .
+                                    this->inputs->text("Title", "title", "The display title for the payment gateway", true, model->title) .
+                                    this->inputs->textarea("Description", "description", "The display description", false, model->description) .
+                                    this->inputs->text("Slug", "slug", "Slug to help internally identify", false, model->slug) .
                                 "</div>
                             </article>
                         </div>
@@ -314,28 +251,47 @@ class PaymentGateways extends Controller
                     </li>
                     <li class='nav-item' role='presentation'><hr/></li>
                     <li class='nav-item' role='presentation'>" . 
-                        button->back(this->global_url) .   
+                        this->buttons->back(this->global_url) .   
                     "</li>";
         if (mode == "edit") {    
             if (model->deleted_at) {
                 let html .= "<li class='nav-item' role='presentation'>" .
-                    button->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='nav-item' role='presentation'>" .
-                    button->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
                 "</li>";
             }
         }
 
         let html .= "<li class='nav-item' role='presentation'>". 
-                        button->save() .   
+                        this->buttons->save() .   
                     "</li>
                 </ul>
             </div>
         </form>";
 
         return html;
+    }
+
+    public function renderList(string path)
+    {
+        var data = [], query;
+
+        let query = "
+            SELECT payment_gateways.* FROM payment_gateways";
+        if (isset(_POST["q"])) {
+            let query .= " AND payment_gateways.name LIKE :query";
+            let data["query"] = "%" . _POST["q"] . "%";
+        }
+        let query .= " ORDER BY payment_gateways.name";
+
+        return this->tables->build(
+            this->list,
+            this->database->all(query, data),
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
+        );
     }
 
     private function setData(data)

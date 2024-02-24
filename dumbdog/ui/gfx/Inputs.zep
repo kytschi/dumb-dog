@@ -1,7 +1,7 @@
 /**
- * Dumb Dog Input builder
+ * Dumb Dog Inputs
  *
- * @package     DumbDog\Ui\Gfx\Input
+ * @package     DumbDog\Ui\Gfx\Inputs
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
@@ -12,9 +12,10 @@ namespace DumbDog\Ui\Gfx;
 
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\Exception;
+use DumbDog\Ui\Gfx\Buttons;
 use DumbDog\Ui\Gfx\Icons;
 
-class Input
+class Inputs
 {
     protected cfg;
 
@@ -206,6 +207,42 @@ class Input
         value = ""
     ) {
         return this->generic(label, var_name, placeholder, required, value, "password");
+    }
+
+    public function searchBox(string url, string label = "Search the entries")
+    {
+        var html = "", buttons;
+        let buttons = new Buttons();
+
+        let html = "
+        <form class='dd-box' action='" . url . "' method='post'>
+            <div class='dd-box-body'>
+                <div class='dd-flex'>
+                    <div class='dd-col'>
+                        <input 
+                            class='dd-form-control dd-wfull'
+                            name='q'
+                            type='text' 
+                            placeholder='Search the entries'
+                            value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
+                    </div>
+                    <div class='dd-col-auto dd-pl-4'>";
+
+        if (isset(_POST["q"])) {
+            let html .= "<a href='" . url . "' class='dd-button-blank dd-mr-3'>clear</a>";
+        }
+            
+        let html .= "   <button 
+                            type='submit'
+                            name='search' 
+                            class='dd-button' 
+                            value='search'>search</button>
+                    </div>
+                </div>
+            </div>
+        </form>";
+
+        return html;
     }
 
     public function select(

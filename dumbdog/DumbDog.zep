@@ -4,7 +4,7 @@
  * @package     DumbDog\DumbDog
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
- * @version     0.0.5 alpha
+ * @version     0.0.7 alpha
  *
  * Copyright 2024 Mike Welsh
 */
@@ -13,6 +13,7 @@ namespace DumbDog;
 //use DumbDog\Controllers\Appointments;
 use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\ContentStacks;
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 //use DumbDog\Controllers\Events;
@@ -46,7 +47,7 @@ class DumbDog
     private cfg;
     private libs = [];
     private template_engine = null;
-    private version = "0.0.6 alpha";
+    private version = "0.0.7 alpha";
 
     public function __construct(
         string cfg_file,
@@ -109,7 +110,7 @@ class DumbDog
         if (template_engine) {
             this->setTemplateEngine(template_engine);
         }
-
+        
         try {
             if (strpos(path, this->cfg->dumb_dog_url) !== false) {
                 let backend = true;
@@ -160,7 +161,8 @@ class DumbDog
 
         var controllers = [
             //"Appointments": new Appointments(),
-            "Comments": new Comments(),
+            //"Comments": new Comments(),
+            "ContentStacks": new ContentStacks(),
             "Dashboard": new Dashboard(),
             //"Events": new Events(),
             "Files": new Files(),
@@ -170,8 +172,8 @@ class DumbDog
             "Pages": new Content(),
             "Settings": new Settings(),
             "Socials": new Socials(),
-            "Templates": new Templates(),
-            "Themes": new Themes(),
+            //"Templates": new Templates(),
+            //"Themes": new Themes(),
             "Users": new Users()
         ];
 

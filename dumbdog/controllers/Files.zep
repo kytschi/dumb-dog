@@ -11,17 +11,20 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Controller;
-use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Helper\Security;
-use DumbDog\Ui\Gfx\Input;
-use DumbDog\Ui\Gfx\Tiles;
-use DumbDog\Ui\Gfx\Titles;
+use DumbDog\Ui\Gfx\Inputs;
 
 class Files extends Controller
 {
     public folder = "/website/files/";
+    protected inputs;
+
+    public function __globals()
+    {
+        let this->inputs = new Inputs();
+    }
 
     /*public function add(string path)
     {
@@ -301,13 +304,11 @@ class Files extends Controller
         string resource_name = "",
         bool delete_old = false
     ) {
-        var filename, status, data = [], input, database;
-        let input = new Input();
+        var filename, status, data = [];
         let filename = this->createFilename(input_name);
-        let database = new Database();
-
+        
         if (delete_old) {
-            let status = database->execute("
+            let status = this->database->execute("
                 UPDATE 
                     files 
                 SET 
@@ -330,11 +331,11 @@ class Files extends Controller
         let data["name"] =  _FILES[input_name]["name"];
         let data["filename"] = this->saveFile(input_name, filename);
         let data["mime_type"] = mime_content_type(getcwd() . this->folder . data["filename"]);
-        let data["created_by"] = this->getUserId();
-        let data["updated_by"] = this->getUserId();
-        let data["tags"] = resource_id ? "" : input->isTagify(_POST["tags"]);
+        let data["created_by"] = this->database->getUserId();
+        let data["updated_by"] = this->database->getUserId();
+        let data["tags"] = resource_id ? "" : this->inputs->isTagify(_POST["tags"]);
         
-        let status = database->execute(
+        let status = this->database->execute(
             "INSERT INTO files 
                 (id,
                 resource,

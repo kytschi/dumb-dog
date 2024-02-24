@@ -6,7 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -17,7 +17,7 @@ use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Ui\Captcha;
 use DumbDog\Ui\Gfx\Icons;
-use DumbDog\Ui\Gfx\Input;
+use DumbDog\Ui\Gfx\Inputs;
 use DumbDog\Ui\Gfx\Tiles;
 use DumbDog\Ui\Gfx\Titles;
 
@@ -256,7 +256,7 @@ class Dashboard extends Controller
     {
         var titles, html, model, data = [], captcha, input;
 
-        let input = new Input();
+        let input = new Inputs();
         let titles = new Titles();
         let captcha = new Captcha();
 
@@ -292,7 +292,8 @@ class Dashboard extends Controller
             }
         }
 
-        let html .= "<form method='post' action='" . this->cfg->dumb_dog_url . "/" . path . "?back=" . urlencode(trim(path, "/")) . "'>
+        let html .= "
+        <form method='post' action='" . this->cfg->dumb_dog_url . "/" . path . "?back=" . urlencode(trim(path, "/")) . "'>
             <div id='dd-login' class='dd-box'>
                 <div class='dd-box-body'>" .
                     input->text("Username", "name", "Please enter your username", true) .

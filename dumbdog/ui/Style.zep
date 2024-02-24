@@ -193,24 +193,6 @@ class Style
         .dd-box-footer a, .dd-box-footer button {
             margin-left: 20px;
         }
-        .dd-box-title, .dd-stack-title {
-            display: flex;
-            flex-direction: row;
-            /*justify-content: space-between;*/
-        }
-        .dd-box-title span, .dd-stack-title span {
-            width: 80%;
-            float: left;
-        }
-        .dd-box-title button, .dd-stack-title button {
-            float: right;
-            margin-left: 10px;
-        }
-        .dd-box-title div, .dd-stack-title div {
-            margin-left: auto;
-            float: right;
-        }
-
         .dd-table td {
             padding: 15px 15px 0px 15px;
             border-bottom: 3px solid var(--box-title-border-colour);
@@ -218,8 +200,8 @@ class Style
 
         .dd-box-title, .dd-table th {
             padding: 10px 15px 5px 15px;
-            border-bottom: 3px solid var(--box-title-border-colour);
             background-color: var(--box-title-background-colour);
+            border-bottom: 3px solid var(--box-title-border-colour);
             color: var(--box-title-colour);
             font-size: 38pt;
             line-height: 30pt;
@@ -321,6 +303,7 @@ class Style
         .dd-button-blank {
             background: none !important;
             border: 0 !important;
+            color: var(--button-background-colour);
         }
         .dd-button:hover {
             background-color: var(--button-hover-background-colour);
@@ -733,6 +716,8 @@ class Style
             text-align: right;
         }
         .dd-image-preview img {
+            margin-left: 20px;
+            margin-top: 20px;
             max-width: 100%;
         }
         ";
@@ -1191,47 +1176,36 @@ class Style
         .dd-mb-0 {
             margin-bottom: 0;
         }
-
         .dd-mb-1 {
             margin-bottom: 0.25rem !important;
         }
-        
         .dd-mb-2 {
             margin-bottom: 0.5rem !important;
         }
-        
         .dd-mb-3 {
             margin-bottom: 1rem !important;
         }
-        
         .dd-mb-4 {
             margin-bottom: 1.5rem !important;
         }
-        
         .dd-mb-5 {
             margin-bottom: 3rem !important;
         }
-
         .dd-mt-0 {
             margin-top: 0 !important;
         }
-        
         .dd-mt-1 {
             margin-top: 0.25rem !important;dd-image-preview
         }
-        
         .dd-mt-2 {
             margin-top: 0.5rem !important;
         }
-        
         .dd-mt-3 {
             margin-top: 1rem !important;
         }
-        
         .dd-mt-4 {
             margin-top: 1.5rem !important;
         }
-        
         .dd-mt-5 {
             margin-top: 3rem !important;
         }
@@ -1239,49 +1213,112 @@ class Style
         .dd-pt-0 {
             padding-top: 0 !important;
         }
-        
         .dd-pt-1 {
             padding-top: 0.25rem !important;
         }
-        
         .dd-pt-2 {
             padding-top: 0.5rem !important;
         }
-        
         .dd-pt-3 {
             padding-top: 1rem !important;
         }
-        
         .dd-pt-4 {
             padding-top: 1.5rem !important;
         }
-        
         .dd-pt-5 {
             padding-top: 3rem !important;
         }
-
         .dd-pb-0 {
             padding-bottom: 0 !important;
         }
-        
         .dd-pb-1 {
             padding-bottom: 0.25rem !important;
         }
-        
         .dd-pb-2 {
             padding-bottom: 0.5rem !important;
         }
-        
         .dd-pb-3 {
             padding-bottom: 1rem !important;
         }
-        
         .dd-pb-4 {
             padding-bottom: 1.5rem !important;
         }
-        
         .dd-pb-5 {
             padding-bottom: 3rem !important;
+        }
+
+        .dd-pl-0 {
+            padding-left: 0 !important;
+        }
+        .dd-pl-1 {
+            padding-left: 0.25rem !important;
+        }
+        .dd-pl-2 {
+            padding-left: 0.5rem !important;
+        }
+        .dd-pl-3 {
+            padding-left: 1rem !important;
+        }
+        .dd-pl-4 {
+            padding-left: 1.5rem !important;
+        }
+        .dd-pl-5 {
+            padding-left: 3rem !important;
+        }
+        .dd-pr-0 {
+            padding-right: 0 !important;
+        }
+        .dd-pr-1 {
+            padding-right: 0.25rem !important;
+        }
+        .dd-pr-2 {
+            padding-right: 0.5rem !important;
+        }
+        .dd-pr-3 {
+            padding-right: 1rem !important;
+        }
+        .dd-pr-4 {
+            padding-right: 1.5rem !important;
+        }
+        .dd-pr-5 {
+            padding-right: 3rem !important;
+        }
+        
+        .dd-ml-0 {
+            margin-left: 0 !important;
+        }
+        .dd-ml-1 {
+            margin-left: 0.25rem !important;
+        }
+        .dd-ml-2 {
+            margin-left: 0.5rem !important;
+        }
+        .dd-ml-3 {
+            margin-left: 1rem !important;
+        }
+        .dd-ml-4 {
+            margin-left: 1.5rem !important;
+        }
+        .dd-ml-5 {
+            margin-left: 3rem !important;
+        }
+        .dd-mr-0 {
+            margin-right: 0 !important;
+        }
+        .dd-mr-1 {
+            margin-right: 0.25rem !important;
+        }
+        .dd-mr-2 {
+            margin-right: 0.5rem !important;
+        }
+        .dd-mr-3 {
+            margin-right: 1rem !important;
+        }
+        .dd-mr-4 {
+            margin-right: 1.5rem !important;
+        }
+        .dd-mr-5 {
+            margin-right: 3rem !important;
         }
 
         .dd-flex {
@@ -1457,6 +1494,10 @@ class Style
             --text-deleted: #f44f46;
 
             --popup-background-color: #fff;
+        }
+
+        .dd-border-none {
+            border: 0 !important;
         }
         ";
     }

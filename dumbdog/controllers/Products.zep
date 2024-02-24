@@ -13,13 +13,10 @@ namespace DumbDog\Controllers;
 use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\ValidationException;
-use DumbDog\Ui\Gfx\Button;
-use DumbDog\Ui\Gfx\Input;
-use DumbDog\Ui\Gfx\Table;
 
 class Products extends Content
 {
-    public global_url = "/DumbDog/products";
+    public global_url = "/products";
     public type = "product";
     public title = "Products";
     public back_url = "";
@@ -123,8 +120,7 @@ class Products extends Content
 
     private function countriesSelect(selected)
     {
-        var select = [], data, input;
-        let input = new Input();
+        var select = [], data;
         let data = this->database->all("
             SELECT * FROM countries 
             ORDER BY is_default DESC, name");
@@ -138,7 +134,7 @@ class Products extends Content
             let iLoop = iLoop + 1;
         }
 
-        return input->select(
+        return this->inputs->select(
             "Country",
             "country_id[]",
             "The country",
@@ -150,8 +146,7 @@ class Products extends Content
 
     private function currenciesSelect(selected)
     {
-        var select = [], data, input;
-        let input = new Input();
+        var select = [], data;
         let data = this->database->all("
             SELECT * FROM currencies 
             ORDER BY is_default DESC, name");
@@ -165,7 +160,7 @@ class Products extends Content
             let iLoop = iLoop + 1;
         }
 
-        return input->select(
+        return this->inputs->select(
             "Currency",
             "currency_id[]",
             "The currency",
@@ -293,10 +288,8 @@ class Products extends Content
 
     public function renderExtra(model)
     {
-        var input, data, item, button, html;
-        let input = new Input();
-        let button = new Button();
-
+        var data, item, html;
+        
         let model->price = 0;
 
         if (model->id) {
@@ -329,9 +322,9 @@ class Products extends Content
                 <article class='card'>
                     <header>Product</header>
                     <div class='card-body'>" .
-                        input->toggle("On offer", "on_offer", false, model->on_offer) . 
-                        input->text("Code", "code", "The product code", true, model->code) .
-                        input->number("Stock", "stock", "The stock", true, model->stock) .
+                        this->inputs->toggle("On offer", "on_offer", false, model->on_offer) . 
+                        this->inputs->text("Code", "code", "The product code", true, model->code) .
+                        this->inputs->number("Stock", "stock", "The stock", true, model->stock) .
                     "</div>
                 </article>
             </div>
@@ -339,7 +332,7 @@ class Products extends Content
                 <article class='card'>
                     <header>
                         <span>Prices</span>" . 
-                        input->inputPopup("create-price", "create_price", "Create a new price") .
+                        this->inputs->inputPopup("create-price", "create_price", "Create a new price") .
                     "</header>
                     <div class='card-body'>";
                     if (count(model->prices)) {
@@ -349,15 +342,15 @@ class Products extends Content
                             <div class='stack'>
                                 <div class='stack-header'>
                                     <h3>" . item->name . "</h3>" .
-                                    button->delete(item->id, "delete-price-" . item->id, "delete_price[]") .
+                                    this->buttons->delete(item->id, "delete-price-" . item->id, "delete_price[]") .
                                 "</div>
                                 <div class='stack-body'>" .
-                                input->text("Name", "price_name[]", "The price name", true, item->name) .
+                                this->inputs->text("Name", "price_name[]", "The price name", true, item->name) .
                                 this->currenciesSelect(item->currency_id) . 
                                 this->taxesSelect(item->tax_id) . 
-                                input->text("Price", "price[]", "The price", true, item->price) .
-                                input->text("Offer price", "offer_price[]", "The offer price", false, item->offer_price) .
-                                input->hidden("price_id[]", item->id) . 
+                                this->inputs->text("Price", "price[]", "The price", true, item->price) .
+                                this->inputs->text("Offer price", "offer_price[]", "The offer price", false, item->offer_price) .
+                                this->inputs->hidden("price_id[]", item->id) . 
                             "   </div>
                             </div>";
                         }
@@ -372,7 +365,7 @@ class Products extends Content
                 <article class='card'>
                     <header>
                         <span>Shipping</span>" . 
-                        input->inputPopup("create-shipping", "create_shipping", "Create a new shipping location") .
+                        this->inputs->inputPopup("create-shipping", "create_shipping", "Create a new shipping location") .
                     "</header>
                     <div class='card-body'>";
                     if (count(model->shipping)) {
@@ -382,14 +375,14 @@ class Products extends Content
                             <div class='stack'>
                                 <div class='stack-header'>
                                     <h3>" . item->name . "</h3>" .
-                                    button->delete(item->id, "delete-shpping-" . item->id, "delete_shpping[]") .
+                                    this->buttons->delete(item->id, "delete-shpping-" . item->id, "delete_shpping[]") .
                                 "</div>
                                 <div class='stack-body'>" .
-                                input->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
-                                input->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
+                                this->inputs->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
+                                this->inputs->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
                                 this->countriesSelect(item->country_id) . 
-                                input->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
-                                input->hidden("shipping_id[]", item->id) . 
+                                this->inputs->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
+                                this->inputs->hidden("shipping_id[]", item->id) . 
                             "   </div>
                             </div>";
                         }
@@ -427,9 +420,7 @@ class Products extends Content
 
     public function renderList(string path)
     {
-        var data, query, table;
-
-        let table = new Table();
+        var data, query;
 
         let data = [];
         let query = "
@@ -451,17 +442,17 @@ class Products extends Content
         }
         let query .= " ORDER BY main_page.name";
 
-        return table->build(
+        return this->tables->build(
             this->list,
             this->database->all(query, data),
-            "/DumbDog/" . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
 
     private function taxesSelect(selected)
     {
-        var select = [], data, input;
-        let input = new Input();
+        var select = [], data;
+        
         let data = this->database->all("
             SELECT * FROM taxes 
             ORDER BY is_default DESC, name");
@@ -477,7 +468,7 @@ class Products extends Content
             let iLoop = iLoop + 1;
         }
 
-        return input->select(
+        return this->inputs->select(
             "Tax rate",
             "tax_id[]",
             "The tax rate",

@@ -11,14 +11,9 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
-use DumbDog\Controllers\Files;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
-use DumbDog\Ui\Gfx\Button;
-use DumbDog\Ui\Gfx\Input;
-use DumbDog\Ui\Gfx\Table;
-use DumbDog\Ui\Gfx\Titles;
 
 class Socials extends Content
 {
@@ -33,12 +28,9 @@ class Socials extends Content
 
     public function add(string path)
     {
-        var titles, html, data, files, input;
-        let files = new Files();
-        let titles = new Titles();
-        let input = new Input();
+        var html, data;
 
-        let html = titles->page("Create the social media link", "socials");
+        let html = this->titles->page("Create the social media link", "socials");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -53,8 +45,8 @@ class Socials extends Content
                     let data["title"] = _POST["title"];
                     let data["description"] = _POST["description"];
                     let data["url"] = _POST["url"];
-                    let data["created_by"] = this->getUserId();
-                    let data["updated_by"] = this->getUserId();
+                    let data["created_by"] = this->database->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
                     
                     let status = this->database->execute(
                         "INSERT INTO socials 
@@ -86,7 +78,7 @@ class Socials extends Content
                     } else {
                         if (isset(_FILES["image"]["name"])) {
                             if (!empty(_FILES["image"]["name"])) {
-                                files->addResource("image", data["id"], "image");
+                                this->files->addResource("image", data["id"], "image");
                             }
                         }
                         this->redirect(this->global_url . "?saved=true");
@@ -114,18 +106,15 @@ class Socials extends Content
 
     public function edit(string path)
     {
-        var titles, html, model, data = [], input, files;
-        let titles = new Titles();
-        let input = new Input();
-        let files = new Files();
-
+        var html, model, data = [];
+        
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
                 socials.*,
                 files.id AS image_id,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
             FROM socials 
             LEFT JOIN files ON files.resource_id = socials.id AND files.deleted_at IS NULL 
             WHERE socials.id=:id", data);
@@ -134,7 +123,7 @@ class Socials extends Content
             throw new NotFoundException("Social media link not found");
         }
 
-        let html = titles->page("Edit the social media link", "socials");
+        let html = this->titles->page("Edit the social media link", "socials");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -167,12 +156,12 @@ class Socials extends Content
                 let data["sub_title"] = _POST["sub_title"];
                 let data["description"] = _POST["description"];
                 let data["url"] = _POST["url"];
-                let data["tags"] = input->isTagify(_POST["tags"]);
-                let data["updated_by"] = this->getUserId();
+                let data["tags"] = this->inputs->isTagify(_POST["tags"]);
+                let data["updated_by"] = this->database->getUserId();
                 
                 if (isset(_FILES["image"]["name"])) {
                     if (!empty(_FILES["image"]["name"])) {
-                        files->addResource("image", data["id"], "image", true);
+                        this->files->addResource("image", data["id"], "image", true);
                     }
                 }
 
@@ -213,10 +202,7 @@ class Socials extends Content
 
     private function render(model, mode = "add")
     {
-        var html, button, input;
-
-        let input = new Input();
-        let button = new Button();
+        var html;
 
         let html = "
         <form method='post' enctype='multipart/form-data'>
@@ -226,12 +212,12 @@ class Socials extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    input->text("Name", "name", "Name the social media link", true, model->name) .
-                                    input->text("Title", "title", "The display title for the social media link", false, model->title) .
-                                    input->text("URL", "url", "The URL for the social media link", false, model->url) .
-                                    input->text("Sub title", "sub_title", "The display sub title for the social media link", false, model->sub_title) .
-                                    input->wysiwyg("Description", "description", "The display description for the social media link", false, model->description) . 
-                                    input->tags("Tags", "tags", "Tag the social media link", false, model->tags) . 
+                                    this->inputs->text("Name", "name", "Name the social media link", true, model->name) .
+                                    this->inputs->text("Title", "title", "The display title for the social media link", false, model->title) .
+                                    this->inputs->text("URL", "url", "The URL for the social media link", false, model->url) .
+                                    this->inputs->text("Sub title", "sub_title", "The display sub title for the social media link", false, model->sub_title) .
+                                    this->inputs->wysiwyg("Description", "description", "The display description for the social media link", false, model->description) . 
+                                    this->inputs->tags("Tags", "tags", "Tag the social media link", false, model->tags) . 
                                 "</div>
                             </div>
                         </div>
@@ -240,7 +226,7 @@ class Socials extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    input->image("Image", "image", "Upload your image here", false, model) . 
+                                    this->inputs->image("Image", "image", "Upload your image here", false, model) . 
                                 "</div>
                             </div>
                         </div>
@@ -267,22 +253,22 @@ class Socials extends Content
                     </li>
                     <li class='dd-nav-item' role='presentation'><hr/></li>
                     <li class='dd-nav-item' role='presentation'>" . 
-                        button->back(this->global_url) .   
+                        this->buttons->back(this->global_url) .   
                     "</li>";
         if (mode == "edit") {    
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    button->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    button->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
                 "</li>";
             }
         }
 
         let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        button->save() .   
+                        this->buttons->save() .   
                     "</li>
                 </ul>
             </div>
@@ -293,9 +279,7 @@ class Socials extends Content
 
     public function renderList(string path)
     {
-        var data = [], query, table;
-
-        let table = new Table();
+        var data = [], query;
 
         let query = "
             SELECT * 
@@ -311,7 +295,7 @@ class Socials extends Content
         }
         let query .= " ORDER BY name";
 
-        return table->build(
+        return this->tables->build(
             this->list,
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")

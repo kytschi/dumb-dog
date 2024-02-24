@@ -1,17 +1,17 @@
 /**
- * Dumb Dog Button builder
+ * Dumb Dog Buttons
  *
- * @package     DumbDog\Ui\Gfx\Button
+ * @package     DumbDog\Ui\Gfx\Buttons
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Ui\Gfx;
 
 use DumbDog\Ui\Gfx\Icons;
 
-class Button
+class Buttons
 {
     private icons;
 

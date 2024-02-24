@@ -11,10 +11,7 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
-use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
-use DumbDog\Ui\Gfx\Table;
-use DumbDog\Ui\Gfx\Titles;
 
 class Events extends Content
 {
@@ -105,7 +102,7 @@ class Events extends Content
         }
         let query .= " ORDER BY main_page.name";
 
-        let html = html . table->build(
+        let html = html . this->tables->build(
             [
                 "name|with_tags",
                 "event_on|event_date"

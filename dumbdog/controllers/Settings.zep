@@ -14,10 +14,6 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Button;
-use DumbDog\Ui\Gfx\Input;
-use DumbDog\Ui\Gfx\Tiles;
-use DumbDog\Ui\Gfx\Titles;
 
 class Settings extends Content
 {
