@@ -43,7 +43,7 @@ class Themes extends Controller
                     let data["created_by"] = this->getUserId();
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
+                    let database = new Database();
                     let status = database->execute(
                         "INSERT INTO themes 
                             (id, name, folder, `default`, created_at, created_by, updated_at, updated_by, status) 
@@ -107,7 +107,7 @@ class Themes extends Controller
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM themes WHERE id=:id", data);
 
@@ -145,7 +145,7 @@ class Themes extends Controller
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
+                    let database = new Database();
                     let status = database->execute(
                         "UPDATE themes SET 
                             name=:name, folder=:folder, `default`=:default, updated_at=NOW(), updated_by=:updated_by
@@ -227,7 +227,7 @@ class Themes extends Controller
             <a href='" . this->global_url . "/add' class='dd-link dd-round dd-icon' title='Add a theme'>&nbsp;</a>
         </div>";
 
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let tiles = new Tiles();
         let html = html . tiles->build(

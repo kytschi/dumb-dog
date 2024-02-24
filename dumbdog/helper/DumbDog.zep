@@ -54,14 +54,16 @@ class DumbDog
         "DESC"
     ];
 
-    public function __construct(object cfg, object page, array libs = [])
+    public function __construct(object page)
     {
-        var site;
+        var site, cfg, libs;
+        let cfg = constant("CFG");
+        let libs = constant("LIBS");
 
         let this->cfg = cfg;
         let this->libs = libs;
         let this->page = page;
-        let this->database = new Database(cfg);
+        let this->database = new Database();
 
         let site = this->database->get("
         SELECT
@@ -77,20 +79,20 @@ class DumbDog
         if (isset(this->cfg->gateway)) {
             if (isset(this->cfg->gateway->stripe)) {
                 let site->stripe_api_key = this->cfg->gateway->stripe->public_api_key;
-                let this->payment_gateways = new PaymentGateways(this->cfg);
+                let this->payment_gateways = new PaymentGateways();
             }
         }
 
         let this->site = site;
 
         let this->captcha = new Captcha();
-        let this->basket = new Basket(this->cfg);
+        let this->basket = new Basket();
     }
 
     public function addComment(array data)
     {
         var security, status;
-        let security = new Security(this->cfg);
+        let security = new Security();
 
         let data["content"] = security->clean(data["content"]);
         let data["created_by"] = this->database->system_uuid;
@@ -124,7 +126,7 @@ class DumbDog
     public function addMessage(array data)
     {
         let data["type"] = "inbox";
-        return (new Messages(this->cfg, this->libs))->save(data);
+        return (new Messages())->save(data);
     }
 
     private function addStacks(data)
@@ -188,7 +190,7 @@ class DumbDog
     public function bookAppointment(array data)
     {
         var model, security;
-        let security = new Security(this->cfg);
+        let security = new Security();
 
         let model = this->database->get(
             "SELECT * FROM appointments WHERE free_slot=1 AND id=:id",
@@ -369,7 +371,7 @@ class DumbDog
     {
         var query, results, item, files;
 
-        let files = new Files(this->cfg);
+        let files = new Files();
 
         let query = "
         SELECT
@@ -426,7 +428,7 @@ class DumbDog
     private function pageQuery(array filters, string type = "page")
     {
         var query, where, join = "", data = [], order = "", item, key, files;
-        let files = new Files(this->cfg);
+        let files = new Files();
         
         let query = "
         SELECT
@@ -512,13 +514,13 @@ class DumbDog
 
     public function products(array filters = [])
     {
-        return (new Products(this->cfg))->get(filters);
+        return (new Products())->get(filters);
     }
 
     public function randomString(int length = 64)
     {
         var security;
-        let security = new Security(this->cfg);
+        let security = new Security();
         return security->randomString(length);
     }
 
@@ -535,7 +537,7 @@ class DumbDog
     public function socials()
     {
         var files;
-        let files = new Files(this->cfg);
+        let files = new Files();
 
         return this->database->all("
         SELECT
@@ -554,7 +556,7 @@ class DumbDog
 
         let data["tag"] = "%{\"value\":\"" . tag . "\"}%";
 
-        let files = new Files(this->cfg);
+        let files = new Files();
 
         let query = "
         SELECT

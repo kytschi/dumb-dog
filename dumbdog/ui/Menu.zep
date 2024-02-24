@@ -17,16 +17,16 @@ class Menu
 {
     protected cfg;
 
-    public function __construct(object cfg)
+    public function __construct()
     {
-        let this->cfg = cfg;
+        let this->cfg = constant("CFG");
     }
 
     public function build()
     {
         var total, controller;
 
-        let controller = new Controller(this->cfg);
+        let controller = new Controller();
 
         echo "
         <nav>
@@ -118,7 +118,7 @@ class Menu
     {
         var controller, icons, messages;
 
-        let controller = new Controller(this->cfg);
+        let controller = new Controller();
         let icons = new Icons();
 
         let messages = count(controller->database->all("SELECT count(id) FROM messages WHERE status='unread' AND deleted_at IS NULL"));

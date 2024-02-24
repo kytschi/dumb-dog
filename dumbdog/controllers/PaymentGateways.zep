@@ -30,9 +30,9 @@ class PaymentGateways extends Controller
     public function add(string path)
     {
         var titles, html, data, files, input;
-        let files = new Files(this->cfg);
+        let files = new Files();
         let titles = new Titles();
-        let input = new Input(this->cfg);
+        let input = new Input();
 
         let html = titles->page("Create the payment gateway");
 
@@ -109,8 +109,8 @@ class PaymentGateways extends Controller
     {
         var titles, html, model, data = [], input, files;
         let titles = new Titles();
-        let input = new Input(this->cfg);
-        let files = new Files(this->cfg);
+        let input = new Input();
+        let files = new Files();
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
@@ -211,7 +211,7 @@ class PaymentGateways extends Controller
         var titles, table, html, query, data, button;
         let titles = new Titles();
         let button = new Button();
-        let table = new Table(this->cfg);
+        let table = new Table();
         
         let html = titles->page("Payment gateways");
 
@@ -280,7 +280,7 @@ class PaymentGateways extends Controller
     {
         var html, button, input;
 
-        let input = new Input(this->cfg);
+        let input = new Input();
         let button = new Button();
 
         let html = "

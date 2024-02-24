@@ -35,9 +35,9 @@ class Menus extends Content
     public function add(string path)
     {
         var titles, html, data, files, input;
-        let files = new Files(this->cfg);
+        let files = new Files();
         let titles = new Titles();
-        let input = new Input(this->cfg);
+        let input = new Input();
 
         let html = titles->page("Create a menu", "menus");
 
@@ -156,7 +156,7 @@ class Menus extends Content
     private function contentSelect(selected = "", string name = "content_id")
     {
         var select = ["": "no content"], data, input;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let data = this->database->all(
             "SELECT 
                 *,
@@ -217,8 +217,8 @@ class Menus extends Content
     {
         var titles, html, model, data = [], input, files;
         let titles = new Titles();
-        let input = new Input(this->cfg);
-        let files = new Files(this->cfg);
+        let input = new Input();
+        let files = new Files();
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
@@ -336,7 +336,7 @@ class Menus extends Content
     private function parentSelect(model = null, exclude = null)
     {
         var select = ["": "no parent"], selected = null, data, input;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let data = this->database->all(
             "SELECT * FROM menus " .
             (exclude ? " WHERE id != '" . exclude . "'" : "") . " 
@@ -369,7 +369,7 @@ class Menus extends Content
     {
         var html, button, input;
 
-        let input = new Input(this->cfg);
+        let input = new Input();
         let button = new Button();
 
         let html = "
@@ -451,7 +451,7 @@ class Menus extends Content
     {
         var data = [], query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let query = "
             SELECT

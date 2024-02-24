@@ -12,7 +12,7 @@ namespace DumbDog\Ui;
 
 class Style
 {
-    public function __construct(object cfg)
+    public function __construct()
     {
         //
     }
@@ -532,6 +532,7 @@ class Style
         }
         .dd-form-control {
             border:1px solid var(--input-border-colour);
+            background-color: var(--box-background-colour);
             padding: 10px;
         }
         .dd-captcha-img img {

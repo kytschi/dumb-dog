@@ -27,7 +27,7 @@ class Files extends Controller
     {
         var titles, html, data, database;
         let titles = new Titles();
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         var from = this->validFrom();
 
@@ -138,7 +138,7 @@ class Files extends Controller
     private function createFilename(string input_name)
     {
         var security;
-        let security = new Security(this->cfg);
+        let security = new Security();
         return security->randomString(16) . "-" . this->createSlug(_FILES[input_name]["name"]);
     }
 
@@ -163,7 +163,7 @@ class Files extends Controller
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM files WHERE id=:id", data);
 
@@ -206,7 +206,7 @@ class Files extends Controller
                     let data["tags"] = this->isTagify(_POST["tags"]);
                     let data["updated_by"] = this->getUserId();
 
-                    let database = new Database(this->cfg);
+                    let database = new Database();
                     let status = database->execute(
                         "UPDATE files SET 
                             name=:name,
@@ -261,7 +261,7 @@ class Files extends Controller
     {
         var titles, tiles, database, html, data, query;
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let titles = new Titles();
         let tiles = new Tiles();
         
@@ -302,9 +302,9 @@ class Files extends Controller
         bool delete_old = false
     ) {
         var filename, status, data = [], input, database;
-        let input = new Input(this->cfg);
+        let input = new Input();
         let filename = this->createFilename(input_name);
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         if (delete_old) {
             let status = database->execute("

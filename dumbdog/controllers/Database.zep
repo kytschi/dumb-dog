@@ -20,11 +20,13 @@ class Database
     private security;
     public system_uuid = "00000000-0000-0000-0000-000000000000";
 
-    public function __construct(object cfg)
+    public function __construct()
     {
-        var connection, username, password;
+        var connection, username, password, cfg;
         let username = "";
         let password = "";
+
+        let cfg = constant("CFG");
 
         if (empty(cfg->database)) {
             throw new CfgException("missing database config");
@@ -61,7 +63,7 @@ class Database
                 
         let this->cfg = cfg;
         let this->db = new \PDO(connection, username, password);
-        let this->security = new Security(cfg);
+        let this->security = new Security();
     }
 
     public function all(string query, array data = [])

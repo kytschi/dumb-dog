@@ -317,7 +317,7 @@ class Messages extends Content
     {
         var data = [], query, table;
 
-        let table = new Table(this->cfg);
+        let table = new Table();
 
         let query = "
             SELECT
@@ -388,7 +388,7 @@ class Messages extends Content
         }
 
         try {
-            let save["contact_id"] = (new Contacts(this->cfg, this->libs))->save(data);
+            let save["contact_id"] = (new Contacts())->save(data);
             let save["subject"] = data["subject"];
             let save["message"] = data["message"];
             let save["type"] = data["type"];

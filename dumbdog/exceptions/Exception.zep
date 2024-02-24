@@ -36,7 +36,7 @@ class Exception extends \Exception
         var html, titles, head, javascript;
 
         let titles = new Titles();
-        let head = new Head(new \stdClass());
+        let head = new Head();
         let javascript = new Javascript();
 
         if (this->cli) {

@@ -24,7 +24,7 @@ class Comments extends Controller
         var titles, html, database;
         let titles = new Titles();
 
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let html = titles->page("Add a comment", "add");
         let html .= "<div class='dd-page-toolbar'>
@@ -47,7 +47,7 @@ class Comments extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
+                        let database = new Database();
                         let status = database->execute(
                             "INSERT INTO comments 
                                 (
@@ -174,7 +174,7 @@ class Comments extends Controller
         var titles, html, database, model, data = [];
         let titles = new Titles();
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data["id"] = this->getPageId(path);
         let model = database->get("SELECT * FROM comments WHERE id=:id", data);
 
@@ -216,7 +216,7 @@ class Comments extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database(this->cfg);
+                        let database = new Database();
                         let status = database->execute(
                             "UPDATE comments SET 
                                 name=:name, 
@@ -286,7 +286,7 @@ class Comments extends Controller
             <a href='/dumb-dog/comments/add' class='dd-link dd-round dd-icon' title='Add a comment'>&nbsp;</a>
         </div>";
 
-        let database = new Database(this->cfg);
+        let database = new Database();
 
         let html .= "<div id='dd-tiles'>";
         let data = database->all("SELECT * FROM comments");

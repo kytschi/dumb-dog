@@ -18,9 +18,9 @@ class Table
 {
     private cfg;
 
-    public function __construct(object cfg)
+    public function __construct()
     {
-        let this->cfg = cfg;
+        let this->cfg = constant("CFG");
     }
 
     public function build(array columns, array data, string url = "", string from = "")
@@ -30,7 +30,7 @@ class Table
         
         if (count(data)) {
             var iLoop, iLoop_head, key, splits, security, with_tags;
-            let security = new Security(this->cfg);
+            let security = new Security();
             let iLoop_head = 0;
 
             let html .= "

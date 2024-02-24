@@ -16,9 +16,9 @@ class Security
 {
     private cfg;
 
-    public function __construct(object cfg)
+    public function __construct()
     {
-        let this->cfg = cfg;
+        let this->cfg = constant("CFG");
     }
 
     public function clean(str)

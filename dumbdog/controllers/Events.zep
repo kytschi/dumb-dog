@@ -76,7 +76,7 @@ class Events extends Content
     {
         var titles, table, database, html, query, data;
         let titles = new Titles();
-        let table = new Table(this->cfg);
+        let table = new Table();
         
         let html = titles->page("Events", "events");
 
@@ -89,7 +89,7 @@ class Events extends Content
             <a href='/dumb-dog/events/add' class='dd-link dd-round dd-icon' title='Add an event'>&nbsp;</a>
         </div>";
 
-        let database = new Database(this->cfg);
+        let database = new Database();
         let data = [];
         let query = "
             SELECT main_page.*,
