@@ -54,8 +54,8 @@ class Files extends Controller
                     let data["name"] = _POST["name"];
                     let data["filename"] = filename;
                     let data["mime_type"] = _FILES["file"]["type"];
-                    let data["created_by"] = this->getUserId();
-                    let data["updated_by"] = this->getUserId();
+                    let data["created_by"] = this->database->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
                     let data["tags"] = this->isTagify(_POST["tags"]);
 
                     this->saveFile(filename);
@@ -160,6 +160,29 @@ class Files extends Controller
 
         imagewebp(save, getcwd() . this->folder . "thumb-" . filename);
     }
+
+    public function deleteResource(string resource_id, string resource_name)
+    {
+        var status;
+        let status = this->database->execute("
+            UPDATE 
+                files 
+            SET 
+                deleted_at=NOW(),
+                deleted_by=:deleted_by
+            WHERE 
+                resource_id=:resource_id AND resource=:resource",
+            [
+                "resource_id": resource_id,
+                "resource": resource_name,
+                "deleted_by": this->database->getUserId()
+            ]
+        );
+        if (!is_bool(status)) {
+            throw new Exception("Failed to delete the file in the database");
+        }
+    }
+
 /*
     public function edit(string path)
     {
@@ -207,7 +230,7 @@ class Files extends Controller
                 } else {
                     let data["name"] = _POST["name"];
                     let data["tags"] = this->isTagify(_POST["tags"]);
-                    let data["updated_by"] = this->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
 
                     let database = new Database();
                     let status = database->execute(
@@ -318,11 +341,11 @@ class Files extends Controller
                     resource_id=:resource_id",
                 [
                     "resource_id": resource_id,
-                    "deleted_by": this->getUserId()
+                    "deleted_by": this->database->getUserId()
                 ]
             );
             if (!is_bool(status)) {
-                throw new Exception("Filed to delete the old file in the database");
+                throw new Exception("Failed to delete the old file in the database");
             }
         }
         
@@ -364,7 +387,7 @@ class Files extends Controller
         );
 
         if (!is_bool(status)) {
-            throw new Exception("Filed to save the file in the database");
+            throw new Exception("Failed to save the file in the database");
         }
 
         return status;
@@ -388,8 +411,6 @@ class Files extends Controller
         }
 
         switch (_FILES[input_name]["type"]) {
-            case "image/avif":
-                let upload = imagecreatefromavif(_FILES[input_name]["tmp_name"]);
             case "image/bmp":
                 let upload = imagecreatefrombmp(_FILES[input_name]["tmp_name"]);
                 break;            

@@ -21,6 +21,7 @@ use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
+use DumbDog\Controllers\Reviews;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Socials;
 use DumbDog\Controllers\Templates;
@@ -170,6 +171,7 @@ class DumbDog
             "Menus": new Menus(),
             "Messages": new Messages(),
             "Pages": new Content(),
+            "Reviews": new Reviews(),
             "Settings": new Settings(),
             "Socials": new Socials(),
             //"Templates": new Templates(),

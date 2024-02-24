@@ -335,7 +335,7 @@ class Menus extends Content
         );
     }
 
-    private function render(model, mode = "add")
+    public function render(model, mode = "add")
     {
         var html;
 
@@ -442,7 +442,7 @@ class Menus extends Content
         );
     }
 
-    private function renderStacks(model)
+    public function renderStacks(model)
     {
         var item, html = "";
 

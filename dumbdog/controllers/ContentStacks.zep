@@ -247,6 +247,10 @@ class ContentStacks extends Content
                     }
                 }
 
+                if (isset(_POST["delete_image"])) {
+                    this->files->deleteResource(data["id"], "image");
+                }
+
                 let status = this->database->execute(
                     "UPDATE content_stacks SET 
                         name=:name,
@@ -278,7 +282,7 @@ class ContentStacks extends Content
         return html;
     }
 
-    private function render(model, mode = "add")
+    public function render(model, mode = "add")
     {
         var html;
 
@@ -331,7 +335,7 @@ class ContentStacks extends Content
                             type='button'
                             role='tab'
                             aria-controls='look-tab' 
-                            aria-selected='true'>Look &amp; Feel</button>
+                            aria-selected='true'>Look and Feel</button>
                     </li>";
         if (mode == "edit") {
             let html .= "
@@ -398,7 +402,7 @@ class ContentStacks extends Content
         );
     }
 
-    private function renderStacks(model)
+    public function renderStacks(model)
     {
         var item, html = "";
 

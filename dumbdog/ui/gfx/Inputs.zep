@@ -115,8 +115,9 @@ class Inputs
         bool required = false,
         model = null
     ) {
-        var style = "", image = "";
+        var style = "", image = "", buttons;
         let style = this->setStyle(required, var_name);
+        let buttons = new Buttons();
 
         if (is_object(model)) {
             if (file_exists(model->thumbnail)) {
@@ -141,11 +142,12 @@ class Inputs
                         placeholder='" . placeholder.  "'/>
                 </div>
             </div>
-            <div class='dd-col-6 dd-image-preview'>
-                <div>" .
+            <div class='dd-col-6 dd-image-preview dd-flex'>
+                <div class='dd-col'>" .
                     (image ? "<img src='" . image . "'/>" : "<p>No image</p>") .
-                "</div>
-            </div>
+                "</div>" . 
+                (image ? "<div class='dd-col-auto'>" . buttons->delete("", "deleted-image", "delete_image", "", true) . "</div>" : "") .
+            "</div>
         </div>";
     }
 
