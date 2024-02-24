@@ -142,13 +142,10 @@ class Reviews extends Content
                 content.*,
                 reviews.score,
                 reviews.author,
-                banner.id AS banner_image_id,
-                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-',  banner.filename), '') AS banner_image
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
             FROM content 
-            LEFT JOIN files AS banner ON 
-                banner.resource_id = content.id AND
-                resource='banner-image' AND
-                banner.deleted_at IS NULL
+            LEFT JOIN files ON files.resource_id = content.id AND resource='image' AND files.deleted_at IS NULL 
             JOIN reviews ON reviews.content_id = content.id 
             WHERE content.type='" . this->type . "' AND content.id=:id", data);
 

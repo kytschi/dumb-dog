@@ -541,13 +541,13 @@ class DumbDog
 
         return this->database->all("
         SELECT
-            socials.*,
+            content.*,
             IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
             IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
-        FROM socials 
-        LEFT JOIN files ON files.resource_id = socials.id AND files.deleted_at IS NULL 
-        WHERE socials.deleted_at IS NULL
-        ORDER BY sort ASC");
+        FROM content 
+        LEFT JOIN files ON files.resource_id = content.id AND files.deleted_at IS NULL 
+        WHERE content.deleted_at IS NULL AND content.type='social' 
+        ORDER BY content.sort ASC");
     }
 
     public function stacksByTag(string tag, string id = "")
