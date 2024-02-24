@@ -13,9 +13,9 @@ namespace DumbDog\Controllers;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Helper\Dates;
-use DumbDog\Ui\Gfx\Button;
+use DumbDog\Ui\Gfx\Buttons;
 use DumbDog\Ui\Gfx\Icons;
-use DumbDog\Ui\Gfx\Input;
+use DumbDog\Ui\Gfx\Inputs;
 
 class Notes
 {
@@ -26,9 +26,9 @@ class Notes
 
     public function __construct()
     {
-        let this->buttons = new Button();
+        let this->buttons = new Buttons();
         let this->database = new Database();
-        let this->inputs = new Input();
+        let this->inputs = new Inputs();
         let this->icons = new Icons();
     }
 

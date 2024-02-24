@@ -17,7 +17,6 @@ use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Dates;
-use DumbDog\Ui\Gfx\Table;
 
 class Leads extends Content
 {
@@ -403,9 +402,7 @@ class Leads extends Content
 
     public function renderList(string path)
     {
-        var data = [], query, table;
-
-        let table = new Table();
+        var data = [], query;
 
         let query = "
             SELECT 
@@ -461,7 +458,7 @@ class Leads extends Content
             }
         }
 
-        return table->build(
+        return this->tables->build(
             this->list,
             data,
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")

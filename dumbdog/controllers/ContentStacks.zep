@@ -1,7 +1,7 @@
 /**
- * DumbDog menus builder
+ * DumbDog content stacks builder
  *
- * @package     DumbDog\Controllers\Menus
+ * @package     DumbDog\Controllers\ContentStacks
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
@@ -11,19 +11,19 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\Files;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
 
-class Menus extends Content
+class ContentStacks extends Content
 {
-    public global_url = "/menus";
-    public title = "Menus";
-    public type = "menu";
+    public global_url = "/dumb-dog/content-stacks";
+    public type = "content-stacks";
+    public title = "Content stacks";
     public required = ["name"];
     public list = [
         "name|with_tags",
-        "parent",
         "title"
     ];
 
@@ -31,7 +31,7 @@ class Menus extends Content
     {
         var html, data;
 
-        let html = this->titles->page("Create a menu", "menus");
+        let html = this->titles->page("Create the content stack", "add");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -46,15 +46,12 @@ class Menus extends Content
                     let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO menus 
+                        "INSERT INTO content_stacks 
                             (id,
                             name,
                             title,
-                            alt,
-                            url,
+                            description,
                             tags,
-                            parent_id,
-                            content_id,
                             created_at,
                             created_by,
                             updated_at,
@@ -63,11 +60,8 @@ class Menus extends Content
                             (:id,
                             :name,
                             :title,
-                            :alt,
-                            :url,
+                            :description,
                             :tags,
-                            :parent_id,
-                            :content_id,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -76,9 +70,14 @@ class Menus extends Content
                     );
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to save the menu");
+                        let html .= this->saveFailed("Failed to save the content stack");
                         let html .= this->consoleLogError(status);
                     } else {
+                        if (isset(_FILES["image"]["name"])) {
+                            if (!empty(_FILES["image"]["name"])) {
+                                this->files->addResource("image", data["id"], "image");
+                            }
+                        }
                         this->redirect(this->global_url . "?saved=true");
                     }
                 }
@@ -86,7 +85,7 @@ class Menus extends Content
         }
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("Menu has been saved");
+            let html .= this->saveSuccess("Content stack has been saved");
         }
 
         var model;
@@ -94,29 +93,27 @@ class Menus extends Content
         let model->deleted_at = null;
         let model->name = "";
         let model->title = "";
-        let model->alt = "";
-        let model->url = "";
-        let model->sort = "";
-        let model->content_id = "";
+        let model->description = "";
+        let model->image = "";
 
         let html .= this->render(model);
 
         return html;
     }
 
-    private function addItem(string id)
+    private function addStack(string id)
     {
         var data = [
-            "menu_id": id,
+            "content_stack_id": id,
             "name": _POST["add_stack"],
-            "created_by": this->getUserId(),
-            "updated_by": this->getUserId()
+            "created_by": this->database->getUserId(),
+            "updated_by": this->database->getUserId()
         ], status;
         
         let status = this->database->execute(
-            "INSERT INTO menus 
+            "INSERT INTO content_stacks 
                 (id,
-                menu_id,
+                content_stack_id,
                 name,
                 created_at,
                 created_by,
@@ -124,7 +121,7 @@ class Menus extends Content
                 updated_by) 
             VALUES 
                 (UUID(),
-                :menu_id,
+                :content_stack_id,
                 :name,
                 NOW(),
                 :created_by,
@@ -134,37 +131,8 @@ class Menus extends Content
         );
 
         if (!is_bool(status)) {
-            throw new Exception("Failed to save the menu item");
+            throw new Exception("Failed to save the content stack");
         }
-    }
-
-    private function contentSelect(selected = "", string name = "content_id")
-    {
-        var select = ["": "no content"], data;
-        let data = this->database->all(
-            "SELECT 
-                *,
-                CONCAT(name, ' (', type, ')') AS name 
-            FROM 
-                content 
-            WHERE type IN ('page', 'blog-post', 'event') 
-            ORDER BY name"
-        );
-        var iLoop = 0;
-
-        while (iLoop < count(data)) {
-            let select[data[iLoop]->id] = data[iLoop]->name;
-            let iLoop = iLoop + 1;
-        }
-
-        return this->inputs->select(
-            "Content",
-            name,
-            "Link to a piece of content",
-            select,
-            false,
-            selected
-        );
     }
 
     public function deleteItem(string id, string item_id)
@@ -176,7 +144,7 @@ class Menus extends Content
             let data["updated_by"] = this->getUserId();
             let status = this->database->execute("
                 UPDATE 
-                    menus
+                    content_stacks 
                 SET
                     deleted_at=NOW(),
                     deleted_by=:updated_by,
@@ -191,7 +159,7 @@ class Menus extends Content
         }
 
         if (!is_bool(status)) {
-            throw new Exception("Failed to delete the menu item");
+            throw new Exception("Failed to delete the content stack");
         } else {
             this->redirect(this->global_url . "/edit/" . id . "?deleted=true");
         }
@@ -200,26 +168,26 @@ class Menus extends Content
     public function edit(string path)
     {
         var html, model, data = [];
-
+  
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
-                menus.*,
+                content_stacks.*,
                 files.id AS image_id,
                 IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
                 IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail  
-            FROM menus 
-            LEFT JOIN files ON files.resource_id = menus.id AND files.deleted_at IS NULL 
-            WHERE menus.id=:id", data);
+            FROM content_stacks 
+            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+            WHERE content_stacks.id=:id", data);
 
         if (empty(model)) {
-            throw new NotFoundException("Menu not found");
+            throw new NotFoundException("Content stack not found");
         }
 
-        let html = this->titles->page("Edit the menu", "edit");
+        let html = this->titles->page("Edit the content stack", "edit");
 
-        if (isset(_GET["deleted"])) {
-            let html .= this->saveSuccess("Menu item has been deleted");
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("Content stack has been updated");
         }
 
         if (model->deleted_at) {
@@ -227,9 +195,14 @@ class Menus extends Content
         }
 
         let model->stacks = this->database->all("
-            SELECT menus.*
-            FROM menus 
-            WHERE menu_id='" . model->id . "' AND menus.deleted_at IS NULL
+            SELECT
+                content_stacks.*,
+                files.id AS image_id,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail  
+            FROM content_stacks
+            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+            WHERE content_stack_id='" . model->id . "' AND content_stacks.deleted_at IS NULL
             ORDER BY sort ASC");
         if (!empty(_POST)) {
             var status = false, err;
@@ -241,13 +214,13 @@ class Menus extends Content
 
                 if (isset(_POST["delete"])) {
                     if (!empty(_POST["delete"])) {
-                        this->triggerDelete("menus", path);
+                        this->triggerDelete("content_stacks", path);
                     }
                 }
 
                 if (isset(_POST["recover"])) {
                     if (!empty(_POST["recover"])) {
-                        this->triggerRecover("menus", path);
+                        this->triggerRecover("content_stacks", path);
                     }
                 }
 
@@ -255,7 +228,7 @@ class Menus extends Content
 
                 if (isset(_POST["add_stack"])) {
                     if (!empty(_POST["add_stack"])) {
-                        this->addItem(model->id);
+                        this->addStack(model->id);
                         let path = path . "&scroll=stack-tab";
                     }
                 }
@@ -268,15 +241,18 @@ class Menus extends Content
 
                 let data = this->setData(data);
                 
+                if (isset(_FILES["image"]["name"])) {
+                    if (!empty(_FILES["image"]["name"])) {
+                        this->files->addResource("image", data["id"], "image", true);
+                    }
+                }
+
                 let status = this->database->execute(
-                    "UPDATE menus SET 
+                    "UPDATE content_stacks SET 
                         name=:name,
                         title=:title,
-                        alt=:alt,
-                        url=:url,
-                        content_id=:content_id,
-                        parent_id=:parent_id,
-                        new_window=:new_window,
+                        sub_title=:sub_title,
+                        description=:description,
                         tags=:tags,
                         updated_at=NOW(),
                         updated_by=:updated_by 
@@ -285,7 +261,7 @@ class Menus extends Content
                 );
             
                 if (!is_bool(status)) {
-                    let html .= this->saveFailed("Failed to update the menu");
+                    let html .= this->saveFailed("Failed to update the content stack");
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
@@ -298,41 +274,8 @@ class Menus extends Content
             }
         }
         
-        if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("I've updated the menu");
-        }
-
         let html .= this->render(model, "edit");
         return html;
-    }
-
-    private function parentSelect(selected = null, exclude = null)
-    {
-        var select = ["": "no parent"], data;
-        let data = this->database->all(
-            "SELECT * FROM menus " .
-            (exclude ? " WHERE id != '" . exclude . "'" : "") . " 
-            ORDER BY name"
-        );
-        var iLoop = 0;
-
-        if (isset(_POST["parent_id"])) {
-            let selected = _POST["parent_id"];
-        }
-
-        while (iLoop < count(data)) {
-            let select[data[iLoop]->id] = data[iLoop]->name;
-            let iLoop = iLoop + 1;
-        }
-
-        return this->inputs->select(
-            "Parent",
-            "parent_id",
-            "Is this menu a child of another?",
-            select,
-            false,
-            selected
-        );
     }
 
     private function render(model, mode = "add")
@@ -347,14 +290,20 @@ class Menus extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->text("Name", "name", "Name the menu", true, model->name) .
-                                    this->parentSelect(model->parent_id, model->id) . 
-                                    this->inputs->text("Title", "title", "The display title of the menu", false, model->title) .
-                                    this->inputs->text("Alt text", "alt", "The display alt text for the menu", false, model->alt) . 
-                                    this->inputs->text("URL", "url", "URL of the menu", false, model->url) .
-                                    this->contentSelect(model->content_id) . 
-                                    this->inputs->select("New window", "new_window", "Open the link in a new window", ["0": "no", "1": "yes"], false, model->new_window) .
-                                    this->inputs->tags("Tags", "tags", "Tag the menu", false, model->tags) . 
+                                    this->inputs->text("Name", "name", "Name the stack", true, model->name) .
+                                    this->inputs->text("Title", "title", "The display title for the stack", false, model->title) .
+                                    this->inputs->text("Sub title", "sub_title", "The display sub title for the stack", false, model->sub_title) .
+                                    this->inputs->wysiwyg("Description", "description", "The display description for the stack", false, model->description) . 
+                                    this->inputs->tags("Tags", "tags", "Tag the content stack", false, model->tags) . 
+                                "</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='look-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
+                                    this->inputs->image("Image", "image", "Upload your image here", false, model) . 
                                 "</div>
                             </div>
                         </div>
@@ -373,7 +322,16 @@ class Menus extends Content
                             role='tab'
                             data-tab='#content-tab'
                             aria-controls='content-tab' 
-                            aria-selected='true'>Menu</button>
+                            aria-selected='true'>Content</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            data-tab='#look-tab'
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            aria-controls='look-tab' 
+                            aria-selected='true'>Look &amp; Feel</button>
                     </li>";
         if (mode == "edit") {
             let html .= "
@@ -384,7 +342,7 @@ class Menus extends Content
                             type='button'
                             role='tab'
                             aria-controls='stack-tab' 
-                            aria-selected='true'>Items</button>
+                            aria-selected='true'>Stacks</button>
                     </li>";
         }
 
@@ -420,20 +378,18 @@ class Menus extends Content
 
         let query = "
             SELECT
-                main.*,
-                IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM menus AS main
-            LEFT JOIN menus AS parent_page ON parent_page.id=main.parent_id 
-            WHERE main.menu_id IS NULL ";
+                content_stacks.* 
+            FROM content_stacks 
+            WHERE content_stacks.content_stack_id IS NULL ";
         if (isset(_POST["q"])) {
-            let query .= " AND main.name LIKE :query";
+            let query .= " AND content_stacks.name LIKE :query";
             let data["query"] = "%" . _POST["q"] . "%";
         }
         if (isset(_GET["tag"])) {
-            let query .= " AND main.tags like :tag";
+            let query .= " AND content_stacks.tags like :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
-        let query .= " ORDER BY main.name";
+        let query .= " ORDER BY content_stacks.name";
 
         return this->tables->build(
             this->list,
@@ -450,43 +406,43 @@ class Menus extends Content
         <div id='stack-tab' class='dd-row'>
             <div class='dd-col-12'>
                 <div class='dd-box'>
-                    <div class='dd-box-title dd-flex'>
-                        <div class='dd-col'>Items</div>
-                        <div class='dd-col-auto'>" .
-                            this->inputs->inputPopup("create-stack", "add_stack", "Create a new stack") .
-                    "   </div>
+                    <div class='dd-box-title dd-flex dd-border-none'>
+                        <div class='dd-col'>Stack items</div>
+                        <div class='dd-col-auto'>" . 
+                            this->inputs->inputPopup("create-stack", "add_stack", "Create a new stack item") .
+                        "</div>
                     </div>
-                    <div class='dd-box-body'>";
+                </div>
+            </div>
+        </div>
+        <div class='dd-row'>";
 
         if (count(model->stacks)) {
-            let html .= "<div class='dd-row'>";
             for item in model->stacks {
                 let html .= "
+                <div class='dd-col-12'>
                     <div class='dd-box'>
                         <div class='dd-box-title dd-flex'>
                             <div class='dd-col'>" . item->name . "</div>
                             <div class='dd-col-auto'>" . 
-                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete") .
+                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "", true) .
                         "   </div>
                         </div>
                         <div class='dd-box-body'>" .
-                            this->inputs->text("Name", "stack_name[]", "The name of the menu item", true, item->name) .
-                            this->inputs->text("Title", "stack_title[]", "The title of the menu item", false, item->title) .
-                            this->inputs->text("Alt text", "stack_alt[]", "The alt text for the menu item", false, item->alt) . 
-                            this->inputs->text("URL", "stack_url[]", "The URL for the menu item", false, item->url) . 
-                            this->contentSelect(item->content_id, "stack_content_id[]") . 
-                            this->inputs->select("New window", "stack_new_window[]", "Open the link in a new window", ["0": "no", "1": "yes"], false, item->new_window) .
-                            this->inputs->number("Sort", "stack_sort[]", "Sort the menu item", false, item->sort) .
+                            this->inputs->text("Name", "stack_name[]", "The name of the stack item", true, item->name) .
+                            this->inputs->text("Title", "stack_title[]", "The title of the stack item", false, item->title) .
+                            this->inputs->text("Sub title", "stack_sub_title[]", "The display sub title for the stack", false, item->sub_title) .
+                            this->inputs->wysiwyg("Description", "stack_description[]", "The stack description item", false, item->description) . 
+                            this->inputs->image("Image", "stack_image[]", "Upload an image here", false, item) . 
+                            this->inputs->number("Sort", "stack_sort[]", "Sort the stack item", false, item->sort) .
                             this->inputs->hidden("stack_id[]", item->id) . 
                         "</div>
-                    </div>";
+                    </div>
+                </div>";
             }
-            let html .= "</div>";
         }
 
-        let html .="</div>
-                </div>
-            </div>
+        let html .="
         </div>";
 
         return html;
@@ -504,12 +460,9 @@ class Menus extends Content
     {
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
-        let data["alt"] = _POST["alt"];
-        let data["url"] = _POST["url"];
-        let data["content_id"] = _POST["content_id"];
-        let data["parent_id"] = _POST["parent_id"];
-        let data["updated_by"] = this->database->getUserId();
+        let data["description"] = _POST["description"];
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
+        let data["updated_by"] = this->database->getUserId();
 
         return data;
     }
@@ -526,55 +479,59 @@ class Menus extends Content
                 "id": id,
                 "name": "",
                 "title": "",
-                "alt": "",
-                "content_id": "",
-                "new_window": 0,
+                "sub_title": "",
+                "description": "",
                 "sort": 0
             ];
 
             if (!isset(_POST["stack_name"][key])) {
-                throw new ValidationException("Missing name for menu item");
-            }
-
-            if (empty(_POST["stack_name"][key])) {
-                throw new ValidationException("Missing name for menu item");
+                throw new ValidationException("Missing name for stack item");
+            } elseif (empty(_POST["stack_name"][key])) {
+                throw new ValidationException("Missing name for stack item");
             }
 
             let data["name"] = _POST["stack_name"][key];
             if (isset(_POST["stack_title"][key])) {
                 let data["title"] = _POST["stack_title"][key];
             }
-            if (isset(_POST["stack_alt"][key])) {
-                let data["alt"] = _POST["stack_alt"][key];
+            if (isset(_POST["stack_sub_title"][key])) {
+                let data["sub_title"] = _POST["stack_sub_title"][key];
             }
-            if (isset(_POST["stack_url"][key])) {
-                let data["url"] = _POST["stack_url"][key];
-            }
-            if (isset(_POST["stack_content_id"][key])) {
-                let data["content_id"] = _POST["stack_content_id"][key];
-            }
-            if (isset(_POST["stack_new_window"][key])) {
-                let data["new_window"] = intval(_POST["stack_new_window"][key]);
+            if (isset(_POST["stack_description"][key])) {
+                let data["description"] = _POST["stack_description"][key];
             }
             if (isset(_POST["stack_sort"][key])) {
                 let data["sort"] = intval(_POST["stack_sort"][key]);
             }
 
             let status = this->database->execute(
-                "UPDATE menus SET 
+                "UPDATE content_stacks SET 
                     name=:name,
                     title=:title,
-                    alt=:alt,
-                    url=:url,
-                    content_id=:content_id,
-                    new_window=:new_window,
+                    sub_title=:sub_title,
+                    description=:description,
                     sort=:sort 
                 WHERE id=:id",
                 data
             );
         
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the menu item");
+                throw new Exception("Failed to update the stack item");
+            }
+
+            if (isset(_FILES["stack_image"]["name"][key])) {
+                if (!empty(_FILES["stack_image"]["name"][key])) {
+                    let _FILES["image"] = [
+                        "name": _FILES["stack_image"]["name"][key],
+                        "full_path": _FILES["stack_image"]["full_path"][key],
+                        "type": _FILES["stack_image"]["type"][key],
+                        "tmp_name": _FILES["stack_image"]["tmp_name"][key],
+                        "error": _FILES["stack_image"]["error"][key],
+                        "size": _FILES["stack_image"]["size"][key]
+                    ];
+                    
+                    this->files->addResource("image", id, "image", true);
+                }
             }
         }
     }

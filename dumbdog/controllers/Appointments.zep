@@ -49,8 +49,7 @@ class Appointments extends Controller
                     let data["updated_by"] = this->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database();
-                        let status = database->execute(
+                        let status = this->database->execute(
                             "INSERT INTO appointments 
                                 (
                                     id,
@@ -115,7 +114,7 @@ class Appointments extends Controller
                     <select name='user_id'>";
 
         var iLoop = 0, selected = "", data;
-        let data = database->all("SELECT * FROM users ORDER BY name");
+        let data = this->database->all("SELECT * FROM users ORDER BY name");
 
         if (isset(_POST["user_id"])) {
             let selected = _POST["user_id"];
@@ -180,10 +179,9 @@ class Appointments extends Controller
     {
         var titles, html, database, model, data = [];
         let titles = new Titles();
-
-        let database = new Database();
+        
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM appointments WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM appointments WHERE id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Appointment not found");

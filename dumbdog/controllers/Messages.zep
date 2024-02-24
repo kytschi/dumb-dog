@@ -16,7 +16,6 @@ use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Security;
-use DumbDog\Ui\Gfx\Table;
 
 class Messages extends Content
 {
@@ -315,9 +314,7 @@ class Messages extends Content
 
     public function renderList(string path)
     {
-        var data = [], query, table;
-
-        let table = new Table();
+        var data = [], query;
 
         let query = "
             SELECT
@@ -345,7 +342,7 @@ class Messages extends Content
             }
         }
 
-        return table->build(
+        return this->tables->build(
             this->list,
             data,
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")

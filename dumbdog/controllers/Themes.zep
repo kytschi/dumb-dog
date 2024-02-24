@@ -1,50 +1,43 @@
 /**
- * Dumb Dog themes builder
+ * Dumb Dog themes
  *
  * @package     DumbDog\Controllers\Themes
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Controller;
-use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Tiles;
-use DumbDog\Ui\Gfx\Titles;
 
-class Themes extends Controller
+class Themes extends Content
 {
     public global_url = "/themes";
 
     public function add(string path)
     {
-        var titles, html;
-        let titles = new Titles();
-        let html = titles->page("Add a theme", "add");
+        var html, data = [], status = false;
+        let html = this->titles->page("Add a theme", "add");
         let html .= "<div class='dd-page-toolbar'>
             <a href='" . this->global_url . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, data = [], status = false;
-
                 if (!this->validate(_POST, ["name", "folder"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
                     let data["folder"] = _POST["folder"];
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
-                    let data["created_by"] = this->getUserId();
-                    let data["updated_by"] = this->getUserId();
+                    let data["created_by"] = this->database->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
 
-                    let database = new Database();
-                    let status = database->execute(
+                    let status = this->database->execute(
                         "INSERT INTO themes 
                             (id, name, folder, `default`, created_at, created_by, updated_at, updated_by, status) 
                         VALUES 
@@ -104,18 +97,16 @@ class Themes extends Controller
 
     public function edit(string path)
     {
-        var titles, html, database, model, data = [];
-        let titles = new Titles();
-
-        let database = new Database();
+        var html, model, data = [], status = false;
+        
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM themes WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM themes WHERE id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Theme not found");
         }
 
-        let html = titles->page("Edit the theme", "edit");
+        let html = this->titles->page("Edit the theme", "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -135,18 +126,15 @@ class Themes extends Controller
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, status = false;
-
                 if (!this->validate(_POST, ["name", "folder"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
                     let data["folder"] = _POST["folder"];
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
-                    let data["updated_by"] = this->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
 
-                    let database = new Database();
-                    let status = database->execute(
+                    let status = this->database->execute(
                         "UPDATE themes SET 
                             name=:name, folder=:folder, `default`=:default, updated_at=NOW(), updated_by=:updated_by
                         WHERE id=:id",
@@ -214,10 +202,9 @@ class Themes extends Controller
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
-        let titles = new Titles();
-        
-        let html = titles->page("Themes", "themes");
+        var html;
+                
+        let html = this->titles->page("Themes", "themes");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the theme");
@@ -227,13 +214,10 @@ class Themes extends Controller
             <a href='" . this->global_url . "/add' class='dd-link dd-round dd-icon' title='Add a theme'>&nbsp;</a>
         </div>";
 
-        let database = new Database();
-
-        let tiles = new Tiles();
-        let html = html . tiles->build(
-            database->all("SELECT * FROM themes"),
+        /*let html = html . this->tiles->build(
+            this->database->all("SELECT * FROM themes"),
             this->global_url . "/edit/"
-        );
+        );*/
 
         return html;
     }

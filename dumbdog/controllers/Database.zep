@@ -6,7 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -18,14 +18,16 @@ class Database
     private cfg;
     private db;
     private security;
+    private statement;
     public system_uuid = "00000000-0000-0000-0000-000000000000";
+
+    private connection = "";
+    private username = "";
+    private password = "";
 
     public function __construct()
     {
-        var connection, username, password, cfg;
-        let username = "";
-        let password = "";
-
+        var cfg;
         let cfg = constant("CFG");
 
         if (empty(cfg->database)) {
@@ -36,42 +38,57 @@ class Database
             throw new CfgException("missing 'db' from the database config");
         }
 
-        let connection = "mysql:";
+        let this->connection = "mysql:";
         if (!empty(cfg->database->type)) {
-            let connection = cfg->database->type . ":";
+            let this->connection = cfg->database->type . ":";
         }
                 
         if (empty(cfg->database->host)) {
-            let connection .= "host=localhost;";
+            let this->connection = this->connection . "host=localhost;";
         } else {
-            let connection .= "host=" . cfg->database->host . ";";
+            let this->connection = this->connection . "host=" . cfg->database->host . ";";
         }
         
         if (!empty(cfg->database->port)) {
-            let connection .= "port=" . cfg->database->port . ";";
+            let this->connection = this->connection . "port=" . cfg->database->port . ";";
         }
 
-        let connection .= "dbname=" . cfg->database->db . ";";        
+        let this->connection = this->connection . "dbname=" . cfg->database->db . ";";        
 
         if (!empty(cfg->database->username)) {
-            let username = cfg->database->username;
+            let this->username = cfg->database->username;
         }
 
         if (!empty(cfg->database->password)) {
-            let password = cfg->database->password;
+            let this->password = cfg->database->password;
         }
                 
         let this->cfg = cfg;
-        let this->db = new \PDO(connection, username, password);
         let this->security = new Security();
     }
 
     public function all(string query, array data = [])
     {
-        var statement;
-        let statement = this->db->prepare(query);
-        statement->execute(data);
-        return statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Model");
+        var results = [];
+        
+        this->connect();
+        let this->statement = this->db->prepare(query);
+        this->statement->execute(data);
+        let results = this->statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Model");
+        this->close();
+
+        return results;
+    }
+
+    private function close()
+    {
+        let this->statement = null;
+        let this->db = null;
+    }
+
+    private function connect()
+    {
+        let this->db = new \PDO(this->connection, this->username, this->password);
     }
 
     public function decrypt(decrypt, model = null)
@@ -119,27 +136,40 @@ class Database
         if (this->cfg->save_mode == false && !always_save) {
             return true;
         }
-        var statement, status, errors;
+
+        var status, errors;
+
+        this->connect();
 
         ob_start();
-        let statement = this->db->prepare(query);
-        let status = statement->execute(data);
+        let this->statement = this->db->prepare(query);
+        let status = this->statement->execute(data);
         let errors = ob_get_contents();
         ob_end_clean();
+
+        this->close();
 
         if (!status) {
             return errors;
         }
 
-        return status ? true : false;
+        return true;
     }
 
     public function get(string query, array data = [])
     {
-        var statement;
-        let statement = this->db->prepare(query);
-        statement->execute(data);
-        return statement->fetchObject("DumbDog\\Models\\Model");
+        var result = null;
+
+        this->connect();
+
+        let this->statement = this->db->prepare(query);
+        this->statement->execute(data);
+
+        let result = this->statement->fetchObject("DumbDog\\Models\\Model");
+
+        this->close();
+
+        return result;
     }
 
     public function isAdmin()

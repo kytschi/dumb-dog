@@ -6,7 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -17,14 +17,15 @@ use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
-use DumbDog\Ui\Gfx\Button;
+use DumbDog\Ui\Gfx\Buttons;
 use DumbDog\Ui\Gfx\Icons;
-use DumbDog\Ui\Gfx\Input;
-use DumbDog\Ui\Gfx\Table;
+use DumbDog\Ui\Gfx\Inputs;
+use DumbDog\Ui\Gfx\Tables;
 use DumbDog\Ui\Gfx\Titles;
 
 class Content extends Controller
 {
+    protected tables;
     protected titles;
     protected buttons;
     protected inputs;
@@ -46,10 +47,11 @@ class Content extends Controller
 
     public function __globals()
     {
+        let this->tables = new Tables();
         let this->titles = new Titles();
-        let this->inputs = new Input();
+        let this->inputs = new Inputs();
         let this->files = new Files();
-        let this->buttons = new Button();
+        let this->buttons = new Buttons();
         let this->icons = new Icons();
     }
 
@@ -433,7 +435,7 @@ class Content extends Controller
         }
 
         let html .= 
-            this->searchBox() . 
+            this->inputs->searchBox(this->global_url, "Search the " . strtolower(this->title)) . 
             this->tags(path, "content") .
             this->renderList(path);
         return html;
@@ -675,9 +677,7 @@ class Content extends Controller
 
     public function renderList(string path)
     {
-        var data = [], query, table;
-
-        let table = new Table();
+        var data = [], query;
 
         let query = "
             SELECT main_page.*,
@@ -697,7 +697,7 @@ class Content extends Controller
         }
         let query .= " ORDER BY main_page.name";
 
-        return table->build(
+        return this->tables->build(
             this->list,
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
@@ -712,10 +712,11 @@ class Content extends Controller
         <div id='old-urls-tab' class='dd-row'>
             <div class='dd-col-12'>
                 <div class='dd-box'>
-                    <div class='dd-box-title'>
-                        <span>Old URLs</span>" .
-                        this->inputs->inputPopup("create-old-url", "add_old_url", "Create a new old URL link") .
-                        "
+                    <div class='dd-box-title dd-flex'>
+                        <div class='dd-col'>Old URLs</div>
+                        <div class='dd-col-auto'>" .
+                            this->inputs->inputPopup("create-old-url", "add_old_url", "Create a new old URL link") .
+                        "</div>
                     </div>
                     <div class='dd-box-body'>";
                     if (count(model->old_urls)) {
@@ -748,10 +749,11 @@ class Content extends Controller
         <div id='stack-tab' class='dd-row'>
             <div class='dd-col-12'>
                 <div class='dd-box'>
-                    <div class='dd-box-title'>
-                        <span>Stacks</span>" .
-                        this->inputs->inputPopup("create-stack", "create_stack", "Create a new stack") .
-                        "
+                    <div class='dd-box-title dd-flex'>
+                        <div class='dd-col'>Stacks</div>
+                        <div class='dd-col-auto'>" .
+                            this->inputs->inputPopup("create-stack", "create_stack", "Create a new stack") .
+                        "</div>
                     </div>
                 </div>";
 
@@ -759,15 +761,15 @@ class Content extends Controller
             for key, item in model->stacks {
                 let html .= "
                 <div class='dd-box'>
-                    <div class='dd-box-title'>
-                        <span>" . item->name . "</span>
-                        <div>" .
-                        this->inputs->inputPopup(
-                            "create-stack-item-" . (key + 1),
-                            "add_to_stack[" . item->id . "]",
-                            "Add to the " . item->name . " stack",
-                            "add") .
-                        this->buttons->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
+                    <div class='dd-box-title dd-flex'>
+                        <div class='dd-col'>" . item->name . "</div>
+                        <div class='dd-col-auto'>" .
+                            this->inputs->inputPopup(
+                                "create-stack-item-" . (key + 1),
+                                "add_to_stack[" . item->id . "]",
+                                "Add to the " . item->name . " stack",
+                                "add") .
+                            this->buttons->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
                         "</div>
                     </div>
                     <div class='dd-box-body'>";
@@ -840,55 +842,6 @@ class Content extends Controller
                 "Add a new " . str_replace("-", " ", this->type)
             ) .
         "</div>";
-    }
-
-    public function searchBox()
-    {
-        var html;
-
-        let html = "
-        <form 
-            action='" . this->global_url . "'
-            method='post'
-            class='dd-box'>
-            <div class='dd-box-body'>
-                <div class='dd-row'>
-                    <div class='dd-col-8'>
-                        <div class='dd-input-group'>
-                            <input 
-                                class='dd-form-control'
-                                name='q'
-                                type='text' 
-                                placeholder='Search the " . (strtolower(this->type). "s") . "'
-                                value='" . (isset(_POST["q"]) ? _POST["q"]  : ""). "'>
-                        </div>
-                    </div>
-                    <div class='dd-col-2'>
-                        <button 
-                            type='submit'
-                            name='search' 
-                            class='dd-float-right dd-button' 
-                            value='search'>
-                            search
-                        </button>";
-
-                    if (isset(_POST["q"])) {
-                        let html .= "
-                        <a 
-                            href='" . this->global_url . "' 
-                            class='dd-button dd-float-right'>
-                            clear
-                        </a>";
-                    }
-            
-        let html .= "   
-                    </div>
-                </div>
-                
-            </div>
-        </form>" ;
-
-        return html;
     }
 
     private function setData(data)
@@ -968,7 +921,7 @@ class Content extends Controller
         }
         let data = this->database->all(rtrim(query, ','), ["page_id": model->id]);
 
-        //I'm reusing vars here, keep an eye.
+        //I'm reusing vars here, keep an eye open.
         let query = [];
         for month in data {
             for year, iLoop in get_object_vars(month) {

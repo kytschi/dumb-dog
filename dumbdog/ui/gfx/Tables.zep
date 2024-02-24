@@ -1,12 +1,12 @@
 /**
- * Dumb Dog table builder
+ * Dumb Dog tables
  *
- * @package     DumbDog\Ui\Gfx\Table
+ * @package     DumbDog\Ui\Gfx\Tables
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Ui\Gfx;
 
@@ -14,7 +14,7 @@ use DumbDog\Helper\Security;
 use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Titles;
 
-class Table
+class Tables
 {
     private cfg;
 

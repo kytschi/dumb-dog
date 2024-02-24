@@ -11,10 +11,8 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
-use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Table;
 
 class Users extends Content
 {
@@ -236,7 +234,7 @@ class Users extends Content
         let html .= this->renderToolbar();
 
         let html .= 
-            this->searchBox() . 
+            this->inputs->searchBox(this->global_url, "Search the users") .
             this->tags(path, "users") .
             this->renderList(path);
         
@@ -290,9 +288,7 @@ class Users extends Content
 
     public function renderList(string path)
     {
-        var data = [], query, table;
-
-        let table = new Table();
+        var data = [], query;
 
         let query = "
             SELECT
@@ -311,7 +307,7 @@ class Users extends Content
         }
         let query .= " ORDER BY users.name";
 
-        return table->build(
+        return this->tables->build(
             this->list,
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
@@ -326,7 +322,7 @@ class Users extends Content
                 this->cfg->dumb_dog_url . "/groups",
                 "groups",
                 "groups",
-                "Click to access the system's groups"
+                "Click to access the groups"
             ) .
             this->buttons->round(
                 this->global_url . "/add",

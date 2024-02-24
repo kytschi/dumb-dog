@@ -6,33 +6,29 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Controller;
-use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Table;
-use DumbDog\Ui\Gfx\Titles;
 
-class Templates extends Controller
+class Templates extends Content
 {
     public global_url = "/templates";
 
     public function add(string path)
     {
-        var titles, html;
-        let titles = new Titles();
-        let html = titles->page("Add a template", "add");
+        var  html;
+        let html = this->titles->page("Add a template", "add");
         let html .= "<div class='dd-page-toolbar'>
             <a href='" . this->global_url . "' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
         </div>";
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, data = [], status = false;
+                var data = [], status = false;
 
                 if (!this->validate(_POST, ["name", "file"])) {
                     let html .= this->missingRequired();
@@ -40,12 +36,11 @@ class Templates extends Controller
                     let data["name"] = _POST["name"];
                     let data["file"] = _POST["file"];
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
-                    let data["created_by"] = this->getUserId();
-                    let data["updated_by"] = this->getUserId();
+                    let data["created_by"] = this->database->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database();
-                        let status = database->execute(
+                        let status = this->database->execute(
                             "INSERT INTO templates 
                                 (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
                             VALUES 
@@ -108,18 +103,16 @@ class Templates extends Controller
 
     public function edit(string path)
     {
-        var titles, html, database, model, data = [];
-        let titles = new Titles();
-
-        let database = new Database();
+        var html, model, data = [], status = false;
+        
         let data["id"] = this->getPageId(path);
-        let model = database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Template not found");
         }
 
-        let html = titles->page("Edit the template", "edit");
+        let html = this->titles->page("Edit the template", "edit");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -139,25 +132,22 @@ class Templates extends Controller
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, status = false;
-
                 if (!this->validate(_POST, ["name", "file"])) {
                     let html .= this->missingRequired();
                 } else {
                     let data["name"] = _POST["name"];
                     let data["file"] = _POST["file"];
                     let data["default"] = isset(_POST["default"]) ? 1 : 0;
-                    let data["updated_by"] = this->getUserId();
+                    let data["updated_by"] = this->database->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        let database = new Database();
                         if (data["default"]) {
-                            let status = database->execute(
+                            let status = this->database->execute(
                                 "UPDATE templates SET `default`=0, updated_at=NOW(), updated_by=:updated_by",
                                 data
                             );
                         }
-                        let status = database->execute(
+                        let status = this->database->execute(
                             "UPDATE templates SET 
                                 name=:name, file=:file, `default`=:default, updated_at=NOW(), updated_by=:updated_by
                             WHERE id=:id",
@@ -228,11 +218,9 @@ class Templates extends Controller
 
     public function index(string path)
     {
-        var titles, table, database, html;
-        let titles = new Titles();
-        let table = new Table();
-        
-        let html = titles->page("Templates", "templates");
+        var html;
+                
+        let html = this->titles->page("Templates", "templates");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the template");
@@ -243,14 +231,12 @@ class Templates extends Controller
             <a href='" . this->global_url . "/add' class='dd-link dd-round dd-icon' title='Add a template'>&nbsp;</a>
         </div>";
 
-        let database = new Database();
-
-        let html .= table->build(
+        let html .= this->tables->build(
             [
                 "name",
                 "default|bool"
             ],
-            database->all("SELECT * FROM templates ORDER BY `default` DESC, name ASC"),
+            this->database->all("SELECT * FROM templates ORDER BY `default` DESC, name ASC"),
             this->global_url
         );
 
