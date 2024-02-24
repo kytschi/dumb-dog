@@ -30,7 +30,7 @@ class Socials extends Content
     {
         var html, data;
 
-        let html = this->titles->page("Create the social media link", "socials");
+        let html = this->titles->page("Create the social media link", "socialmedia");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -123,7 +123,7 @@ class Socials extends Content
             throw new NotFoundException("Social media link not found");
         }
 
-        let html = this->titles->page("Edit the social media link", "socials");
+        let html = this->titles->page("Edit the social media link", "socialmedia");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
@@ -200,7 +200,7 @@ class Socials extends Content
         return html;
     }
 
-    private function render(model, mode = "add")
+    public function render(model, mode = "add")
     {
         var html;
 
@@ -232,7 +232,7 @@ class Socials extends Content
                         </div>
                     </div>
                 </div>
-                <ul class='dd-col dd-nav ndd-av-tabs' role='tablist'>
+                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
                     <li class='dd-nav-item' role='presentation'>
                         <button
                             class='dd-nav-link'
@@ -249,7 +249,7 @@ class Socials extends Content
                             type='button'
                             role='tab'
                             aria-controls='look-tab' 
-                            aria-selected='true'>Look &amp; Feel</button>
+                            aria-selected='true'>Look and Feel</button>
                     </li>
                     <li class='dd-nav-item' role='presentation'><hr/></li>
                     <li class='dd-nav-item' role='presentation'>" . 

@@ -59,7 +59,10 @@ class Content extends Controller
     {
         var html, data, model, path = "";
         
-        let html = this->titles->page("Create the " . str_replace("-", " ", this->type));
+        let html = this->titles->page(
+            "Create the " . str_replace("-", " ", this->type),
+            "add"
+        );
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -69,11 +72,11 @@ class Content extends Controller
                 if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
+                    let path = this->global_url;
+
                     let data["id"] = this->database->uuid();
                     let data["created_by"] = this->getUserId();
                     let data["type"] = this->type;
-
-                    let path = this->global_url;
 
                     let data = this->setData(data);
 
@@ -100,6 +103,7 @@ class Content extends Controller
                             featured,
                             parent_id,
                             sort,
+                            sitemap_include,
                             created_at,
                             created_by,
                             updated_at,
@@ -127,6 +131,7 @@ class Content extends Controller
                             :featured,
                             :parent_id,
                             :sort,
+                            :sitemap_include,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -172,6 +177,7 @@ class Content extends Controller
         let model->meta_description = "";
         let model->template_id = "";
         let model->banner_image = "";
+        let model->sitemap_include = 1;
 
         let html .= this->render(model);
 
@@ -391,7 +397,8 @@ class Content extends Controller
                         tags=:tags,
                         featured=:featured,
                         parent_id=:parent_id,
-                        sort=:sort  
+                        sort=:sort,
+                        sitemap_include=:sitemap_include 
                     WHERE id=:id",
                     data
                 );
@@ -477,7 +484,7 @@ class Content extends Controller
         );
     }
 
-    private function render(model, mode = "add")
+    public function render(model, mode = "add")
     {
         var html;
 
@@ -527,6 +534,7 @@ class Content extends Controller
                             <div class='dd-box'>
                                 <div class='dd-box-title'>SEO</div>
                                 <div class='dd-box-body'>" .
+                                    this->inputs->toggle("Sitemap include", "sitemap_include", false, model->sitemap_include) . 
                                     this->inputs->tags("Tags", "tags", "Tag the page", false, model->tags) . 
                                     this->inputs->text("Meta keywords", "meta_keywords", "Help search engines find the page", false, model->meta_keywords) .
                                     this->inputs->text("Meta author", "meta_author", "The author of the page", false, model->meta_author) .
@@ -692,7 +700,7 @@ class Content extends Controller
             let data["query"] = "%" . _POST["q"] . "%";
         }
         if (isset(_GET["tag"])) {
-            let query .= " AND main_page.tags like :tag";
+            let query .= " AND main_page.tags LIKE :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
         let query .= " ORDER BY main_page.name";
@@ -741,7 +749,7 @@ class Content extends Controller
         return html;
     }
 
-    private function renderStacks(model)
+    public function renderStacks(model)
     {
         var key, key_stack, item, item_stack, html = "";
 
@@ -844,7 +852,7 @@ class Content extends Controller
         "</div>";
     }
 
-    private function setData(data)
+    private function setData(array data)
     {
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
@@ -863,7 +871,7 @@ class Content extends Controller
         let data["meta_keywords"] = _POST["meta_keywords"];
         let data["meta_author"] = _POST["meta_author"];
         let data["meta_description"] = this->cleanContent(_POST["meta_description"]);
-        let data["updated_by"] = this->getUserId();
+        let data["updated_by"] = this->database->getUserId();
         let data["event_on"] = null;                    
         let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
         let data["author"] = isset(_POST["author"]) ? _POST["author"] : null;
@@ -871,6 +879,7 @@ class Content extends Controller
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["parent_id"] = _POST["parent_id"];
         let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
+        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
         let data["sort"] = intval(_POST["sort"]);
 
         if (isset(_POST["event_on"])) {

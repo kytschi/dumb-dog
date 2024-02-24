@@ -190,7 +190,7 @@ class Leads extends Content
         return html;
     }
 
-    private function render(model, mode = "add")
+    public function render(model, mode = "add")
     {
         var html;
 
@@ -465,7 +465,7 @@ class Leads extends Content
         );
     }
 
-    private function renderMessages(string lead_id)
+    public function renderMessages(string lead_id)
     {
         var message, data, html, dates, messages;
 

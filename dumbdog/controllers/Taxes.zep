@@ -194,7 +194,7 @@ class Taxes extends Content
         return html;
     }
 
-    private function render(model, mode = "add")
+    public function render(model, mode = "add")
     {
         var html;
 

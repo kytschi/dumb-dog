@@ -246,7 +246,7 @@ class Users extends Content
         return this->triggerRecover(path, "users");
     }
 
-    private function render(model)
+    public function render(model, mode = "add")
     {
         return "
         <form method='post' enctype='multipart/form-data'>
