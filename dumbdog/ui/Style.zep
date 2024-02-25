@@ -570,21 +570,11 @@ class Style
             width: 100%;
             margin-bottom: 20px;
         }
-        #dd-search-box table {
-            width: 100%;
-            background-color: #fff;
+        #dd-search-box .dd-box {
+            margin-bottom: 0 !important;
         }
         #dd-search-box input {
             width: calc(100% - 23px);
-        }
-        #dd-search-box table td {
-            border: 0 !important;
-        }
-        #dd-search-box table tfoot td {
-            text-align: right;
-        }
-        #dd-search-box .dd-button {
-            margin-left: 10px;
         }
         .dd-switcher {
             font-size: 0pt !important;
