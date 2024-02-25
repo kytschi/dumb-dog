@@ -116,22 +116,29 @@ class Menu
 
     public function quickmenu()
     {
-        var controller, icons, messages;
+        var controller, icons, total, indicator = false;
 
         let controller = new Controller();
         let icons = new Icons();
-
-        let messages = count(controller->database->all("SELECT count(id) FROM messages WHERE status='unread' AND deleted_at IS NULL"));
     
         echo "<div id='dd-quick-menu' style='display: none;'>
             <div class='dd-container'>
-                <div id='dd-quick-menu-header'>
-                    <div>
-                        <input class='form-control' name='search'>
+                <div id='dd-quick-menu-header' class='dd-flex'>
+                    <div id='dd-search-box' class='dd-col'>
+                        <div class='dd-box'>
+                            <div class='dd-box-body'>
+                                <input 
+                                    class='dd-form-control' 
+                                    name='search'
+                                    placeholder='What yah looking for?'>
+                            </div>
+                        </div>
                     </div>
-                    <button type='button' onclick='showQuickMenu()' class='dd-float-right dd-button-blank'>" .
-                        icons->cancel() .
-                    "</button>
+                    <div class='dd-col-auto'>
+                        <button type='button' onclick='showQuickMenu()' class='dd-button-blank'>" .
+                            icons->cancel() .
+                        "</button>
+                    </div>
                 </div>
                 <div id='dd-apps'>
                     <a href='" . this->cfg->dumb_dog_url . "' title='Go to the dashboard' class='dd-box'>
@@ -141,12 +148,38 @@ class Menu
                         </div>
                     </a>";
                 if (this->cfg->apps->crm || this->cfg->apps->cms) {
+                    let total = count(controller->database->all("SELECT count(id) FROM messages WHERE status='unread' AND deleted_at IS NULL"));
+                    if (total) {
+                        let indicator = true;
+                    }
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/messages' title='Manage the messages' class='dd-box'>
                         <div class='dd-box-body'>" . 
                             icons->messages() .
                             "<label>Messages</label>" . 
-                            (messages ? "<span class='dd-icon-indicator'>" . messages . "</span>" : "") .
+                            (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
+                        "</div>
+                    </a>";
+                    let total = count(
+                        controller->database->all(
+                            "SELECT count(appointments.id)
+                            FROM appointments 
+                            JOIN content ON content.id=appointments.content_id 
+                            WHERE user_id=:user_id AND content.deleted_at IS NULL",
+                            [
+                                "user_id": controller->database->getUserId()
+                            ]
+                        )
+                    );
+                    if (total) {
+                        let indicator = true;
+                    }
+                    echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->appointments() .
+                            "<label>Appointments</label>". 
+                            (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
                         "</div>
                     </a>";
                 }
@@ -217,12 +250,6 @@ class Menu
                             icons->leads() .
                             "<label>Leads</label>
                         </div>
-                    </a>
-                    <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
-                        <div class='dd-box-body'>" . 
-                            icons->appointments() .
-                            "<label>Appointments</label>
-                        </div>
                     </a>";
                 }
                 echo "
@@ -250,7 +277,7 @@ class Menu
         <div id='dd-quick-menu-button' onclick='showQuickMenu()'>
             <div class='dd-round dd-icon-dumbdog'>" .
                 icons->dumbdog() .
-                (messages ? "<span class='dd-icon-indicator'></span>" : "") .
+                (indicator ? "<span class='dd-icon-indicator'></span>" : "") .
             "</div>
         </div>";
     }
