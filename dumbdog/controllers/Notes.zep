@@ -88,9 +88,9 @@ class Notes
         <div id='notes-tab' class='dd-row'>
             <div class='dd-col-12'>
                 <div class='dd-box'>
-                    <div class='dd-box-title'>
-                        <span>Add a note</span>
-                        <div>
+                    <div class='dd-box-title dd-flex'>
+                        <span class='dd-col'>Add a note</span>
+                        <div class='dd-col-auto'>
                             <button 
                                 type='submit'
                                 name='add_note'
@@ -116,7 +116,7 @@ class Notes
                                     <div class='dd-note-header dd-pb-3'>
                                         <div class='dd-float-left'>
                                             <p>" . note->created_by . "</p>
-                                            <p>" . dates->prettyDate(note->created_at) . "</p>
+                                            <p>" . dates->prettyDate(note->created_at, true, false) . "</p>
                                         </div>
                                         <div class='dd-float-right'>" .
                                         this->buttons->delete(

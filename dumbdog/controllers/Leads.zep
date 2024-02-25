@@ -109,9 +109,12 @@ class Leads extends Content
                 contacts.*,
                 leads.id,
                 leads.contact_id,
-                leads.ranking 
+                leads.ranking,
+                appointments.content_id AS appointment_id,
+                appointments.on_date 
             FROM leads
             JOIN contacts ON contacts.id = leads.contact_id 
+            LEFT JOIN appointments ON appointments.lead_id = leads.id  
             LEFT JOIN users ON users.id = leads.user_id 
             WHERE leads.id=:id", data);
 
@@ -195,7 +198,33 @@ class Leads extends Content
         var html;
 
         let html = "
-        <form method='post' enctype='multipart/form-data'>
+        <form method='post' enctype='multipart/form-data'>";
+
+        if (!empty(model->on_date)) {
+            let html .= "
+            <div class='dd-row'>
+                <div class='dd-col-12'>
+                    <div class='dd-box'>
+                        <div class='dd-box-title dd-flex'>
+                            <span class='dd-col'>Appointment booked</span>
+                            <div class='dd-col-auto'>" . 
+                                this->buttons->generic(
+                                    this->cfg->dumb_dog_url . "/appointments/edit/" . model->appointment_id,
+                                    "",
+                                    "edit",
+                                    "Edit the appointment"
+                                ) .
+                            "</div>
+                        </div>
+                        <div class='dd-box-body dd-flex'>" .
+                            (new Dates())->prettyDate(model->on_date, true, false) . 
+                        "</div>
+                    </div>
+                </div>
+            </div>";
+        }
+
+        let html .= "
             <div class='dd-row'>
                 <div class='dd-col-12'>
                     <div class='dd-box'>
@@ -377,6 +406,16 @@ class Leads extends Content
             if (model->website) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
                     this->buttons->view(model->website) .
+                "</li>";
+            }
+            if (empty(model->appointment_id)) {
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
+                    this->buttons->generic(
+                        this->cfg->dumb_dog_url . "/appointments/add?lead_id=" . model->id,
+                        "appointment",
+                        "appointments",
+                        "Create an appointment"
+                    ) .
                 "</li>";
             }
             if (model->deleted_at) {
