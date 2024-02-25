@@ -336,6 +336,13 @@ class Socials extends Content
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["updated_by"] = this->database->getUserId();
 
+        if (this->database->get(
+            "SELECT id FROM content WHERE url=:url AND deleted_at IS NULL",
+            ["url": data["url"]]
+        )) {
+            throw new Exception("URL already taken by another piece of content");
+        }
+
         return data;
     }
 }

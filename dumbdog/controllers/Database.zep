@@ -206,6 +206,17 @@ class Database
         return this->system_uuid;
     }
 
+    public function toDate(string str)
+    {
+        var date;
+        let date = \DateTime::createFromFormat("d/m/Y H:i:s", str);
+        if (empty(date)) {
+            throw new \Exception("Failed to process the date");
+        }
+
+        return date->format("Y-m-d H:i:s");
+    }
+
     public function uuid() {
         return sprintf(
             "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",

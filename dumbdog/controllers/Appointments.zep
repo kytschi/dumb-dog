@@ -1,354 +1,262 @@
 /**
- * Dumb Dog appointments builder
+ * Dumb Dog appointments
  *
  * @package     DumbDog\Controllers\Appointments
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Controller;
-use DumbDog\Controllers\Database;
+use DumbDog\Controllers\Content;
+use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
-use DumbDog\Ui\Gfx\Tiles;
-use DumbDog\Ui\Gfx\Titles;
+use DumbDog\Exceptions\ValidationException;
+use DumbDog\Helper\Dates;
 
-class Appointments extends Controller
+class Appointments extends Content
 {
-    /*public function add(string path)
-    {
-        var titles, html, database;
-        let titles = new Titles();
-        let database = new Database();
+    public global_url = "/appointments";
+    public type = "appointment";
+    public title = "Appointments";
+    public required = ["name", "on_date", "on_time", "appointment_length"];
+    public list = [
+        "name|with_tags",
+        "title"        
+    ];
 
-        let html = titles->page("Add an appointment", "add");
-        let html .= "<div class='dd-page-toolbar'>
-            <a href='/dumb-dog/appointments' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
-        </div>";
+    public function add(string path)
+    {
+        var html, data, model;
+
+        let html = this->titles->page("Create an appointment", "appointments");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var database, data = [], status = false;
+                var status = false;
+                let data = [];
 
-                if (!this->validate(_POST, ["name", "user_id", "on_date", "on_time"])) {
+                if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
-                    let data["user_id"] = _POST["user_id"];
-                    let data["name"] = _POST["name"];
-                    let data["with_email"] = _POST["with_email"];
-                    let data["with_number"] = _POST["with_number"];
-                    let data["content"] = _POST["content"];
-                    let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
-                    let data["appointment_length"] = isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null;
-                    let data["on_date"] = this->dateToSql(_POST["on_date"] . " " . _POST["on_time"] . ":00");
-                    let data["created_by"] = this->getUserId();
-                    let data["updated_by"] = this->getUserId();
+                    let data["id"] = this->database->uuid();
+                    let data["created_by"] = this->database->getUserId();
+                    let data["type"] = this->type;
 
-                    if (this->cfg->save_mode == true) {
-                        let status = this->database->execute(
-                            "INSERT INTO appointments 
-                                (
-                                    id,
-                                    user_id,
-                                    name,
-                                    with_email,
-                                    with_number,
-                                    content,
-                                    on_date,
-                                    free_slot,
-                                    appointment_length,
-                                    created_at,
-                                    created_by,
-                                    updated_at,
-                                    updated_by
-                                ) 
-                            VALUES 
-                                (
-                                    UUID(),
-                                    :user_id,
-                                    :name,
-                                    :with_email,
-                                    :with_number,
-                                    :content,
-                                    :on_date,
-                                    :free_slot,
-                                    :appointment_length,
-                                    NOW(),
-                                    :created_by,
-                                    NOW(),
-                                    :updated_by
-                                )",
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
+                    let data = this->setData(data);
+                    
+                    let status = this->database->execute(
+                        "INSERT INTO content 
+                            (id,
+                            status,
+                            name,
+                            title,
+                            sub_title,
+                            slogan,
+                            url,
+                            content,
+                            template_id,
+                            meta_keywords,
+                            meta_author,
+                            meta_description,
+                            type,                            
+                            tags,
+                            featured,
+                            sitemap_include,
+                            public_facing,
+                            created_at,
+                            created_by,
+                            updated_at,
+                            updated_by) 
+                        VALUES 
+                            (
+                            :id,
+                            :status,
+                            :name,
+                            :title,
+                            :sub_title,
+                            :slogan,
+                            :url,
+                            :content,                            
+                            :template_id,
+                            :meta_keywords,
+                            :meta_author,
+                            :meta_description,
+                            :type,
+                            :tags,
+                            :featured,
+                            :sitemap_include,
+                            :public_facing,
+                            NOW(),
+                            :created_by,
+                            NOW(),
+                            :updated_by)",
+                        data
+                    );
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to save the appointment");
+                        let html .= this->saveFailed("Failed to save the appointments");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumb-dog/appointments/add?saved=true");
+                        if (isset(_FILES["banner_image"]["name"])) {
+                            if (!empty(_FILES["banner_image"]["name"])) {
+                                this->files->addResource("banner_image", data["id"], "image");
+                            }
+                        }
+                        let model = this->database->get(
+                            "SELECT * FROM content WHERE id=:id",
+                            [
+                                "id": data["id"]
+                            ]);
+                        let path = this->updateExtra(model, path);
+                        this->redirect(this->global_url . "?saved=true");
                     }
                 }
             }
         }
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("I've created the appointment");
+            let html .= this->saveSuccess("Appointments has been saved");
         }
 
-        let html .= "<form method='post'>
-        <div class='dd-box dd-wfull'>
-            <div class='dd-box-title'>
-                <span>the appointment</span>
-            </div>
-            <div class='dd-box-body'>";
-        let html .= this->createInputSwitch("free slot", "free_slot", false, isset(_POST["free_slot"]) ? _POST["free_slot"] : false);
-        let html .= "<div class='dd-input-group'>
-                    <span>for user<span class='dd-required'>*</span></span>
-                    <select name='user_id'>";
-
-        var iLoop = 0, selected = "", data;
-        let data = this->database->all("SELECT * FROM users ORDER BY name");
-
-        if (isset(_POST["user_id"])) {
-            let selected = _POST["user_id"];
-        } else {
-            let selected = this->getUserId();
-        }
-
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == selected) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-
-        let html .= "</select></div>";
-
-        let html .= 
-                this->createInputDate("when its happening", "on_date", "leave a comment?", true) .
-                this->createInputText(
-                    "what time, enter as hour:minutes",
-                    "on_time",
-                    "24 hour time please",
-                    true,
-                    (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : "")
-                ) .
-                this->createInputSelect(
-                    "how long for",
-                    "appointment_length",
-                    [
-                        "1": "1 hour",
-                        "2": "2 hours",
-                        "4": "4 hours",
-                        "all_day": "all day",
-                        "daily": "daily",
-                        "weekly": "weekly",
-                        "monthly": "monthly",
-                        "annually": "annually"
-                    ]
-                ) .
-                this->createInputText("label", "name", "give me a label", true) .
-                this->createInputText("email", "with_email", "give me their email if possible") . 
-                this->createInputText("number", "with_number", "give me their number if possible") .
-                this->createInputTextarea("details", "content", "any details?") . 
-        "</div>
-            <div class='dd-box-footer'>
-                <a href='/dumb-dog/appointments' class='dd-button-blank'>cancel</a>
-                <button type='submit' name='save' class='dd-button'>save</button>
-            </div>
-        </div></form>";
+        let model = new \stdClass();
+        let model->deleted_at = null;
+        let model->status = "live";
+        let model->name = "";
+        let model->title = "";
+        let model->sub_title = "";
+        let model->feature = false;
+        let model->content = "";
+        let model->sitemap_include = false;
+        let model->public_facing = false;
+        let model->tags = "";
+        let model->url = "";
+        
+        let html .= this->render(model);
 
         return html;
     }
-
-    public function delete(string path)
-    {
-        return this->triggerDelete(path, "appointments");
-    }
-
+    
     public function edit(string path)
     {
-        var titles, html, database, model, data = [];
-        let titles = new Titles();
+        var html, model, data = [];
         
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("SELECT * FROM appointments WHERE id=:id", data);
+        let model = this->database->get("
+            SELECT 
+                appointments.*,
+                content.*,
+                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-',  banner.filename), '') AS banner_image
+            FROM content 
+            LEFT JOIN files AS banner ON 
+                banner.resource_id = content.id AND
+                resource='banner-image' AND
+                banner.deleted_at IS NULL
+            JOIN appointments ON appointments.content_id = content.id 
+            WHERE content.type='" . this->type . "' AND content.id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Appointment not found");
         }
 
-        let html = titles->page("Edit the appointment", "edit");
+        let html = this->titles->page("Edit the appointment", "appointments");
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='dd-page-toolbar";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'>
-            <a href='/dumb-dog/appointments' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
-        if (model->deleted_at) {
-            let html .= "<a href='/dumb-dog/appointments/recover/" . model->id . "' class='dd-round dd-icon dd-icon-recover' title='Recover the appointment'>&nbsp;</a>";
-        } else {
-            let html .= "<a href='/dumb-dog/appointments/delete/" . model->id . "' class='dd-round dd-icon dd-icon-delete' title='Delete the appointment'>&nbsp;</a>";
-        }
-        let html .= "</div>";
-
         if (!empty(_POST)) {
-            if (isset(_POST["save"])) {
-                var database, status = false;
+            var status = false, err;
 
-                if (!this->validate(_POST, ["name", "user_id", "on_date", "on_time"])) {
-                    let html .= this->missingRequired();
-                } else {
-                    let data["user_id"] = _POST["user_id"];
-                    let data["name"] = _POST["name"];
-                    let data["with_email"] = _POST["with_email"];
-                    let data["with_number"] = _POST["with_number"];
-                    let data["content"] = _POST["content"];
-                    let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
-                    let data["appointment_length"] = isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null;
-                    let data["on_date"] = this->dateToSql(_POST["on_date"] . " " . _POST["on_time"] . ":00");
-                    let data["updated_by"] = this->getUserId();
+            if (!this->validate(_POST, this->required)) {
+                let html .= this->missingRequired();
+            } else {
+                let path = this->global_url . "/edit/" . model->id;
 
-                    if (this->cfg->save_mode == true) {
-                        let database = new Database();
-                        let status = database->execute(
-                            "UPDATE appointments SET 
-                                user_id=:user_id,
-                                name=:name, 
-                                with_email=:with_email, 
-                                with_number=:with_number, 
-                                content=:content, 
-                                on_date=:on_date, 
-                                free_slot=:free_slot,
-                                appointment_length=:appointment_length, 
-                                updated_at=NOW(), 
-                                updated_by=:updated_by
-                            WHERE id=:id",
-                            data
-                        );
-                    } else {
-                        let status = true;
+                if (isset(_POST["delete"])) {
+                    if (!empty(_POST["delete"])) {
+                        this->triggerDelete("content", path);
                     }
+                }
 
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to update the appointment");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect("/dumb-dog/appointments/edit/" . model->id . "?saved=true");
+                if (isset(_POST["recover"])) {
+                    if (!empty(_POST["recover"])) {
+                        this->triggerRecover("content", path);
+                    }
+                }
+
+                let path = path . "?saved=true";
+
+                let data = this->setData(data);
+                
+                if (isset(_FILES["banner_image"]["name"])) {
+                    if (!empty(_FILES["banner_image"]["name"])) {
+                        this->files->addResource("banner_image", data["id"], "banner-image");
+                    }
+                }
+
+                let status = this->database->execute(
+                    "UPDATE content SET 
+                        status=:status,
+                        name=:name,
+                        title=:title,
+                        sub_title=:sub_title,
+                        slogan=:slogan,
+                        url=:url,
+                        template_id=:template_id,
+                        content=:content,
+                        meta_keywords=:meta_keywords,
+                        meta_author=:meta_author,
+                        meta_description=:meta_description,
+                        updated_at=NOW(),
+                        updated_by=:updated_by,
+                        tags=:tags,
+                        featured=:featured,
+                        sitemap_include=:sitemap_include 
+                    WHERE id=:id",
+                    data
+                );
+            
+                if (!is_bool(status)) {
+                    let html .= this->saveFailed("Failed to update the review");
+                    let html .= this->consoleLogError(status);
+                } else {
+                    try {
+                        let path = this->updateExtra(model, path);
+                        this->redirect(path);
+                    } catch ValidationException, err {
+                        this->missingRequired(err->getMessage());
                     }
                 }
             }
         }
-
+        
         if (isset(_GET["saved"])) {
             let html .= this->saveSuccess("I've updated the appointment");
         }
 
-        let html .= "<form method='post'>
-        <div class=dd-box dd-wfull";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'>
-            <div class='dd-box-title'>
-                <span>the appointment</span>
-            </div>
-            <div class='dd-box-body'>";
-        let html .= this->createInputSwitch("free slot", "free_slot", false, model->free_slot);
-        let html .= "<div class='dd-input-group'>
-                    <span>for user<span class='dd-required'>*</span></span>
-                    <select name='user_id'>";
-
-        var iLoop = 0, selected = "";
-        let data = database->all("SELECT * FROM users ORDER BY name");
-
-        if (isset(_POST["user_id"])) {
-            let selected = _POST["user_id"];
-        } else {
-            let selected = model->user_id;
-        }
-
-        while (iLoop < count(data)) {
-            let html .= "<option value='" . data[iLoop]->id . "'";
-            if (data[iLoop]->id == selected) {
-                let html .= " selected='selected'";
-            }
-            let html .= ">" . data[iLoop]->name . "</option>";
-            let iLoop = iLoop + 1;
-        }
-
-        let html .= "</select></div>";
-
-        let html .= 
-                this->createInputDate("when its happening", "on_date", "leave a comment?", true, model->on_date) .
-                this->createInputText(
-                    "what time, enter as hour:minutes",
-                    "on_time",
-                    "24 hour time please",
-                    true,
-                    (isset(_POST["on_time"]) ? date("H:i", strtotime(_POST["on_time"])) : date("H:i", strtotime(model->on_date)))
-                ) .
-                this->createInputSelect(
-                    "how long for",
-                    "appointment_length",
-                    [
-                        "1": "1 hour",
-                        "2": "2 hours",
-                        "4": "4 hours",
-                        "all_day": "all day",
-                        "daily": "daily",
-                        "weekly": "weekly",
-                        "monthly": "monthly",
-                        "annually": "annually"
-                    ],
-                    false,
-                    model->appointment_length
-                ) .
-                this->createInputText("label", "name", "give me a label", true, model->name) .
-                this->createInputText("email", "with_email", "give me their email if possible", false, model->with_email) . 
-                this->createInputText("number", "with_number", "give me their number if possible", false, model->with_number) .
-                this->createInputTextarea("details", "content", "any details?", false, model->content) . 
-        "</div>
-            <div class='dd-box-footer'>
-                <a href='/dumb-dog/appointments' class='dd-button-blank'>cancel</a>
-                <button type='submit' name='save' class='dd-button'>save</button>
-            </div>
-        </div></form>";
-
+        let html .= this->render(model, "edit");
         return html;
     }
 
     public function index(string path)
     {
-        var titles, tiles, database, html;
-
-        let database = new Database();
-        let titles = new Titles();
-        let tiles = new Tiles();
+        var html;
         
-        let html = titles->page("Appointments", "appointments");
+        let html = this->titles->page("Appointments", "appointments");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the appointment");
         }
 
-        let html .= "<div class='dd-page-toolbar'>
-            <a href='/dumb-dog/appointments/add' class='dd-round dd-icon' title='Add an appointment'>&nbsp;</a>
-        </div>";
+        if (this->back_url) {
+            let html .= this->renderBack();
+        } else {
+            let html .= this->renderToolbar();
+        }
 
         var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date;
         
@@ -363,15 +271,13 @@ class Appointments extends Controller
             let today = intval(date("d"));
         }
         
-        let html .= "<div id='dd-calendar-month'>
-            <div>
-                <span>
-                    " . date("F Y", strtotime(date . "-01")) . "
-                </span>
-                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))) . "' class='dd-link dd-icon dd-icon-prev'>&nbsp;</a>
-                <a href='/dumb-dog/appointments?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))) . "' class='dd-link dd-icon dd-icon-next'>&nbsp;</a>
-            </div>
-        </div><div id='dd-calendar'>";
+        let html .= "
+        <div id='dd-calendar-month' class='dd-flex'>" .
+            this->buttons->previous(this->global_url . "?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))), "Previous month") .
+            "<span>" . date("F Y", strtotime(date . "-01")) . "</span>" . 
+            this->buttons->next(this->global_url . "?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))), "Next month") .
+        "</div>
+        <div id='dd-calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         while(iLoop < count(days)) {
             let html .= "<div class='dd-calendar-day'>" . days[iLoop] . "</div>";
@@ -399,8 +305,16 @@ class Appointments extends Controller
                 let html .= " dd-calendar-blank";
             }
             let html .= "'><div class='dd-calendar-date'>" . iLoop ."</div>";
-            let data = database->all(
-                "SELECT * FROM appointments WHERE on_date BETWEEN CONCAT(:on_date, ' 00:00') AND CONCAT(:on_date, ' 23:59') ORDER BY on_date",
+            let data = this->database->all(
+                "SELECT
+                    appointments.*,
+                    content.*  
+                FROM content 
+                JOIN appointments ON appointments.content_id = content.id  
+                WHERE 
+                    on_date BETWEEN CONCAT(:on_date, ' 00:00') AND
+                    CONCAT(:on_date, ' 23:59')
+                ORDER BY on_date",
                 [
                     "on_date": date(date . "-" . iLoop)
                 ]
@@ -411,7 +325,7 @@ class Appointments extends Controller
                     if (entry->free_slot) {
                         let html .= " dd-calendar-free-slot";
                     }
-                    let html .= "'><a href='/dumb-dog/appointments/edit/" . entry->id . "' class='dd-link'>
+                    let html .= "'><a href='" .this->global_url . "/edit/" . entry->id . "' class='dd-link'>
                         <small>" .date("H:i", strtotime(entry->on_date));
                     if (entry->free_slot) {
                         let html .= "&nbsp;<span>free slot</span>";
@@ -429,8 +343,291 @@ class Appointments extends Controller
         return html;
     }
 
-    public function recover(string path)
+    public function render(model, mode = "add")
     {
-        return this->triggerRecover(path, "appointments");
-    }*/
+        var html = "";
+
+        if (!empty(model->on_date)) {
+            let model->on_time = (new Dates())->getTime(model->on_date, false);
+        }
+
+        let html = "
+        <form method='post' enctype='multipart/form-data'>
+            <div class='dd-tabs'>
+                <div class='dd-tabs-content dd-col'>
+                    <div id='content-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
+                                    this->inputs->toggle("Set live", "status", false, (model->status=="live" ? 1 : 0)) . 
+                                    this->inputs->text("Name", "name", "Name the appointment", true, model->name) .
+                                    this->inputs->date("On date", "on_date", "When the appointment is", true, model->on_date) .
+                                    this->inputs->text("On time", "on_time", "What time is the appointment", true, model->on_time) .
+                                    this->inputs->select(
+                                        "Length",
+                                        "appointment_length",
+                                        "Appointment length",
+                                        [
+                                            "1": "1 hour",
+                                            "2": "2 hours",
+                                            "4": "4 hours",
+                                            "all_day": "all day",
+                                            "daily": "daily",
+                                            "weekly": "weekly",
+                                            "monthly": "monthly",
+                                            "annually": "annually"
+                                        ],
+                                        true,
+                                        model->appointment_length
+                                    ) . 
+                                    this->inputs->toggle("Free slot", "free_slot", false, model->free_slot) . 
+                                "</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='public-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-title'>Public</div>
+                                <div class='dd-box-body'>" .
+                                    this->inputs->toggle("Public", "public_facing", false, model->public_facing) . 
+                                    this->inputs->text("Title", "title", "The appointment title", false, model->title) .
+                                    this->inputs->text("Sub title", "sub_title", "The appointment sub title", false, model->sub_title) .
+                                    this->inputs->textarea("Slogan", "slogan", "The appointment slogan", false, model->slogan, 500) .
+                                    this->inputs->wysiwyg("Content", "content", "The appointment content", false, model->content) . 
+                                    this->inputs->toggle("Feature", "featured", false, model->featured) . 
+                                    this->inputs->tags("Tags", "tags", "Tag the appointment", false, model->tags) .
+                                    this->inputs->text("Path", "url", "The path for the page", false, model->url) .
+                                "</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='seo-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-title'>SEO</div>
+                                <div class='dd-box-body'>" .
+                                    this->inputs->toggle("Sitemap include", "sitemap_include", false, model->sitemap_include) . 
+                                    this->inputs->text("Meta keywords", "meta_keywords", "Help search engines find the page", false, model->meta_keywords) .
+                                    this->inputs->text("Meta author", "meta_author", "The author of the page", false, model->meta_author) .
+                                    this->inputs->textarea("Meta description", "meta_description", "A short description of the page", false, model->meta_description) .
+                                "</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='look-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-title'>Look and Feel</div>
+                                <div class='dd-box-body'>" .
+                                    this->templatesSelect(model->template_id) . 
+                                    this->inputs->image("Banner image", "banner_image", "Upload your banner image here", false, model->banner_image) . 
+                                "</div>
+                            </div>
+                        </div>
+                    </div>";
+
+        if (mode == "edit") {
+            let html .= this->renderStacks(model);
+            let html .= this->renderOldUrls(model);
+        }
+
+        let html .= "
+                </div>
+                <ul class='dd-col dd-nav-tabs' role='tablist'>
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            data-tab='#content-tab'
+                            aria-controls='content-tab' 
+                            aria-selected='true'>Appointment</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            data-tab='#public-tab'
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            aria-controls='public-tab' 
+                            aria-selected='true'>Public</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            data-tab='#seo-tab'
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            aria-controls='seo-tab' 
+                            aria-selected='true'>SEO</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            data-tab='#look-tab'
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            aria-controls='look-tab' 
+                            aria-selected='true'>Look and Feel</button>
+                    </li>";
+        if (mode == "edit") {
+            let html .= "
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            data-tab='#stack-tab'
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            aria-controls='stack-tab' 
+                            aria-selected='true'>Stacks</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            data-tab='#old-urls-tab'
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            aria-controls='old-urls-tab' 
+                            aria-selected='true'>Old URLs</button>
+                    </li>";
+        }
+
+        let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
+                    <li class='dd-nav-item' role='presentation'>" . 
+                        this->buttons->generic(
+                            this->global_url,
+                            "back",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                    "</li>";
+        if (mode == "edit") {
+            let html .= "
+                <li class='dd-nav-item' role='presentation'>" . 
+                    this->buttons->generic(
+                        this->global_url . "/add",
+                        "add",
+                        "add",
+                        "Create a new " . str_replace("-", " ", this->type)
+                    ) .
+                "</li>
+                <li class='dd-nav-item' role='presentation'>" .
+                    this->buttons->view(model->url) .
+                "</li>";
+    
+            if (model->deleted_at) {
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
+                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                "</li>";
+            } else {
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
+                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                "</li>";
+            }
+        }
+
+        let html .= "<li class='dd-nav-item' role='presentation'>". 
+                        this->buttons->save() .   
+                    "</li>
+                </ul>
+            </div>
+        </form>";
+
+        return html;
+    }
+
+    public function renderToolbar()
+    {
+        return "
+        <div class='dd-page-toolbar'>" . 
+            this->buttons->add(this->global_url . "/add") .
+        "</div>";
+    }
+
+    private function setData(array data)
+    {
+        if (empty(_POST["url"])) {
+            let data["url"] = "/appointments/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
+        }
+        let data = this->setContentData(data);
+
+        let data["public_facing"] = isset(_POST["public_facing"]) ? 1 : 0;
+
+        return data;
+    }
+
+    public function updateExtra(model, path)
+    {
+        var data, status = false, required = ["appointment_length", "on_date"];
+
+        let data = this->database->get("
+            SELECT *
+            FROM appointments 
+            WHERE content_id='" . model->id . "'");
+
+        if (!empty(data)) {
+            if (!this->validate(_POST, required)) {
+                throw new ValidationException("Missing required data");
+            }
+            
+            let status = this->database->get("
+                UPDATE appointments SET
+                    with_email=:with_email,
+                    with_number=:with_number,
+                    free_slot=:free_slot,
+                    appointment_length=:appointment_length,
+                    on_date=:on_date 
+                WHERE id=:id",
+                [
+                    "id": data->id,
+                    "with_email": isset(_POST["with_email"]) ?  _POST["with_email"] : null,
+                    "with_number": isset(_POST["with_number"]) ? _POST["with_number"] : null,
+                    "free_slot": isset(_POST["free_slot"]) ? 1 : 0,
+                    "appointment_length": isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null,
+                    "on_date": this->database->toDate(_POST["on_date"] . " " . _POST["on_time"] . ":00")
+                ]
+            );
+
+            if (!is_bool(status)) {
+                throw new Exception("Failed to update the appointment");
+            }
+        } else {
+            let status = this->database->get("
+                INSERT INTO appointments 
+                (
+                    id,
+                    content_id,
+                    with_email,
+                    with_number,
+                    free_slot,
+                    appointment_length,
+                    on_date
+                ) VALUES
+                (
+                    UUID(),
+                    :content_id,
+                    :with_email,
+                    :with_number,
+                    :free_slot,
+                    :appointment_length,
+                    :on_date 
+                )",
+                [
+                    "content_id": model->id,
+                    "with_email": isset(_POST["with_email"]) ?  _POST["with_email"] : null,
+                    "with_number": isset(_POST["with_number"]) ? _POST["with_number"] : null,
+                    "free_slot": isset(_POST["free_slot"]) ? 1 : 0,
+                    "appointment_length": isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null,
+                    "on_date": this->database->toDate(_POST["on_date"] . " " . _POST["on_time"] . ":00")
+                ]
+            );
+
+            if (!is_bool(status)) {
+                throw new Exception("Failed to create the appointment");
+            }
+        }
+
+        return path;
+    }
 }

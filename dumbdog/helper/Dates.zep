@@ -12,6 +12,12 @@ namespace DumbDog\Helper;
 
 class Dates
 {
+    public function getTime(datetime, bool seconds = true)
+    {
+        let datetime = strtotime(datetime);
+        return date(seconds ? "H:i:s" : "H:i", datetime);
+    }
+
     public function prettyDate(
         string datetime,
         bool time = true,

@@ -306,7 +306,7 @@ class Menus extends Content
         return html;
     }
 
-    private function parentSelect(selected = null, exclude = null)
+    public function parentSelect(selected = null, exclude = null)
     {
         var select = ["": "no parent"], data;
         let data = this->database->all(
@@ -514,7 +514,7 @@ class Menus extends Content
         return data;
     }
 
-    private function updateStacks()
+    public function updateStacks()
     {
         if (!isset(_POST["stack_name"])) {
             return;

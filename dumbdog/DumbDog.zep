@@ -10,7 +10,7 @@
 */
 namespace DumbDog;
 
-//use DumbDog\Controllers\Appointments;
+use DumbDog\Controllers\Appointments;
 use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Content;
 use DumbDog\Controllers\ContentStacks;
@@ -161,7 +161,7 @@ class DumbDog
         this->secure(path);
 
         var controllers = [
-            //"Appointments": new Appointments(),
+            "Appointments": new Appointments(),
             //"Comments": new Comments(),
             "ContentStacks": new ContentStacks(),
             "Dashboard": new Dashboard(),
@@ -313,7 +313,11 @@ class DumbDog
                     banner.resource_id = content.id AND
                     banner.resource='banner-image' AND
                     banner.deleted_at IS NULL 
-                WHERE content.url=:url AND content.status='live' AND content.deleted_at IS NULL",
+                WHERE 
+                    content.url=:url AND 
+                    content.status='live' AND 
+                    content.public_facing=1 AND 
+                    content.deleted_at IS NULL",
                 data
             );
             if (page) {
