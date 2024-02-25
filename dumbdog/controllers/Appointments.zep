@@ -134,6 +134,24 @@ class Appointments extends Content
         let model->public_facing = false;
         let model->tags = "";
         let model->url = "";
+
+        if (isset(_GET["lead_id"])) {
+            let data = this->database->get("
+                SELECT contacts.*
+                FROM leads
+                JOIN contacts ON contacts.id = leads.contact_id 
+                WHERE leads.id=:id",
+                [
+                    "id": _GET["lead_id"]
+                ]
+            );
+
+            if (!empty(data)) {
+                let model->name = "Appointment with " .
+                    this->database->decrypt(data->first_name) .
+                    (!empty(data->last_name) ? " " . this->database->decrypt(data->last_name) : "");
+            }
+        }
         
         let html .= this->render(model);
 
@@ -381,6 +399,7 @@ class Appointments extends Content
                                         model->appointment_length
                                     ) . 
                                     this->inputs->toggle("Free slot", "free_slot", false, model->free_slot) . 
+                                    this->userSelect(model->user_id) . 
                                 "</div>
                             </div>
                         </div>
@@ -496,10 +515,14 @@ class Appointments extends Content
         let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
                     <li class='dd-nav-item' role='presentation'>" . 
                         this->buttons->generic(
-                            this->global_url,
+                            isset(_GET["lead_id"]) ?
+                                this->cfg->dumb_dog_url . "/leads/edit/" . _GET["lead_id"] :
+                                this->global_url,
                             "back",
                             "back",
-                            "Go back to the list"
+                            isset(_GET["lead_id"]) ?
+                                "Back to the lead" :
+                                "Go back to the list"
                         ) .
                     "</li>";
         if (mode == "edit") {
@@ -515,7 +538,16 @@ class Appointments extends Content
                 <li class='dd-nav-item' role='presentation'>" .
                     this->buttons->view(model->url) .
                 "</li>";
-    
+            if (!empty(model->lead_id)) {
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
+                    this->buttons->generic(
+                        this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id,
+                        "lead",
+                        "leads",
+                        "View the lead"
+                    ) .
+                "</li>";
+            }
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
                     this->buttons->recover(this->global_url ."/recover/" . model->id) . 
@@ -557,6 +589,19 @@ class Appointments extends Content
         return data;
     }
 
+    private function setAppointmentData(array data)
+    {
+        let data["user_id"] = isset(_POST["user_id"]) ? _POST["user_id"] : null;
+        let data["with_email"] = isset(_POST["with_email"]) ? _POST["with_email"] : null;
+        let data["with_number"] = isset(_POST["with_number"]) ? _POST["with_number"] : null;
+        let data["free_slot"] = isset(_POST["free_slot"]) ? 1 : 0;
+        let data["appointment_length"] = isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null;
+        let data["on_date"] = this->database->toDate(_POST["on_date"] . " " . _POST["on_time"] . ":00");
+        let data["lead_id"] = isset(_GET["lead_id"]) ? _GET["lead_id"] : null;
+        
+        return data;
+    }
+
     public function updateExtra(model, path)
     {
         var data, status = false, required = ["appointment_length", "on_date"];
@@ -570,57 +615,53 @@ class Appointments extends Content
             if (!this->validate(_POST, required)) {
                 throw new ValidationException("Missing required data");
             }
-            
+
+            let data = this->setAppointmentData(["id": data->id]);
+                        
             let status = this->database->get("
                 UPDATE appointments SET
+                    user_id=:user_id,
                     with_email=:with_email,
                     with_number=:with_number,
                     free_slot=:free_slot,
                     appointment_length=:appointment_length,
-                    on_date=:on_date 
+                    on_date=:on_date,
+                    lead_id=:lead_id 
                 WHERE id=:id",
-                [
-                    "id": data->id,
-                    "with_email": isset(_POST["with_email"]) ?  _POST["with_email"] : null,
-                    "with_number": isset(_POST["with_number"]) ? _POST["with_number"] : null,
-                    "free_slot": isset(_POST["free_slot"]) ? 1 : 0,
-                    "appointment_length": isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null,
-                    "on_date": this->database->toDate(_POST["on_date"] . " " . _POST["on_time"] . ":00")
-                ]
+                data
             );
 
             if (!is_bool(status)) {
                 throw new Exception("Failed to update the appointment");
             }
         } else {
+            let data = this->setAppointmentData(["content_id": model->id]);
+
             let status = this->database->get("
                 INSERT INTO appointments 
                 (
                     id,
                     content_id,
+                    user_id,
                     with_email,
                     with_number,
                     free_slot,
                     appointment_length,
-                    on_date
+                    on_date,
+                    lead_id
                 ) VALUES
                 (
                     UUID(),
                     :content_id,
+                    :user_id,
                     :with_email,
                     :with_number,
                     :free_slot,
                     :appointment_length,
-                    :on_date 
+                    :on_date,
+                    :lead_id
                 )",
-                [
-                    "content_id": model->id,
-                    "with_email": isset(_POST["with_email"]) ?  _POST["with_email"] : null,
-                    "with_number": isset(_POST["with_number"]) ? _POST["with_number"] : null,
-                    "free_slot": isset(_POST["free_slot"]) ? 1 : 0,
-                    "appointment_length": isset(_POST["appointment_length"]) ? _POST["appointment_length"] : null,
-                    "on_date": this->database->toDate(_POST["on_date"] . " " . _POST["on_time"] . ":00")
-                ]
+                data
             );
 
             if (!is_bool(status)) {
@@ -629,5 +670,36 @@ class Appointments extends Content
         }
 
         return path;
+    }
+
+    private function userSelect(selected = null)
+    {
+        var select = ["": "available to all"], data;
+        let data = this->database->all(
+            "SELECT *
+            FROM users  
+            ORDER BY nickname"
+        );
+        var iLoop = 0;
+
+        if (isset(_POST["user_id"])) {
+            let selected = _POST["user_id"];
+        } elseif (isset(_GET["lead_id"])) {
+            let selected = this->database->getUserId();
+        }
+
+        while (iLoop < count(data)) {
+            let select[data[iLoop]->id] = data[iLoop]->nickname;
+            let iLoop = iLoop + 1;
+        }
+
+        return this->inputs->select(
+            "Owner",
+            "user_id",
+            "Who owns this appointment?",
+            select,
+            false,
+            selected
+        );
     }
 }

@@ -495,21 +495,21 @@ class DumbDog
     public function prettyDate(
         string datetime,
         bool time = true,
+        bool seconds = true,
         bool today = false,
-        string unknown = "Unknown",
-        bool seconds = true
+        string unknown = "Unknown"
     ) {
-        return (new Dates())->prettyDate(datetime, time, today, unknown, seconds);
+        return (new Dates())->prettyDate(datetime, time, seconds, today, unknown);
     }
 
     public function prettyDateFull(
         string datetime,
         bool time = true,
+        bool seconds = true,
         bool today = false,
-        string unknown = "Unknown",
-        bool seconds = true
+        string unknown = "Unknown"
     ) {
-        return (new Dates())->prettyDateFull(datetime, time, today, unknown, seconds);
+        return (new Dates())->prettyDateFull(datetime, time, seconds, today, unknown);
     }
 
     public function products(array filters = [])

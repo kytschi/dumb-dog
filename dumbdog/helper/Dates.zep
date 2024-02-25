@@ -21,9 +21,9 @@ class Dates
     public function prettyDate(
         string datetime,
         bool time = true,
+        bool seconds = true,
         bool today = false,
-        string unknown = "Unknown",
-        bool seconds = true
+        string unknown = "Unknown"
     ) {
         var timestamp, err;
 
@@ -54,9 +54,9 @@ class Dates
     public function prettyDateFull(
         string datetime,
         bool time = true,
+        bool seconds = true,
         bool today = false,
-        string unknown = "Unknown",
-        bool seconds = true
+        string unknown = "Unknown"
     ) {
         var timestamp, err;
 
