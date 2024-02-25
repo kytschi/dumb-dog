@@ -143,6 +143,12 @@ class Content extends Controller
                         let html .= this->saveFailed("Failed to save the " . this->type);
                         let html .= this->consoleLogError(status);
                     } else {
+                        if (isset(_FILES["banner_image"]["name"])) {
+                            if (!empty(_FILES["banner_image"]["name"])) {
+                                this->files->addResource("banner_image", data["id"], "banner-image");
+                            }
+                        }
+
                         let path = path . "?saved=true";
                         let model = this->database->get(
                             "SELECT * FROM content WHERE id=:id",
@@ -184,7 +190,7 @@ class Content extends Controller
         return html;
     }
 
-    private function addStack(string id)
+    public function addStack(string id)
     {
         var data = [
             "content_id": id,
@@ -233,7 +239,7 @@ class Content extends Controller
         }
     }
 
-    private function createStack(string id)
+    public function createStack(string id)
     {
         var data = [
             "content_id": id,
@@ -448,7 +454,7 @@ class Content extends Controller
         return html;
     }
 
-    private function parentSelect(model = null, exclude = null)
+    public function parentSelect(model = null, exclude = null)
     {
         var select = ["": "no parent"], selected = null, data;
         let data = this->database->all(
@@ -757,7 +763,7 @@ class Content extends Controller
         <div id='stack-tab' class='dd-row'>
             <div class='dd-col-12'>
                 <div class='dd-box'>
-                    <div class='dd-box-title dd-flex'>
+                    <div class='dd-box-title dd-flex dd-border-none'>
                         <div class='dd-col'>Stacks</div>
                         <div class='dd-col-auto'>" .
                             this->inputs->inputPopup("create-stack", "create_stack", "Create a new stack") .
@@ -852,7 +858,7 @@ class Content extends Controller
         "</div>";
     }
 
-    private function setData(array data)
+    public function setContentData(array data)
     {
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
@@ -861,9 +867,16 @@ class Content extends Controller
         let data["slogan"] = _POST["slogan"];
 
         if (empty(_POST["url"])) {
-            let data["url"] = "/" . this->createSlug(_POST["title"]);
+            let data["url"] = "/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
         } else {
             let data["url"] = this->cleanUrl(_POST["url"]);
+        }
+
+        if (this->database->get(
+            "SELECT id FROM content WHERE url=:url AND deleted_at IS NULL",
+            ["url": data["url"]]
+        )) {
+            throw new Exception("URL already taken by another piece of content");
         }
 
         let data["content"] = this->cleanContent(_POST["content"]);
@@ -871,15 +884,23 @@ class Content extends Controller
         let data["meta_keywords"] = _POST["meta_keywords"];
         let data["meta_author"] = _POST["meta_author"];
         let data["meta_description"] = this->cleanContent(_POST["meta_description"]);
+        let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
+        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
+        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["updated_by"] = this->database->getUserId();
+
+        return data;
+    }
+
+    private function setData(array data)
+    {   
+        let data = this->setContentData(data);
+
         let data["event_on"] = null;                    
         let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
         let data["author"] = isset(_POST["author"]) ? _POST["author"] : null;
         let data["company_name"] = isset(_POST["company_name"]) ? _POST["company_name"] : null;
-        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["parent_id"] = _POST["parent_id"];
-        let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
-        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
         let data["sort"] = intval(_POST["sort"]);
 
         if (isset(_POST["event_on"])) {
@@ -888,13 +909,13 @@ class Content extends Controller
             } elseif (empty(_POST["event_time"])) {
                 let _POST["event_time"] = "00:00";
             }
-            let data["event_on"] = this->dateToSql(_POST["event_on"] . " " . _POST["event_time"] . ":00");
+            let data["event_on"] = this->database->toDate(_POST["event_on"] . " " . _POST["event_time"] . ":00");
         }
 
         return data;
     }
 
-    private function stats(model)
+    public function stats(model)
     {
         var query, html = "", iLoop, data, year, month, colours = [
             "visitors": "#00c129",
@@ -979,7 +1000,7 @@ class Content extends Controller
         return html;
     }
 
-    private function stackTemplatesSelect(selected = null, string id = "template_id")
+    public function stackTemplatesSelect(selected = null, string id = "template_id")
     {
         var select = [], data;
         let data = this->database->all("
@@ -1010,7 +1031,7 @@ class Content extends Controller
         );
     }
 
-    private function templatesSelect(selected = null, string id = "template_id")
+    public function templatesSelect(selected = null, string id = "template_id")
     {
         var select = [], data;
         let data = this->database->all("
@@ -1046,7 +1067,7 @@ class Content extends Controller
         return path;
     }
 
-    private function updateStacks()
+    public function updateStacks()
     {
         if (!isset(_POST["stack_name"])) {
             return;

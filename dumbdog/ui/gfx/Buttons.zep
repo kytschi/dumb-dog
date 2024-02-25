@@ -107,6 +107,28 @@ class Buttons
         </a>";
     }
 
+    public function next(string url, string label = "Next page")
+    {
+        return "
+        <a
+            href='" . url ."'
+            title='" . label . "'
+            class='dd-button-blank'>" . 
+            this->icons->next() .
+        "</a>";
+    }
+
+    public function previous(string url, string label = "Previous page")
+    {
+        return "
+        <a
+            href='" . url ."'
+            title='" . label . "'
+            class='dd-button-blank'>" . 
+            this->icons->previous() .
+        "</a>";
+    }
+
     public function recover(string entry, string id = "recover", string name = "recover", string title = "Recover the entry")
     {
         return "<button

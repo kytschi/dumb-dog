@@ -386,6 +386,15 @@ class Icons
         </svg>";
     }
 
+    public function next()
+    {
+        return "
+        <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path d='M9.5 7L14.5 12L12 14.5L9.5 17' stroke='#DF1463' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+            <path d='M9.5 7L14.5 12L12 14.5' stroke='#1C1C1C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+        </svg>";
+    }
+
     public function pages()
     {
         return "
@@ -414,6 +423,15 @@ class Icons
             <path d='M4 23L4 35' stroke='#000000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' />
             <path d='M11 34L19 34' stroke='#DF1463' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' />
             <path d='M25 34L27 34' stroke='#DF1463' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' />
+        </svg>";
+    }
+
+    public function previous()
+    {
+        return "
+        <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path d='M14.5 17L9.5 12L12 9.5L14.5 7' stroke='#DF1463' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+            <path d='M14.5 17L9.5 12L12 9.5' stroke='#1C1C1C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
         </svg>";
     }
 

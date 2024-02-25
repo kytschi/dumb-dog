@@ -363,28 +363,14 @@ class Style
             margin-top: 20px;
             margin-bottom: 20px;
         }
-        #dd-calendar-month a, #dd-calendar-month span {
-            float: left;
-            margin-right: 10px;
-        }
-        #dd-calendar-month span {
-            padding-top: 7px !important;
-        }
-        #dd-calendar-month div {
-            float: left;
-            padding-bottom: 10px !important;
-        }
         #dd-calendar-month a {
             display: block;
             width: 64px;
             height: 64px;
         }
-        #dd-calendar-month a:hover {
-            text-decoration: none;
-        }
-        #dd-calendar-month a:before {
-            top: 10px !important;
-            left: 0 !important;
+        #dd-calendar-month a svg {
+            width: 100%;
+            height: 100%;
         }
         #dd-calendar .dd-calendar-entry, #dd-calendar .dd-calendar-day, #dd-calendar .dd-calendar-blank {
             padding: 10px;

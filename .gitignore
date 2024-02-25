@@ -4,6 +4,7 @@ compile-errors.log
 compile.log
 public/website
 ui.php
+temp.html
 dumbdog.json
 composer.lock
 vendor*

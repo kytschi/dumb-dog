@@ -45,11 +45,10 @@ class Inputs
         return "<div class='dd-input-group'>
             <label>" . label . (required ? "<span class='dd-required'>*</span>" : "") . "</label>
             <input
-                class='datepicker' 
                 type='text'
                 name='" . var_name . "' 
                 placeholder='' 
-                class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
+                class='datepicker dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
                 value=\"" . htmlspecialchars(value, ENT_QUOTES) . "\">
         </div>";
     }

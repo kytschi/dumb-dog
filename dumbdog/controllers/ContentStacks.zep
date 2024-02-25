@@ -1,5 +1,5 @@
 /**
- * DumbDog content stacks builder
+ * DumbDog content stacks
  *
  * @package     DumbDog\Controllers\ContentStacks
  * @author 		Mike Welsh
@@ -101,7 +101,7 @@ class ContentStacks extends Content
         return html;
     }
 
-    private function addStack(string id)
+    public function addStack(string id)
     {
         var data = [
             "content_stack_id": id,
@@ -471,7 +471,7 @@ class ContentStacks extends Content
         return data;
     }
 
-    private function updateStacks()
+    public function updateStacks()
     {
         if (!isset(_POST["stack_name"])) {
             return;
