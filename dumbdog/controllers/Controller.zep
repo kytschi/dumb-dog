@@ -184,15 +184,19 @@ class Controller
         }
     }
 
-    public function tags(string path, string table)
+    public function tags(string path, string table, string type = "")
     {
         var database, data, html = "";
 
         let database = new Database();
-        let data = database->all("SELECT tags FROM " . table . " WHERE tags IS NOT NULL AND tags != ''");
+        let data = database->all(
+            "SELECT tags FROM " . table . " 
+            WHERE tags IS NOT NULL AND tags != ''" . 
+            (type ? " AND type='" . type . "'" : "")
+        );
 
         if (data) {
-            let html .= "<div id='dd-tags'>";
+            let html .= "<div id='dd-tags' class='dd-flex'>";
             var selected = "";
             if (isset(_GET["tag"])) {
                 let selected = urldecode(_GET["tag"]);

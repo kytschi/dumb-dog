@@ -202,7 +202,7 @@ class Menus extends Content
             let data["updated_by"] = this->getUserId();
             let status = this->database->execute("
                 UPDATE 
-                    menus
+                    content
                 SET
                     deleted_at=NOW(),
                     deleted_by=:updated_by,
@@ -269,13 +269,13 @@ class Menus extends Content
             let path = this->global_url . "/edit/" . model->id;
             if (isset(_POST["delete"])) {
                 if (!empty(_POST["delete"])) {
-                    this->triggerDelete("menus", path);
+                    this->triggerDelete("content", path);
                 }
             }
 
             if (isset(_POST["recover"])) {
                 if (!empty(_POST["recover"])) {
-                    this->triggerRecover("menus", path);
+                    this->triggerRecover("content", path);
                 }
             }
 

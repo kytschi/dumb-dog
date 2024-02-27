@@ -45,11 +45,11 @@ class Style
         this->text() .
         this->buttons() .
         this->calendar() .
+        this->tags() .
         this->icons() . 
         this->inputs() . 
         this->layout() . 
         this->quickmenu() .
-        this->tags() .
         this->tiles() .
         "</style>";
     }
@@ -1481,14 +1481,18 @@ class Style
             margin-top: 10px;
             margin-bottom: 10px;
         }
-        .dd-tags .dd-tag, #dd-tags .dd-tag {
-            float: left;
+        .dd-tag {
+            padding: 5px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            color: var(--button-text-colour);
+            background-color: var(--button-background-colour);
+            border: 3px solid var(--button-border-colour);
             margin-right: 5px;
             margin-bottom: 5px;
-            border-radius: 25px;
-            padding: 15px;
-            background-color: #fff;
-            border: 3px solid var(--box-title-background-colour);
         }
         .dd-tag.selected, .dd-tag:hover {
             color: #fff !important;

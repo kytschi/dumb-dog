@@ -21,6 +21,7 @@ use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
+use DumbDog\Controllers\Products;
 use DumbDog\Controllers\Reviews;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Socials;
@@ -171,6 +172,7 @@ class DumbDog
             "Menus": new Menus(),
             "Messages": new Messages(),
             "Pages": new Content(),
+            "Products": new Products(),
             "Reviews": new Reviews(),
             "Settings": new Settings(),
             "Socials": new Socials(),
@@ -504,6 +506,7 @@ class DumbDog
                 
                 let data = [];
                 let data["currency_id"] = item;
+                let data["page_id"] = page->id;
                 let item = database->get("
                     SELECT
                         products.stock,
@@ -513,7 +516,7 @@ class DumbDog
                         currencies.symbol,
                         currencies.locale_code
                     FROM products
-                    JOIN product_prices ON 
+                    LEFT JOIN product_prices ON 
                         product_prices.id = 
                         (
                             SELECT id
@@ -521,16 +524,16 @@ class DumbDog
                             WHERE
                                 pp.product_id = products.id AND
                                 pp.deleted_at IS NULL AND
-                                pp.currency_id=:currencies.id 
+                                pp.currency_id=:currency_id 
                             LIMIT 1
                         )
-                    JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL 
-                    WHERE 
-                        products.content_id='" . page->id . "'",
+                    LEFT JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL 
+                    WHERE products.content_id=:page_id",
                     data
                 );
                 
                 if (item) {
+                    let page->code = item->code;
                     let page->stock = item->stock;
                     let page->on_offer = item->on_offer;
                     let page->price = item->price;

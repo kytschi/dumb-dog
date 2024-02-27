@@ -454,7 +454,7 @@ class Content extends Controller
 
         let html .= 
             this->inputs->searchBox(this->global_url, "Search the " . strtolower(this->title)) . 
-            this->tags(path, "content") .
+            this->tags(path, "content", this->type) .
             this->renderList(path);
         return html;
     }
