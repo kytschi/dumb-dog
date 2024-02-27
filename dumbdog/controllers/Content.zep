@@ -327,36 +327,41 @@ class Content extends Controller
 
         if (!empty(_POST)) {
             var status = false, err;
+            let path = this->global_url . "/edit/" . model->id;
+
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("content", path);
+                }
+            }
+
+            if (isset(_POST["delete_old_url"])) {
+                if (!empty(_POST["delete_old_url"])) {
+                    let path = path . "?scroll=old-urls-tab";
+                    this->triggerDelete("old_urls", path, _POST["delete_old_url"]);
+                }
+            }
+
+            if (isset(_POST["delete_stack"])) {
+                if (!empty(_POST["delete_stack"])) {
+                    let path = path . "?scroll=stack-tab";
+                    this->triggerDelete("content_stacks", path, reset(_POST["delete_stack"]));
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("content", path);
+                }
+            }
+
+            if (isset(_POST["delete_banner_image"])) {
+                this->files->deleteResource(data["id"], "banner-image", path . "?deleted=true");
+            }
 
             if (!this->validate(_POST, this->required)) {
                 let html .= this->missingRequired();
             } else {
-                let path = this->global_url . "/edit/" . model->id;
-
-                if (isset(_POST["delete"])) {
-                    if (!empty(_POST["delete"])) {
-                        this->triggerDelete("content", path);
-                    }
-                }
-
-                if (isset(_POST["delete_old_url"])) {
-                    if (!empty(_POST["delete_old_url"])) {
-                        this->triggerDelete("old_urls", path, _POST["delete_old_url"]);
-                    }
-                }
-
-                if (isset(_POST["delete_stack"])) {
-                    if (!empty(_POST["delete_stack"])) {
-                        this->triggerDelete("content_stacks", path, reset(_POST["delete_stack"]));
-                    }
-                }
-
-                if (isset(_POST["recover"])) {
-                    if (!empty(_POST["recover"])) {
-                        this->triggerRecover("content", path);
-                    }
-                }
-
                 let path = path . "?saved=true";
 
                 if (isset(_POST["add_to_stack"])) {
@@ -555,7 +560,13 @@ class Content extends Controller
                                 <div class='dd-box-title'>Look and Feel</div>
                                 <div class='dd-box-body'>" .
                                     this->templatesSelect(model->template_id) . 
-                                    this->inputs->image("Banner image", "banner_image", "Upload your banner image here", false, model->banner_image) . 
+                                    this->inputs->image(
+                                        "Banner image",
+                                        "banner_image",
+                                        "Upload your banner image here",
+                                        false,
+                                        model->banner_image
+                                    ) . 
                                 "</div>
                             </div>
                         </div>
@@ -645,11 +656,11 @@ class Content extends Controller
     
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }
@@ -745,6 +756,8 @@ class Content extends Controller
                                 "</div>
                             </div>";
                         }
+                    } else {
+                        let html .= "<span>No urls</span>";
                     }
 
         let html .= "</div>
@@ -782,8 +795,15 @@ class Content extends Controller
                                 "create-stack-item-" . (key + 1),
                                 "add_to_stack[" . item->id . "]",
                                 "Add to the " . item->name . " stack",
-                                "add") .
-                            this->buttons->delete(item->id, "delete-stack-" . item->id, "delete_stack[]") .
+                                "add"
+                            ) .
+                            this->buttons->delete(
+                                item->id,
+                                "delete-stack-" . item->id,
+                                "delete_stack[]",
+                                "Delete the stack", 
+                                true
+                            ) .
                         "</div>
                     </div>
                     <div class='dd-box-body'>";
@@ -804,18 +824,23 @@ class Content extends Controller
                                 this->inputs->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags) . 
                                 this->inputs->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item) . 
                                 this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort) .
-                                this->stackTemplatesSelect(
-                                    item->template_id,
-                                    "stack_template[" . item->id . "]"
-                                ) . 
+                                this->stackTemplatesSelect(item->template_id, "stack_template[" . item->id . "]") . 
                                 "<h3 class='dd-mt-5 dd-mb-0'>Stack items</h3>";
                                 for key_stack, item_stack in item->stacks {
                                     let html .= "
                                     <div class='dd-stack'>" .
-                                        "<div class='dd-stack-title'>
-                                            <span>" . item_stack->name . "</span>" .
-                                            this->buttons->delete(item_stack->id, "delete-stack-" . item_stack->id, "delete_stack[]") .
-                                        "</div>
+                                        "<div class='dd-stack-title dd-flex'>
+                                            <span class='dd-col'>" . item_stack->name . "</span>
+                                            <div class='dd-col-auto'>" .
+                                                this->buttons->delete(
+                                                    item_stack->id, 
+                                                    "delete-stack-" . item_stack->id,
+                                                    "delete_stack[]",
+                                                    "Delete the stack item",
+                                                    true
+                                                ) .
+                                            "</div>
+                                        </div>
                                         <div class='dd-stack-body'>" .
                                             this->inputs->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name) .
                                             this->inputs->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title) .
@@ -872,12 +897,7 @@ class Content extends Controller
             let data["url"] = this->cleanUrl(_POST["url"]);
         }
 
-        if (this->database->get(
-            "SELECT id FROM content WHERE url=:url AND deleted_at IS NULL",
-            ["url": data["url"]]
-        )) {
-            throw new Exception("URL already taken by another piece of content");
-        }
+        this->validUrl(data);
 
         let data["content"] = this->cleanContent(_POST["content"]);
         let data["template_id"] = _POST["template_id"];
@@ -1206,6 +1226,19 @@ class Content extends Controller
                     }
                 }
             }
+        }
+    }
+
+    public function validUrl(array data)
+    {
+        if (this->database->get(
+            "SELECT id FROM content WHERE url=:url AND deleted_at IS NULL AND id !=:id",
+            [
+                "url": data["url"],
+                "id": data["id"]
+            ]
+        )) {
+            throw new Exception("URL already taken by another piece of content");
         }
     }
 }

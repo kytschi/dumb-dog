@@ -668,28 +668,24 @@ class Style
 
         .dd-inline-popup {
             position: absolute;
-            right: 100px;
+            min-width: 460px;
             display: none;
-            z-index: 1025;
+            z-index: 1125;
+            font-family: Helvetica, sans-serif !important;
+            font-size: 14pt !important;
+            color: var(--body-text-colour);
         }
-        .dd-inline-popup-body {                
-            display: flex;
+        .dd-delete-warning {
+            min-width: 260px;
+        }
+        .dd-inline-popup-body {
             border: 1px solid var(--input-border-colour);
             border-radius: .375rem;
             padding: .375rem .75rem;
             background-color: var(--popup-background-color);
         }
-        .dd-inline-popup input, .inline-popup span {
-            width: calc(100% - 100px - 1.5rem) !important;
-        }
         .dd-inline-popup span {
-            display: block;
             padding-top: 5px;
-        }
-        .dd-inline-popup-buttons {
-            width: 100px;
-            margin-left: auto;
-            text-align: right;
         }
         .dd-image-preview img {
             margin-left: 20px;
@@ -1353,7 +1349,7 @@ class Style
             display: flex;
             -webkit-flex-wrap: wrap;
             flex-wrap: wrap;
-            gap: 50px;
+            gap: 40px;
             overflow-y: scroll;
             padding-top: 20px;
         }

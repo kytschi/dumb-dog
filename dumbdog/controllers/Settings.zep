@@ -66,7 +66,9 @@ class Settings extends Content
                         let html .= this->saveFailed("Failed to update the settings");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect("/dumbdog/settings?saved=true");
+                        this->redirect(
+                            this->cfg->dumb_dog_url . "/settings?saved=true"
+                        );
                     }
                 }
             }

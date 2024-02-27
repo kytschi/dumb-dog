@@ -233,11 +233,11 @@ class Taxes extends Content
         if (mode == "edit") {    
             if (model->deleted_at) {
                 let html .= "<li class='nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }

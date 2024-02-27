@@ -207,23 +207,27 @@ class ContentStacks extends Content
         if (!empty(_POST)) {
             var status = false, err;
 
+            let path = this->global_url . "/edit/" . model->id;
+
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("content_stacks", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("content_stacks", path);
+                }
+            }
+
+            if (isset(_POST["delete_image"])) {
+                this->files->deleteResource(data["id"], "image", path . "?deleted=true");
+            }
+
             if (!this->validate(_POST, this->required)) {
                 let html .= this->missingRequired();
             } else {
-                let path = this->global_url . "/edit/" . model->id;
-
-                if (isset(_POST["delete"])) {
-                    if (!empty(_POST["delete"])) {
-                        this->triggerDelete("content_stacks", path);
-                    }
-                }
-
-                if (isset(_POST["recover"])) {
-                    if (!empty(_POST["recover"])) {
-                        this->triggerRecover("content_stacks", path);
-                    }
-                }
-
                 let path = path . "?saved=true";
 
                 if (isset(_POST["add_stack"])) {
@@ -236,6 +240,7 @@ class ContentStacks extends Content
                 if (isset(_POST["stack_delete"])) {
                     if (!empty(_POST["stack_delete"])) {
                         this->deleteItem(model->id, _POST["stack_delete"]);
+                        let path = path . "&scroll=stack-tab";
                     }
                 }
 
@@ -245,10 +250,6 @@ class ContentStacks extends Content
                     if (!empty(_FILES["image"]["name"])) {
                         this->files->addResource("image", data["id"], "image", true);
                     }
-                }
-
-                if (isset(_POST["delete_image"])) {
-                    this->files->deleteResource(data["id"], "image");
                 }
 
                 let status = this->database->execute(
@@ -357,11 +358,11 @@ class ContentStacks extends Content
         if (mode == "edit") {    
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }

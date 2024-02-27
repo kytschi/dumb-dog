@@ -30,15 +30,15 @@ class Appointments extends Content
 
     public function add(string path)
     {
-        var html, data, model;
+        var html, data = [], model;
 
         let html = this->titles->page("Create an appointment", "appointments");
+        let model = new \stdClass();
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
                 var status = false;
-                let data = [];
-
+                
                 if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
@@ -106,11 +106,7 @@ class Appointments extends Content
                                 this->files->addResource("banner_image", data["id"], "image");
                             }
                         }
-                        let model = this->database->get(
-                            "SELECT * FROM content WHERE id=:id",
-                            [
-                                "id": data["id"]
-                            ]);
+                        let model->id = data["id"];
                         let path = this->updateExtra(model, path);
                         this->redirect(this->global_url . "?saved=true");
                     }
@@ -122,7 +118,6 @@ class Appointments extends Content
             let html .= this->saveSuccess("Appointments has been saved");
         }
 
-        let model = new \stdClass();
         let model->deleted_at = null;
         let model->status = "live";
         let model->name = "";
@@ -550,11 +545,11 @@ class Appointments extends Content
             }
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }

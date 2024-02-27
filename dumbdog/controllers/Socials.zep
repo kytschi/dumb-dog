@@ -174,6 +174,9 @@ class Socials extends Content
                         this->files->addResource("image", data["id"], "image", true);
                     }
                 }
+                if (isset(_POST["delete_image"])) {
+                    this->files->deleteResource(data["id"], "image");
+                }
 
                 let status = this->database->execute(
                     "UPDATE content SET 
@@ -271,11 +274,11 @@ class Socials extends Content
         if (mode == "edit") {    
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }
@@ -336,12 +339,7 @@ class Socials extends Content
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["updated_by"] = this->database->getUserId();
 
-        if (this->database->get(
-            "SELECT id FROM content WHERE url=:url AND deleted_at IS NULL",
-            ["url": data["url"]]
-        )) {
-            throw new Exception("URL already taken by another piece of content");
-        }
+        this->validUrl(data);
 
         return data;
     }
