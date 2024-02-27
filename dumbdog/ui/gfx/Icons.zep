@@ -662,8 +662,8 @@ class Icons
             xmlns='http://www.w3.org/2000/svg'>
             <path
                 d='M3 12.1525C3 17.0389 7.02944 21 12 21C16.9706 21 21 17.0389 21 12.1525C21 7.26622 17 3.30508 12 3.30508C6 3.30508 3 8.22034 3 8.22034M3 8.22034L3 3M3 8.22034H7.6551'
-                stroke='#DF1463' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' />
-            <path d='M12 3.30508C6 3.30508 3 8.22034 3 8.22034M3 8.22034L3 3M3 8.22034H7.6551' stroke='#0095FF'
+                stroke='#1C1C1C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' />
+            <path d='M12 3.30508C6 3.30508 3 8.22034 3 8.22034M3 8.22034L3 3M3 8.22034H7.6551' stroke='#DF1463'
                 stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' />
         </svg>";
     }

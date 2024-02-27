@@ -161,7 +161,7 @@ class Files extends Controller
         imagewebp(save, getcwd() . this->folder . "thumb-" . filename);
     }
 
-    public function deleteResource(string resource_id, string resource_name)
+    public function deleteResource(string resource_id, string resource_name, string path)
     {
         var status;
         let status = this->database->execute("
@@ -181,6 +181,8 @@ class Files extends Controller
         if (!is_bool(status)) {
             throw new Exception("Failed to delete the file in the database");
         }
+
+        this->redirect(path);
     }
 
 /*

@@ -145,7 +145,7 @@ class Inputs
                 <div class='dd-col'>" .
                     (image ? "<img src='" . image . "'/>" : "<p>No image</p>") .
                 "</div>" . 
-                (image ? "<div class='dd-col-auto'>" . buttons->delete("", "deleted-image", "delete_image", "", true) . "</div>" : "") .
+                (image ? "<div class='dd-col-auto'>" . buttons->delete("", "deleted-" . var_name, "delete_" . var_name, "", true) . "</div>" : "") .
             "</div>
         </div>";
     }
@@ -165,9 +165,11 @@ class Inputs
         <div 
             id='" . id . "' 
             class='dd-inline-popup'>
-            <div class='dd-inline-popup-body'>
-                <input class='dd-form-control' name='" . name . "' type='text'>
-                <div class='dd-inline-popup-buttons'>
+            <div class='dd-inline-popup-body dd-flex'>
+                <div class='dd-col'>
+                    <input class='dd-form-control' name='" . name . "' type='text'>
+                </div>
+                <div class='dd-col-auto'>
                     <button 
                         type='button'
                         class='dd-button'

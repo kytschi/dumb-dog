@@ -210,9 +210,9 @@ class Messages extends Content
                             <div 
                                 id='convert-to-lead' 
                                 class='dd-inline-popup'>
-                                <div class='dd-inline-popup-body'>
-                                    <span style='width:80px;padding-top:10px;'>Lead type</span>
-                                    <div class='dd-inline-popup-buttons' style='width: 260px'>
+                                <div class='dd-inline-popup-body dd-flex'>
+                                    <span class='dd-col'>Lead type</span>
+                                    <div class='dd-col-auto'>
                                         <a 
                                             href='" . this->cfg->dumb_dog_url . "/messages/convert-to-my-lead/" . model->id . "'
                                             class='dd-button'

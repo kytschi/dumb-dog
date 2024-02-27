@@ -65,15 +65,20 @@ class Buttons
             (!mini ? "<span>Delete</span>" : "") .
         "</button>
         <div id='" . id . "' class='dd-inline-popup dd-delete-warning'>
-            <div class='dd-inline-popup-body'>
-                <span>Are you sure?</span>
-                <div class='dd-inline-popup-buttons'>
+            <div class='dd-inline-popup-body dd-flex'>
+                <span class='dd-col'>Are you sure?</span>
+                <div class='dd-col-auto'>
                     <button 
                         type='button'
+                        class='dd-button' 
                         data-inline-popup-close='#" . id . "'>" .
                         this->icons->cancel() .
                     "</button>
-                    <button type='submit' name='" . name . "' value='" . entry . "'>" .
+                    <button 
+                        type='submit' 
+                        class='dd-button' 
+                        name='" . name . "'
+                        value='" . entry . "'>" .
                         this->icons->accept() .
                     "</button>
                 </div>
@@ -133,6 +138,7 @@ class Buttons
     {
         return "<button
             type='button'
+            class='dd-button'
             data-inline-popup='#" . id . "'
             titile='" . title . "'>" . 
             this->icons->recover() .

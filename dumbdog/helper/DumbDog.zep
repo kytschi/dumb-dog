@@ -376,11 +376,14 @@ class DumbDog
         let query = "
         SELECT
             menus.*,
-            IF(content.url IS NOT NULL, content.url, menus.url) AS url
-        FROM menus 
-        LEFT JOIN content ON content.id = menus.content_id AND content.deleted_at IS NULL 
-        WHERE menus.tags like :tag AND menus.deleted_at IS NULL
-        ORDER BY sort ASC";
+            content.*,
+            content.sub_title AS alt,
+            IF(link.url IS NOT NULL, link.url, content.url) AS url
+        FROM content 
+        JOIN menus ON menus.content_id = content.id 
+        LEFT JOIN content AS link ON link.id = menus.content_id AND link.deleted_at IS NULL 
+        WHERE content.tags LIKE :tag AND content.deleted_at IS NULL AND content.type='menu' 
+        ORDER BY content.sort ASC";
 
         let results = this->database->all(query, ["tag": "%{\"value\":\"" . tag . "\"}%"]);
 
@@ -396,15 +399,22 @@ class DumbDog
         var child;
 
         let item->items = this->database->all("
-        SELECT
-            menus.*,
-            IF(content.url IS NOT NULL, content.url, menus.url) AS url
-        FROM menus 
-        LEFT JOIN content ON content.id = menus.content_id AND content.deleted_at IS NULL 
-        WHERE menu_id='" . item->id . "' AND menus.deleted_at IS NULL
-        ORDER BY sort ASC");
+            SELECT
+                menus.*,
+                content.*,
+                content.sub_title AS alt,
+                IF(link.url IS NOT NULL, link.url, content.url) AS url
+            FROM content 
+            JOIN menus ON menus.content_id = content.id 
+            LEFT JOIN content AS link ON link.id = menus.content_id AND link.deleted_at IS NULL 
+            WHERE content.parent_id=:parent_id AND content.deleted_at IS NULL AND content.type='menu-item' 
+            ORDER BY content.sort ASC",
+            [
+                "parent_id": item->id
+            ]
+        );
 
-        let item->children = this->database->all("
+        /*let item->children = this->database->all("
         SELECT
             menus.*,
             IF(content.url IS NOT NULL, content.url, menus.url) AS url
@@ -415,7 +425,7 @@ class DumbDog
 
         for child in item->children {
             let child = this->menuItems(child);
-        }
+        }*/
 
         return item;
     }

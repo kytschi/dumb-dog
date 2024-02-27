@@ -20,7 +20,7 @@ class Menus extends Content
     public global_url = "/menus";
     public title = "Menus";
     public type = "menu";
-    public required = ["name"];
+    public required = ["name", "title"];
     public list = [
         "name|with_tags",
         "parent",
@@ -29,9 +29,11 @@ class Menus extends Content
 
     public function add(string path)
     {
-        var html, data;
+        var html, data, model;
 
         let html = this->titles->page("Create a menu", "menus");
+
+        let model = new \stdClass();
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -42,36 +44,43 @@ class Menus extends Content
                     let html .= this->missingRequired();
                 } else {
                     let data["id"] = this->database->uuid();
+                    let data["type"] = this->type;
                     let data["created_by"] = this->database->getUserId();
                     let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO menus 
-                            (id,
-                            name,
-                            title,
-                            alt,
-                            url,
-                            tags,
-                            parent_id,
-                            content_id,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
+                        "INSERT INTO content 
+                            (
+                                id,
+                                name,
+                                title,
+                                sub_title,
+                                url,
+                                tags,
+                                type,
+                                parent_id,
+                                sitemap_include,
+                                created_at,
+                                created_by,
+                                updated_at,
+                                updated_by
+                            ) 
                         VALUES 
-                            (:id,
-                            :name,
-                            :title,
-                            :alt,
-                            :url,
-                            :tags,
-                            :parent_id,
-                            :content_id,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                            (
+                                :id,
+                                :name,
+                                :title,
+                                :sub_title,
+                                :url,
+                                :tags,
+                                :type,
+                                :parent_id,
+                                0,
+                                NOW(),
+                                :created_by,
+                                NOW(),
+                                :updated_by
+                            )",
                         data
                     );
 
@@ -79,6 +88,8 @@ class Menus extends Content
                         let html .= this->saveFailed("Failed to save the menu");
                         let html .= this->consoleLogError(status);
                     } else {
+                        let model->id = data["id"];
+                        this->updateExtra(model, path);
                         this->redirect(this->global_url . "?saved=true");
                     }
                 }
@@ -89,8 +100,6 @@ class Menus extends Content
             let html .= this->saveSuccess("Menu has been saved");
         }
 
-        var model;
-        let model = new \stdClass();
         let model->deleted_at = null;
         let model->name = "";
         let model->title = "";
@@ -107,46 +116,63 @@ class Menus extends Content
     private function addItem(string id)
     {
         var data = [
-            "menu_id": id,
+            "id": this->database->uuid(),
+            "parent_id": id,
             "name": _POST["add_stack"],
+            "title": _POST["add_stack"],
+            "type": this->type . "-item",
             "created_by": this->getUserId(),
             "updated_by": this->getUserId()
         ], status;
         
         let status = this->database->execute(
-            "INSERT INTO menus 
-                (id,
-                menu_id,
-                name,
-                created_at,
-                created_by,
-                updated_at,
-                updated_by) 
+            "INSERT INTO content 
+                (
+                    id,
+                    parent_id,
+                    name,
+                    title,
+                    type,
+                    sitemap_include,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by
+                ) 
             VALUES 
-                (UUID(),
-                :menu_id,
-                :name,
-                NOW(),
-                :created_by,
-                NOW(),
-                :updated_by)",
+                (
+                    :id,
+                    :parent_id,
+                    :name,
+                    :title,
+                    :type,
+                    0,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by
+                )",
             data
         );
 
         if (!is_bool(status)) {
             throw new Exception("Failed to save the menu item");
         }
+
+        var model;
+        let model = new \stdClass();
+        let model->id = data["id"];
+        this->updateExtra(model);
     }
 
-    private function contentSelect(selected = "", string name = "content_id")
+    private function contentSelect(selected = "", string name = "link_to")
     {
         var select = ["": "no content"], data;
         let data = this->database->all(
             "SELECT 
                 *,
                 CONCAT(name, ' (', type, ')') AS name 
-            FROM 
-                content 
+            FROM content 
             WHERE type IN ('page', 'blog-post', 'event') 
             ORDER BY name"
         );
@@ -193,7 +219,7 @@ class Menus extends Content
         if (!is_bool(status)) {
             throw new Exception("Failed to delete the menu item");
         } else {
-            this->redirect(this->global_url . "/edit/" . id . "?deleted=true");
+            this->redirect(this->global_url . "/edit/" . id . "?deleted=true&scroll=stack-tab");
         }
     }
 
@@ -204,13 +230,14 @@ class Menus extends Content
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
-                menus.*,
+                menus.*, content.*,
                 files.id AS image_id,
                 IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
                 IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail  
-            FROM menus 
-            LEFT JOIN files ON files.resource_id = menus.id AND files.deleted_at IS NULL 
-            WHERE menus.id=:id", data);
+            FROM content 
+            JOIN menus ON menus.content_id = content.id 
+            LEFT JOIN files ON files.resource_id = content.id AND files.deleted_at IS NULL 
+            WHERE content.id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Menu not found");
@@ -227,30 +254,40 @@ class Menus extends Content
         }
 
         let model->stacks = this->database->all("
-            SELECT menus.*
-            FROM menus 
-            WHERE menu_id='" . model->id . "' AND menus.deleted_at IS NULL
-            ORDER BY sort ASC");
+            SELECT menus.*, content.* FROM content 
+            JOIN menus ON menus.content_id = content.id 
+            WHERE parent_id='" . model->id . "' AND deleted_at IS NULL AND type=:type
+            ORDER BY sort ASC",
+            [
+                "type": this->type . "-item"
+            ]
+        );
+
         if (!empty(_POST)) {
             var status = false, err;
+
+            let path = this->global_url . "/edit/" . model->id;
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("menus", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("menus", path);
+                }
+            }
+
+            if (isset(_POST["stack_delete"])) {
+                if (!empty(_POST["stack_delete"])) {
+                    this->deleteItem(model->id, _POST["stack_delete"]);
+                }
+            }
 
             if (!this->validate(_POST, this->required)) {
                 let html .= this->missingRequired();
             } else {
-                let path = this->global_url . "/edit/" . model->id;
-
-                if (isset(_POST["delete"])) {
-                    if (!empty(_POST["delete"])) {
-                        this->triggerDelete("menus", path);
-                    }
-                }
-
-                if (isset(_POST["recover"])) {
-                    if (!empty(_POST["recover"])) {
-                        this->triggerRecover("menus", path);
-                    }
-                }
-
                 let path = path . "?saved=true";
 
                 if (isset(_POST["add_stack"])) {
@@ -260,23 +297,15 @@ class Menus extends Content
                     }
                 }
 
-                if (isset(_POST["stack_delete"])) {
-                    if (!empty(_POST["stack_delete"])) {
-                        this->deleteItem(model->id, _POST["stack_delete"]);
-                    }
-                }
-
                 let data = this->setData(data);
                 
                 let status = this->database->execute(
-                    "UPDATE menus SET 
+                    "UPDATE content SET 
                         name=:name,
                         title=:title,
-                        alt=:alt,
+                        sub_title=:sub_title,
                         url=:url,
-                        content_id=:content_id,
                         parent_id=:parent_id,
-                        new_window=:new_window,
                         tags=:tags,
                         updated_at=NOW(),
                         updated_by=:updated_by 
@@ -289,6 +318,7 @@ class Menus extends Content
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
+                        this->updateExtra(model);
                         this->updateStacks();
                         this->redirect(path);
                     } catch ValidationException, err {
@@ -310,9 +340,12 @@ class Menus extends Content
     {
         var select = ["": "no parent"], data;
         let data = this->database->all(
-            "SELECT * FROM menus " .
-            (exclude ? " WHERE id != '" . exclude . "'" : "") . " 
-            ORDER BY name"
+            "SELECT * FROM content WHERE type=:type" .
+            (exclude ? " AND id != '" . exclude . "'" : "") . " 
+            ORDER BY name",
+            [
+                "type": this->type
+            ]
         );
         var iLoop = 0;
 
@@ -348,12 +381,12 @@ class Menus extends Content
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
                                     this->inputs->text("Name", "name", "Name the menu", true, model->name) .
+                                    this->inputs->text("Title", "title", "The display title of the menu", true, model->title) .
                                     this->parentSelect(model->parent_id, model->id) . 
-                                    this->inputs->text("Title", "title", "The display title of the menu", false, model->title) .
-                                    this->inputs->text("Alt text", "alt", "The display alt text for the menu", false, model->alt) . 
+                                    this->inputs->text("Alt text", "sub_title", "The display alt text for the menu", false, model->alt) . 
                                     this->inputs->text("URL", "url", "URL of the menu", false, model->url) .
-                                    this->contentSelect(model->content_id) . 
-                                    this->inputs->select("New window", "new_window", "Open the link in a new window", ["0": "no", "1": "yes"], false, model->new_window) .
+                                    this->contentSelect(model->link_to) . 
+                                    this->inputs->toggle("New window", "new_window", false, model->new_window) . 
                                     this->inputs->tags("Tags", "tags", "Tag the menu", false, model->tags) . 
                                 "</div>
                             </div>
@@ -395,11 +428,11 @@ class Menus extends Content
         if (mode == "edit") {    
             if (model->deleted_at) {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(this->global_url ."/recover/" . model->id) . 
+                    this->buttons->recover(model->id) . 
                 "</li>";
             } else {
                 let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(this->global_url ."/delete/" . model->id) . 
+                    this->buttons->delete(model->id) . 
                 "</li>";
             }
         }
@@ -418,13 +451,15 @@ class Menus extends Content
     {
         var data = [], query;
 
+        let data["type"] = this->type;
+
         let query = "
             SELECT
                 main.*,
                 IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM menus AS main
-            LEFT JOIN menus AS parent_page ON parent_page.id=main.parent_id 
-            WHERE main.menu_id IS NULL ";
+            FROM content AS main
+            LEFT JOIN content AS parent_page ON parent_page.id=main.parent_id 
+            WHERE main.type=:type";
         if (isset(_POST["q"])) {
             let query .= " AND main.name LIKE :query";
             let data["query"] = "%" . _POST["q"] . "%";
@@ -450,42 +485,39 @@ class Menus extends Content
         <div id='stack-tab' class='dd-row'>
             <div class='dd-col-12'>
                 <div class='dd-box'>
-                    <div class='dd-box-title dd-flex'>
+                    <div class='dd-box-title dd-flex dd-border-none'>
                         <div class='dd-col'>Items</div>
                         <div class='dd-col-auto'>" .
-                            this->inputs->inputPopup("create-stack", "add_stack", "Create a new stack") .
+                            this->inputs->inputPopup("create-stack", "add_stack", "Create a new item") .
                     "   </div>
                     </div>
-                    <div class='dd-box-body'>";
+                </div>";
 
         if (count(model->stacks)) {
-            let html .= "<div class='dd-row'>";
             for item in model->stacks {
                 let html .= "
                     <div class='dd-box'>
                         <div class='dd-box-title dd-flex'>
                             <div class='dd-col'>" . item->name . "</div>
                             <div class='dd-col-auto'>" . 
-                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete") .
+                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "Delete the item", true) .
                         "   </div>
                         </div>
                         <div class='dd-box-body'>" .
                             this->inputs->text("Name", "stack_name[]", "The name of the menu item", true, item->name) .
                             this->inputs->text("Title", "stack_title[]", "The title of the menu item", false, item->title) .
-                            this->inputs->text("Alt text", "stack_alt[]", "The alt text for the menu item", false, item->alt) . 
+                            this->inputs->text("Alt text", "stack_sub_title[]", "The alt text for the menu item", false, item->alt) . 
                             this->inputs->text("URL", "stack_url[]", "The URL for the menu item", false, item->url) . 
-                            this->contentSelect(item->content_id, "stack_content_id[]") . 
-                            this->inputs->select("New window", "stack_new_window[]", "Open the link in a new window", ["0": "no", "1": "yes"], false, item->new_window) .
+                            this->contentSelect(item->link_to, "stack_link_to[]") . 
+                            this->inputs->toggle("New window", "stack_new_window[]", false, item->new_window) . 
                             this->inputs->number("Sort", "stack_sort[]", "Sort the menu item", false, item->sort) .
                             this->inputs->hidden("stack_id[]", item->id) . 
                         "</div>
                     </div>";
             }
-            let html .= "</div>";
         }
 
-        let html .="</div>
-                </div>
+        let html .="
             </div>
         </div>";
 
@@ -504,14 +536,74 @@ class Menus extends Content
     {
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
-        let data["alt"] = _POST["alt"];
+        let data["sub_title"] = _POST["sub_title"];
         let data["url"] = _POST["url"];
-        let data["content_id"] = _POST["content_id"];
         let data["parent_id"] = _POST["parent_id"];
-        let data["updated_by"] = this->database->getUserId();
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
+        let data["updated_by"] = this->database->getUserId();       
 
         return data;
+    }
+
+    private function setMenuData(array data = [])
+    {
+        let data["new_window"] = isset(_POST["new_window"]) ? 1 : 0;
+        let data["link_to"] = _POST["link_to"];
+        
+        return data;
+    }
+
+    public function updateExtra(model = null, path = "")
+    {
+        var data, status = false, required = [];
+
+        let data = this->database->get("
+            SELECT *
+            FROM menus 
+            WHERE content_id='" . model->id . "'");
+
+        if (!empty(data)) {
+            if (!this->validate(_POST, required)) {
+                throw new ValidationException("Missing required data");
+            }
+
+            let data = this->setMenuData(["id": data->id]);
+                        
+            let status = this->database->get("
+                UPDATE menus SET
+                    link_to=:link_to,
+                    new_window=:new_window 
+                WHERE id=:id",
+                data
+            );
+
+            if (!is_bool(status)) {
+                throw new Exception("Failed to update the menu");
+            }
+        } else {
+            let data = this->setMenuData(["content_id": model->id]);
+
+            let status = this->database->get("
+                INSERT INTO menus 
+                (
+                    id,
+                    content_id,
+                    link_to,
+                    new_window
+                ) VALUES
+                (
+                    UUID(),
+                    :content_id,
+                    :link_to,
+                    :new_window
+                )",
+                data
+            );
+
+            if (!is_bool(status)) {
+                throw new Exception("Failed to create the menu");
+            }
+        }
     }
 
     public function updateStacks()
@@ -520,54 +612,45 @@ class Menus extends Content
             return;
         }
 
-        var key, id, status, data = [];
+        var key, id, status, data = [], model;
+        let model = new \stdClass();
+
         for key, id in _POST["stack_id"] {
             let data = [
                 "id": id,
                 "name": "",
                 "title": "",
-                "alt": "",
-                "content_id": "",
-                "new_window": 0,
+                "sub_title": "",
                 "sort": 0
             ];
 
             if (!isset(_POST["stack_name"][key])) {
                 throw new ValidationException("Missing name for menu item");
             }
-
             if (empty(_POST["stack_name"][key])) {
                 throw new ValidationException("Missing name for menu item");
             }
-
             let data["name"] = _POST["stack_name"][key];
+
             if (isset(_POST["stack_title"][key])) {
                 let data["title"] = _POST["stack_title"][key];
             }
-            if (isset(_POST["stack_alt"][key])) {
-                let data["alt"] = _POST["stack_alt"][key];
+            if (isset(_POST["stack_sub_title"][key])) {
+                let data["sub_title"] = _POST["stack_sub_title"][key];
             }
             if (isset(_POST["stack_url"][key])) {
                 let data["url"] = _POST["stack_url"][key];
-            }
-            if (isset(_POST["stack_content_id"][key])) {
-                let data["content_id"] = _POST["stack_content_id"][key];
-            }
-            if (isset(_POST["stack_new_window"][key])) {
-                let data["new_window"] = intval(_POST["stack_new_window"][key]);
             }
             if (isset(_POST["stack_sort"][key])) {
                 let data["sort"] = intval(_POST["stack_sort"][key]);
             }
 
             let status = this->database->execute(
-                "UPDATE menus SET 
+                "UPDATE content SET 
                     name=:name,
                     title=:title,
-                    alt=:alt,
+                    sub_title=:sub_title,
                     url=:url,
-                    content_id=:content_id,
-                    new_window=:new_window,
                     sort=:sort 
                 WHERE id=:id",
                 data
@@ -576,6 +659,16 @@ class Menus extends Content
             if (!is_bool(status)) {
                 throw new Exception("Failed to update the menu item");
             }
+
+            let model->id = data["id"];
+            if (isset(_POST["stack_new_window"][key])) {
+                let _POST["new_window"] = 1;
+            } else {
+                unset(_POST["new_window"]);
+            }
+            let _POST["link_to"] = isset(_POST["stack_link_to"][key]) ? _POST["stack_link_to"][key] : null;
+
+            this->updateExtra(model);
         }
     }
 }
