@@ -5,7 +5,6 @@
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  *
- * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Ui\Gfx;
 
@@ -150,10 +149,15 @@ class Buttons
                 <div class='dd-inline-popup-buttons'>
                     <button 
                         type='button'
+                        class='dd-button' 
                         data-inline-popup-close='#" . id . "'>" .
                         this->icons->cancel() .
                     "</button>
-                    <button type='submit' name='" . name . "' value='" . entry . "'>" .
+                    <button
+                        type='submit' 
+                        class='dd-button' 
+                        name='" . name . "' 
+                        value='" . entry . "'>" .
                         this->icons->accept() .
                     "</button>
                 </div>

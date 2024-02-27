@@ -6,7 +6,6 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
 */
 namespace DumbDog\Controllers;
 
@@ -20,13 +19,13 @@ class PaymentGateways extends Content
 {
     public global_url = "/payment-gateways";
     public type = "payment-gateway";
-    public required = ["name", "title"];
+    public required = ["name", "title", "type"];
 
     public function add(string path)
     {
         var html, data;
 
-        let html = this->titles->page("Create the payment gateway");
+        let html = this->titles->page("Create the payment gateway", "add");
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -46,10 +45,11 @@ class PaymentGateways extends Content
                             (id,
                             name,
                             title,
-                            slug,
+                            type,
                             description,
                             is_default,
                             status,
+                            public_api_key,
                             created_at,
                             created_by,
                             updated_at,
@@ -58,10 +58,11 @@ class PaymentGateways extends Content
                             (:id,
                             :name,
                             :title,
-                            :slug,
+                            :type,
                             :description,
                             :is_default,
                             :status,
+                            :public_api_key,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -88,9 +89,10 @@ class PaymentGateways extends Content
         let model->deleted_at = null;
         let model->name = "";
         let model->title = "";
-        let model->slug = "";
+        let model->type = "";
         let model->description = "";
         let model->is_default = 0;
+        let model->public_api_key = "";
 
         let html .= this->render(model);
 
@@ -112,7 +114,7 @@ class PaymentGateways extends Content
             throw new NotFoundException("Payment gateway not found");
         }
 
-        let html = this->titles->page("Edit the payment gateway");
+        let html = this->titles->page("Edit the payment gateway", "edit");
 
         if (isset(_GET["saved"])) {
             let html .= this->saveSuccess("Payment gateway has been updated");
@@ -150,10 +152,11 @@ class PaymentGateways extends Content
                     "UPDATE payment_gateways SET 
                         name=:name,
                         title=:title,
-                        slug=:slug,
+                        type=:type,
                         description=:description,
                         is_default=:is_default,
                         status=:status,
+                        public_api_key=:public_api_key,
                         updated_at=NOW(),
                         updated_by=:updated_by 
                     WHERE id=:id",
@@ -222,50 +225,80 @@ class PaymentGateways extends Content
         var html;
         let html = "
         <form method='post' enctype='multipart/form-data'>
-            <div class='tabs'>
-                <div class='tabs-content col'>
-                    <div id='content-tab' class='row'>
-                        <div class='col-12'>
-                            <article class='card'>
-                                <div class='card-body'>" .
+            <div class='dd-tabs'>
+                <div class='dd-tabs-content dd-col'>
+                    <div id='content-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
                                     this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
+                                    this->inputs->select(
+                                        "Type",
+                                        "type",
+                                        "The type of payment gateway",
+                                        [
+                                            "stripe": "stripe"
+                                        ],
+                                        true,
+                                        model->type
+                                    ) . 
                                     this->inputs->text("Name", "name", "Name the payment gateway", true, model->name) .
-                                    this->inputs->text("Title", "title", "The display title for the payment gateway", true, model->title) .
+                                    this->inputs->text("Title", "title", "The display title for the payment gateway", true, model->title) .                                    
                                     this->inputs->textarea("Description", "description", "The display description", false, model->description) .
-                                    this->inputs->text("Slug", "slug", "Slug to help internally identify", false, model->slug) .
                                 "</div>
-                            </article>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <ul class='col nav nav-tabs' role='tablist'>
-                    <li class='nav-item' role='presentation'>
+                <div class='dd-tabs-content dd-col'>
+                    <div id='api-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
+                                    this->inputs->text("Public key", "public_api_key", "The public key for API access", false, model->public_api_key) .
+                                    this->inputs->text("Private key", "private_api_key", "The private key for API access", false, model->private_api_key) .
+                                "</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
+                    <li class='dd-nav-item' role='presentation'>
                         <button
-                            class='nav-link'
+                            class='dd-nav-link'
                             type='button'
                             role='tab'
                             data-tab='#content-tab'
                             aria-controls='content-tab' 
                             aria-selected='true'>Payment gateway</button>
                     </li>
-                    <li class='nav-item' role='presentation'><hr/></li>
-                    <li class='nav-item' role='presentation'>" . 
+                    <li class='dd-nav-item' role='presentation'>
+                        <button
+                            class='dd-nav-link'
+                            type='button'
+                            role='tab'
+                            data-tab='#api-tab'
+                            aria-controls='api-tab' 
+                            aria-selected='true'>API access</button>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'><hr/></li>
+                    <li class='dd-nav-item' role='presentation'>" . 
                         this->buttons->back(this->global_url) .   
                     "</li>";
         if (mode == "edit") {    
             if (model->deleted_at) {
-                let html .= "<li class='nav-item' role='presentation'>" .
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
                     this->buttons->recover(model->id) . 
                 "</li>";
             } else {
-                let html .= "<li class='nav-item' role='presentation'>" .
+                let html .= "<li class='dd-nav-item' role='presentation'>" .
                     this->buttons->delete(model->id) . 
                 "</li>";
             }
         }
 
-        let html .= "<li class='nav-item' role='presentation'>". 
+        let html .= "<li class='dd-nav-item' role='presentation'>". 
                         this->buttons->save() .   
                     "</li>
                 </ul>
@@ -294,13 +327,21 @@ class PaymentGateways extends Content
         );
     }
 
+    public function renderToolbar()
+    {
+        return "
+        <div class='dd-page-toolbar'>" . 
+            this->buttons->add(this->global_url . "/add") .
+        "</div>";
+    }
+
     private function setData(data)
     {
         let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
         let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
-        let data["slug"] = isset(_POST["slug"]) ? _POST["slug"] : this->createSlug(data["name"]);
+        let data["type"] = _POST["type"];
         let data["description"] = isset(_POST["description"]) ? _POST["description"] : "";
         let data["updated_by"] = this->getUserId();
 

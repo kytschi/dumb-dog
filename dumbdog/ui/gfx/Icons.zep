@@ -5,7 +5,7 @@
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  *
-  * Copyright 2024 Mike Welsh
+ 
 */
 namespace DumbDog\Ui\Gfx;
 
@@ -97,7 +97,7 @@ class Icons
     public function categories()
     {
         return "
-        <svg width='800px' height='800px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
             <path
                 d='M2.84448 18.6377V11.3132C2.84448 10.3019 3.66431 9.48212 4.67561 9.48212H19.3246C20.3359 9.48212 21.1557 10.3019 21.1557 11.3132V18.6377C21.1557 19.649 20.3359 20.4689 19.3246 20.4689H4.67561C3.6643 20.4689 2.84448 19.649 2.84448 18.6377Z'
                 stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
@@ -409,6 +409,24 @@ class Icons
         </svg>";
     }
 
+    public function pagecategories()
+    {
+        return "
+        <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path
+                d='M2.84448 18.6377V11.3132C2.84448 10.3019 3.66431 9.48212 4.67561 9.48212H19.3246C20.3359 9.48212 21.1557 10.3019 21.1557 11.3132V18.6377C21.1557 19.649 20.3359 20.4689 19.3246 20.4689H4.67561C3.6643 20.4689 2.84448 19.649 2.84448 18.6377Z'
+                stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
+            <path d='M9.27148 15.8729L9.95361 16.555C10.3303 16.9317 10.9411 16.9317 11.3179 16.555L14.7285 13.1443'
+                stroke='#DF1463' stroke-width='1.7' stroke-linecap='round' />
+            <path
+                d='M4.67554 9.48204L4.67554 8.56648C4.67554 7.55517 5.49536 6.73535 6.50666 6.73535H17.4934C18.5047 6.73535 19.3245 7.55517 19.3245 8.56648V9.48204'
+                stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
+            <path
+                d='M7.03296 6.60382V5.776C7.03296 4.86162 7.77422 4.12036 8.6886 4.12036H15.3112C16.2256 4.12036 16.9668 4.86162 16.9668 5.776V6.60382'
+                stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
+        </svg>";
+    }
+
     public function paymentGateways()
     {
         return "
@@ -445,6 +463,24 @@ class Icons
             <path
                 d='M16.6082 10.1958V7.43084C16.6082 5.39476 14.9576 3.7442 12.9216 3.7442H11.0782C9.04217 3.7442 7.3916 5.39476 7.3916 7.43084V10.1958'
                 stroke='#DF1463' stroke-width='1.7' stroke-linecap='round' />
+        </svg>";
+    }
+
+    public function productcategories()
+    {
+        return "
+        <svg width='32px' height='32px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path
+                d='M2.84448 18.6377V11.3132C2.84448 10.3019 3.66431 9.48212 4.67561 9.48212H19.3246C20.3359 9.48212 21.1557 10.3019 21.1557 11.3132V18.6377C21.1557 19.649 20.3359 20.4689 19.3246 20.4689H4.67561C3.6643 20.4689 2.84448 19.649 2.84448 18.6377Z'
+                stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
+            <path d='M9.27148 15.8729L9.95361 16.555C10.3303 16.9317 10.9411 16.9317 11.3179 16.555L14.7285 13.1443'
+                stroke='#DF1463' stroke-width='1.7' stroke-linecap='round' />
+            <path
+                d='M4.67554 9.48204L4.67554 8.56648C4.67554 7.55517 5.49536 6.73535 6.50666 6.73535H17.4934C18.5047 6.73535 19.3245 7.55517 19.3245 8.56648V9.48204'
+                stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
+            <path
+                d='M7.03296 6.60382V5.776C7.03296 4.86162 7.77422 4.12036 8.6886 4.12036H15.3112C16.2256 4.12036 16.9668 4.86162 16.9668 5.776V6.60382'
+                stroke='#1C1C1C' stroke-width='1.7' stroke-linecap='round' />
         </svg>";
     }
 

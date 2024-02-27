@@ -6,7 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
+
 */
 namespace DumbDog\Helper;
 
@@ -17,6 +17,7 @@ use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Messages;
 use DumbDog\Controllers\PaymentGateways;
 use DumbDog\Controllers\Products;
+use DumbDog\Controllers\ProductCategories;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Dates;
@@ -369,9 +370,7 @@ class DumbDog
 
     public function menusByTag(string tag)
     {
-        var query, results, item, files;
-
-        let files = new Files();
+        var query, results, item;
 
         let query = "
         SELECT
@@ -381,7 +380,7 @@ class DumbDog
             IF(link.url IS NOT NULL, link.url, content.url) AS url
         FROM content 
         JOIN menus ON menus.content_id = content.id 
-        LEFT JOIN content AS link ON link.id = menus.content_id AND link.deleted_at IS NULL 
+        LEFT JOIN content AS link ON link.id = menus.link_to AND link.deleted_at IS NULL 
         WHERE content.tags LIKE :tag AND content.deleted_at IS NULL AND content.type='menu' 
         ORDER BY content.sort ASC";
 
@@ -406,7 +405,7 @@ class DumbDog
                 IF(link.url IS NOT NULL, link.url, content.url) AS url
             FROM content 
             JOIN menus ON menus.content_id = content.id 
-            LEFT JOIN content AS link ON link.id = menus.content_id AND link.deleted_at IS NULL 
+            LEFT JOIN content AS link ON link.id = menus.link_to AND link.deleted_at IS NULL 
             WHERE content.parent_id=:parent_id AND content.deleted_at IS NULL AND content.type='menu-item' 
             ORDER BY content.sort ASC",
             [
@@ -525,6 +524,11 @@ class DumbDog
     public function products(array filters = [])
     {
         return (new Products())->get(filters);
+    }
+
+    public function productCategories(array filters = [])
+    {
+        return (new ProductCategories())->get(filters);
     }
 
     public function randomString(int length = 64)

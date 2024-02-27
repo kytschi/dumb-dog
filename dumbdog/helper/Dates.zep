@@ -6,7 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
+
 */
 namespace DumbDog\Helper;
 

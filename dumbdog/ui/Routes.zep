@@ -5,7 +5,7 @@
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  *
-  * Copyright 2024 Mike Welsh
+ 
 */
 namespace DumbDog\Ui;
 
@@ -131,6 +131,21 @@ class Routes
             "Pages",
             "index",
             "pages"
+        ],
+        "/page-categories/add": [
+            "PageCategories",
+            "add",
+            "create a page category"
+        ],
+        "/page-categories/edit": [
+            "PageCategories",
+            "edit",
+            "edit the page category"
+        ],
+        "/page-categories": [
+            "PageCategories",
+            "index",
+            "page categories"
         ],
         "/products/add": [
             "Products",

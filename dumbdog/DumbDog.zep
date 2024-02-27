@@ -6,14 +6,16 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.7 alpha
  *
- * Copyright 2024 Mike Welsh
+
 */
 namespace DumbDog;
 
 use DumbDog\Controllers\Appointments;
 use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\ContentCategories;
 use DumbDog\Controllers\ContentStacks;
+use DumbDog\Controllers\Currencies;
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 //use DumbDog\Controllers\Events;
@@ -21,7 +23,9 @@ use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
+use DumbDog\Controllers\PaymentGateways;
 use DumbDog\Controllers\Products;
+use DumbDog\Controllers\ProductCategories;
 use DumbDog\Controllers\Reviews;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Socials;
@@ -142,29 +146,14 @@ class DumbDog
             let path = "/dashboard";
         }
 
-        /**
-         * I'm needed for the session handling for logins etc.
-         */
-        if (session_status() === 1) {
-            session_set_cookie_params([
-                "secure": true,
-                "samesite": "none"
-            ]);
-
-            // Valid for four hours
-            ini_set("session.gc_maxlifetime", 14400);
-            ini_set("session.cookie_lifetime", 14400);
-
-            session_name("dd");
-            session_start();
-        }
-
+        this->startSession();
         this->secure(path);
 
         var controllers = [
             "Appointments": new Appointments(),
             //"Comments": new Comments(),
             "ContentStacks": new ContentStacks(),
+            "Currencies": new Currencies(),
             "Dashboard": new Dashboard(),
             //"Events": new Events(),
             "Files": new Files(),
@@ -172,7 +161,10 @@ class DumbDog
             "Menus": new Menus(),
             "Messages": new Messages(),
             "Pages": new Content(),
+            "PageCategories": new ContentCategories(),
+            "PaymentGateways": new PaymentGateways(),
             "Products": new Products(),
+            "ProductCategories": new ProductCategories(),
             "Reviews": new Reviews(),
             "Settings": new Settings(),
             "Socials": new Socials(),
@@ -301,6 +293,8 @@ class DumbDog
         if (settings->status == "offline") {
             this->offline();
         } else {
+            this->startSession();
+
             let data["url"] = path;
             let page = database->get("
                 SELECT
@@ -762,6 +756,26 @@ class DumbDog
                 let iLoop = iLoop + 1;
             }
             echo "</urlset>";
+        }
+    }
+
+    private function startSession()
+    {
+        /**
+         * I'm needed for the session handling for logins etc.
+         */
+         if (session_status() === 1) {
+            session_set_cookie_params([
+                "secure": true,
+                "samesite": "none"
+            ]);
+
+            // Valid for four hours
+            ini_set("session.gc_maxlifetime", 14400);
+            ini_set("session.cookie_lifetime", 14400);
+
+            session_name("dd");
+            session_start();
         }
     }
 }
