@@ -105,7 +105,7 @@ class Tables
                                     if (!empty(data[iLoop]->tags)) {
                                         var tag;
                                         let html .= "
-                                        <p class='dd-tags'>";
+                                        <div class='dd-tags dd-flex'>";
                                             for tag in json_decode(data[iLoop]->tags) {
                                                 let html .= "
                                                 <a
@@ -115,7 +115,7 @@ class Tables
                                                 "</a>";
                                             }
                                         let html .= "
-                                        </p>";
+                                        </div>";
                                     }
                                 }
                             let html .= "

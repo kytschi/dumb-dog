@@ -175,14 +175,13 @@ class Products extends Content
     */
     public function get(array filters = [])
     {
-        var query, where, join, data = [], order = "", item, item_sub, key, files;
-        let files = new Files();
-        
+        var query, where, join, data = [], order = "", item, item_sub, key;
+                
         let query = "
         SELECT
             content.*,
-            IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
-            IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail,
+            IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "', banner.filename), '') AS banner_image,
+            IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', banner.filename), '') AS banner_thumbnail,
             templates.file AS template,
             products.stock,
             products.code,
@@ -195,7 +194,7 @@ class Products extends Content
         let join = "LEFT JOIN files AS banner ON banner.resource_id = content.id AND resource='banner-image'
         JOIN templates ON templates.id=content.template_id 
         JOIN products ON products.content_id = content.id
-        JOIN product_prices ON 
+        LEFT JOIN product_prices ON 
             product_prices.id = 
             (
                 SELECT id
@@ -206,7 +205,7 @@ class Products extends Content
                     pp.currency_id=:currency_id
                 LIMIT 1
             )
-        JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL";
+        LEFT JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL";
 
         let where = " WHERE content.status='live' AND content.deleted_at IS NULL AND content.type = 'product'";
         
@@ -317,79 +316,85 @@ class Products extends Content
         }
 
         let html = "
-        <div id='product-tab' class='row'>
-            <div class='col-12'>
-                <article class='card'>
-                    <header>Product</header>
-                    <div class='card-body'>" .
+        <div id='product-tab' class='dd-row'>
+            <div class='dd-col-12'>
+                <div class='dd-box'>
+                    <div class='dd-box-title'>Product</div>
+                    <div class='dd-box-body'>" .
                         this->inputs->toggle("On offer", "on_offer", false, model->on_offer) . 
                         this->inputs->text("Code", "code", "The product code", true, model->code) .
                         this->inputs->number("Stock", "stock", "The stock", true, model->stock) .
                     "</div>
-                </article>
+                </div>
             </div>
-            <div class='col-12'>
-                <article class='card'>
-                    <header>
-                        <span>Prices</span>" . 
-                        this->inputs->inputPopup("create-price", "create_price", "Create a new price") .
-                    "</header>
-                    <div class='card-body'>";
-                    if (count(model->prices)) {
-                        let html .= "<div class='stacks'>";
-                        for item in model->prices {
-                            let html .= "
-                            <div class='stack'>
-                                <div class='stack-header'>
-                                    <h3>" . item->name . "</h3>" .
+            <div class='dd-col-12'>
+                <div class='dd-box'>
+                    <div class='dd-box-title dd-flex dd-border-none'>
+                        <span class='dd-col'>Prices</span>
+                        <div class='dd-col-auto'>" . 
+                            this->inputs->inputPopup("create-price", "create_price", "Create a new price") .
+                    "   </div>
+                    </div>
+                </div>
+                <div class='dd-row'>";
+                if (count(model->prices)) {
+                    for item in model->prices {
+                        let html .= "
+                        <div class='dd-box'>
+                            <div class='dd-box-title dd-flex'>
+                                <span class='dd-col'>" . item->name . "</span>
+                                <div class='dd-col-auto'>" .
                                     this->buttons->delete(item->id, "delete-price-" . item->id, "delete_price[]") .
-                                "</div>
-                                <div class='stack-body'>" .
+                            "   </div>
+                            </div>
+                            <div class='dd-box-body'>" .
                                 this->inputs->text("Name", "price_name[]", "The price name", true, item->name) .
                                 this->currenciesSelect(item->currency_id) . 
                                 this->taxesSelect(item->tax_id) . 
                                 this->inputs->text("Price", "price[]", "The price", true, item->price) .
                                 this->inputs->text("Offer price", "offer_price[]", "The offer price", false, item->offer_price) .
                                 this->inputs->hidden("price_id[]", item->id) . 
-                            "   </div>
-                            </div>";
-                        }
-                        let html .= "</div>";
+                        "   </div>
+                        </div>";
                     }
-        let html .= "</div>
-                </article>
+                }
+        let html .= "
+                </div>
             </div>
         </div>
-        <div id='shipping-tab' class='row'>
-            <div class='col-12'>
-                <article class='card'>
-                    <header>
-                        <span>Shipping</span>" . 
-                        this->inputs->inputPopup("create-shipping", "create_shipping", "Create a new shipping location") .
-                    "</header>
-                    <div class='card-body'>";
-                    if (count(model->shipping)) {
-                        let html .= "<div class='stacks'>";
-                        for item in model->shipping {
-                            let html .= "
-                            <div class='stack'>
-                                <div class='stack-header'>
-                                    <h3>" . item->name . "</h3>" .
+        <div id='shipping-tab' class='dd-row'>
+            <div class='dd-col-12'>
+                <div class='dd-box'>
+                    <div class='dd-box-title dd-flex dd-border-none'>
+                        <span class='dd-col'>Shipping</span>
+                        <div class='dd-col-auto'>" . 
+                            this->inputs->inputPopup("create-shipping", "create_shipping", "Create a new shipping location") .
+                    "   </div>
+                    </div>
+                </div>
+                <div class='dd-row'>";
+                if (count(model->shipping)) {
+                    for item in model->shipping {
+                        let html .= "
+                        <div class='dd-box'>
+                            <div class='dd-box-title dd-flex'>
+                                <span class='dd-col'>" . item->name . "</span>
+                                <div class='dd-col-auto'>" .
                                     this->buttons->delete(item->id, "delete-shpping-" . item->id, "delete_shpping[]") .
-                                "</div>
-                                <div class='stack-body'>" .
-                                this->inputs->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
-                                this->inputs->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
-                                this->countriesSelect(item->country_id) . 
-                                this->inputs->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
-                                this->inputs->hidden("shipping_id[]", item->id) . 
                             "   </div>
-                            </div>";
-                        }
-                        let html .= "</div>";
+                            </div>
+                            <div class='dd-box-body'>" .
+                            this->inputs->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
+                            this->inputs->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
+                            this->countriesSelect(item->country_id) . 
+                            this->inputs->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
+                            this->inputs->hidden("shipping_id[]", item->id) . 
+                        "   </div>
+                        </div>";
                     }
-        let html .= "</div>
-                </article>
+                }
+        let html .= "
+                </div>
             </div>
         </div>";
 
@@ -398,31 +403,30 @@ class Products extends Content
 
     public function renderExtraMenu()
     {
-        return "<li class='nav-item' role='presentation'>
+        return "<li class='dd-nav-item' role='presentation'>
             <button
                 data-tab='#product-tab'
-                class='nav-link'
+                class='dd-nav-link'
                 type='button'
                 role='tab'
-                aria-controls='product-tab' data
+                aria-controls='product-tab'
                 aria-selected='true'>Product</button>
         </li>
-        <li class='nav-item' role='presentation'>
+        <li class='dd-nav-item' role='presentation'>
             <button
                 data-tab='#shipping-tab'
-                class='nav-link'
+                class='dd-nav-link'
                 type='button'
                 role='tab'
-                aria-controls='shipping-tab' data
+                aria-controls='shipping-tab'
                 aria-selected='true'>Shipping</button>
         </li>";
     }
 
     public function renderList(string path)
     {
-        var data, query;
+        var data = [], query;
 
-        let data = [];
         let query = "
             SELECT
                 main_page.*,
@@ -480,7 +484,7 @@ class Products extends Content
 
     public function updateExtra(model, path)
     {
-        var data, status = false;
+        var data, status = false, required = ["code", "stock"];
 
         let data = this->database->get("
             SELECT *
@@ -488,10 +492,8 @@ class Products extends Content
             WHERE content_id='" . model->id . "'");
 
         if (!empty(data)) {
-            if (!isset(_POST["code"])) {
-                throw new ValidationException("Missing product code");
-            } elseif (empty(_POST["code"])) {
-                throw new ValidationException("Missing product code");
+            if (!this->validate(_POST, required)) {
+                throw new ValidationException("Missing required data");
             }
 
             let status = this->database->get("
@@ -546,17 +548,20 @@ class Products extends Content
                 (
                     id,
                     content_id,
+                    code,
                     stock,
                     on_offer
                 ) VALUES
                 (
                     UUID(),
                     :content_id,
+                    :code,
                     :stock,
                     :on_offer
                 )",
                 [
                     "content_id": model->id,
+                    "code": _POST["code"],
                     "stock": intval(_POST["stock"]),
                     "on_offer": isset(_POST["on_offer"]) ? 1 : 0
                 ]
