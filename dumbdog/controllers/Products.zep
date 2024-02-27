@@ -1,12 +1,12 @@
 /**
- * DumbDog products builder
+ * DumbDog products
  *
  * @package     DumbDog\Controllers\Products
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Mike Welsh
+
 */
 namespace DumbDog\Controllers;
 
@@ -35,7 +35,6 @@ class Products extends Content
         "meta_keywords",
         "meta_author",
         "meta_description",
-        "type",
         "price",
         "stock",
         "code",
@@ -335,8 +334,7 @@ class Products extends Content
                             this->inputs->inputPopup("create-price", "create_price", "Create a new price") .
                     "   </div>
                     </div>
-                </div>
-                <div class='dd-row'>";
+                </div>";
                 if (count(model->prices)) {
                     for item in model->prices {
                         let html .= "
@@ -344,7 +342,13 @@ class Products extends Content
                             <div class='dd-box-title dd-flex'>
                                 <span class='dd-col'>" . item->name . "</span>
                                 <div class='dd-col-auto'>" .
-                                    this->buttons->delete(item->id, "delete-price-" . item->id, "delete_price[]") .
+                                    this->buttons->delete(
+                                        item->id, 
+                                        "delete-price-" . item->id,
+                                        "delete_price[]",
+                                        "",
+                                        true
+                                    ) .
                             "   </div>
                             </div>
                             <div class='dd-box-body'>" .
@@ -359,7 +363,6 @@ class Products extends Content
                     }
                 }
         let html .= "
-                </div>
             </div>
         </div>
         <div id='shipping-tab' class='dd-row'>
@@ -371,8 +374,7 @@ class Products extends Content
                             this->inputs->inputPopup("create-shipping", "create_shipping", "Create a new shipping location") .
                     "   </div>
                     </div>
-                </div>
-                <div class='dd-row'>";
+                </div>";
                 if (count(model->shipping)) {
                     for item in model->shipping {
                         let html .= "
@@ -380,21 +382,26 @@ class Products extends Content
                             <div class='dd-box-title dd-flex'>
                                 <span class='dd-col'>" . item->name . "</span>
                                 <div class='dd-col-auto'>" .
-                                    this->buttons->delete(item->id, "delete-shpping-" . item->id, "delete_shpping[]") .
+                                    this->buttons->delete(
+                                        item->id,
+                                        "delete-shpping-" . item->id,
+                                        "delete_shpping[]",
+                                        "",
+                                        true
+                                    ) .
                             "   </div>
                             </div>
                             <div class='dd-box-body'>" .
-                            this->inputs->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
-                            this->inputs->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
-                            this->countriesSelect(item->country_id) . 
-                            this->inputs->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
-                            this->inputs->hidden("shipping_id[]", item->id) . 
+                                this->inputs->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
+                                this->inputs->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
+                                this->countriesSelect(item->country_id) . 
+                                this->inputs->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
+                                this->inputs->hidden("shipping_id[]", item->id) . 
                         "   </div>
                         </div>";
                     }
                 }
         let html .= "
-                </div>
             </div>
         </div>";
 

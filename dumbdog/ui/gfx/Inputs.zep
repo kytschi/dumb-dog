@@ -6,7 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-  * Copyright 2024 Mike Welsh
+ 
 */
 namespace DumbDog\Ui\Gfx;
 
@@ -49,7 +49,7 @@ class Inputs
                 name='" . var_name . "' 
                 placeholder='' 
                 class='datepicker dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
-                value=\"" . htmlspecialchars(value, ENT_QUOTES) . "\">
+                value=\"" . value . "\">
         </div>";
     }
 
@@ -72,11 +72,15 @@ class Inputs
         string type = "text",
         bool disabled = false
     ) {
-        if (empty(value)) {
+        if (empty(value) && value != 0) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
             if (type == "password") {
                 let value = "";
             }
+        }
+
+        if (is_null(value)) {
+            let value = "";
         }
 
         var style = "";
@@ -101,6 +105,10 @@ class Inputs
 
     public function hidden(string var_name, value)
     {
+        if (is_null(value)) {
+            let value = "";
+        }
+
         return "<input 
             type='hidden'
             name='" . var_name . "' 
