@@ -432,6 +432,33 @@ class Basket extends Controller
         return true;
     }
 
+    public function clear()
+    {
+        this->session_clear("basket");
+    }
+
+    public function complete()
+    {
+        var basket, item, status = false;
+
+        let basket = this->get();
+        for item in basket->items {
+            let status = this->database->execute(
+                "UPDATE products SET stock=:stock WHERE id=:id",
+                [
+                    "id": item->product_id,
+                    "stock": (item->stock - 1) >= 0 ? (item->stock - 1) : 0
+                ]
+            );
+    
+            if (!is_bool(status)) {
+                throw new Exception("Failed to update the product");
+            }
+        }
+
+        this->session_clear("basket");
+    }
+
     private function createCustomer(string order_id, data)
     {
         var status = false, id, model, customer_id;
