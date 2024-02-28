@@ -15,6 +15,7 @@ use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Content;
 use DumbDog\Controllers\ContentCategories;
 use DumbDog\Controllers\ContentStacks;
+use DumbDog\Controllers\Countries;
 use DumbDog\Controllers\Currencies;
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
@@ -51,22 +52,19 @@ use DumbDog\Ui\Routes;
 class DumbDog
 {
     private cfg;
-    private libs = [];
     private template_engine = null;
     private version = "0.0.7 alpha";
 
     public function __construct(
         string cfg_file,
+        libs = null,
         template_engine = null,
-        array libs = [],
         string migrations_folder = ""
     ) {
         var cfg, err;
         let cfg = new \stdClass();
 
-        let this->libs = libs;
-
-        define("LIBS", this->libs);
+        define("LIBS", libs);
         define("VERSION", this->version);
 
         if (!file_exists(cfg_file)) {
@@ -146,6 +144,10 @@ class DumbDog
             let path = "/dashboard";
         }
 
+        // Payment gateway handling.        
+        let controller = new PaymentGateways();
+        controller->process(path);
+
         this->startSession();
         this->secure(path);
 
@@ -153,6 +155,7 @@ class DumbDog
             "Appointments": new Appointments(),
             //"Comments": new Comments(),
             "ContentStacks": new ContentStacks(),
+            "Countries": new Countries(),
             "Currencies": new Currencies(),
             "Dashboard": new Dashboard(),
             //"Events": new Events(),

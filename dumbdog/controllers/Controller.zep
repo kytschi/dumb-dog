@@ -106,8 +106,8 @@ class Controller
 
     public function getLib(string name)
     {
-        if (isset(this->libs[name])) {
-            return this->libs[name];
+        if (property_exists(this->libs, name)) {
+            return this->libs->{name};
         }
         
         return null;

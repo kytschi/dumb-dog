@@ -77,15 +77,11 @@ class DumbDog
         let site->theme_folder = "/website/themes/" . trim(site->theme, "/") . "/";
         let site->theme = site->theme_folder . "theme.css";
         let site->mode = this->cfg->mode;
-        if (isset(this->cfg->gateway)) {
-            if (isset(this->cfg->gateway->stripe)) {
-                let site->stripe_api_key = this->cfg->gateway->stripe->public_api_key;
-                let this->payment_gateways = new PaymentGateways();
-            }
-        }
-
+        let site->dumb_dog_url = this->cfg->dumb_dog_url;
+        
         let this->site = site;
 
+        let this->payment_gateways = new PaymentGateways();
         let this->captcha = new Captcha();
         let this->basket = new Basket();
     }
