@@ -5,21 +5,27 @@
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
- *
 */
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\Gateways\Stripe;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\ValidationException;
-use DumbDog\Helper\Security;
 
 class PaymentGateways extends Content
 {
+    public decrypt = ["public_api_key", "private_api_key"];
     public global_url = "/payment-gateways";
     public type = "payment-gateway";
     public required = ["name", "title", "type"];
+    public list = [
+        "name",
+        "type",
+        "is_default|bool",
+        "status"
+    ];
 
     public function add(string path)
     {
@@ -50,6 +56,7 @@ class PaymentGateways extends Content
                             is_default,
                             status,
                             public_api_key,
+                            private_api_key,
                             created_at,
                             created_by,
                             updated_at,
@@ -63,6 +70,7 @@ class PaymentGateways extends Content
                             :is_default,
                             :status,
                             :public_api_key,
+                            :private_api_key,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -114,6 +122,8 @@ class PaymentGateways extends Content
             throw new NotFoundException("Payment gateway not found");
         }
 
+        let model = this->database->decrypt(this->decrypt, model);
+
         let html = this->titles->page("Edit the payment gateway", "edit");
 
         if (isset(_GET["saved"])) {
@@ -157,6 +167,7 @@ class PaymentGateways extends Content
                         is_default=:is_default,
                         status=:status,
                         public_api_key=:public_api_key,
+                        private_api_key=:private_api_key,
                         updated_at=NOW(),
                         updated_by=:updated_by 
                     WHERE id=:id",
@@ -185,24 +196,25 @@ class PaymentGateways extends Content
      */
     public function get()
     {
-        return this->database->all("
-        SELECT
-            payment_gateways.id,
-            payment_gateways.title,
-            payment_gateways.description,
-            payment_gateways.is_default 
-        FROM
-            payment_gateways
-        WHERE
-            deleted_at IS NULL AND status='active' 
-        ORDER BY is_default DESC, title");
+        var data = [], item;
+        let data = this->database->all("
+            SELECT payment_gateways.*
+            FROM payment_gateways
+            WHERE deleted_at IS NULL AND status='active' 
+            ORDER BY is_default DESC, title");
+        
+        for item in data {
+            let item = this->database->decrypt(this->decrypt, item);
+        }
+
+        return data;
     }
 
     public function index(string path)
     {
         var html;       
         
-        let html = this->titles->page("Payment gateways");
+        let html = this->titles->page("Payment gateways", "paymentGateways");
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the payment gateway");
@@ -250,8 +262,6 @@ class PaymentGateways extends Content
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class='dd-tabs-content dd-col'>
                     <div id='api-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
@@ -335,6 +345,32 @@ class PaymentGateways extends Content
         "</div>";
     }
 
+    public function process(string path)
+    {
+        if (strpos(path, "/payment-gateway/") !== false) {
+            if (strpos(path, "/payment-gateway/create/") !== false) {
+                let path = str_replace("/payment-gateway/create/", "", path);
+                switch (path) {
+                    case "stripe":
+                        (new Stripe())->create();
+                        break;
+                }
+            } elseif (strpos(path, "/payment-gateway/status/") !== false) {
+                let path = str_replace("/payment-gateway/status/", "", path);
+                switch (path) {
+                    case "stripe":
+                        (new Stripe())->status();
+                        break;
+                }
+            } else {
+                header("Content-Type: application/json");
+                http_response_code(404);
+                echo json_encode(["error": "invalid path"]);
+                die();
+            }
+        }
+    }
+
     private function setData(data)
     {
         let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
@@ -344,6 +380,9 @@ class PaymentGateways extends Content
         let data["type"] = _POST["type"];
         let data["description"] = isset(_POST["description"]) ? _POST["description"] : "";
         let data["updated_by"] = this->getUserId();
+
+        let data["public_api_key"] = this->database->encrypt(_POST["public_api_key"]);
+        let data["private_api_key"] = this->database->encrypt(_POST["private_api_key"]);
 
         return data;
     }

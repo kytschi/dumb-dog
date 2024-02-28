@@ -185,8 +185,7 @@ class Basket extends Controller
 
     private function create(string currency_id, tax_id)
     {
-        var id, security, data, status;
-        let security = new Security();
+        var id, data, status;
         let id = this->database->uuid();
 
         let data = this->database->get("SELECT count(id) AS order_number FROM orders");
@@ -216,19 +215,24 @@ class Basket extends Controller
 
     public function get()
     {
-        var id, security, model;
-        let id = this->session("basket");
+        var id, model;
+
+        if (isset(_GET["bid"])) {
+            let id = _GET["bid"];
+        } else {
+            let id = this->session("basket");
+        }
+
         if (empty(id)) {
             return null;
         }
-
-        let security = new Security();
 
         let model = this->database->get(
             "SELECT
                 order_addresses.*,
                 orders.*,
-                payment_gateways.slug AS payment_gateway,
+                payment_gateways.type AS payment_gateway,
+                payment_gateways.public_api_key AS payment_gateway_api_key,
                 currencies.symbol 
             FROM orders 
             JOIN currencies ON currencies.id = orders.currency_id 
@@ -243,21 +247,21 @@ class Basket extends Controller
             return null;
         }
 
-        var decrypt = [
-            "first_name",
-            "last_name",
-            "email",
-            "address_line_1",
-            "address_line_2",
-            "city",
-            "county",
-            "postcode",
-            "country"
-        ];
-
-        for id in decrypt {
-            let model->{id} = security->decrypt(model->{id});
-        }
+        let model = this->database->decrypt(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "address_line_1",
+                "address_line_2",
+                "city",
+                "county",
+                "postcode",
+                "country",
+                "payment_gateway_api_key"
+            ],
+            model
+        );
 
         let model->items = this->database->all(
             "SELECT
@@ -315,7 +319,7 @@ class Basket extends Controller
 
     private function addAddress(array data, string type = "billing")
     {
-        var id, basket, model, status, security, key, required = [
+        var id, basket, model, status, key, required = [
             "first_name",
             "last_name",
             "email",
@@ -334,7 +338,6 @@ class Basket extends Controller
             }
         }
 
-        let security = new Security();
         let basket = this->get();
 
         let model = this->database->get(
@@ -406,15 +409,15 @@ class Basket extends Controller
                 "id": id,
                 "order_id": basket->id,
                 "type": type,
-                "first_name": security->encrypt(data["first_name"]),
-                "last_name": security->encrypt(data["last_name"]),
-                "email": security->encrypt(data["email"]),
-                "address_line_1": security->encrypt(data["address_line_1"]),
-                "address_line_2": security->encrypt(isset(data["address_line_2"]) ? data["address_line_2"] : ""),
-                "city": security->encrypt(data["city"]),
-                "county": security->encrypt(data["county"]),
-                "postcode": security->encrypt(data["postcode"]),
-                "country": security->encrypt(data["country"]),
+                "first_name": this->database->encrypt(data["first_name"]),
+                "last_name": this->database->encrypt(data["last_name"]),
+                "email": this->database->encrypt(data["email"]),
+                "address_line_1": this->database->encrypt(data["address_line_1"]),
+                "address_line_2": this->database->encrypt(isset(data["address_line_2"]) ? data["address_line_2"] : ""),
+                "city": this->database->encrypt(data["city"]),
+                "county": this->database->encrypt(data["county"]),
+                "postcode": this->database->encrypt(data["postcode"]),
+                "country": this->database->encrypt(data["country"]),
                 "created_by": this->database->system_uuid,
                 "updated_by": this->database->system_uuid
             ]
@@ -424,30 +427,40 @@ class Basket extends Controller
             throw new Exception(status);
         }
 
-        this->createCustomer(basket->id, data, security);
+        this->createCustomer(basket->id, data);
 
         return true;
     }
 
-    private function createCustomer(string order_id, data, security)
+    private function createCustomer(string order_id, data)
     {
-        var status = false, id, model;
+        var status = false, id, model, customer_id;
 
         let model = this->database->get(
-            "SELECT id FROM customers WHERE email=:email",
+            "SELECT
+                contacts.id,
+                customers.id AS customer_id 
+            FROM contacts 
+            LEFT JOIN customers ON customers.contact_id=contacts.id 
+            WHERE email=:email",
             [
-                "email": security->encrypt(data["email"])
+                "email": this->database->encrypt(data["email"])
             ]
         );
 
         if (!empty(model)) {
             let id = model->id;
+            let customer_id = model->customer_id;
         } else {
             let id = this->database->uuid();
         }
+
+        if (empty(customer_id)) {
+            let customer_id = this->database->uuid();
+        }
         
         let status = this->database->execute(
-            "INSERT INTO customers
+            "INSERT INTO contacts
             (
                 id,
                 first_name,
@@ -478,9 +491,43 @@ class Basket extends Controller
                     updated_by=:updated_by",
             [
                 "id": id,
-                "email": security->encrypt(data["email"]),
-                "first_name": security->encrypt(data["first_name"]),
-                "last_name": security->encrypt(data["last_name"]),
+                "email": this->database->encrypt(data["email"]),
+                "first_name": this->database->encrypt(data["first_name"]),
+                "last_name": this->database->encrypt(data["last_name"]),
+                "created_by": this->database->system_uuid,
+                "updated_by": this->database->system_uuid
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception(status);
+        }
+
+        let status = this->database->execute(
+            "INSERT INTO customers
+            (
+                id,
+                contact_id,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by
+            ) 
+            VALUES
+            (
+                :id,
+                :contact_id,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by
+            )
+            ON DUPLICATE KEY 
+                UPDATE 
+                    contact_id=:contact_id",
+            [
+                "id": customer_id,
+                "contact_id": id,
                 "created_by": this->database->system_uuid,
                 "updated_by": this->database->system_uuid
             ]
@@ -494,7 +541,7 @@ class Basket extends Controller
             "UPDATE orders SET customer_id=:customer_id WHERE id=:id",
             [
                 "id": order_id,
-                "customer_id": id
+                "customer_id": customer_id
             ]
         );
 
@@ -632,7 +679,7 @@ class Basket extends Controller
         }
 
         let result = this->database->get(
-            "SELECT id, slug FROM payment_gateways WHERE id=:id AND deleted_at IS NULL AND status='active'",
+            "SELECT id, type FROM payment_gateways WHERE id=:id AND deleted_at IS NULL AND status='active'",
             [
                 "id": payment_gateway_id
             ]

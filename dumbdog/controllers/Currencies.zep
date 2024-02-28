@@ -193,11 +193,7 @@ class Currencies extends Content
             let html .= this->saveSuccess("I've deleted the entry");
         }
 
-        if (this->back_url) {
-            let html .= this->renderBack();
-        } else {
-            let html .= this->renderToolbar();
-        }
+        let html .= this->renderToolbar();
 
         let html .= 
             this->inputs->searchBox(this->global_url, "Search the currencies") . 

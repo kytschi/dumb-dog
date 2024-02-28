@@ -1,22 +1,21 @@
 /**
  * Dumb Dog Stripe payment gateway
  *
- * @package     DumbDog\Controllers\Gateways
+ * @package     DumbDog\Controllers\Gateways\Stripe
  * @author 		Mike Welsh
- * @copyright   2024 Digital Dunes
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
- *
- * Copyright 2024 Digital Dunes
 */
 namespace DumbDog\Controllers\Gateways;
 
 use DumbDog\Controllers\Basket;
 use DumbDog\Controllers\Controller;
 use DumbDog\Exceptions\Exception;
-use DumbDog\Helper\Security;
 
 class Stripe extends Controller
 {
+    private api_key = "";
+
     public function create()
     {
         var stripe, basket, item, items = [], checkout_session, settings, err;
@@ -25,9 +24,12 @@ class Stripe extends Controller
 
         try {
             let basket = (new Basket())->get();
+            if (empty(basket)) {
+                throw new Exception("Empty basket");
+            }
             
             let settings = this->database->get("SELECT * FROM settings LIMIT 1");
-            let stripe = this->getLib("stripe");
+            let stripe = this->setClient(basket);
             
             for item in basket->items {
                 let items[] = [
@@ -42,14 +44,17 @@ class Stripe extends Controller
                 ];
             }
 
-            let checkout_session = stripe->checkout->sessions->create([
-                "ui_mode": "embedded",
-                "line_items": items,
-                "client_reference_id": basket->id,
-                "customer_email": basket->email,
-                "mode": "payment",
-                "return_url": settings->domain . "/basket/complete?session_id={CHECKOUT_SESSION_ID}"
-            ]);
+            let checkout_session = stripe->checkout->sessions->create(
+                [
+                    "ui_mode": "embedded",
+                    "line_items": items,
+                    "client_reference_id": basket->id,
+                    "customer_email": basket->email,
+                    "mode": "payment",
+                    "return_url": settings->domain . "/basket/complete?session_id={CHECKOUT_SESSION_ID}"
+                ],
+                ["api_key": this->api_key]
+            );
 
             http_response_code(200);
             echo json_encode(["clientSecret": checkout_session->client_secret]);
@@ -61,22 +66,58 @@ class Stripe extends Controller
         }
     }
 
+    private function setClient(basket)
+    {
+        var client, result;
+        let client = this->getLib("stripe");
+
+        if (empty(client)) {
+            throw new Exception("Stripe library not found");
+        }
+
+        let result = this->database->get(
+            "SELECT payment_gateways.* 
+            FROM orders 
+            LEFT JOIN payment_gateways ON payment_gateways.id = orders.payment_gateway_id 
+            WHERE orders.id=:id AND orders.deleted_at IS NULL",
+            ["id": basket->id]
+        );
+        if (empty(result)) {
+            throw new Exception("Invalid gateway");
+        }
+        if (empty(result->private_api_key)) {
+            throw new Exception("Invalid gateway");
+        }
+
+        let this->api_key = this->database->decrypt(result->private_api_key);
+
+        return client;
+    }
+
     public function status()
     {
         var stripe, json, session, err, basket, status = false;
 
-        let basket = (new Basket())->get();
-        let stripe = this->getLib("stripe");
         header("Content-Type: application/json");
 
         try {
+            let basket = (new Basket())->get();
+            if (empty(basket)) {
+                throw new Exception("Empty basket");
+            }
+            let stripe = this->setClient(basket);
+            
             let json = json_decode(file_get_contents("php://input"));
 
             if (empty(json)) {
                 throw new Exception("Invalid json");
             }
 
-            let session = stripe->checkout->sessions->retrieve(json->session_id);
+            let session = stripe->checkout->sessions->retrieve(
+                json->session_id,
+                null,
+                ["api_key": this->api_key]
+            );
 
             if (empty(session)) {
                 throw new Exception("Invalid session");
