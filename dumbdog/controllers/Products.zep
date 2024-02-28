@@ -174,21 +174,21 @@ class Products extends Content
     */
     public function get(array filters = [])
     {
-        var query, where, join, data = [], order = "", item, item_sub, key;
+        var query, where, join, data = [], order = "", item, item_sub, key, currency_id = "";
                 
         let query = "
-        SELECT
-            content.*,
-            IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "', banner.filename), '') AS banner_image,
-            IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', banner.filename), '') AS banner_thumbnail,
-            templates.file AS template,
-            products.stock,
-            products.code,
-            products.on_offer,
-            IF(products.on_offer,product_prices.offer_price,product_prices.price) AS price,
-            currencies.symbol,
-            currencies.locale_code 
-        FROM content ";
+            SELECT
+                content.*,
+                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "', banner.filename), '') AS banner_image,
+                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', banner.filename), '') AS banner_thumbnail,
+                templates.file AS template,
+                products.stock,
+                products.code,
+                products.on_offer,
+                IF(products.on_offer,product_prices.offer_price,product_prices.price) AS price,
+                currencies.symbol,
+                currencies.locale_code 
+            FROM content ";
 
         let join = "LEFT JOIN files AS banner ON banner.resource_id = content.id AND resource='banner-image'
         JOIN templates ON templates.id=content.template_id 
@@ -208,15 +208,15 @@ class Products extends Content
 
         let where = " WHERE content.status='live' AND content.deleted_at IS NULL AND content.type = 'product'";
         
-        let item = this->session("currency");
-        if (empty(item)) {
+        let currency_id = this->session("currency");
+        if (empty(currency_id)) {
             let item_sub = this->database->get("SELECT currencies.id FROM currencies WHERE is_default=1");
             if (!empty(item_sub)) {
-                let item = item_sub->id;
-                this->session("currency", item);
+                let currency_id = item_sub->id;
+                this->session("currency", currency_id);
             }
         }
-        let data["currency_id"] = item;
+        let data["currency_id"] = currency_id;
 
         if (count(filters)) {
             for key, item in filters {
@@ -270,15 +270,34 @@ class Products extends Content
 
         for item in data {
             let item->stacks = this->database->all("
-            SELECT *
-            FROM content_stacks
-            WHERE content_id='" . item->id . "' AND deleted_at IS NULL AND content_stack_id IS NULL");
+                SELECT *
+                FROM content_stacks
+                WHERE content_id='" . item->id . "' AND deleted_at IS NULL AND content_stack_id IS NULL");
             for item_sub in item->stacks {
                 let item_sub->stacks = this->database->all("
                 SELECT *
                 FROM content_stacks
                 WHERE content_stack_id='" . item_sub->id . "' AND deleted_at IS NULL");                
             }
+
+            let item->parent = this->database->get("
+                SELECT
+                    content.*,
+                    IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "', banner.filename), '') AS banner_image,
+                    IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', banner.filename), '') AS banner_thumbnail,
+                    templates.file AS template 
+                FROM content
+                LEFT JOIN files AS banner ON banner.resource_id = content.id AND resource='banner-image'
+                JOIN templates ON templates.id=content.template_id 
+                WHERE 
+                    content.id=:id AND 
+                    content.status='live' AND 
+                    content.public_facing=1 AND 
+                    content.deleted_at IS NULL",
+                [
+                    "id": item->parent_id
+                ]
+            );
         }
 
         return data;

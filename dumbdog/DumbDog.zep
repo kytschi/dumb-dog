@@ -445,6 +445,29 @@ class DumbDog
     {
         var item;
 
+        let page->parent = database->get("
+            SELECT
+                content.*,
+                templates.file AS template,
+                banner.id AS banner_image_id,
+                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
+                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail 
+            FROM content 
+            JOIN templates ON templates.id=content.template_id 
+            LEFT JOIN files AS banner ON 
+                banner.resource_id = content.id AND
+                banner.resource='banner-image' AND
+                banner.deleted_at IS NULL 
+            WHERE 
+                content.id=:id AND 
+                content.status='live' AND 
+                content.public_facing=1 AND 
+                content.deleted_at IS NULL",
+            [
+                "id": page->parent_id
+            ]
+        );
+
         let page->children = database->all("
             SELECT
                 content.*,
@@ -506,6 +529,7 @@ class DumbDog
                 let data["page_id"] = page->id;
                 let item = database->get("
                     SELECT
+                        products.code,
                         products.stock,
                         products.on_offer,
                         product_prices.price,
