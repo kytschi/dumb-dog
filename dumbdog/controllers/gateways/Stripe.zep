@@ -96,12 +96,13 @@ class Stripe extends Controller
 
     public function status()
     {
-        var stripe, json, session, err, basket, status = false;
+        var stripe, json, session, err, basket, status = false, controller;
 
+        let controller = new Basket();
         header("Content-Type: application/json");
 
         try {
-            let basket = (new Basket())->get();
+            let basket = controller->get();
             if (empty(basket)) {
                 throw new Exception("Empty basket");
             }
@@ -142,7 +143,7 @@ class Stripe extends Controller
                     throw new Exception("Failed to update the basket");
                 }
 
-                this->session_clear("basket");
+                controller->complete();
             } else {
                 throw new Exception("Invalid basket");
             }
