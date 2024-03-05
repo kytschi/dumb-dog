@@ -322,7 +322,7 @@ class Menus extends Content
                         this->updateStacks();
                         this->redirect(path);
                     } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
+                        let html .= this->missingRequired(err->getMessage());
                     }
                 }
             }
@@ -500,7 +500,7 @@ class Menus extends Content
                         <div class='dd-box-title dd-flex'>
                             <div class='dd-col'>" . item->name . "</div>
                             <div class='dd-col-auto'>" . 
-                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "Delete the item", true) .
+                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "Delete the item") .
                         "   </div>
                         </div>
                         <div class='dd-box-body'>" .

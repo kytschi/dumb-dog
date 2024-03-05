@@ -52,8 +52,7 @@ class Buttons
         string entry,
         string id = "delete",
         string name = "delete",
-        string title = "Delete the entry",
-        bool mini = false
+        string title = "Delete the entry"
     ) {
         return "<button
             type='button'
@@ -61,7 +60,6 @@ class Buttons
             data-inline-popup='#" . id . "'
             titile='" . title . "'>" . 
             this->icons->delete() .
-            (!mini ? "<span>Delete</span>" : "") .
         "</button>
         <div id='" . id . "' class='dd-inline-popup dd-delete-warning'>
             <div class='dd-inline-popup-body dd-flex'>
@@ -141,7 +139,7 @@ class Buttons
             data-inline-popup='#" . id . "'
             titile='" . title . "'>" . 
             this->icons->recover() .
-            "<span>Recover</span>
+            "
         </button>
         <div id='" . id . "' class='dd-inline-popup dd-delete-warning'>
             <div class='dd-inline-popup-body'>
@@ -189,8 +187,7 @@ class Buttons
             title='Save the entry'
             class='dd-button'>" .
             this->icons->save() .
-            "<span>Save</span>
-        </button>";
+        "</button>";
     }
 
     public function view(string url)
@@ -202,7 +199,6 @@ class Buttons
             class='dd-button'
             target='_blank'>" .
             this->icons->view() .
-            "<span>View</span>
-        </a>";
+        "</a>";
     }
 }

@@ -122,7 +122,7 @@ class Inputs
         bool required = false,
         model = null
     ) {
-        var style = "", image = "", buttons;
+        var style = "", image = "", buttons, html;
         let style = this->setStyle(required, var_name);
         let buttons = new Buttons();
 
@@ -136,7 +136,7 @@ class Inputs
             let image = model;
         }
 
-        return "
+        let html = "
         <div class='dd-row'>
             <div class='dd-col-6'>
                 <div class='dd-input-group'>" . 
@@ -148,25 +148,35 @@ class Inputs
                         class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
                         placeholder='" . placeholder.  "'/>
                 </div>
-            </div>
-            <div class='dd-col-6 dd-image-preview dd-flex'>
-                <div class='dd-col'>" .
-                    (image ? "<img src='" . image . "'/>" : "<p>No image</p>") .
-                "</div>" . 
-                (image ? "<div class='dd-col-auto'>" . buttons->delete("", "deleted-" . var_name, "delete_" . var_name, "", true) . "</div>" : "") .
-            "</div>
-        </div>";
+            </div>";
+
+        if (model) {
+            let html .= "
+                <div class='dd-col-6 dd-image-preview dd-flex'>
+                    <div class='dd-col'>" .
+                        (image ? "<img src='" . image . "'/>" : "<p>No image</p>") .
+                    "</div>" . 
+                    (image ? "<div class='dd-col-auto'>" . buttons->delete("", "deleted-" . var_name, "delete_" . var_name, "") . "</div>" : "") .
+                "</div>";
+        }
+
+        let html .= "</div>";
+
+        return html;
     }
 
-    public function inputPopup(string id, string name, string title, string label = "Create")
+    public function inputPopup(string id, string name, string title, string style = "")
     {
-        var icons;
+        var icons, html;
         let icons = new Icons();
 
-        return "<button
+        let html = "<button
             type='button'
-            class='dd-button'
-            data-inline-popup='#" . id . "'
+            class='dd-button";
+        if (style) {
+            let html .= " " . style;
+        }
+        let html .= "' data-inline-popup='#" . id . "'
             titile='" . title . "'>" . 
             icons->add() .
         "</button>
@@ -190,6 +200,8 @@ class Inputs
                 </div>
             </div>
         </div>";
+
+        return html;
     }
 
     public function isTagify(string tags)

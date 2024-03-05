@@ -273,7 +273,7 @@ class ContentStacks extends Content
                         this->updateStacks();
                         this->redirect(path);
                     } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
+                        let html .= this->missingRequired(err->getMessage());
                     }
                 }
             }
@@ -430,7 +430,7 @@ class ContentStacks extends Content
                         <div class='dd-box-title dd-flex'>
                             <div class='dd-col'>" . item->name . "</div>
                             <div class='dd-col-auto'>" . 
-                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "", true) .
+                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "") .
                         "   </div>
                         </div>
                         <div class='dd-box-body'>" .

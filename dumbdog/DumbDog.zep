@@ -6,8 +6,7 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.7 alpha
  *
-
-*/
+ */
 namespace DumbDog;
 
 use DumbDog\Controllers\Appointments;

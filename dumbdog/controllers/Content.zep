@@ -380,9 +380,9 @@ class Content extends Controller
 
                 let data = this->setData(data);
 
-                if (isset(_FILES["banner_image"]["name"])) {
-                    if (!empty(_FILES["banner_image"]["name"])) {
-                        this->files->addResource("banner_image", data["id"], "banner-image");
+                if (isset(_FILES["add_image"]["name"])) {
+                    if (!empty(_FILES["add_image"]["name"])) {
+                        this->files->addResource("add_image", data["id"], "content-image");
                     }
                 }
 
@@ -419,12 +419,12 @@ class Content extends Controller
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
+                        let path = this->updateExtra(model, path);
                         this->updateStacks();
                         (new OldUrls())->add(this->database, model->id);
-                        let path = this->updateExtra(model, path);
                         this->redirect(path);
                     } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
+                        let html .= this->missingRequired(err->getMessage());
                     }
                 }
             }
@@ -509,10 +509,10 @@ class Content extends Controller
                                     this->inputs->toggle("Set live", "status", false, (model->status=="live" ? 1 : 0)) . 
                                     this->inputs->text("Name", "name", "Name the page", true, model->name) .
                                     this->inputs->text("Title", "title", "The page title", true, model->title) .
+                                    this->inputs->toggle("Feature", "featured", false, model->featured) . 
                                     this->inputs->text("Sub title", "sub_title", "The page sub title", false, model->sub_title) .
                                     this->inputs->textarea("Slogan", "slogan", "The page slogan", false, model->slogan, 500) .
                                     this->inputs->wysiwyg("Content", "content", "The page content", false, model->content) . 
-                                    this->inputs->toggle("Feature", "featured", false, model->featured) . 
                                 "
                                 </div>
                             </div>
@@ -560,11 +560,10 @@ class Content extends Controller
                                 <div class='dd-box-body'>" .
                                     this->templatesSelect(model->template_id) . 
                                     this->inputs->image(
-                                        "Banner image",
-                                        "banner_image",
-                                        "Upload your banner image here",
-                                        false,
-                                        model->banner_image
+                                        "Add image",
+                                        "add_image",
+                                        "Add an image here",
+                                        false
                                     ) . 
                                 "</div>
                             </div>
@@ -578,97 +577,9 @@ class Content extends Controller
         }
 
         let html .= "
-                </div>
-                <ul class='dd-col dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Content</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#nav-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='nav-tab' 
-                            aria-selected='true'>Navigation and SEO</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#look-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='look-tab' 
-                            aria-selected='true'>Look and Feel</button>
-                    </li> " .
-                    this->renderExtraMenu();
-        if (mode == "edit") {
-            let html .= "
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#stack-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='stack-tab' 
-                            aria-selected='true'>Stacks</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#old-urls-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='old-urls-tab' 
-                            aria-selected='true'>Old URLs</button>
-                    </li>";
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
-                        this->buttons->generic(
-                            this->global_url,
-                            "back",
-                            "back",
-                            "Go back to the list"
-                        ) .
-                    "</li>";
-        if (mode == "edit") {
-            let html .= "
-                <li class='dd-nav-item' role='presentation'>" . 
-                    this->buttons->generic(
-                        this->global_url . "/add",
-                        "add",
-                        "add",
-                        "Create a new " . str_replace("-", " ", this->type)
-                    ) .
-                "</li>
-                <li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->view(model->url) .
-                "</li>";
-    
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+                </div> " .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
@@ -786,7 +697,7 @@ class Content extends Controller
         if (count(model->stacks)) {
             for key, item in model->stacks {
                 let html .= "
-                <div class='dd-box'>
+                <div id='" . this->createSlug(item->name) . "-stack' class='dd-box'>
                     <div class='dd-box-title dd-flex'>
                         <div class='dd-col'>" . item->name . "</div>
                         <div class='dd-col-auto'>" .
@@ -800,8 +711,7 @@ class Content extends Controller
                                 item->id,
                                 "delete-stack-" . item->id,
                                 "delete_stack[]",
-                                "Delete the stack", 
-                                true
+                                "Delete the stack"
                             ) .
                         "</div>
                     </div>
@@ -827,7 +737,7 @@ class Content extends Controller
                                 "<h3 class='dd-mt-5 dd-mb-0'>Stack items</h3>";
                                 for key_stack, item_stack in item->stacks {
                                     let html .= "
-                                    <div class='dd-stack'>" .
+                                    <div id='" . this->createSlug(item_stack->name) . "-sub-stack' class='dd-stack'>" .
                                         "<div class='dd-stack-title dd-flex'>
                                             <span class='dd-col'>" . item_stack->name . "</span>
                                             <div class='dd-col-auto'>" .
@@ -835,8 +745,7 @@ class Content extends Controller
                                                     item_stack->id, 
                                                     "delete-stack-" . item_stack->id,
                                                     "delete_stack[]",
-                                                    "Delete the stack item",
-                                                    true
+                                                    "Delete the stack item"
                                                 ) .
                                             "</div>
                                         </div>
@@ -860,6 +769,115 @@ class Content extends Controller
             </div>
         </div>";
 
+        return html;
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() . 
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Create a new " . str_replace("-", " ", this->type)
+                        );
+        if (mode == "edit") {
+            let html .= this->buttons->view(model->url);
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>
+                        Content
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#nav-tab'
+                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        role='tab'
+                        aria-controls='nav-tab' 
+                        aria-selected='true'>
+                        Navigation and SEO
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#look-tab'
+                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        role='tab'
+                        aria-controls='look-tab' 
+                        aria-selected='true'>
+                        Look and Feel
+                    </span>
+                </div>
+            </li> " .
+            this->renderExtraMenu();
+        if (mode == "edit") {
+            let html .= "
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#old-urls-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='old-urls-tab' 
+                                aria-selected='true'>
+                                Old URLs
+                            </span>
+                        </div>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span
+                                data-tab='#stack-tab'
+                                role='tab'
+                                aria-controls='stack-tab' 
+                                aria-selected='true'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'>
+                                Stacks
+                            </span>
+                            <span class='dd-col-auto'>
+                            " .
+                                this->inputs->inputPopup(
+                                    "create-stack-btn",
+                                    "create_stack",
+                                    "Create a new stack",
+                                    "dd-border-none dd-p0"
+                                ) .
+                        "   </span>
+                        </div>
+                    </li>";
+        }
+        let html .= "</ul>";
         return html;
     }
 
