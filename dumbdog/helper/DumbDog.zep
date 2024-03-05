@@ -425,6 +425,20 @@ class DumbDog
         return item;
     }
 
+    public function metaDate(string datetime)
+    {
+        var err;
+
+        try {
+            return date("l, F d, H:i a", strtotime(datetime));
+        } catch \Exception, err {
+            if (err) {
+                //stopping compile warning
+            }
+            echo "Failed to render date";
+        }
+    }
+
     public function pages(array filters = [])
     {
         return this->pageQuery(filters);

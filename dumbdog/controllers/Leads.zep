@@ -179,7 +179,7 @@ class Leads extends Content
                         contacts->update(model->contact_id);
                         this->redirect(path . "?saved=true");
                     } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
+                        let html .= this->missingRequired(err->getMessage());
                     }
                 }
             }
@@ -545,8 +545,7 @@ class Leads extends Content
                                             message->id,
                                             "delete_message",
                                             "delete_message",
-                                            "Delete the message",
-                                            true
+                                            "Delete the message"
                                         ) . 
                                     "   </div>
                                     </div>

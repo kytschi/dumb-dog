@@ -173,7 +173,7 @@ class Countries extends Content
                             this->redirect(path);
                         }
                     } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
+                        let html .= this->missingRequired(err->getMessage());
                     }
                 }
             }

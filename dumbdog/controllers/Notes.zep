@@ -123,8 +123,7 @@ class Notes
                                             note->id,
                                             "delete_note",
                                             "delete_note",
-                                            "Delete the note",
-                                            true
+                                            "Delete the note"
                                         ) . 
                                     "   </div>
                                     </div>

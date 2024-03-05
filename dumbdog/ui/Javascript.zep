@@ -77,7 +77,7 @@ class Javascript
             });
             $('.tagify').tagify();
 
-            $('.dd-nav-tabs .dd-nav-link').click((event) => {
+            $('.dd-nav-tabs .dd-tab-link').click((event) => {
                 scrollTo($(event.target).data('tab'));
             });
 

@@ -365,8 +365,7 @@ class Products extends Content
                                         item->id, 
                                         "delete-price-" . item->id,
                                         "delete_price[]",
-                                        "",
-                                        true
+                                        ""
                                     ) .
                             "   </div>
                             </div>
@@ -405,8 +404,7 @@ class Products extends Content
                                         item->id,
                                         "delete-shpping-" . item->id,
                                         "delete_shpping[]",
-                                        "",
-                                        true
+                                        ""
                                     ) .
                             "   </div>
                             </div>
@@ -510,12 +508,9 @@ class Products extends Content
 
     public function updateExtra(model, path)
     {
-        var data, status = false, required = ["code", "stock"];
+        var data, status = false, required = ["code"];
 
-        let data = this->database->get("
-            SELECT *
-            FROM products 
-            WHERE content_id='" . model->id . "'");
+        let data = this->database->get("SELECT * FROM products WHERE content_id=:id", ["id":model->id]);
 
         if (!empty(data)) {
             if (!this->validate(_POST, required)) {

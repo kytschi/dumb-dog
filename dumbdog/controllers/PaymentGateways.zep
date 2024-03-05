@@ -181,7 +181,7 @@ class PaymentGateways extends Content
                     try {
                         this->redirect(path);
                     } catch ValidationException, err {
-                        this->missingRequired(err->getMessage());
+                        let html .= this->missingRequired(err->getMessage());
                     }
                 }
             }

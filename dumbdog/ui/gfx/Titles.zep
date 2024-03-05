@@ -32,7 +32,6 @@ class Titles
         return "
         <div class='dd-h1 dd-page-title'>
             <div>" .
-                (icon ? icons->{icon}() : "") . 
                 "<span>" . title . "</span>
             </div>
         </div>";
