@@ -1184,7 +1184,7 @@ class Style
             margin-top: 0 !important;
         }
         .dd-mt-1 {
-            margin-top: 0.25rem !important;dd-image-preview
+            margin-top: 0.25rem !important;
         }
         .dd-mt-2 {
             margin-top: 0.5rem !important;

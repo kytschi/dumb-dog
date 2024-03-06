@@ -95,10 +95,6 @@ class Content extends Controller
                             meta_author,
                             meta_description,
                             type,
-                            event_on,
-                            event_length,
-                            author,
-                            company_name,
                             tags,
                             featured,
                             parent_id,
@@ -123,10 +119,6 @@ class Content extends Controller
                             :meta_author,
                             :meta_description,
                             :type,
-                            :event_on,
-                            :event_length,
-                            :author,
-                            :company_name,
                             :tags,
                             :featured,
                             :parent_id,
@@ -143,12 +135,6 @@ class Content extends Controller
                         let html .= this->saveFailed("Failed to save the " . this->type);
                         let html .= this->consoleLogError(status);
                     } else {
-                        if (isset(_FILES["banner_image"]["name"])) {
-                            if (!empty(_FILES["banner_image"]["name"])) {
-                                this->files->addResource("banner_image", data["id"], "banner-image");
-                            }
-                        }
-
                         let path = path . "?saved=true";
                         let model = this->database->get(
                             "SELECT * FROM content WHERE id=:id",
@@ -156,7 +142,8 @@ class Content extends Controller
                                 "id": data["id"]
                             ]);
                         let path = this->updateExtra(model, path);
-                        this->redirect(path);
+
+                        this->redirect(this->global_url . "/edit/" . data["id"]);
                     }
                 }
             }
@@ -184,7 +171,7 @@ class Content extends Controller
         let model->template_id = "";
         let model->banner_image = "";
         let model->sitemap_include = 1;
-
+        
         let html .= this->render(model);
 
         return html;
@@ -282,17 +269,13 @@ class Content extends Controller
         var html = "", model, data = [];
                 
         let data["id"] = this->getPageId(path);
+        let data["type"] = this->type;
         let model = this->database->get("
-            SELECT 
-            content.*,
-                banner.id AS banner_image_id,
-                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-',  banner.filename), '') AS banner_image
+            SELECT content.*
             FROM content 
-            LEFT JOIN files AS banner ON 
-                banner.resource_id = content.id AND
-                resource='banner-image' AND
-                banner.deleted_at IS NULL
-            WHERE content.type='" . this->type . "' AND content.id=:id", data);
+            WHERE content.type=:type AND content.id=:id",
+            data
+        );
 
         if (empty(model)) {
             throw new NotFoundException(ucwords(str_replace("-", " ", this->type)) . " not found");
@@ -310,20 +293,7 @@ class Content extends Controller
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
-        }
-
-        let model->stacks = this->database->all("
-            SELECT
-                content_stacks.*,
-                files.id AS image_id,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content_stacks 
-            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL
-            WHERE content_id='" . model->id . "' AND content_stacks.deleted_at IS NULL AND content_stack_id IS NULL
-            ORDER BY sort ASC");
-
-        let model->old_urls = this->database->all("SELECT * FROM old_urls WHERE content_id='" . model->id . "' AND deleted_at IS NULL");
+        }       
 
         if (!empty(_POST)) {
             var status = false, err;
@@ -355,8 +325,8 @@ class Content extends Controller
                 }
             }
 
-            if (isset(_POST["delete_banner_image"])) {
-                this->files->deleteResource(data["id"], "banner-image", path . "?deleted=true");
+            if (isset(_POST["delete_image"])) {
+                this->files->deleteResource(data["id"], "content-image", path . "?deleted=true");
             }
 
             if (!this->validate(_POST, this->required)) {
@@ -379,7 +349,7 @@ class Content extends Controller
                 }
 
                 let data = this->setData(data);
-
+ 
                 if (isset(_FILES["add_image"]["name"])) {
                     if (!empty(_FILES["add_image"]["name"])) {
                         this->files->addResource("add_image", data["id"], "content-image");
@@ -388,6 +358,7 @@ class Content extends Controller
 
                 let status = this->database->execute(
                     "UPDATE content SET 
+                        type=:type,
                         status=:status,
                         name=:name,
                         title=:title,
@@ -401,10 +372,6 @@ class Content extends Controller
                         meta_description=:meta_description,
                         updated_at=NOW(),
                         updated_by=:updated_by,
-                        event_on=:event_on,
-                        event_length=:event_length,
-                        author=:author,
-                        company_name=:company_name,
                         tags=:tags,
                         featured=:featured,
                         parent_id=:parent_id,
@@ -421,6 +388,7 @@ class Content extends Controller
                     try {
                         let path = this->updateExtra(model, path);
                         this->updateStacks();
+                        this->updateImages();
                         (new OldUrls())->add(this->database, model->id);
                         this->redirect(path);
                     } catch ValidationException, err {
@@ -430,6 +398,41 @@ class Content extends Controller
             }
         }
         
+        let model->images = this->database->all(
+            "SELECT 
+                *,
+                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
+                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
+            FROM files 
+            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+            ORDER BY sort ASC",
+            [
+                "resource_id": model->id
+            ]
+        );
+
+        let model->stacks = this->database->all("
+            SELECT
+                content_stacks.*,
+                files.id AS image_id,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
+            FROM content_stacks 
+            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL
+            WHERE content_id=:id AND content_stacks.deleted_at IS NULL AND content_stack_id IS NULL
+            ORDER BY sort ASC",
+            [
+                "id": model->id
+            ]
+        );
+
+        let model->old_urls = this->database->all(
+            "SELECT * FROM old_urls WHERE content_id=:id AND deleted_at IS NULL",
+            [
+                "id": model->id
+            ]
+        );
+
         let html .=
             this->render(model, "edit") .
             this->stats(model);
@@ -558,14 +561,19 @@ class Content extends Controller
                             <div class='dd-box'>
                                 <div class='dd-box-title'>Look and Feel</div>
                                 <div class='dd-box-body'>" .
-                                    this->templatesSelect(model->template_id) . 
-                                    this->inputs->image(
-                                        "Add image",
-                                        "add_image",
-                                        "Add an image here",
-                                        false
-                                    ) . 
-                                "</div>
+                                    this->templatesSelect(model->template_id);
+
+        if (mode == "edit") {
+            let html .= this->inputs->image(
+                "Add image",
+                "add_image",
+                "Add an image here",
+                false
+            ) .
+            this->renderImages(model);
+        }
+
+        let html .= "</div>
                             </div>
                         </div>
                     </div>" .
@@ -608,6 +616,32 @@ class Content extends Controller
     public function renderExtraMenu()
     {
         return "";
+    }
+
+    public function renderImages(model)
+    {
+        if (!isset(model->images)) {
+            return "";
+        }
+
+        var item, html = "";
+
+        for item in model->images {
+            let html .= "
+            <div class='dd-row'>
+                <div class='dd-col-12 dd-image-preview dd-flex'>
+                    <div class='dd-col'>
+                        <img src='" . item->image . "'/>" .
+                        this->inputs->number("Sort", "image_sort[" . item->id . "]", "Sort the image", false, item->sort) .
+                    "</div>
+                    <div class='dd-col-auto'>" .
+                        this->buttons->delete(item->id, "deleted-image", "delete_image", "") .
+                    "</div>
+                </div>
+            </div>";
+        }
+
+        return html;
     }
 
     public function renderList(string path)
@@ -933,13 +967,13 @@ class Content extends Controller
     {   
         let data = this->setContentData(data);
 
-        let data["event_on"] = null;                    
+        /*let data["event_on"] = null;                    
         let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
         let data["author"] = isset(_POST["author"]) ? _POST["author"] : null;
-        let data["company_name"] = isset(_POST["company_name"]) ? _POST["company_name"] : null;
+        let data["company_name"] = isset(_POST["company_name"]) ? _POST["company_name"] : null;*/
         let data["parent_id"] = _POST["parent_id"];
         let data["sort"] = intval(_POST["sort"]);
-
+/*
         if (isset(_POST["event_on"])) {
             if (!isset(_POST["event_time"])) {
                 let _POST["event_time"] = "00:00";
@@ -947,7 +981,7 @@ class Content extends Controller
                 let _POST["event_time"] = "00:00";
             }
             let data["event_on"] = this->database->toDate(_POST["event_on"] . " " . _POST["event_time"] . ":00");
-        }
+        }*/
 
         return data;
     }
@@ -1102,6 +1136,31 @@ class Content extends Controller
     public function updateExtra(model, path)
     {
         return path;
+    }
+
+    public function updateImages()
+    {
+        if (!isset(_POST["image_sort"])) {
+            return;
+        }
+
+        var val, id, status = false;
+        for id, val in _POST["image_sort"] {
+            let status = this->database->execute(
+                "UPDATE files 
+                SET 
+                    sort=:sort
+                WHERE id=:id",
+                [
+                    "id": id,
+                    "sort": intval(val)
+                ]
+            );
+        
+            if (!is_bool(status)) {
+                throw new Exception("Failed to update the image sort");
+            }
+        }
     }
 
     public function updateStacks()

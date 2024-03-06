@@ -14,6 +14,7 @@ use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Content;
 use DumbDog\Controllers\ContentCategories;
 use DumbDog\Controllers\ContentStacks;
+use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Countries;
 use DumbDog\Controllers\Currencies;
 use DumbDog\Controllers\Dashboard;
@@ -115,7 +116,7 @@ class DumbDog
         }
         
         try {
-            if (strpos(path, this->cfg->dumb_dog_url) !== false) {
+            if (strpos(path . "/", this->cfg->dumb_dog_url . "/") !== false) {
                 let backend = true;
                 this->backend(parsed["path"]);
             } elseif(path == "/robots.txt") {
@@ -301,16 +302,9 @@ class DumbDog
             let page = database->get("
                 SELECT
                     content.*,
-                    templates.file AS template,
-                    banner.id AS banner_image_id,
-                    IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
-                    IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail 
+                    templates.file AS template 
                 FROM content 
                 JOIN templates ON templates.id=content.template_id 
-                LEFT JOIN files AS banner ON 
-                    banner.resource_id = content.id AND
-                    banner.resource='banner-image' AND
-                    banner.deleted_at IS NULL 
                 WHERE 
                     content.url=:url AND 
                     content.status='live' AND 
@@ -326,8 +320,7 @@ class DumbDog
                 }
 
                 if (file_exists("./website/" . file)) {
-                    let data = ["parent_id": page->id];
-                    let page = this->pageExtra(database, page, files, data);
+                    let page = this->pageExtra(database, page, files);
 
                     var obj;
                     let obj = new \stdClass();
@@ -440,23 +433,29 @@ class DumbDog
         }
     }
 
-    private function pageExtra(database, page, files, data)
+    private function pageExtra(database, page, files)
     {
-        var item;
+        var item, controller;
+        let controller = new Controller();
 
-        let page->parent = database->get("
+        let page->images = database->all(
+            "SELECT 
+                IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
+                IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
+            FROM files 
+            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+            ORDER BY sort ASC",
+            [
+                "resource_id": page->id
+            ]
+        );
+
+        let item = database->get("
             SELECT
                 content.*,
-                templates.file AS template,
-                banner.id AS banner_image_id,
-                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
-                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail 
+                templates.file AS template 
             FROM content 
             JOIN templates ON templates.id=content.template_id 
-            LEFT JOIN files AS banner ON 
-                banner.resource_id = content.id AND
-                banner.resource='banner-image' AND
-                banner.deleted_at IS NULL 
             WHERE 
                 content.id=:id AND 
                 content.status='live' AND 
@@ -467,23 +466,52 @@ class DumbDog
             ]
         );
 
+        if (item) {
+            let item->images = database->all(
+                "SELECT 
+                    IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
+                    IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
+                FROM files 
+                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+                ORDER BY sort ASC",
+                [
+                    "resource_id": page->parent_id
+                ]
+            );
+        }
+
+        let page->parent = item;
+
         let page->children = database->all("
             SELECT
                 content.*,
-                templates.file AS template,
-                banner.id AS banner_image_id,
-                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "', banner.filename), '') AS banner_image,
-                IF(banner.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', banner.filename), '') AS banner_thumbnail 
+                templates.file AS template 
             FROM content 
             JOIN templates ON templates.id=content.template_id 
-            LEFT JOIN files AS banner ON 
-                banner.resource_id = content.id AND
-                banner.resource='banner-image' AND
-                banner.deleted_at IS NULL
             WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
             ORDER BY content.sort ASC", 
-            data
+            [
+                "parent_id": page->id
+            ]
         );
+
+        let page->tags = controller->toTags(page->tags);
+
+        if (page->children) {
+            for item in page->children {
+                let item->images = database->all(
+                    "SELECT 
+                        IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
+                        IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
+                    FROM files 
+                    WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+                    ORDER BY sort ASC",
+                    [
+                        "resource_id": item->id
+                    ]
+                );
+            }
+        }
 
         let page->stacks = database->all("
             SELECT
@@ -495,21 +523,29 @@ class DumbDog
             LEFT JOIN templates ON templates.id = content_stacks.template_id AND templates.deleted_at IS NULL 
             LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
             WHERE 
-                content_id='" . page->id . "' AND 
+                content_id=:id AND 
                 content_stacks.deleted_at IS NULL AND 
                 content_stack_id IS NULL
-            ORDER BY sort ASC");
+            ORDER BY sort ASC",
+            [
+                "id": page->id
+            ]
+        );
 
         for item in page->stacks {
             let item->stacks = database->all("
-            SELECT
-                content_stacks.*,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content_stacks 
-            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
-            WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL 
-            ORDER BY sort ASC");                
+                SELECT
+                    content_stacks.*,
+                    IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
+                    IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
+                FROM content_stacks 
+                LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+                WHERE content_stack_id=:id AND content_stacks.deleted_at IS NULL 
+                ORDER BY sort ASC",
+                [
+                    "id": item->id
+                ]
+            );
         }
 
         switch (page->type) {
@@ -523,9 +559,6 @@ class DumbDog
                     }
                 }
                 
-                let data = [];
-                let data["currency_id"] = item;
-                let data["page_id"] = page->id;
                 let item = database->get("
                     SELECT
                         products.code,
@@ -549,7 +582,10 @@ class DumbDog
                         )
                     LEFT JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL 
                     WHERE products.content_id=:page_id",
-                    data
+                    [
+                        "currency_id": item,
+                        "page_id": page->id
+                    ]
                 );
                 
                 if (item) {

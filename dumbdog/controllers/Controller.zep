@@ -231,6 +231,17 @@ class Controller
         return html;
     }
 
+    public function toTags(tags)
+    {
+        if (empty(tags)) {
+            return [];
+        }
+
+        var data;
+        let data = explode("\"},", str_replace(["[", "{\"", "value\":\"", "\"}]", "}]"], "", tags));
+        return data;
+    }
+
     public function triggerDelete(string table, string path, string id = "")
     {
         var data = [], status = false;
