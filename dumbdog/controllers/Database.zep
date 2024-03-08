@@ -25,10 +25,11 @@ class Database
     private username = "";
     private password = "";
 
-    public function __construct()
+    public function __construct(cfg = null)
     {
-        var cfg;
-        let cfg = constant("CFG");
+        if (empty(cfg)) {
+            let cfg = constant("CFG");
+        }
 
         if (empty(cfg->database)) {
             throw new CfgException("missing database config");
@@ -64,7 +65,7 @@ class Database
         }
                 
         let this->cfg = cfg;
-        let this->security = new Security();
+        let this->security = new Security(cfg);
     }
 
     public function all(string query, array data = [])

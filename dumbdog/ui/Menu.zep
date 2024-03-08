@@ -191,6 +191,12 @@ class Menu
                             "<label>Pages</label>
                         </div>
                     </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/blog-posts' title='Managing the blog' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->blog() .
+                            "<label>Blog</label>
+                        </div>
+                    </a>
                     <a href='" . this->cfg->dumb_dog_url . "/menus' title='Managing the menus' class='dd-box'>
                         <div class='dd-box-body'>" . 
                             icons->menus() .

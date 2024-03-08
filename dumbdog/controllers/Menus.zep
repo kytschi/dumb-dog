@@ -173,7 +173,7 @@ class Menus extends Content
                 *,
                 CONCAT(name, ' (', type, ')') AS name 
             FROM content 
-            WHERE type IN ('page', 'blog-post', 'event') 
+            WHERE type IN ('page', 'blog', 'blog-category', 'event') 
             ORDER BY name"
         );
         var iLoop = 0;
@@ -400,46 +400,60 @@ class Menus extends Content
         let html .= "</div>
                 <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
                     <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Menu</button>
+                        <div id='dd-tabs-toolbar'>
+                            <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                                this->buttons->generic(
+                                    this->global_url,
+                                    "",
+                                    "back",
+                                    "Go back to the list"
+                                ) .
+                                this->buttons->save() . 
+                                this->buttons->generic(
+                                    this->global_url . "/add",
+                                    "",
+                                    "add",
+                                    "Create a new " . str_replace("-", " ", this->type)
+                                );
+                if (mode == "edit") {
+                    if (model->deleted_at) {
+                        let html .= this->buttons->recover(model->id);
+                    } else {
+                        let html .= this->buttons->delete(model->id);
+                    }
+                }
+                let html .= "</div>
+                        </div>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#content-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='content-tab' 
+                                aria-selected='true'>
+                                Menu
+                            </span>
+                        </div>
                     </li>";
         if (mode == "edit") {
             let html .= "
                     <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#stack-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='stack-tab' 
-                            aria-selected='true'>Items</button>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#stack-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='stack-tab' 
+                                aria-selected='true'>
+                                Items
+                            </span>
+                        </div>
                     </li>";
         }
 
-        let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
-                        this->buttons->back(this->global_url) .   
-                    "</li>";
-        if (mode == "edit") {    
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
+        let html .= "
                 </ul>
             </div>
         </form>";
@@ -661,6 +675,7 @@ class Menus extends Content
             }
 
             let model->id = data["id"];
+            
             if (isset(_POST["stack_new_window"][key])) {
                 let _POST["new_window"] = 1;
             } else {

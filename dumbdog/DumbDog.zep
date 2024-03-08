@@ -10,6 +10,8 @@
 namespace DumbDog;
 
 use DumbDog\Controllers\Appointments;
+use DumbDog\Controllers\Blog;
+use DumbDog\Controllers\BlogCategories;
 use DumbDog\Controllers\Comments;
 use DumbDog\Controllers\Content;
 use DumbDog\Controllers\ContentCategories;
@@ -42,6 +44,7 @@ use DumbDog\Engines\Volt;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Helper\DumbDog as Helper;
+use DumbDog\Ui\Feeds;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
 use DumbDog\Ui\Gfx\Icons;
@@ -53,7 +56,7 @@ class DumbDog
 {
     private cfg;
     private template_engine = null;
-    private version = "0.0.7 alpha";
+    private version = "0.0.8 alpha";
 
     public function __construct(
         string cfg_file,
@@ -90,9 +93,7 @@ class DumbDog
 
         if (!isset(cfg->dumb_dog_url)) {
             let cfg->dumb_dog_url = "/dumb-dog";
-        }
-
-        if (!empty(cfg->dumb_dog_url)) {
+        } elseif (!empty(cfg->dumb_dog_url)) {
             let cfg->dumb_dog_url = "/dumb-dog";
         }
 
@@ -103,8 +104,22 @@ class DumbDog
             return;
         }
 
+        var database;
+        let database = new Database(cfg);
+        let cfg->settings = database->get("
+            SELECT
+                settings.*,
+                themes.folder AS theme
+            FROM 
+                settings
+            JOIN themes ON themes.id=settings.theme_id LIMIT 1");
+        if (empty(cfg->settings)) {
+            throw new \Exception("show stopper...no settings in the database");
+        }
+
         let this->cfg = cfg;
         define("CFG", this->cfg);
+        
         let this->template_engine = template_engine;
 
         var parsed, path, backend = false;
@@ -119,13 +134,12 @@ class DumbDog
             if (strpos(path . "/", this->cfg->dumb_dog_url . "/") !== false) {
                 let backend = true;
                 this->backend(parsed["path"]);
-            } elseif(path == "/robots.txt") {
-                this->robots();
-            } elseif(path == "/sitemap.xml") {
-                this->sitemap();
-            } else {
-                this->frontend(path);
             }
+
+            //Look for the sitemap, rss, robots, atom request and so on.
+            (new Feeds())->process(path);
+
+            this->frontend(path);
         } catch NotFoundException, err {
             this->ddHead(strtolower(err->getMessage()), 404);
             echo this->notFound(backend, err->getMessage());
@@ -153,6 +167,8 @@ class DumbDog
 
         var controllers = [
             "Appointments": new Appointments(),
+            "Blog": new Blog(),
+            "BlogCategories": new BlogCategories(),
             //"Comments": new Comments(),
             "ContentStacks": new ContentStacks(),
             "Countries": new Countries(),
@@ -212,6 +228,7 @@ class DumbDog
         this->ddHead(location, code);
         echo output;
         this->ddFooter(isset(_SESSION["dd"]) ? true : false);
+        exit();
     }
 
     private function ddFooter(bool menu = true)
@@ -278,22 +295,7 @@ class DumbDog
         let database = new Database();
         let files = new Files();
         
-        let settings = database->get("
-            SELECT
-                settings.name,
-                settings.meta_keywords,
-                settings.meta_description,
-                settings.meta_author,
-                settings.status,
-                themes.folder AS theme
-            FROM 
-                settings
-            JOIN themes ON themes.id=settings.theme_id LIMIT 1");
-        if (empty(settings)) {
-            throw new \Exception("show stopper...no settings in the database");
-        }
-
-        if (settings->status == "offline") {
+        if (this->cfg->settings->status == "offline") {
             this->offline();
         } else {
             this->startSession();
@@ -605,29 +607,27 @@ class DumbDog
 
     private function offline()
     {
-        var titles;
-        let titles = new Titles();
+        if (file_exists("./website/offline.php")) {
+            var page;
+            let page = new \stdClass();
+            let page->name = "Offline";
+            let page->content = "*yawn* Let me sleep a little longer will you...";
+            let page->meta_description = "";
+            let page->meta_keywords = "";
+            let page->meta_author = "";
 
-        this->ddHead("offline", 404);
-        echo titles->page("offline", "/assets/dumbdog.png");
-        echo "<div class='dd-box'><div class='dd-box-body'><h3 class='dd-h3'>*yawn* Let me sleep a little longer will you...</h3></div></div>";
-        this->ddFooter(false);        
-    }
+            define("DUMBDOG", new Helper(page));
+            eval("$DUMBDOG = constant('DUMBDOG');");
 
-    private function robots()
-    {
-        var database, settings;
-        let database = new Database();
+            require_once("./website/offline.php");
+        } else {
+            var titles;
+            let titles = new Titles();
 
-        let settings = database->get("
-                SELECT
-                    settings.robots_txt
-                FROM 
-                    settings
-                LIMIT 1");
-        if (settings) {
-            header("Content-Type: text/plain");
-            echo settings->robots_txt;
+            this->ddHead("offline", 404);
+            echo titles->page("offline", "/assets/dumbdog.png");
+            echo "<div class='dd-box'><div class='dd-box-body'><h3 class='dd-h3'>*yawn* Let me sleep a little longer will you...</h3></div></div>";
+            this->ddFooter(false);
         }
     }
 
@@ -790,34 +790,6 @@ class DumbDog
                 break;
             default:
                 throw new Exception("Template engine not supported");
-        }
-    }
-
-    private function sitemap()
-    {
-        var database, pages, iLoop, url;
-        let database = new Database();
-
-        let pages = database->all("
-                SELECT
-                    content.*
-                FROM 
-                    content
-                WHERE content.status='live' AND content.deleted_at IS NULL");
-        if (pages) {
-            let iLoop = 0;
-            let url = (_SERVER["HTTPS"] ? "https://" : "http://") . _SERVER["SERVER_NAME"];
-            header("Content-Type: text/xml");
-            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-            echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">";
-            while (iLoop < count(pages)) {
-                echo "<url>";
-                echo "<loc>" .  url . pages[iLoop]->url . "</loc>";
-                echo "<lastmod>" . (new \DateTime(pages[iLoop]->updated_at))->format(\DateTime::ATOM) . "</lastmod>";
-                echo "</url>";                        
-                let iLoop = iLoop + 1;
-            }
-            echo "</urlset>";
         }
     }
 
