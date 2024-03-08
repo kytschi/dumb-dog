@@ -23,6 +23,8 @@ use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Dates;
 use DumbDog\Helper\Security;
 use DumbDog\Ui\Captcha;
+use DumbDog\Ui\Feeds;
+use DumbDog\Ui\Meta;
 
 class DumbDog
 {
@@ -332,6 +334,13 @@ class DumbDog
         return this->pageQuery(filters, "event");
     }
 
+    public function feeds()
+    {
+        var controller;
+        let controller = new Feeds();
+        controller->siteTags();
+    }
+
     public function filesByTag(string tag)
     {
         var query;
@@ -425,18 +434,11 @@ class DumbDog
         return item;
     }
 
-    public function metaDate(string datetime)
+    public function meta()
     {
-        var err;
-
-        try {
-            return date("l, F d, H:i a", strtotime(datetime));
-        } catch \Exception, err {
-            if (err) {
-                //stopping compile warning
-            }
-            echo "Failed to render date";
-        }
+        var controller;
+        let controller = new Meta();
+        controller->build(this->page);
     }
 
     public function pages(array filters = [])
