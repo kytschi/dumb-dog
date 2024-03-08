@@ -5,7 +5,6 @@
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
  *
- 
 */
 namespace DumbDog\Ui;
 
@@ -41,6 +40,36 @@ class Routes
             "Appointments",
             "index",
             "appointments"
+        ],
+        "/blog-categories/add": [
+            "BlogCategories",
+            "add",
+            "create a blog category"
+        ],
+        "/blog-categories/edit": [
+            "BlogCategories",
+            "edit",
+            "edit the blog category"
+        ],
+        "/blog-categories": [
+            "BlogCategories",
+            "index",
+            "blog categories"
+        ],
+        "/blog-posts/add": [
+            "Blog",
+            "add",
+            "create a blog entry"
+        ],
+        "/blog-posts/edit": [
+            "Blog",
+            "edit",
+            "edit the blog entry"
+        ],
+        "/blog-posts": [
+            "Blog",
+            "index",
+            "blog entries"
         ],
         "/comments/add": [
             "Comments",

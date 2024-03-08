@@ -19,7 +19,7 @@ class Style
 
     public function build()
     {
-        return this->defaultStyle();
+        return str_replace(["\n", "\r\n"], "", this->defaultStyle());
     }
 
     private function defaultStyle()

@@ -391,7 +391,7 @@ class DumbDog
 
     private function menuItems(item)
     {
-        var child;
+        //var child;
 
         let item->items = this->database->all("
             SELECT

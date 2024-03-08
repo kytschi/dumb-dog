@@ -281,7 +281,7 @@ class Content extends Controller
             throw new NotFoundException(ucwords(str_replace("-", " ", this->type)) . " not found");
         }
 
-        let html = this->titles->page("Edit the " . this->type, "edit");
+        let html = this->titles->page("Edit the " . str_replace("-", " ", this->type), "edit");
 
         if (isset(_GET["saved"])) {
             let html .= this->saveSuccess("I've updated the " . str_replace("-", " ", this->type));

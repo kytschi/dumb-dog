@@ -34,11 +34,7 @@ class Head
             <link rel='icon' type='image/png' sizes='64x64' href='data:image/png;base64," . this->favicon() . "'>" .
             "<title>" . location . " | dumb dog</title>" .
             style->build() .
-            js->jquery() .
-            js->jqueryUI() .
-            js->tagify() . 
-            js->chartjs() . 
-            js->trumbowyg() . 
+            js->build() .
             "<meta http-equiv='cache-control' content='no-cache'>
         </head>";
     }

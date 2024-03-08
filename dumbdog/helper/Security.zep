@@ -16,9 +16,13 @@ class Security
 {
     private cfg;
 
-    public function __construct()
+    public function __construct(cfg = null)
     {
-        let this->cfg = constant("CFG");
+        if (empty(cfg)) {
+            let this->cfg = constant("CFG");
+        } else {
+            let this->cfg = cfg;
+        }
     }
 
     public function clean(str)

@@ -44,6 +44,8 @@ class Settings extends Content
                     let data["meta_author"] = _POST["meta_author"];
                     let data["meta_keywords"] = _POST["meta_keywords"];
                     let data["robots_txt"] = _POST["robots_txt"];
+                    let data["offline_title"] = _POST["offline_title"];
+                    let data["offline_content"] = _POST["offline_content"];
 
                     let status = this->database->execute(
                         "UPDATE settings
@@ -57,7 +59,9 @@ class Settings extends Content
                             meta_description=:meta_description,
                             meta_author=:meta_author,
                             meta_keywords=:meta_keywords,
-                            robots_txt=:robots_txt
+                            robots_txt=:robots_txt,
+                            offline_title=:offline_title,
+                            offline_content=:offline_content 
                         WHERE name IS NOT NULL",
                         data
                     );
@@ -88,7 +92,6 @@ class Settings extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                this->inputs->toggle("Online", "status", false, (model->status=="online" ? 1 : 0)) . 
                                 this->inputs->text("name", "name", "make sure to set a name", true, model->name) .
                                 this->inputs->text("Domain", "domain", "Your domain, i.e. https://example.com", true, model->domain) .
                                 this->inputs->text("Contact email", "contact_email", "hello@example.com", false, model->contact_email) .
@@ -125,39 +128,74 @@ class Settings extends Content
                             </div>
                         </div>
                     </div>
+                    <div id='offline-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
+                                this->inputs->toggle("Online", "status", false, (model->status=="online" ? 1 : 0)) . 
+                                this->inputs->text("Title", "offline_title", "Set an offline title", false, model->offline_title) .
+                                this->inputs->textarea("Content", "offline_content", "Some text saying why your offline", false, model->offline_content) .
+                                "</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
                     <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#settings-tab'
-                            aria-controls='settings-tab' 
-                            aria-selected='true'>Settings</button>
+                        <div id='dd-tabs-toolbar'>
+                            <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                                this->buttons->save() . 
+                            "</div>
+                        </div>
                     </li>
                     <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#look-tab'
-                            aria-controls='look-tab' 
-                            aria-selected='true'>Look and feel</button>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#settings-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='settings-tab' 
+                                aria-selected='true'>
+                                Settings
+                            </span>
+                        </div>
                     </li>
                     <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#seo-tab'
-                            aria-controls='seo-tab' 
-                            aria-selected='true'>SEO</button>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#look-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='look-tab' 
+                                aria-selected='true'>
+                                Look and feel
+                            </span>
+                        </div>
                     </li>
-                    <li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#seo-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='seo-tab' 
+                                aria-selected='true'>
+                                SEO
+                            </span>
+                        </div>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#offline-tab'
+                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                role='tab'
+                                aria-controls='offline-tab' 
+                                aria-selected='true'>
+                                Offline
+                            </span>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </form>";
