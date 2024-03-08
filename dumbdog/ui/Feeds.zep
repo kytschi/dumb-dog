@@ -25,8 +25,6 @@ class Feeds extends Controller
             path == "/rss" ||
             path == "/rss.xml" ||
             path == "/rss.rss" ||
-            path == "/feed" ||
-            path == "/feed.xml" ||
             path == "/feed.rss"
         ) {
             this->rss();
@@ -34,7 +32,12 @@ class Feeds extends Controller
             path == "/atom" ||
             path == "/atom.xml" ||
             path == "/atom.atom" ||
-            path == "/feed.atom"
+            path == "/feed" ||
+            path == "/feed.xml" ||
+            path == "/feed.atom" ||
+            path == "/feeds" ||
+            path == "/feeds.xml" ||
+            path == "/feeds.atom"
         ) {
             this->atom();
         } elseif(
@@ -67,10 +70,12 @@ class Feeds extends Controller
             this->robots();
         } elseif(path == "/sitemap.xml") {
             this->sitemap();
+        } elseif(path == "/humans.txt") {
+            this->humans();
         }
     }
 
-    public function atom(string type = "")
+    private function atom(string type = "")
     {
         var pages, page;
                 
@@ -109,6 +114,27 @@ class Feeds extends Controller
         exit(0);
     }
 
+    private function humans()
+    {
+        header("Content-Type: text/plain");
+        if (!empty(this->cfg->settings->humans_txt)) {
+            echo this->cfg->settings->humans_txt;
+        } else {
+            echo "/* TEAM */\n";
+            echo "Your title: " . this->cfg->settings->name . "\n";
+            echo "Site: " . this->cfg->settings->name . "\n";
+            if (!empty(this->cfg->settings->address)) {
+                echo "Location: " . str_replace("\n", ", ", this->cfg->settings->address) . "\n";
+            }
+            echo "/* SITE */\n";
+            if (!empty(this->cfg->settings->last_update)) {
+                echo "Last update: " . date("Y/m/d", strtotime(this->cfg->settings->last_update)) . "\n";
+            }
+            echo "Doctype: HTML5\n";
+        }
+        exit(0);
+    }
+
     private function getPages(string type = "")
     {
         var query, data = [];
@@ -130,13 +156,26 @@ class Feeds extends Controller
         return this->database->all(query, data);
     }
 
-    public function robots()
+    /*
+    <OpenSearchDescription>
+<ShortName>Dumb Dog</ShortName>
+<Description>
+Dumb dog
+</Description>
+<InputEncoding>UTF-8</InputEncoding>
+<Image width="16" height="16" type="image/x-icon">
+https://dumbdog
+</Image>
+<Url type="text/html" method="get" template="https://dumbdog/search?q={searchTerms}"/>
+</OpenSearchDescription>*/
+
+    private function robots()
     {
         header("Content-Type: text/plain");
         echo this->cfg->settings->robots_txt;
     }
 
-    public function rss(string type = "")
+    private function rss(string type = "")
     {
         var pages, page;
 
@@ -188,5 +227,20 @@ class Feeds extends Controller
             }
             echo "</urlset>";
         }
+    }
+
+    public function siteTags()
+    {
+        echo "<link rel=\"alternate\" type=\"application/atom+xml\"
+            title=\"Feed for " . this->cfg->settings->name . "\" 
+            href=\"/atom.xml\">";
+        echo "<link rel=\"alternate\" type=\"application/rss+xml\" 
+            title=\"Feed for " . this->cfg->settings->name . "\" 
+            href=\"/rss.xml\" />";
+        echo "<link rel=\"author\" href=\"/humans.txt\">";
+        /*
+        <link rel="search" type="application/opensearchdescription+xml" title="Dumb Dog" href="/opensearch.xml">
+        
+        */
     }
 }

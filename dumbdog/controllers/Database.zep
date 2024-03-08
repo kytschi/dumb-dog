@@ -154,6 +154,22 @@ class Database
             return errors;
         }
 
+        if (
+            substr(query, strlen("DELETE")) == "DELETE" ||
+            substr(query, strlen("INSERT")) == "INSERT" ||
+            substr(query, strlen("UPDATE")) == "UPDATE"
+        ) {
+            ob_start();
+            let this->statement = this->db->prepare("UPDATE settings SET last_update=NOW() WHERE name IS NOT NULL");
+            let status = this->statement->execute();
+            let errors = ob_get_contents();
+            ob_end_clean();
+
+            if (!status) {
+                return errors;
+            }
+        }
+
         return true;
     }
 
