@@ -17,6 +17,7 @@ use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
+use DumbDog\Helper\Dates;
 use DumbDog\Ui\Gfx\Buttons;
 use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Inputs;
@@ -124,7 +125,7 @@ class Content extends Controller
                             :parent_id,
                             :sort,
                             :sitemap_include,
-                            NOW(),
+                            :created_at,
                             :created_by,
                             NOW(),
                             :updated_by)",
@@ -326,7 +327,7 @@ class Content extends Controller
             }
 
             if (isset(_POST["delete_image"])) {
-                this->files->deleteResource(data["id"], "content-image", path . "?deleted=true");
+                this->files->deleteResource(_POST["delete_image"], path . "?deleted=true");
             }
 
             if (!this->validate(_POST, this->required)) {
@@ -376,7 +377,8 @@ class Content extends Controller
                         featured=:featured,
                         parent_id=:parent_id,
                         sort=:sort,
-                        sitemap_include=:sitemap_include 
+                        sitemap_include=:sitemap_include,
+                        created_at=:created_at  
                     WHERE id=:id",
                     data
                 );
@@ -536,12 +538,27 @@ class Content extends Controller
                                     <div class='dd-box'>
                                         <div class='dd-box-title'>Relationship</div>
                                         <div class='dd-box-body'>" .
-                                            this->parentSelect(model->parent_id, model->id) .
-                                            this->inputs->number("Sort", "sort", "Sort the page with in the parent", false, model->sort) .
+                                            this->parentSelect(model->parent_id, model->id);
+
+        if (!in_array(this->type, ["blog", "blog-category"])) {
+            let html .= this->inputs->number("Sort", "sort", "Sort the page with in the parent", false, model->sort);
+        }
+        
+                            let html .= "</div>
+                                    </div>
+                                </div>";
+
+        if (in_array(this->type, ["blog", "blog-category"])) {
+                    let html .= "<div class='dd-col-12'>
+                                    <div class='dd-box'>
+                                        <div class='dd-box-title'>Date written</div>
+                                        <div class='dd-box-body'>" .
+                                        this->inputs->date("Written on", "created_at", "When was the content written", false, model->created_at) .
                                         "</div>
                                     </div>
-                                </div>
-                            </div>
+                                </div>";
+        }
+                let html .= "</div>
                         </div>
                         <div class='dd-col-lg-6 dd-col-md-12'>
                             <div class='dd-box'>
@@ -628,14 +645,17 @@ class Content extends Controller
 
         for item in model->images {
             let html .= "
-            <div class='dd-row'>
+            <div class='dd-row dd-mt-3'>
                 <div class='dd-col-12 dd-image-preview dd-flex'>
                     <div class='dd-col'>
                         <img src='" . item->image . "'/>" .
+                        this->inputs->text("Label", "image_label[" . item->id . "]", "Label the image", false, item->label) .
                         this->inputs->number("Sort", "image_sort[" . item->id . "]", "Sort the image", false, item->sort) .
+                        this->inputs->toggle("Visible", "image_visible[" . item->id . "]", false, item->visible) . 
                     "</div>
                     <div class='dd-col-auto'>" .
-                        this->buttons->delete(item->id, "deleted-image", "delete_image", "") .
+                        this->buttons->copy(item->image) .
+                        this->buttons->delete(item->id, "deleted-image-" . item->id, "delete_image", "") .
                     "</div>
                 </div>
             </div>";
@@ -936,6 +956,9 @@ class Content extends Controller
 
     public function setContentData(array data)
     {
+        var date;
+        let date = new Dates();
+
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
@@ -959,6 +982,8 @@ class Content extends Controller
         let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["updated_by"] = this->database->getUserId();
+
+        let data["created_at"] = isset(_POST["created_at"]) ? date->toSQL(_POST["created_at"], false) : date("Y-m-d H:i:s");
 
         return data;
     }
@@ -1149,11 +1174,15 @@ class Content extends Controller
             let status = this->database->execute(
                 "UPDATE files 
                 SET 
-                    sort=:sort
+                    sort=:sort,
+                    label=:label,
+                    visible=:visible 
                 WHERE id=:id",
                 [
                     "id": id,
-                    "sort": intval(val)
+                    "sort": intval(val),
+                    "label": _POST["image_label"][id],
+                    "visible": _POST["image_visible"][id]
                 ]
             );
         

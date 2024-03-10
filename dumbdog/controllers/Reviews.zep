@@ -177,7 +177,7 @@ class Reviews extends Content
             }
 
             if (isset(_POST["delete_image"])) {
-                this->files->deleteResource(data["id"], "image", path . "?deleted=true");
+                this->files->deleteResource(_POST["delete_image"], path . "?deleted=true");
             }
 
             if (!this->validate(_POST, this->required)) {

@@ -48,6 +48,16 @@ class Buttons
         return "<button type='" . type . "'>" . label . "</button>";
     }
 
+    public function copy(string url)
+    {
+        return "<span
+            class='dd-button dd-mr-2 clipboard-copy'
+            onclick=\"copyTextToClipboard('" . url . "');\" 
+            title='Copy to clipboard'>" .
+            this->icons->copy() .
+        "</span>";
+    }
+
     public function delete(
         string entry,
         string id = "delete",

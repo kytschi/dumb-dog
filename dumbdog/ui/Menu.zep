@@ -148,38 +148,40 @@ class Menu
                         </div>
                     </a>";
                 if (this->cfg->apps->crm || this->cfg->apps->cms) {
-                    let total = count(controller->database->all("SELECT count(id) FROM messages WHERE status='unread' AND deleted_at IS NULL"));
+                    let total = controller->database->get("SELECT count(id) AS total FROM messages WHERE status='unread' AND deleted_at IS NULL");
                     if (total) {
-                        let indicator = true;
+                        if (total->total) {
+                            let indicator = true;
+                        }
                     }
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/messages' title='Manage the messages' class='dd-box'>
                         <div class='dd-box-body'>" . 
                             icons->messages() .
                             "<label>Messages</label>" . 
-                            (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
+                            (total ? "<span class='dd-icon-indicator'>" . total->total . "</span>" : "") .
                         "</div>
                     </a>";
-                    let total = count(
-                        controller->database->all(
-                            "SELECT count(appointments.id)
-                            FROM appointments 
-                            JOIN content ON content.id=appointments.content_id 
-                            WHERE user_id=:user_id AND content.deleted_at IS NULL",
-                            [
-                                "user_id": controller->database->getUserId()
-                            ]
-                        )
+                    let total = controller->database->get(
+                        "SELECT count(appointments.id) AS total
+                        FROM appointments 
+                        JOIN content ON content.id=appointments.content_id 
+                        WHERE user_id=:user_id AND content.deleted_at IS NULL",
+                        [
+                            "user_id": controller->database->getUserId()
+                        ]
                     );
                     if (total) {
-                        let indicator = true;
+                        if (total->total) {
+                            let indicator = true;
+                        }
                     }
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
                         <div class='dd-box-body'>" . 
                             icons->appointments() .
                             "<label>Appointments</label>". 
-                            (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
+                            (total ? "<span class='dd-icon-indicator'>" . total->total . "</span>" : "") .
                         "</div>
                     </a>";
                 }
