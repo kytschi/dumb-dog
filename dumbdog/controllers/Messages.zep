@@ -331,7 +331,7 @@ class Messages extends Content
             let query .= " AND messages.tags like :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
-        let query .= " ORDER BY messages.created_at";
+        let query .= " ORDER BY messages.created_at DESC";
 
         let data = this->database->all(query, data);
         for query in data {

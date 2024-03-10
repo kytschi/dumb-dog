@@ -688,6 +688,10 @@ class Style
         .dd-inline-popup span {
             padding-top: 5px;
         }
+        .dd-image-preview {
+            border-top: 1px solid var(--input-border-colour);
+            padding-top: 30px;
+        }
         .dd-image-preview img {
             margin-left: 20px;
             margin-top: 20px;

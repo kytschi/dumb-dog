@@ -445,7 +445,7 @@ class DumbDog
                 IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
                 IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
             FROM files 
-            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
             ORDER BY sort ASC",
             [
                 "resource_id": page->id
@@ -474,7 +474,7 @@ class DumbDog
                     IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
                     IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
                 FROM files 
-                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
                 ORDER BY sort ASC",
                 [
                     "resource_id": page->parent_id
@@ -484,6 +484,11 @@ class DumbDog
 
         let page->parent = item;
 
+        let item = "content.created_at DESC, content.sort ASC";
+        if (in_array(page->type, ["blog-category", "blog"])) {
+            let item = "content.created_at DESC";
+        }
+
         let page->children = database->all("
             SELECT
                 content.*,
@@ -491,7 +496,7 @@ class DumbDog
             FROM content 
             JOIN templates ON templates.id=content.template_id 
             WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
-            ORDER BY content.sort ASC", 
+            ORDER BY " . item, 
             [
                 "parent_id": page->id
             ]
@@ -506,7 +511,7 @@ class DumbDog
                         IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
                         IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
                     FROM files 
-                    WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
+                    WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
                     ORDER BY sort ASC",
                     [
                         "resource_id": item->id

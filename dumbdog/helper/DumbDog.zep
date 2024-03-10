@@ -128,9 +128,10 @@ class DumbDog
         return (new Messages())->save(data);
     }
 
-    private function addStacks(data)
+    private function addExtras(data)
     {
-        var item, item_sub;
+        var item, item_sub, files;
+        let files = new Files();
 
         for item in data {
             let item->stacks = this->database->all("
@@ -143,6 +144,17 @@ class DumbDog
                 FROM content_stacks
                 WHERE content_stack_id='" . item_sub->id . "' AND deleted_at IS NULL");                
             }
+
+            let item->images = this->database->all(
+            "SELECT 
+                IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
+                IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
+            FROM files 
+            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+            ORDER BY sort ASC",
+            [
+                "resource_id": item->id
+            ]);
         }
 
         return data;
@@ -150,13 +162,14 @@ class DumbDog
 
     public function appointments(array filters = [])
     {
-        var query, data = [];        
+        var query, data = [], files;
+        let files = new Files();
 
         let query = "SELECT
             appointments.*,
             users.nickname AS user, 
-            IFNULL(CONCAT('/website/files/', users.file), '') AS filename,
-            IFNULL(CONCAT('/website/files/thumb-', users.file), '') AS thumbnail  
+            IFNULL(CONCAT('" . files->folder . "', users.file), '') AS filename,
+            IFNULL(CONCAT('" . files->folder . "thumb-', users.file), '') AS thumbnail  
         FROM appointments 
         LEFT JOIN users ON users.id=appointments.user_id 
         WHERE appointments.free_slot=1 AND appointments.deleted_at IS NULL";
@@ -343,14 +356,15 @@ class DumbDog
 
     public function filesByTag(string tag)
     {
-        var query;
+        var query, files;
+        let files = new Files();
 
         let query = "
         SELECT
             name,
             mime_type,
-            CONCAT('/website/files/', filename) AS filename,
-            CONCAT('/website/files/thumb-', filename) AS thumbnail  
+            CONCAT('" . files->folder . "', filename) AS filename,
+            CONCAT('" . files->folder . "thumb-', filename) AS thumbnail  
         FROM files 
         WHERE tags like :tag AND deleted_at IS NULL";
 
@@ -508,7 +522,7 @@ class DumbDog
         
         let data = this->database->all(query . join . where . order, data);
 
-        let data = this->addStacks(data);
+        let data = this->addExtras(data);
 
         return data;
     }
@@ -553,6 +567,11 @@ class DumbDog
     public function reviews(array filters = [])
     {
         return this->pageQuery(filters, "review");
+    }
+
+    public function required(array data, array checks = [])
+    {
+        return this->basket->validate(data, checks);
     }
 
     public function session(string name, value = null)

@@ -175,7 +175,7 @@ class Socials extends Content
                     }
                 }
                 if (isset(_POST["delete_image"])) {
-                    this->files->deleteResource(data["id"], "image");
+                    this->files->deleteResource(_POST["delete_image"], path . "?deleted=true");
                 }
 
                 let status = this->database->execute(

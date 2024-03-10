@@ -173,7 +173,7 @@ class Menus extends Content
                 *,
                 CONCAT(name, ' (', type, ')') AS name 
             FROM content 
-            WHERE type IN ('page', 'blog', 'blog-category', 'event') 
+            WHERE type IN ('page', 'page-category', 'blog', 'blog-category', 'event') 
             ORDER BY name"
         );
         var iLoop = 0;
@@ -518,14 +518,13 @@ class Menus extends Content
                         "   </div>
                         </div>
                         <div class='dd-box-body'>" .
-                            this->inputs->text("Name", "stack_name[]", "The name of the menu item", true, item->name) .
-                            this->inputs->text("Title", "stack_title[]", "The title of the menu item", false, item->title) .
-                            this->inputs->text("Alt text", "stack_sub_title[]", "The alt text for the menu item", false, item->alt) . 
-                            this->inputs->text("URL", "stack_url[]", "The URL for the menu item", false, item->url) . 
-                            this->contentSelect(item->link_to, "stack_link_to[]") . 
-                            this->inputs->toggle("New window", "stack_new_window[]", false, item->new_window) . 
-                            this->inputs->number("Sort", "stack_sort[]", "Sort the menu item", false, item->sort) .
-                            this->inputs->hidden("stack_id[]", item->id) . 
+                            this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the menu item", true, item->name) .
+                            this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the menu item", false, item->title) .
+                            this->inputs->text("Alt text", "stack_sub_title[" . item->id . "]", "The alt text for the menu item", false, item->alt) . 
+                            this->inputs->text("URL", "stack_url[" . item->id . "]", "The URL for the menu item", false, item->url) . 
+                            this->contentSelect(item->link_to, "stack_link_to[" . item->id . "]") . 
+                            this->inputs->toggle("New window", "stack_new_window[" . item->id . "]", false, item->new_window) . 
+                            this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the menu item", false, item->sort) .
                         "</div>
                     </div>";
             }
@@ -626,10 +625,10 @@ class Menus extends Content
             return;
         }
 
-        var key, id, status, data = [], model;
+        var id, name, status, data = [], model;
         let model = new \stdClass();
 
-        for key, id in _POST["stack_id"] {
+        for id, name in _POST["stack_name"] {
             let data = [
                 "id": id,
                 "name": "",
@@ -638,25 +637,22 @@ class Menus extends Content
                 "sort": 0
             ];
 
-            if (!isset(_POST["stack_name"][key])) {
+            if (empty(name)) {
                 throw new ValidationException("Missing name for menu item");
             }
-            if (empty(_POST["stack_name"][key])) {
-                throw new ValidationException("Missing name for menu item");
-            }
-            let data["name"] = _POST["stack_name"][key];
+            let data["name"] = name;
 
-            if (isset(_POST["stack_title"][key])) {
-                let data["title"] = _POST["stack_title"][key];
+            if (isset(_POST["stack_title"][id])) {
+                let data["title"] = _POST["stack_title"][id];
             }
-            if (isset(_POST["stack_sub_title"][key])) {
-                let data["sub_title"] = _POST["stack_sub_title"][key];
+            if (isset(_POST["stack_sub_title"][id])) {
+                let data["sub_title"] = _POST["stack_sub_title"][id];
             }
-            if (isset(_POST["stack_url"][key])) {
-                let data["url"] = _POST["stack_url"][key];
+            if (isset(_POST["stack_url"][id])) {
+                let data["url"] = _POST["stack_url"][id];
             }
-            if (isset(_POST["stack_sort"][key])) {
-                let data["sort"] = intval(_POST["stack_sort"][key]);
+            if (isset(_POST["stack_sort"][id])) {
+                let data["sort"] = intval(_POST["stack_sort"][id]);
             }
 
             let status = this->database->execute(
@@ -675,13 +671,13 @@ class Menus extends Content
             }
 
             let model->id = data["id"];
-            
-            if (isset(_POST["stack_new_window"][key])) {
+
+            if (isset(_POST["stack_new_window"][id])) {
                 let _POST["new_window"] = 1;
             } else {
                 unset(_POST["new_window"]);
             }
-            let _POST["link_to"] = isset(_POST["stack_link_to"][key]) ? _POST["stack_link_to"][key] : null;
+            let _POST["link_to"] = isset(_POST["stack_link_to"][id]) ? _POST["stack_link_to"][id] : null;
 
             this->updateExtra(model);
         }
