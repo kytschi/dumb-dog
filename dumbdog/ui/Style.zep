@@ -561,6 +561,9 @@ class Style
         .trumbowyg-dropdown-formatting button {
             line-height: 35px !important;
         }
+        .trumbowyg-box .trumbowyg-editor {
+            min-height: 400px;
+        }
         .dd-form-control:focus {
             border:1px solid var(--input-border-focus-colour);
             outline: none;
