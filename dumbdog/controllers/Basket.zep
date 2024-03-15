@@ -10,12 +10,20 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Controller;
+use DumbDog\Controllers\Files;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Helper\Security;
 
 class Basket extends Controller
 {
+    protected files;
+
+    public function __globals()
+    {
+        let this->files = new Files();
+    }
+
     public function add(string product_code, int quantity)
     {
         var id, currency_id, product, order_product, status,
@@ -303,6 +311,20 @@ class Basket extends Controller
                 "order_id": model->id
             ]
         );
+
+        for id in model->items {
+            let id->images = this->database->all(
+                "SELECT 
+                    IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
+                    IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
+                FROM files 
+                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+                ORDER BY sort ASC",
+                [
+                    "resource_id": id->product_id
+                ]
+            );
+        }
 
         return model;
     }
