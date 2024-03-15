@@ -179,8 +179,6 @@ class Products extends Content
         let query = "
             SELECT
                 content.*,
-                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "', banner.filename), '') AS banner_image,
-                IF(banner.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', banner.filename), '') AS banner_thumbnail,
                 templates.file AS template,
                 products.stock,
                 products.code,
@@ -190,8 +188,7 @@ class Products extends Content
                 currencies.locale_code 
             FROM content ";
 
-        let join = "LEFT JOIN files AS banner ON banner.resource_id = content.id AND resource='banner-image'
-        JOIN templates ON templates.id=content.template_id 
+        let join = "JOIN templates ON templates.id=content.template_id 
         JOIN products ON products.content_id = content.id
         LEFT JOIN product_prices ON 
             product_prices.id = 
@@ -296,6 +293,18 @@ class Products extends Content
                     content.deleted_at IS NULL",
                 [
                     "id": item->parent_id
+                ]
+            );
+
+            let item->images = this->database->all(
+                "SELECT 
+                    IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
+                    IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
+                FROM files 
+                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+                ORDER BY sort ASC",
+                [
+                    "resource_id": item->id
                 ]
             );
         }
