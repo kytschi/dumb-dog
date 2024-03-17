@@ -117,6 +117,18 @@ class ProductCategories extends ContentCategories
                 FROM content_stacks
                 WHERE content_stack_id='" . item_sub->id . "' AND deleted_at IS NULL");                
             }
+
+            let item->images = this->database->all(
+                "SELECT 
+                    IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
+                    IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
+                FROM files 
+                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+                ORDER BY sort ASC",
+                [
+                    "resource_id": item->id
+                ]
+            );
         }
 
         return data;
