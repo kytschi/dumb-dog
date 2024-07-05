@@ -102,7 +102,7 @@ class Menus extends Content
         let model->deleted_at = null;
         let model->name = "";
         let model->title = "";
-        let model->alt = "";
+        let model->sub_title = "";
         let model->url = "";
         let model->sort = "";
         let model->content_id = "";
@@ -229,7 +229,8 @@ class Menus extends Content
         let data["id"] = this->getPageId(path);
         let model = this->database->get("
             SELECT 
-                menus.*, content.*,
+                menus.*,
+                content.*,
                 files.id AS image_id,
                 IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
                 IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail  
@@ -253,7 +254,10 @@ class Menus extends Content
         }
 
         let model->stacks = this->database->all("
-            SELECT menus.*, content.* FROM content 
+            SELECT 
+                menus.*, 
+                content.* 
+            FROM content 
             JOIN menus ON menus.content_id = content.id 
             WHERE parent_id='" . model->id . "' AND deleted_at IS NULL AND type=:type
             ORDER BY sort ASC",
@@ -382,7 +386,7 @@ class Menus extends Content
                                     this->inputs->text("Name", "name", "Name the menu", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title of the menu", true, model->title) .
                                     this->parentSelect(model->parent_id, model->id) . 
-                                    this->inputs->text("Alt text", "sub_title", "The display alt text for the menu", false, model->alt) . 
+                                    this->inputs->text("Alt text", "sub_title", "The display alt text for the menu", false, model->sub_title) . 
                                     this->inputs->text("URL", "url", "URL of the menu", false, model->url) .
                                     this->contentSelect(model->link_to) . 
                                     this->inputs->toggle("New window", "new_window", false, model->new_window) . 
@@ -519,7 +523,7 @@ class Menus extends Content
                         <div class='dd-box-body'>" .
                             this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the menu item", true, item->name) .
                             this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the menu item", false, item->title) .
-                            this->inputs->text("Alt text", "stack_sub_title[" . item->id . "]", "The alt text for the menu item", false, item->alt) . 
+                            this->inputs->text("Alt text", "stack_sub_title[" . item->id . "]", "The alt text for the menu item", false, item->sub_title) . 
                             this->inputs->text("URL", "stack_url[" . item->id . "]", "The URL for the menu item", false, item->url) . 
                             this->contentSelect(item->link_to, "stack_link_to[" . item->id . "]") . 
                             this->inputs->toggle("New window", "stack_new_window[" . item->id . "]", false, item->new_window) . 
