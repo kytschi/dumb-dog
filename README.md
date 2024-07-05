@@ -81,7 +81,7 @@ Have a look at the `example` website in the repository to show you a way of buil
 
 ## Updating
 
-Either git pull, clone or download the latest from the repo to keep Janus up to date.
+Either git pull, clone or download the latest from the repo to keep Dumb Dog up to date.
 
 **DO NOT FORGET TO RESTART THE PHP SERVER**
 
@@ -96,7 +96,7 @@ sh /var/www/dumbdog/migrations/migrations.sh /var/www/another-site/dumbdog.json
 
 ## Template engines
 
-Dumb Dog does support some of the major templating engines out there should you want to use. Personally I'd just stick with PHP "templates" over using an engine as it's much much faster. But people love to complicate things ;-)
+Dumb Dog does support some of the major templating engines out there should you want to use one. Personally I'd just stick with PHP "templates" over using an engine as it's much much faster. But people love to complicate things ;-)
 
 ### Twig
 
