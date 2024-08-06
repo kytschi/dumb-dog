@@ -29,7 +29,9 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        value = null
+        value = null,
+        bool disabled = false,
+        string sub_label = ""
     ) {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : date("Y-m-d"));
@@ -47,10 +49,12 @@ class Inputs
             <input
                 type='text'
                 name='" . var_name . "' 
-                placeholder='' 
-                class='datepicker dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
-                value=\"" . value . "\">
-        </div>";
+                placeholder='' " .
+                (disabled ? "disabled='disabled' " : "") . 
+                "class='datepicker dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
+                value=\"" . value . "\">" .
+                (sub_label ? "<small>" . sub_label . "</small>" : "") .
+        "</div>";
     }
 
     public function file(
@@ -58,9 +62,11 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        value = ""
+        value = "",
+        bool disabled = false,
+        string sub_label = ""
     ) {
-        return this->generic(label, var_name, placeholder, required, value, "file");
+        return this->generic(label, var_name, placeholder, required, value, "file", disabled, sub_label);
     }
 
     private function generic(
@@ -70,7 +76,8 @@ class Inputs
         bool required = false,
         value = "",
         string type = "text",
-        bool disabled = false
+        bool disabled = false,
+        string sub_label = ""
     ) {
         if (empty(value) && value != 0) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
@@ -99,8 +106,9 @@ class Inputs
                 placeholder='" . placeholder.  "' 
                 class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' " . 
                 (disabled ? "disabled='disabled' " : "") . 
-                "value=\"" . htmlspecialchars(value, ENT_QUOTES) . "\">
-      </div>";
+                "value=\"" . htmlspecialchars(value, ENT_QUOTES) . "\">" .
+                (sub_label ? "<small>" . sub_label . "</small>" : "") .
+      "</div>";
     }
 
     public function hidden(string var_name, value)
@@ -120,7 +128,9 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        model = null
+        model = null,
+        bool disabled = false,
+        string sub_label = ""
     ) {
         var style = "", image = "", buttons, html;
         let style = this->setStyle(required, var_name);
@@ -145,9 +155,11 @@ class Inputs
                         type='file'
                         name='" . var_name . "' 
                         accept='image/*;capture=camera' 
-                        class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
-                        placeholder='" . placeholder.  "'/>
-                </div>
+                        class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' " .
+                        (disabled ? "disabled='disabled' " : "") . 
+                        "placeholder='" . placeholder.  "'/> " .
+                        (sub_label ? "<small>" . sub_label . "</small>" : "") .
+                "</div>
             </div>";
 
         if (model) {
@@ -217,9 +229,11 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        value = ""
+        value = "",
+        bool disabled = false,
+        string sub_label = ""
     ) {
-        return this->generic(label, var_name, placeholder, required, value, "number");
+        return this->generic(label, var_name, placeholder, required, value, "number", disabled, sub_label);
     }
 
     public function password(
@@ -227,9 +241,11 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        value = ""
+        value = "",
+        bool disabled = false,
+        string sub_label = ""
     ) {
-        return this->generic(label, var_name, placeholder, required, value, "password");
+        return this->generic(label, var_name, placeholder, required, value, "password", disabled, sub_label);
     }
 
     public function searchBox(string url, string label = "Search the entries")
@@ -274,7 +290,9 @@ class Inputs
         string placeholder,
         array data, 
         bool required = false, 
-        selected = ""
+        selected = "",
+        bool disabled = false,
+        string sub_label = ""
     ) {
         var html = "", item, key, style = "";
 
@@ -290,8 +308,9 @@ class Inputs
                     (required ? "<span class='dd-required'>*</span>" : "") .
                 "</label>
                 <select 
-                    name='" . var_name . "' 
-                    class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "'>";
+                    name='" . var_name . "' " .
+                    (disabled ? "disabled='disabled' " : "") . 
+                    "class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "'>";
 
         if (count(data)) {
             for key, item in data {
@@ -304,7 +323,9 @@ class Inputs
             let html .= "<option value=''>Nothing available</option>";
         }
 
-        let html .= "</select></div>";
+        let html .= "</select>" .
+            (sub_label ? "<small>" . sub_label . "</small>" : "") .
+            "</div>";
         return html;
     }
 
@@ -314,7 +335,9 @@ class Inputs
         string placeholder,
         string query, 
         bool required = false, 
-        selected = ""
+        selected = "",
+        bool disabled = false,
+        string sub_label = ""
     ) {
         var database, results, data = [], iLoop = 0;
 
@@ -326,7 +349,7 @@ class Inputs
             let iLoop += 1;
         }
 
-        return this->select(label, var_name, placeholder, data, required, selected);
+        return this->select(label, var_name, placeholder, data, required, selected, disabled, sub_label);
     }
 
     private function setStyle(bool required, string var_name)
@@ -349,13 +372,15 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        value = ""
+        value = "",
+        bool disabled = false,
+        string sub_label = ""
     ) {
         if (value) {
             let value = str_replace("'", "&#39;", value);
         }
 
-        return this->generic(label, var_name, placeholder, required, value, "tagify");
+        return this->generic(label, var_name, placeholder, required, value, "tagify", disabled, sub_label);
     }
 
     public function text(
@@ -364,9 +389,10 @@ class Inputs
         string placeholder,
         bool required = false,
         value = "",
-        bool disabled = false
+        bool disabled = false,        
+        string sub_label = ""
     ) {
-        return this->generic(label, var_name, placeholder, required, value, "text", disabled);
+        return this->generic(label, var_name, placeholder, required, value, "text", disabled, sub_label);
     }
 
     public function textarea(
@@ -375,7 +401,9 @@ class Inputs
         string placeholder,
         bool required = false,
         value = null,
-        int length = 1000
+        int length = 1000,
+        bool disabled = false,
+        string sub_label = ""
     ) {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
@@ -390,18 +418,22 @@ class Inputs
                 name='" . var_name . "' 
                 rows='4' 
                 maxlength'" . length . "' 
-                class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' 
-                placeholder='" . placeholder . "'" . 
+                class='dd-form-control" . (style ? " " . trim(style) . "" : "") . "' " .
+                (disabled ? "disabled='disabled' " : "") . 
+                "placeholder='" . placeholder . "'" . 
                 (required ? " required='required'" : "") . 
-            ">" . value . "</textarea>
-        </div>";
+            ">" . value . "</textarea>" .
+            (sub_label ? "<small>" . sub_label . "</small>" : "") .
+        "</div>";
     }
 
     public function toggle(
         string label,
         string var_name,
         bool required = false,
-        selected = false
+        selected = false,
+        bool disabled = false,
+        string sub_label = ""
     ) {
         var style = "";
         let style = this->setStyle(required, var_name);
@@ -415,15 +447,17 @@ class Inputs
                 <label>
                     <input 
                         type='checkbox'
-                        name='" . var_name . "' 
-                        value='1' " . 
+                        name='" . var_name . "' ".
+                        (disabled ? "disabled='disabled' " : "") . 
+                        "value='1' " . 
                         (selected ? " checked='checked'" : "") . ">
                     <span" . (style ? " class='" . trim(style) . "'" : "") . ">
                         <small class='dd-switcher-on'></small>
                         <small class='dd-switcher-off'></small>
                     </span>
-                </label>
-            </div>
+                </label>" .
+                (sub_label ? "<small>" . sub_label . "</small>" : "") .
+            "</div>
         </div>";
     }
 
@@ -432,7 +466,9 @@ class Inputs
         string var_name,
         string placeholder,
         bool required = false,
-        value = null
+        value = null,
+        bool disabled = false,
+        string sub_label = ""
     ) {
         if (empty(value)) {
             let value = (isset(_POST[var_name]) ? _POST[var_name] : "");
@@ -446,10 +482,12 @@ class Inputs
             <textarea
                 class='dd-form-control wysiwyg" . (style ? " " . trim(style) . "" : "") . "' 
                 name='" . var_name . "' 
-                rows='7' 
-                placeholder='" . placeholder . "'" . 
+                rows='7' " .
+                (disabled ? "disabled='disabled' " : "") . 
+                "placeholder='" . placeholder . "'" . 
                 (required ? " required='required'" : "") . 
-            ">" . value . "</textarea>
-        </div>";
+            ">" . value . "</textarea>" .
+            (sub_label ? "<small>" . sub_label . "</small>" : "") .
+        "</div>";
     }
 }
