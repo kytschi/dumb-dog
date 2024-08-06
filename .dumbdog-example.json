@@ -5,8 +5,8 @@
         "host": "localhost",
         "port": "3306",
         "db": "dumb_dog",
-        "username": "dumbdog",
-        "password": "dumbdog"
+        "username": "dumb_dog",
+        "password": "dumb_dog"
     },
     "apps": {
         "cms": true,

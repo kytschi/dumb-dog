@@ -40,7 +40,8 @@ class Dashboard extends Controller
             </div>";
         }
 
-        let model = count(this->database->all("SELECT count(id) FROM messages WHERE status='unread' AND deleted_at IS NULL"));
+        let model = this->database->get("SELECT count(id) AS total FROM messages WHERE status='unread' AND deleted_at IS NULL");
+        let model = model->total;
 
         let html .= "
         <div class='dd-page-toolbar'>

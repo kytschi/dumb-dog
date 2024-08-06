@@ -17,7 +17,9 @@ The dumbest dog on the CMS block you'll ever see!
 Download or clone the repository.
 
 Copy the module located in the compiled folder to your PHP modules folder on your server.
+```
 https://github.com/kytschi/dumb-dog/blob/main/compiled
+```
 
 Now create an ini to load the module in your PHP modules ini folder.
 ```
@@ -30,12 +32,14 @@ You can also just create the ini and point the `extension` to the folder with th
 **And don't forget to restart your webserver.**
 
 If you have issues with the module you may need to compile it yourself. 
-See https://docs.zephir-lang.com/0.12/en/installation for more information on installing Zephir and compiling.
+See https://docs.zephir-lang.com/0.12/en/installation for more information on installing Zephir-lang and compiling.
 
 Create yourself a database and run the SQL located in the setup folder.
+```
 https://github.com/kytschi/dumb-dog/blob/main/setup/database.sql
+```
 
-Once the database is setup and the SQL installed, go to the `dumbdog-example.json` in the root folder and copy it to a file called `dumbdog.json`. This is where you can configure Dumb Dog. Now set the database connection details to that of your newly created database.
+Once the database is setup and the SQL installed, go to the `.dumbdog-example.json` in the root folder and copy it to a file called `.dumbdog.json`. This is where you can configure Dumb Dog. Now set the database connection details to that of your newly created database.
 
 ```
 "database":
@@ -44,13 +48,13 @@ Once the database is setup and the SQL installed, go to the `dumbdog-example.jso
     "host": "localhost",
     "port": "3306",
     "db": "dumb_dog",
-    "username": "dumbdog",
-    "password": "dumbdog"
+    "username": "dumb_dog",
+    "password": "password"
 }
 ```
 
 Generate a random key for the encryption part of Dumb Dog, can use a command like the following and save that to the
-`encryption` variable in the `dumbdog.json` file.
+`encryption` variable in the `.dumbdog.json` file.
 
 ```
 openssl rand -base64 32
@@ -189,7 +193,7 @@ $engine = new Mustache_Engine([
 
 ## More information
 
-I've knocked up a demo website running the `example` in this repository and there's more information located there to help you get going and under Dumb Dog.\
+I've knocked up a demo website located in the `example` folder of this repository and there's more information located there to help you get going with Dumb Dog.
 [See it live](https://dumb-dog.kytschi.com)
 
 ## Credits

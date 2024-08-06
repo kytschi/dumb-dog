@@ -530,7 +530,14 @@ class Content extends Controller
                                     <div class='dd-box'>
                                         <div class='dd-box-title'>Navigation</div>
                                         <div class='dd-box-body'>" .
-                                            this->inputs->text("Path", "url", "The path for the page", true, model->url) .
+                                            this->inputs->text(
+                                                "Path",
+                                                "url",
+                                                "The path for the page",
+                                                true,
+                                                model->url,
+                                                false,
+                                                "If you leave it blank I'll auto-generate a URL for you") .
                                         "</div>
                                     </div>
                                 </div>
