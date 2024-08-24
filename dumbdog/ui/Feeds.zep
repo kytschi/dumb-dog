@@ -173,6 +173,7 @@ https://dumbdog
     {
         header("Content-Type: text/plain");
         echo this->cfg->settings->robots_txt;
+        exit(0);
     }
 
     private function rss(string type = "")
@@ -227,6 +228,7 @@ https://dumbdog
             }
             echo "</urlset>";
         }
+        exit(0);
     }
 
     public function siteTags()
