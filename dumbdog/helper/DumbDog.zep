@@ -415,6 +415,15 @@ class DumbDog
     private function menuItems(item)
     {
         //var child;
+        var parsed, path;
+
+        let parsed = parse_url(_SERVER["REQUEST_URI"]);
+        let path = "/" . trim(parsed["path"], "/");
+
+        let item->active = false;
+        if (path == item->url) {
+            let item->active = true;
+        }
 
         let item->items = this->database->all("
             SELECT
@@ -431,6 +440,13 @@ class DumbDog
                 "parent_id": item->id
             ]
         );
+
+        for parsed in item->items {
+            let parsed->active = false;
+            if (path == parsed->url) {
+                let parsed->active = true;
+            }
+        }
 
         /*let item->children = this->database->all("
         SELECT

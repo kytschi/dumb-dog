@@ -144,6 +144,16 @@ class Messages extends Content
             let html .= this->deletedState("I'm in a deleted state");
         }
 
+        if (!empty(_POST)) {
+            let path = this->global_url . "/edit/" . model->id;
+
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("messages", path);
+                }
+            }
+        }
+
         let html .= "
         <form method='post' enctype='multipart/form-data'>
             <div class='dd-tabs dd-mt-4'>
@@ -172,75 +182,9 @@ class Messages extends Content
                             </div>
                         </div>
                     </div>
-                </div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#user-tab'
-                            aria-controls='user-tab' 
-                            aria-selected='true'>Message</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'><hr/></li>";
-
-        if (this->cfg->apps->crm) {
-            if (model->lead_id) {
-                let html .= "
-                    <li class='dd-dd-nav-item' role='presentation'>
-                        <a
-                            class='dd-button'
-                            href='" . this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id . "'>".
-                            this->icons->leads() .
-                            "<span>Lead</span>
-                        </a>
-                    </li>";
-            } else {
-                let html .= "
-                        <li class='dd-nav-item' role='presentation'>
-                            <button
-                                type='button'
-                                class='dd-button'
-                                data-inline-popup='#convert-to-lead'
-                                titile='Convert to a lead'>" . 
-                                this->icons->leads() .
-                            "   <span>Convert to lead</span>
-                            </button>
-                            <div 
-                                id='convert-to-lead' 
-                                class='dd-inline-popup'>
-                                <div class='dd-inline-popup-body dd-flex'>
-                                    <span class='dd-col'>Lead type</span>
-                                    <div class='dd-col-auto'>
-                                        <a 
-                                            href='" . this->cfg->dumb_dog_url . "/messages/convert-to-my-lead/" . model->id . "'
-                                            class='dd-button'
-                                            title='Convert to my lead'>" .
-                                            this->icons->contactMine() .
-                                        "</a>
-                                        <a 
-                                            href='" . this->cfg->dumb_dog_url . "/messages/convert-to-group-lead/" . model->id . "'
-                                            class='dd-button'
-                                            title='Convert and give to the group'>" .
-                                            this->icons->groups() .
-                                        "</a>
-                                        <button 
-                                            type='button'
-                                            class='dd-button'
-                                            data-inline-popup-close='#convert-to-lead'>" . 
-                                            this->icons->cancel() .
-                                        "</button>
-                                    </div>
-                                </div>
-                            </div> 
-                        </li>";
-            }
-        }           
-
-        let html .= "
-                </ul>
-            </div>
+                </div>" . 
+                this->renderSidebar(model, "edit") .   
+            "</div>
         </form>";
 
         return html;
@@ -347,6 +291,89 @@ class Messages extends Content
             data,
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+        let html = "
+        <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>";
+
+        if (this->cfg->apps->crm) {
+            if (model->lead_id) {
+                let html .= "
+                    <li class='dd-dd-nav-item' role='presentation'>
+                        <a
+                            class='dd-button'
+                            href='" . this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id . "'>".
+                            this->icons->leads() .
+                            "<span>Lead</span>
+                        </a>
+                    </li>";
+            } else {
+                let html .= "
+                        <li class='dd-nav-item' role='presentation'>
+                            <button
+                                type='button'
+                                class='dd-button'
+                                data-inline-popup='#convert-to-lead'
+                                titile='Convert to a lead'>" . 
+                                this->icons->leads() .
+                            "   <span>Convert to lead</span>
+                            </button>
+                            <div 
+                                id='convert-to-lead' 
+                                class='dd-inline-popup'>
+                                <div class='dd-inline-popup-body dd-flex'>
+                                    <span class='dd-col'>Lead type</span>
+                                    <div class='dd-col-auto'>
+                                        <a 
+                                            href='" . this->cfg->dumb_dog_url . "/messages/convert-to-my-lead/" . model->id . "'
+                                            class='dd-button'
+                                            title='Convert to my lead'>" .
+                                            this->icons->contactMine() .
+                                        "</a>
+                                        <a 
+                                            href='" . this->cfg->dumb_dog_url . "/messages/convert-to-group-lead/" . model->id . "'
+                                            class='dd-button'
+                                            title='Convert and give to the group'>" .
+                                            this->icons->groups() .
+                                        "</a>
+                                        <button 
+                                            type='button'
+                                            class='dd-button'
+                                            data-inline-popup-close='#convert-to-lead'>" . 
+                                            this->icons->cancel() .
+                                        "</button>
+                                    </div>
+                                </div>
+                            </div> 
+                        </li>";
+            }
+        }           
+
+        let html .= "
+        </ul>";
+        return html;
     }
 
     public function renderToolbar()
