@@ -125,7 +125,7 @@ class Content extends Controller
                             :parent_id,
                             :sort,
                             :sitemap_include,
-                            :created_at,
+                            NOW(),
                             :created_by,
                             NOW(),
                             :updated_by)",
@@ -377,8 +377,7 @@ class Content extends Controller
                         featured=:featured,
                         parent_id=:parent_id,
                         sort=:sort,
-                        sitemap_include=:sitemap_include,
-                        created_at=:created_at  
+                        sitemap_include=:sitemap_include
                     WHERE id=:id",
                     data
                 );
@@ -953,6 +952,12 @@ class Content extends Controller
                 "Click to access the " . str_replace("-", " ", this->type) . " categories"
             ) .
             this->buttons->round(
+                this->cfg->dumb_dog_url . "/templates",
+                "templates",
+                "templates",
+                "Click to access the templates"
+            ) .
+            this->buttons->round(
                 this->global_url . "/add",
                 "add",
                 "add",
@@ -989,8 +994,6 @@ class Content extends Controller
         let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);
         let data["updated_by"] = this->database->getUserId();
-
-        let data["created_at"] = isset(_POST["created_at"]) ? date->toSQL(_POST["created_at"], false) : date("Y-m-d H:i:s");
 
         return data;
     }
