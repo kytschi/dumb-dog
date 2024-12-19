@@ -17,81 +17,88 @@ use DumbDog\Exceptions\SaveException;
 class Templates extends Content
 {
     public global_url = "/templates";
+    public back_url = "/pages";
+    public required = ["name", "file", "type"];
 
     public function add(string path)
     {
-        var  html;
-        let html = this->titles->page("Add a template", "add");
-        let html .= "<div class='dd-page-toolbar'>
-            <a href='" . this->global_url . "' class='dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>
-        </div>";
+        var html, data, model, path = "";
+        
+        let html = this->titles->page(
+            "Add a template",
+            "add"
+        );
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
-                var data = [], status = false;
+                var status = false;
+                let data = [];
 
-                if (!this->validate(_POST, ["name", "file"])) {
+                if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
-                    let data["name"] = _POST["name"];
-                    let data["file"] = _POST["file"];
-                    let data["default"] = isset(_POST["default"]) ? 1 : 0;
-                    let data["created_by"] = this->database->getUserId();
-                    let data["updated_by"] = this->database->getUserId();
+                    let path = this->global_url;
 
-                    if (this->cfg->save_mode == true) {
-                        let status = this->database->execute(
-                            "INSERT INTO templates 
-                                (id, name, file, `default`, created_at, created_by, updated_at, updated_by) 
-                            VALUES 
-                                (UUID(), :name, :file, :default, NOW(), :created_by, NOW(), :updated_by)",
-                            data
-                        );
-                    } else {
-                        let status = true;
-                    }
+                    let data["id"] = this->database->uuid();
+                    let data["created_by"] = this->getUserId();                    
+                                        
+                    let data = this->setData(data);
+
+                    let status = this->database->execute(
+                        "INSERT INTO templates  
+                            (id,
+                            type,
+                            name,
+                            file,
+                            is_default,
+                            created_at,
+                            created_by,
+                            updated_at,
+                            updated_by) 
+                        VALUES 
+                            (
+                            :id,
+                            :type,
+                            :name,
+                            :file,
+                            :is_default,
+                            NOW(),
+                            :created_by,
+                            NOW(),
+                            :updated_by)",
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the template");
                         let html .= this->consoleLogError(status);
                     } else {
-                        let html .= this->saveSuccess("I've saved the template");
+                        let path = path . "?saved=true";
+                        let model = this->database->get(
+                            "SELECT * FROM templates WHERE id=:id",
+                            [
+                                "id": data["id"]
+                            ]);
+                        
+                        this->redirect(this->global_url . "/edit/" . data["id"]);
                     }
                 }
             }
         }
 
-        let html .= "<form method='post'><div class='dd-box dd-wfull'>
-            <div class='dd-box-title'>
-                <span>the template</span>
-            </div>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>name<span class='dd-required'>*</span></span>
-                    <input type='text' name='name' placeholder='give me a name' value=''>
-                </div>
-                <div class='dd-input-group'>
-                    <span>file<span class='dd-required'>*</span></span>
-                    <input type='text' name='file' placeholder='where am I located and with what file?' value=''>
-                </div>
-                <div class='dd-input-group'>
-                    <span>default</span>
-                    <div class='dd-switcher'>
-                        <label>
-                            <input type='checkbox' name='default' value='1'>
-                            <span>
-                                <small class='dd-switcher-on'></small>
-                                <small class='dd-switcher-off'></small>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class='dd-box-footer'>
-                <a href='" . this->global_url . "' class='dd-link dd-button-blank'>cancel</a>
-                <button type='submit' name='save' class='dd-button'>save</button>
-            </div>
-        </div></form>";
+        if (isset(_GET["saved"])) {
+            let html .= this->saveSuccess("Entry has been saved");
+        }
+
+        let model = new \stdClass();
+        let model->deleted_at = null;
+        let model->type = "page";
+        let model->name = "";
+        let model->file = "";
+        let model->is_default = 0;
+        let model->id = "";
+        
+        let html .= this->render(model);
 
         return html;
     }
@@ -118,18 +125,6 @@ class Templates extends Content
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let html .= "<div class='dd-page-toolbar";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'><a href='" . this->global_url . "' class='dd-link dd-round dd-icon dd-icon-back' title='Back to list'>&nbsp;</a>";
-        if (model->deleted_at) {
-            let html .= "<a href='" . this->global_url . "/recover/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-recover' title='Recover the template'>&nbsp;</a>";
-        } else {
-            let html .= "<a href='" . this->global_url . "/delete/" . model->id . "' class='dd-link dd-round dd-icon dd-icon-delete' title='Delete the template'>&nbsp;</a>";
-        }
-        let html .= "</div>";
-
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
                 if (!this->validate(_POST, ["name", "file"])) {
@@ -137,19 +132,19 @@ class Templates extends Content
                 } else {
                     let data["name"] = _POST["name"];
                     let data["file"] = _POST["file"];
-                    let data["default"] = isset(_POST["default"]) ? 1 : 0;
+                    let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
                     let data["updated_by"] = this->database->getUserId();
 
                     if (this->cfg->save_mode == true) {
-                        if (data["default"]) {
+                        if (data["is_default"]) {
                             let status = this->database->execute(
-                                "UPDATE templates SET `default`=0, updated_at=NOW(), updated_by=:updated_by",
+                                "UPDATE templates SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
                                 data
                             );
                         }
                         let status = this->database->execute(
                             "UPDATE templates SET 
-                                name=:name, file=:file, `default`=:default, updated_at=NOW(), updated_by=:updated_by
+                                name=:name, file=:file, `is_default`=:is_default, updated_at=NOW(), updated_by=:updated_by
                             WHERE id=:id",
                             data
                         );
@@ -171,47 +166,8 @@ class Templates extends Content
             let html .= this->saveSuccess("I've updated the template");
         }
 
-        let html .= "<form method='post'><div class='dd-box dd-wfull";
-        if (model->deleted_at) {
-            let html .= " dd-deleted";
-        }
-        let html .= "'>
-            <div class='dd-box-title'>
-                <span>the template</span>
-            </div>
-            <div class='dd-box-body'>
-                <div class='dd-input-group'>
-                    <span>name<span class='dd-required'>*</span></span>
-                    <input type='text' name='name' placeholder='make sure to set a name' value='" . model->name . "'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>file<span class='dd-required'>*</span></span>
-                    <input type='text' name='file' placeholder='where am I located and with what file?' value='" . model->file . "'>
-                </div>
-                <div class='dd-input-group'>
-                    <span>default</span>
-                    <div class='dd-switcher'>
-                        <label>
-                            <input type='checkbox' name='default' value='1'";
-
-                if (model->{"default"} == 1) {
-                    let html .= " checked='checked'";
-                }
-                
-                let html .= ">
-                            <span>
-                                <small class='dd-switcher-on'></small>
-                                <small class='dd-switcher-off'></small>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class='dd-box-footer'>
-                <a href='" . this->global_url . "' class='dd-link dd-button-blank'>cancel</a>
-                <button type='submit' name='save' class='dd-button'>save</button>
-            </div>
-        </div></form>";
+        let html .=
+            this->render(model, "edit");
 
         return html;
     }
@@ -226,19 +182,14 @@ class Templates extends Content
             let html .= this->saveSuccess("I've deleted the template");
         }
 
-        let html .= "<div class='dd-page-toolbar'>
-            <a href='" . this->cfg->dumb_dog_url . "/pages' class='dd-link dd-round dd-icon dd-icon-up' title='Back to pages'>&nbsp;</a>
-            <a href='" . this->global_url . "/add' class='dd-link dd-round dd-icon' title='Add a template'>&nbsp;</a>
-        </div>";
+        if (this->back_url) {
+            let html .= this->renderBack();
+        }
 
-        let html .= this->tables->build(
-            [
-                "name",
-                "default|bool"
-            ],
-            this->database->all("SELECT * FROM templates ORDER BY `default` DESC, name ASC"),
-            this->global_url
-        );
+        let html .= 
+            this->renderToolbar() .
+            this->inputs->searchBox(this->global_url, "Search the " . strtolower(this->title)) . 
+            this->renderList(path);
 
         return html;
     }
@@ -246,5 +197,151 @@ class Templates extends Content
     public function recover(string path)
     {
         return this->triggerRecover(path, "templates");
+    }
+
+    public function render(model, mode = "add")
+    {
+        var html;
+
+        let html = "
+        <form method='post' enctype='multipart/form-data'>
+            <div class='dd-tabs'>
+                <div class='dd-tabs-content dd-col'>
+                    <div id='content-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
+                                    this->inputs->toggle("Default", "is_default", false, model->is_default) . 
+                                    this->inputs->text("Name", "name", "Name the page", true, model->name) .
+                                    this->inputs->text("File", "file", "The template's file", true, model->file) .
+                                    this->inputs->select(
+                                        "type",
+                                        "type",
+                                        "The template's type",
+                                        [
+                                            "page": "Page",
+                                            "content-stack": "Content stack"
+                                        ],
+                                        true,
+                                        model->type
+                                    ) .
+                                "
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> " .
+                this->renderSidebar(model, mode) .
+            "</div>
+        </form>";
+
+        return html;
+    }
+
+    public function renderBack()
+    {
+        return "
+        <div class='dd-box'>
+            <div class='dd-box-body'>
+                <a href='" . this->cfg->dumb_dog_url . this->back_url . "' title='Go back' class='dd-button'>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
+                        <path fill-rule='evenodd' d='M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z'/>
+                    </svg>
+                    <span>Back</span>
+                </a>
+            </div>
+        </div>";
+    }
+
+    public function renderList(string path)
+    {
+        var data = [], query;
+
+        let query = "
+            SELECT * 
+            FROM templates 
+            WHERE id IS NOT NULL";
+        if (isset(_POST["q"])) {
+            let query .= " AND name LIKE :query";
+            let data["query"] = "%" . _POST["q"] . "%";
+        }
+        let query .= " ORDER BY `is_default` DESC, name ASC";
+
+        return this->tables->build(
+            this->list,
+            this->database->all(query, data),
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
+        );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() . 
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Add a new template"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>
+                        Content
+                    </span>
+                </div>
+            </li>
+        </ul>";
+        return html;
+    }
+
+    public function renderToolbar()
+    {
+        return "
+        <div class='dd-page-toolbar'>" . 
+            this->buttons->round(
+                this->global_url . "/add",
+                "add",
+                "add",
+                "Add a new template"
+            ) .
+        "</div>";
+    }
+
+    private function setData(array data)
+    {   
+        let data["name"] = _POST["name"];
+        let data["file"] = _POST["file"];
+        let data["type"] = _POST["type"];
+        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
+        let data["updated_by"] = this->getUserId();
+
+        return data;
     }
 }

@@ -56,7 +56,7 @@ class DumbDog
 {
     private cfg;
     private template_engine = null;
-    private version = "0.0.8 alpha";
+    private version = "0.0.9 alpha";
 
     public function __construct(
         string cfg_file,
@@ -187,7 +187,7 @@ class DumbDog
             "Reviews": new Reviews(),
             "Settings": new Settings(),
             "Socials": new Socials(),
-            //"Templates": new Templates(),
+            "Templates": new Templates(),
             //"Themes": new Themes(),
             "Users": new Users()
         ];
@@ -452,6 +452,7 @@ class DumbDog
             ]
         );
 
+        // Get the parent
         let item = database->get("
             SELECT
                 content.*,
@@ -496,27 +497,17 @@ class DumbDog
             FROM content 
             JOIN templates ON templates.id=content.template_id 
             WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
-            ORDER BY " . item, 
+            ORDER BY content.created_at DESC, content.name", 
             [
                 "parent_id": page->id
             ]
         );
-
+        
         let page->tags = controller->toTags(page->tags);
 
         if (page->children) {
             for item in page->children {
-                let item->images = database->all(
-                    "SELECT 
-                        IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
-                        IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
-                    FROM files 
-                    WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
-                    ORDER BY sort ASC",
-                    [
-                        "resource_id": item->id
-                    ]
-                );
+                let item = this->pageExtra(database, item, files);
             }
         }
 

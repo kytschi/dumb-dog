@@ -135,9 +135,11 @@ class DumbDog
 
         for item in data {
             let item->stacks = this->database->all("
-            SELECT *
-            FROM content_stacks
-            WHERE content_id='" . item->id . "' AND deleted_at IS NULL AND content_stack_id IS NULL");
+                SELECT *
+                FROM content_stacks
+                WHERE content_id='" . item->id . "' AND deleted_at IS NULL AND content_stack_id IS NULL
+                ORDER BY sort ASC"
+            );
             for item_sub in item->stacks {
                 let item_sub->stacks = this->database->all("
                 SELECT *
@@ -145,16 +147,34 @@ class DumbDog
                 WHERE content_stack_id='" . item_sub->id . "' AND deleted_at IS NULL");                
             }
 
-            let item->images = this->database->all(
-            "SELECT 
-                IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
-                IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
-            FROM files 
-            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
-            ORDER BY sort ASC",
-            [
-                "resource_id": item->id
-            ]);
+            let item->children = this->database->all("
+                SELECT
+                    content.*,
+                    templates.file AS template 
+                FROM content 
+                JOIN templates ON templates.id=content.template_id 
+                WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
+                ORDER BY sort", 
+                [
+                    "parent_id": item->id
+                ]
+            );
+            let item->children = this->addExtras(item->children);
+
+            let item->images = this->database->all("
+                SELECT 
+                    files.*,
+                    IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
+                    IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
+                FROM files 
+                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+                ORDER BY sort ASC",
+                [
+                    "resource_id": item->id
+                ]
+            );
+            
+            let item->tags = files->toTags(item->tags);
         }
 
         return data;
@@ -503,6 +523,9 @@ class DumbDog
                         break;
                     case "random":
                         let order .= " ORDER BY RAND() LIMIT " . intval(item);
+                        break;
+                    case "limit":
+                        let order .= " LIMIT " . intval(item);
                         break;
                     case "order":
                         var splits, check, id = 0;
