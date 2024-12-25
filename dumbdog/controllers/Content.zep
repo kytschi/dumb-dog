@@ -621,12 +621,14 @@ class Content extends Controller
         return "
         <div class='dd-box'>
             <div class='dd-box-body'>
-                <a href='" . this->cfg->dumb_dog_url . this->back_url . "' title='Go back' class='dd-button'>
-                    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                        <path fill-rule='evenodd' d='M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z'/>
-                    </svg>
-                    <span>Back</span>
-                </a>
+                " .
+                this->buttons->generic(
+                    this->cfg->dumb_dog_url . this->back_url,
+                    "Back",
+                    "back",
+                    "Go back to the pages"
+                ) .
+            "
             </div>
         </div>";
     }
@@ -868,11 +870,12 @@ class Content extends Controller
                 <div class='dd-nav-link dd-flex'>
                     <span 
                         data-tab='#content-tab'
-                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        class='dd-tab-link dd-col'
                         role='tab'
                         aria-controls='content-tab' 
-                        aria-selected='true'>
-                        Content
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Content
                     </span>
                 </div>
             </li>
@@ -880,11 +883,12 @@ class Content extends Controller
                 <div class='dd-nav-link dd-flex'>
                     <span 
                         data-tab='#nav-tab'
-                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        class='dd-tab-link dd-col'
                         role='tab'
                         aria-controls='nav-tab' 
-                        aria-selected='true'>
-                        Navigation and SEO
+                        aria-selected='true'>" .
+                        this->buttons->tab("nav-tab") .
+                        "Navigation &amp; SEO
                     </span>
                 </div>
             </li>
@@ -892,11 +896,12 @@ class Content extends Controller
                 <div class='dd-nav-link dd-flex'>
                     <span 
                         data-tab='#look-tab'
-                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        class='dd-tab-link dd-col'
                         role='tab'
                         aria-controls='look-tab' 
-                        aria-selected='true'>
-                        Look and Feel
+                        aria-selected='true'>" .
+                        this->buttons->tab("look-tab") .
+                        "Look &amp; Feel
                     </span>
                 </div>
             </li> " .
@@ -907,11 +912,12 @@ class Content extends Controller
                         <div class='dd-nav-link dd-flex'>
                             <span 
                                 data-tab='#old-urls-tab'
-                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                                class='dd-tab-link dd-col'
                                 role='tab'
                                 aria-controls='old-urls-tab' 
-                                aria-selected='true'>
-                                Old URLs
+                                aria-selected='true'>" .
+                                this->buttons->tab("old-urls-tab") .
+                                "Old URLs
                             </span>
                         </div>
                     </li>
@@ -922,8 +928,9 @@ class Content extends Controller
                                 role='tab'
                                 aria-controls='stack-tab' 
                                 aria-selected='true'
-                                class='dd-tab-link dd-col dd-pt-2 dd-pb-2'>
-                                Stacks
+                                class='dd-tab-link dd-col'>" .
+                                this->buttons->tab("stack-tab") .
+                                "Stacks
                             </span>
                             <span class='dd-col-auto'>
                             " .
@@ -956,6 +963,12 @@ class Content extends Controller
                 "templates",
                 "templates",
                 "Click to access the templates"
+            ) .
+            this->buttons->round(
+                this->cfg->dumb_dog_url . "/themes",
+                "themes",
+                "themes",
+                "Click to access the themes"
             ) .
             this->buttons->round(
                 this->global_url . "/add",

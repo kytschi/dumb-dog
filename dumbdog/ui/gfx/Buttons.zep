@@ -200,6 +200,21 @@ class Buttons
         "</button>";
     }
 
+    public function tab(string url)
+    {
+        return "
+        <button 
+            data-tab='#" . url . "'
+            role='tab'
+            aria-controls='" . url . "' 
+            aria-selected='true'
+            type='button'
+            title='Click to go to section'
+            class='dd-button'>" .
+            this->icons->view() .
+        "</button>";
+    }
+
     public function view(string url)
     {
         return "

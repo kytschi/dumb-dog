@@ -795,8 +795,71 @@ class Icons
     public function templates()
     {
         return "
-        <svg width='32px' height='32px' viewBox='0 0 50 50' fill='none' xmlns='http://www.w3.org/2000/svg'>
-            <path d='M 7 2 L 7 48 L 43 48 L 43 14.59375 L 42.71875 14.28125 L 30.71875 2.28125 L 30.40625 2 Z M 9 4 L 29 4 L 29 16 L 41 16 L 41 46 L 9 46 Z M 31 5.4375 L 39.5625 14 L 31 14 Z M 15 22 L 15 24 L 35 24 L 35 22 Z M 15 28 L 15 30 L 31 30 L 31 28 Z M 15 34 L 15 36 L 35 36 L 35 34 Z'/>
+        <svg
+            width='32px'
+            height='32px'
+            viewBox='0 0 24 24'
+            fill='none'
+            version='1.1'
+            xmlns='http://www.w3.org/2000/svg'>
+            <path
+                d='M 22.684254,10.299519 V 4.8092394 c 0,-2.02146 -1.638801,-3.66019 -3.660201,-3.66019 H 8.3434541 c -2.02147,0 -3.6524198,0.726271 -3.6524198,2.747741'
+                stroke='#1c1c1c'
+                stroke-width='1.69904'
+                stroke-linecap='round'
+                id='path4209-3'
+                sodipodi:nodetypes='csssc' />
+            <path
+                d='M 20.044779,13.035816 V 7.5455361 c 0,-2.02146 -1.6388,-3.66019 -3.6602,-3.66019 H 5.7039789 c -2.02147,0 -3.66019,1.63872 -3.66019,3.66019 V 18.526116 c 0,2.0215 1.63872,3.6602 3.66019,3.6602 h 5.3403001'
+                stroke='#1c1c1c'
+                stroke-width='1.69904'
+                stroke-linecap='round'
+                id='path4209'
+                sodipodi:insensitive='true' />
+            <path
+                d='m 6.1968689,13.035616 h 2.99911'
+                stroke='#1c1c1c'
+                stroke-width='1.69904'
+                stroke-linecap='round'
+                id='path4211'
+                sodipodi:insensitive='true' />
+            <path
+                d='M 6.1968689,9.0378161 H 12.193479'
+                stroke='#1c1c1c'
+                stroke-width='1.69904'
+                stroke-linecap='round'
+                id='path4213'
+                sodipodi:insensitive='true' />
+        </svg>";
+    }
+
+    public function themes()
+    {
+        return "
+        <svg
+            width='32px'
+            height='32px'
+            viewBox='0 0 24 24'
+            fill='none'
+            version='1.1'
+            xmlns='http://www.w3.org/2000/svg'>
+            <path
+                d='M20.845 12V6.50968C20.845 4.48821 19.2062 2.84949 17.1848 2.84949H6.50419C4.48272 2.84949 2.84399 4.48821 2.84399 6.50968V17.4903C2.84399 19.5117 4.48272 21.1504 6.50419 21.1504H11.8445'
+                stroke='#1C1C1C'
+                stroke-width='1.69904'
+                stroke-linecap='round'
+                id='path1059'
+                style='stroke-width:1.69875;stroke-dasharray:none' />
+            <path
+                d='m 17.686991,13.006396 c -0.129711,0 -0.245009,0.05765 -0.331482,0.144122 L 13.03183,18.19481 c -0.158535,0.18736 -0.12971,0.461192 0.04324,0.605315 0.08647,0.07206 0.201772,0.100886 0.302658,0.100886 h 8.632945 c 0.100885,0 0.201771,-0.02883 0.288244,-0.100886 0.18736,-0.158535 0.201772,-0.432368 0.04324,-0.605315 l -4.323678,-5.044292 c -0.08648,-0.08647 -0.201773,-0.144122 -0.331483,-0.144122 z'
+                id='path2'
+                style='fill:#ffffff;stroke:#1c1c1c;stroke-width:1.69875;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1' />
+            <circle
+                cx='8.6781664'
+                cy='8.4348049'
+                id='circle6'
+                style='fill:none;fill-opacity:1;stroke:#1c1c1c;stroke-width:1.69875;stroke-dasharray:none;stroke-opacity:1'
+                r='3.5510077' />
         </svg>";
     }
 
