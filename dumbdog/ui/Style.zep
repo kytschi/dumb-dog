@@ -280,8 +280,8 @@ class Style
             text-align: center;
         }
         .dd-button, .dd-button-blank, .dd-nav-link {
-            background-color: var(--button-background-colour);
-            border: 3px solid var(--button-border-colour);
+            background-color: var(--tabs-toolbar-background-colour);
+            border: 3px solid var(--tabs-toolbar-border-colour);
             padding: 5px 15px;
             cursor: pointer;
             text-decoration: none;
@@ -292,6 +292,8 @@ class Style
         }
         .dd-button svg {
             margin-top: 3px;
+            width: 32px !important;
+            height: 32px !important;
             fill: var(--button-svg-fill-colour);
         }
         .dd-button span {
@@ -340,6 +342,15 @@ class Style
         }
         .dd-deleted .dd-round, .dd-deleted .dd-button {
             background-color: var(--box-deleted-background-colour);
+        }
+
+        .dd-tab-link .dd-button {
+            border: 0;
+            margin-right: 10px;
+            padding: 0;
+        }
+        .dd-button svg {
+            pointer-events: none;
         }
         ";
     }
@@ -1149,11 +1160,15 @@ class Style
             margin-bottom: 15px;
         }
 
+        .dd-nav-item #dd-tabs-toolbar {
+            width: auto;
+        }
+
         #dd-tabs-toolbar {
             width: 100%;
             color: var(--button-text-colour);
-            background-color: var(--button-background-colour);
-            border: 3px solid var(--button-border-colour);
+            background-color: var(--tabs-toolbar-background-colour);
+            border: 3px solid var(--tabs-toolbar-border-colour);
             padding: 5px 10px;
         }
 
@@ -1491,6 +1506,9 @@ class Style
             --text-deleted: #f44f46;
 
             --popup-background-color: #fff;
+
+            --tabs-toolbar-background-colour: #DF1463;
+            --tabs-toolbar-border-colour: #030202;
         }
 
         .dd-border-none {
@@ -1523,6 +1541,16 @@ class Style
             color: #fff !important;
             background-color: var(--box-title-background-colour) !important;
             text-decoration: none !important;
+        }
+        .dd-tag.selected span {
+            background-color: #fff;
+            border-radius: 50%;
+            padding: 0 6px 2px 6px;
+            color: var(--button-background-colour);
+            border: 3px solid var(--button-border-colour);
+            position: absolute;
+            margin-left: 3px;
+            margin-top: 2px;
         }
         ";
     }

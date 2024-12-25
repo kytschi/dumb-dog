@@ -71,9 +71,11 @@ class Javascript
                 });
             }
             function scrollTo(id) {
-                $([document.documentElement, document.body]).animate({
-                    scrollTop: $(id).offset().top
-                }, 1000);
+                if (id) {
+                    $([document.documentElement, document.body]).animate({
+                        scrollTop: $(id).offset().top
+                    }, 1000);
+                }
             }
 
             $(function() {
@@ -90,7 +92,7 @@ class Javascript
                 });
                 $('.tagify').tagify();
 
-                $('.dd-nav-tabs .dd-tab-link').click((event) => {
+                $('.dd-nav-tabs .dd-tab-link, .dd-nav-tabs .dd-tab-link button').click((event) => {
                     scrollTo($(event.target).data('tab'));
                 });
 
