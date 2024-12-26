@@ -191,9 +191,9 @@ class Themes extends Content
                     <div id='time-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
-                                <div class='dd-box-title'>Date/Time</div>
+                                <div class='dd-box-title'>Date schedule</div>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Annual", "annual", false, model->annual) . 
+                                    this->inputs->toggle("Annually recurring", "annual", false, model->annual) . 
                                     this->inputs->date("Active from", "active_from", "Date theme becomes active", false, model->active_from) .
                                     this->inputs->date("Active to", "active_to", "Date theme becomes inactive", false, model->active_to) .
                                 "
@@ -283,7 +283,7 @@ class Themes extends Content
                         aria-controls='time-tab' 
                         aria-selected='true'>" .
                         this->buttons->tab("time-tab") .
-                        "Date/Time
+                        "Date schedule
                     </span>
                 </div>
             </li>
