@@ -98,10 +98,10 @@ class DumbDog
         }
 
         let cfg->dumb_dog_url = rtrim(cfg->dumb_dog_url, "/");
+        let this->cfg = cfg;
         
         if (!empty(migrations_folder)) {
             this->runMigrations(migrations_folder);
-            return;
         }
 
         var database;
@@ -630,17 +630,15 @@ class DumbDog
     private function runMigrations(string migrations_folder)
     {
         var migration, migrations, err, found, database;
-        let database = new Database();
+        let database = new Database(this->cfg);
 
-        echo "Running migrations\n";
         let migration = shell_exec("ls " . rtrim(migrations_folder, "/") . "/*.sql");
         if (empty(migration)) {
-            echo "Nothing to migrate!\n";
             return;
         }
+        
         let migrations = explode("\n", migration);
         if (!count(migrations)) {
-            echo "Nothing to migrate!\n";
             return;
         }
 
@@ -673,9 +671,9 @@ class DumbDog
                 if (!is_bool(found)) {
                     echo "Failed to run the migration " . basename(migration) .
                         "\n Error: ". found . "\n";
-                } else {
-                    echo basename(migration) . " successfully run\n";
+                    die();
                 }
+
                 let found = database->execute(
                     "INSERT INTO migrations (migration, created_at) VALUES (:migration, NOW())",
                     [
@@ -686,13 +684,14 @@ class DumbDog
                 if (!is_bool(found)) {
                     echo "Failed to save the migration " . basename(migration) .
                         " in the migrations table\n Error: ". found . "\n";
+                    die();
                 }
             } catch \Exception, err {
                 echo "Failed to run the migration " . basename(migration) .
                     "\n Error: " . err->getMessage() . "\n";
+                die();
             }
         }
-        echo "Migrations complete\n";
     }
 
     private function secure(string path)
