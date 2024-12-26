@@ -115,8 +115,8 @@ class Buttons
             title='" . title . "'
             class='dd-button'>" .
             (icon ? this->icons->{icon}() : "") .
-            "<span>" . label . "</span>
-        </a>";
+            (label ? "<span>" . label . "</span>" : "") .
+        "</a>";
     }
 
     public function next(string url, string label = "Next page")

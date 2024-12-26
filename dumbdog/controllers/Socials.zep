@@ -241,53 +241,16 @@ class Socials extends Content
                     <div id='look-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
+                                <div class='dd-box-title'>Look &amp; Feel</div>
                                 <div class='dd-box-body'>" .
                                     this->inputs->image("Image", "image", "Upload your image here", false, model) . 
                                 "</div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Content</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#look-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='look-tab' 
-                            aria-selected='true'>Look and Feel</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
-                        this->buttons->back(this->global_url) .   
-                    "</li>";
-        if (mode == "edit") {    
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+                </div>" .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
@@ -317,6 +280,68 @@ class Socials extends Content
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() . 
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Add a new social media link"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Link
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#look-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='look-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("look-tab") .
+                        "Look &amp; Feel
+                    </span>
+                </div>
+            </li>
+        </ul>";
+        return html;
     }
 
     public function renderToolbar()

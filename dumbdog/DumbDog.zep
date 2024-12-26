@@ -32,6 +32,7 @@ use DumbDog\Controllers\ProductCategories;
 use DumbDog\Controllers\Reviews;
 use DumbDog\Controllers\Settings;
 use DumbDog\Controllers\Socials;
+use DumbDog\Controllers\Taxes;
 use DumbDog\Controllers\Templates;
 use DumbDog\Controllers\Themes;
 use DumbDog\Controllers\Users;
@@ -187,6 +188,7 @@ class DumbDog
             "Reviews": new Reviews(),
             "Settings": new Settings(),
             "Socials": new Socials(),
+            "Taxes": new Taxes(),
             "Templates": new Templates(),
             "Themes": new Themes(),
             "Users": new Users()

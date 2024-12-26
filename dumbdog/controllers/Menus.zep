@@ -400,65 +400,9 @@ class Menus extends Content
             let html .= this->renderStacks(model);
         }
 
-        let html .= "</div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div id='dd-tabs-toolbar'>
-                            <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
-                                this->buttons->generic(
-                                    this->global_url,
-                                    "",
-                                    "back",
-                                    "Go back to the list"
-                                ) .
-                                this->buttons->save() . 
-                                this->buttons->generic(
-                                    this->global_url . "/add",
-                                    "",
-                                    "add",
-                                    "Create a new " . str_replace("-", " ", this->type)
-                                );
-                if (mode == "edit") {
-                    if (model->deleted_at) {
-                        let html .= this->buttons->recover(model->id);
-                    } else {
-                        let html .= this->buttons->delete(model->id);
-                    }
-                }
-                let html .= "</div>
-                        </div>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div class='dd-nav-link dd-flex'>
-                            <span 
-                                data-tab='#content-tab'
-                                class='dd-tab-link dd-col'
-                                role='tab'
-                                aria-controls='content-tab' 
-                                aria-selected='true'>
-                                Menu
-                            </span>
-                        </div>
-                    </li>";
-        if (mode == "edit") {
-            let html .= "
-                    <li class='dd-nav-item' role='presentation'>
-                        <div class='dd-nav-link dd-flex'>
-                            <span 
-                                data-tab='#stack-tab'
-                                class='dd-tab-link dd-col'
-                                role='tab'
-                                aria-controls='stack-tab' 
-                                aria-selected='true'>
-                                Items
-                            </span>
-                        </div>
-                    </li>";
-        }
-
-        let html .= "
-                </ul>
-            </div>
+        let html .= "</div>" .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
@@ -492,6 +436,74 @@ class Menus extends Content
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html;
+
+        let html = "
+            <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
+                    <li class='dd-nav-item' role='presentation'>
+                        <div id='dd-tabs-toolbar'>
+                            <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                                this->buttons->generic(
+                                    this->global_url,
+                                    "",
+                                    "back",
+                                    "Go back to the list"
+                                ) .
+                                this->buttons->save() . 
+                                this->buttons->generic(
+                                    this->global_url . "/add",
+                                    "",
+                                    "add",
+                                    "Create a new " . str_replace("-", " ", this->type)
+                                );
+                if (mode == "edit") {
+                    if (model->deleted_at) {
+                        let html .= this->buttons->recover(model->id);
+                    } else {
+                        let html .= this->buttons->delete(model->id);
+                    }
+                }
+                let html .= "</div>
+                        </div>
+                    </li>
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#content-tab'
+                                class='dd-tab-link dd-col'
+                                role='tab'
+                                aria-controls='content-tab' 
+                                aria-selected='true'>" .
+                                this->buttons->tab("content-tab") .
+                                "Menu
+                            </span>
+                        </div>
+                    </li>";
+        if (mode == "edit") {
+            let html .= "
+                    <li class='dd-nav-item' role='presentation'>
+                        <div class='dd-nav-link dd-flex'>
+                            <span 
+                                data-tab='#stack-tab'
+                                class='dd-tab-link dd-col'
+                                role='tab'
+                                aria-controls='stack-tab' 
+                                aria-selected='true'>" .
+                                this->buttons->tab("stack-tab") .
+                                "Items
+                            </span>
+                        </div>
+                    </li>";
+        }
+
+        let html .= "
+            </ul>";
+
+        return html;
     }
 
     public function renderStacks(model)

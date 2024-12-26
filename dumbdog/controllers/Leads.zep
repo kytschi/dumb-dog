@@ -6,7 +6,6 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
-
 */
 namespace DumbDog\Controllers;
 
@@ -206,7 +205,7 @@ class Leads extends Content
                 <div class='dd-col-12'>
                     <div class='dd-box'>
                         <div class='dd-box-title dd-flex'>
-                            <span class='dd-col'>Appointment booked</span>
+                            <div class='dd-col'>Appointment booked</div>
                             <div class='dd-col-auto'>" . 
                                 this->buttons->generic(
                                     this->cfg->dumb_dog_url . "/appointments/edit/" . model->appointment_id,
@@ -364,76 +363,9 @@ class Leads extends Content
             let html .= this->notes->render(model->id);
         }
 
-        let html .= "</div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#lead-tab'
-                            aria-controls='lead-tab' 
-                            aria-selected='true'>Lead</button>
-                    </li>";
-
-        if (mode == "edit") {
-            let html .= "
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#messages-tab'
-                            aria-controls='messages-tab' 
-                            aria-selected='true'>Messages</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#notes-tab'
-                            aria-controls='notes-tab' 
-                            aria-selected='true'>Notes</button>
-                    </li>";
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
-                        this->buttons->back(this->global_url) .   
-                    "</li>";
-        if (mode == "edit") {
-            if (model->website) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->view(model->website) .
-                "</li>";
-            }
-            if (empty(model->appointment_id)) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->generic(
-                        this->cfg->dumb_dog_url . "/appointments/add?lead_id=" . model->id,
-                        "appointment",
-                        "appointments",
-                        "Create an appointment"
-                    ) .
-                "</li>";
-            }
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+        let html .= "</div>" .
+            this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
@@ -580,6 +512,103 @@ class Leads extends Content
             </div>
         </div>";
 
+        return html;
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() .                         
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Add a new lead"
+                        );
+        if (mode == "edit") {
+            let html .= this->buttons->view(model->website);
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Lead
+                    </span>
+                </div>
+            </li>";
+
+        if (mode == "edit") {
+            let html .= "
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#messages-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='messages-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("messages-tab") .
+                        "Messages
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#notes-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='notes-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("notes-tab") .
+                        "Notes
+                    </span>
+                </div>
+            </li>";
+
+            if (empty(model->appointment_id)) {
+                let html .= "<li class='dd-nav-item' role='presentation'>
+                    <div class='dd-nav-link dd-flex'>
+                        <span class='dd-tab-link dd-col'>" .
+                            this->buttons->generic(
+                                this->cfg->dumb_dog_url . "/appointments/add?lead_id=" . model->id,
+                                "",
+                                "appointments",
+                                "Create an appointment"
+                            ) .
+                            "Add appointment
+                        </span>
+                    </div>
+                </li>";
+            }
+        }
+
+        let html .= "</ul>";
         return html;
     }
 
