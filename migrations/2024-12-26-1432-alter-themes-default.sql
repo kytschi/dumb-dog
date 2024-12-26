@@ -1,0 +1,1 @@
+ALTER TABLE themes CHANGE `default` is_default tinyint(1) DEFAULT 0 NULL;
