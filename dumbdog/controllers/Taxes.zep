@@ -3,10 +3,9 @@
  *
  * @package     DumbDog\Controllers\Taxes
  * @author 		Mike Welsh
- * @copyright   2024 Digital Dunes
+ * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- * Copyright 2024 Digital Dunes
 */
 namespace DumbDog\Controllers;
 
@@ -195,53 +194,24 @@ class Taxes extends Content
 
         let html = "
         <form method='post' enctype='multipart/form-data'>
-            <div class='tabs'>
-                <div class='tabs-content col'>
-                    <div id='content-tab' class='row'>
-                        <div class='col-12'>
-                            <article class='card'>
-                                <div class='card-body'>" .
+            <div class='dd-tabs'>
+                <div class='dd-tabs-content dd-col'>
+                    <div id='content-tab' class='dd-row'>
+                        <div class='dd-col-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-body'>" .
                                     this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "Name the tax", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title for the tax", true, model->title) .
                                     this->inputs->text("Tax rate", "tax_rate", "The tax rate as percentage", true, model->tax_rate) .
                                 "</div>
-                            </article>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <ul class='col nav nav-tabs' role='tablist'>
-                    <li class='nav-item' role='presentation'>
-                        <button
-                            class='nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Tax</button>
-                    </li>
-                    <li class='nav-item' role='presentation'><hr/></li>
-                    <li class='nav-item' role='presentation'>" . 
-                        this->buttons->back(this->global_url) .   
-                    "</li>";
-        if (mode == "edit") {    
-            if (model->deleted_at) {
-                let html .= "<li class='nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+                </div>" .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
@@ -264,6 +234,55 @@ class Taxes extends Content
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() . 
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Add a new tax"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Content
+                    </span>
+                </div>
+            </li>
+        </ul>";
+        return html;
     }
 
     public function renderToolbar()

@@ -89,7 +89,7 @@ class Notes
             <div class='dd-col-12'>
                 <div class='dd-box'>
                     <div class='dd-box-title dd-flex'>
-                        <span class='dd-col'>Add a note</span>
+                        <div class='dd-col'>Add a note</div>
                         <div class='dd-col-auto'>
                             <button 
                                 type='submit'
