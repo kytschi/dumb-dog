@@ -126,16 +126,17 @@ class Tables
                         }
 
                         let html .= "
-                        <td class='dd-tools'>
-                            <a 
-                                href='" . url . "/edit/" . data[iLoop]->id . "'
-                                class='dd-link'
-                                title='Edit me'>" . icons->edit() . "</a>";
+                        <td class='dd-tools'>";
                         if (property_exists(data[iLoop], "url")) {
                             let html .= "<a  href='" . data[iLoop]->url . "' target='_blank' 
                                 class='dd-link'
                                 title='View me live'>" . icons->view() . "</a>";
                         }
+                        let html .= "
+                            <a 
+                                href='" . url . "/edit/" . data[iLoop]->id . "'
+                                class='dd-link'
+                                title='Edit me'>" . icons->edit() . "</a>";
                         let html .= "
                         </td>
                     </tr>";

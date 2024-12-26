@@ -293,7 +293,7 @@ class Templates extends Content
                 <div class='dd-nav-link dd-flex'>
                     <span 
                         data-tab='#content-tab'
-                        class='dd-tab-link dd-col dd-pt-2 dd-pb-2'
+                        class='dd-tab-link dd-col'
                         role='tab'
                         aria-controls='content-tab' 
                         aria-selected='true'>" .
