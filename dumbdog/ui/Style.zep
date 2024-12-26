@@ -694,13 +694,15 @@ class Style
         }
         .dd-inline-popup-body {
             text-align: left;
-            border: 1px solid var(--input-border-colour);
+            border: 3px solid var(--popup-border-background-color);
             border-radius: .375rem;
             padding: .375rem .75rem;
             background-color: var(--popup-background-color);
+            box-shadow: var(--popup-shadow);
         }
-        .dd-inline-popup span {
-            padding-top: 5px;
+        .dd-inline-popup p {
+            padding: 8px 0 0 0;
+            margin: 0;
         }
         .dd-image-preview {
             border-top: 1px solid var(--input-border-colour);
@@ -1506,6 +1508,8 @@ class Style
             --text-deleted: #f44f46;
 
             --popup-background-color: #fff;
+            --popup-border-background-color: #030202;
+            --popup-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
 
             --tabs-toolbar-background-colour: #DF1463;
             --tabs-toolbar-border-colour: #030202;
