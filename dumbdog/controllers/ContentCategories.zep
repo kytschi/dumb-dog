@@ -28,8 +28,20 @@ class ContentCategories extends Content
 
     public function renderToolbar()
     {
-        return "
-        <div class='dd-page-toolbar'>" . 
+        var html;
+        
+        let html = "<div class='dd-page-toolbar'>";
+
+        if (this->back_url) {
+            let html .= this->buttons->round(
+                this->cfg->dumb_dog_url . this->back_url,
+                "Back",
+                "back",
+                "Go back to the pages"
+            );
+        }
+
+        let html .= 
             this->buttons->round(
                 this->global_url . "/add",
                 "add",
@@ -37,5 +49,7 @@ class ContentCategories extends Content
                 "Add a new " . str_replace("-", " ", this->type)
             ) .
         "</div>";
+
+        return html;
     }
 }

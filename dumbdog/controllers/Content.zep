@@ -294,7 +294,7 @@ class Content extends Controller
 
         if (model->deleted_at) {
             let html .= this->deletedState("I'm in a deleted state");
-        }       
+        }
 
         if (!empty(_POST)) {
             var status = false, err;
@@ -448,10 +448,6 @@ class Content extends Controller
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the entry");
-        }
-
-        if (this->back_url) {
-            let html .= this->renderBack();
         }
 
         let html .= 
@@ -614,23 +610,6 @@ class Content extends Controller
         </form>";
 
         return html;
-    }
-
-    public function renderBack()
-    {
-        return "
-        <div class='dd-box'>
-            <div class='dd-box-body'>
-                " .
-                this->buttons->generic(
-                    this->cfg->dumb_dog_url . this->back_url,
-                    "Back",
-                    "back",
-                    "Go back to the pages"
-                ) .
-            "
-            </div>
-        </div>";
     }
 
     public function renderExtra(model)
@@ -950,33 +929,52 @@ class Content extends Controller
 
     public function renderToolbar()
     {
-        return "
-        <div class='dd-page-toolbar'>" . 
+        var html;
+
+        let html = "<div class='dd-page-toolbar'>";
+
+        if (this->back_url) {
+            let html .= this->buttons->round(
+                this->cfg->dumb_dog_url . this->back_url,
+                "Back",
+                "back",
+                "Go back to the pages"
+            );
+        }
+
+        let html .=
             this->buttons->round(
                 this->cfg->dumb_dog_url . "/" . this->type . "-categories",
                 "categories",
                 "categories",
                 "Click to access the " . str_replace("-", " ", this->type) . " categories"
-            ) .
-            this->buttons->round(
-                this->cfg->dumb_dog_url . "/templates",
-                "templates",
-                "templates",
-                "Click to access the templates"
-            ) .
-            this->buttons->round(
-                this->cfg->dumb_dog_url . "/themes",
-                "themes",
-                "themes",
-                "Click to access the themes"
-            ) .
-            this->buttons->round(
+            );
+
+        if (this->global_url == this->cfg->dumb_dog_url . "/pages") {
+            let html .= 
+                this->buttons->round(
+                    this->cfg->dumb_dog_url . "/templates",
+                    "templates",
+                    "templates",
+                    "Click to access the templates"
+                ) .
+                this->buttons->round(
+                    this->cfg->dumb_dog_url . "/themes",
+                    "themes",
+                    "themes",
+                    "Click to access the themes"
+                );
+        }
+
+        let html .= this->buttons->round(
                 this->global_url . "/add",
                 "add",
                 "add",
                 "Add a new " . str_replace("-", " ", this->type)
             ) .
         "</div>";
+
+        return html;
     }
 
     public function setContentData(array data)

@@ -220,13 +220,8 @@ class PaymentGateways extends Content
             let html .= this->saveSuccess("I've deleted the payment gateway");
         }
 
-        if (this->back_url) {
-            let html .= this->renderBack();
-        } else {
-            let html .= this->renderToolbar();
-        }
-
         let html .= 
+            this->renderToolbar() .
             this->inputs->searchBox(this->global_url, "Search the payment gateways") .
             this->renderList(path);
         return html;
@@ -339,10 +334,29 @@ class PaymentGateways extends Content
 
     public function renderToolbar()
     {
-        return "
-        <div class='dd-page-toolbar'>" . 
-            this->buttons->add(this->global_url . "/add") .
+        var html;
+        
+        let html = "<div class='dd-page-toolbar'>";
+
+        if (this->back_url) {
+            let html .= this->buttons->round(
+                this->cfg->dumb_dog_url . this->back_url,
+                "Back",
+                "back",
+                "Go back to the payment gateways"
+            );
+        }
+
+        let html .= 
+            this->buttons->round(
+                this->global_url . "/add",
+                "add",
+                "add",
+                "Add a new payment gateway"
+            ) .
         "</div>";
+
+        return html;
     }
 
     public function process(string path)

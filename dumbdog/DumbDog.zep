@@ -4,7 +4,7 @@
  * @package     DumbDog\DumbDog
  * @author 		Mike Welsh
  * @copyright   2024 Mike Welsh
- * @version     0.0.7 alpha
+ * @version     0.0.9 alpha
  *
  */
 namespace DumbDog;
@@ -21,7 +21,7 @@ use DumbDog\Controllers\Countries;
 use DumbDog\Controllers\Currencies;
 use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
-//use DumbDog\Controllers\Events;
+use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
 use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
@@ -169,12 +169,12 @@ class DumbDog
             "Appointments": new Appointments(),
             "Blog": new Blog(),
             "BlogCategories": new BlogCategories(),
-            //"Comments": new Comments(),
+            "Comments": new Comments(),
             "ContentStacks": new ContentStacks(),
             "Countries": new Countries(),
             "Currencies": new Currencies(),
             "Dashboard": new Dashboard(),
-            //"Events": new Events(),
+            "Events": new Events(),
             "Files": new Files(),
             "Leads": new Leads(),
             "Menus": new Menus(),
@@ -188,7 +188,7 @@ class DumbDog
             "Settings": new Settings(),
             "Socials": new Socials(),
             "Templates": new Templates(),
-            //"Themes": new Themes(),
+            "Themes": new Themes(),
             "Users": new Users()
         ];
 

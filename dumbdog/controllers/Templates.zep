@@ -103,11 +103,6 @@ class Templates extends Content
         return html;
     }
 
-    public function delete(string path)
-    {
-        return this->triggerDelete(path, "templates");
-    }
-
     public function edit(string path)
     {
         var html, model, data = [], status = false;
@@ -126,6 +121,20 @@ class Templates extends Content
         }
 
         if (!empty(_POST)) {
+            let path = this->global_url . "/edit/" . model->id;
+            
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("templates", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("templates", path);
+                }
+            }
+
             if (isset(_POST["save"])) {
                 if (!this->validate(_POST, ["name", "file"])) {
                     let html .= this->missingRequired();
@@ -166,8 +175,7 @@ class Templates extends Content
             let html .= this->saveSuccess("I've updated the template");
         }
 
-        let html .=
-            this->render(model, "edit");
+        let html .= this->render(model, "edit");
 
         return html;
     }
@@ -182,21 +190,12 @@ class Templates extends Content
             let html .= this->saveSuccess("I've deleted the template");
         }
 
-        if (this->back_url) {
-            let html .= this->renderBack();
-        }
-
         let html .= 
             this->renderToolbar() .
             this->inputs->searchBox(this->global_url, "Search the " . strtolower(this->title)) . 
             this->renderList(path);
 
         return html;
-    }
-
-    public function recover(string path)
-    {
-        return this->triggerRecover(path, "templates");
     }
 
     public function render(model, mode = "add")
@@ -230,28 +229,12 @@ class Templates extends Content
                             </div>
                         </div>
                     </div>
-                </div> " .
+                </div>" .
                 this->renderSidebar(model, mode) .
             "</div>
         </form>";
 
         return html;
-    }
-
-    public function renderBack()
-    {
-        return "
-        <div class='dd-box'>
-            <div class='dd-box-body'>" .
-                this->buttons->generic(
-                    this->cfg->dumb_dog_url . this->back_url,
-                    "Back",
-                    "back",
-                    "Go back to the pages"
-                ) .
-            "
-            </div>
-        </div>";
     }
 
     public function renderList(string path)
@@ -325,8 +308,20 @@ class Templates extends Content
 
     public function renderToolbar()
     {
-        return "
-        <div class='dd-page-toolbar'>" . 
+        var html;
+        
+        let html = "<div class='dd-page-toolbar'>";
+
+        if (this->back_url) {
+            let html .= this->buttons->round(
+                this->cfg->dumb_dog_url . this->back_url,
+                "Back",
+                "back",
+                "Go back to the pages"
+            );
+        }
+
+        let html .= 
             this->buttons->round(
                 this->global_url . "/add",
                 "add",
@@ -334,6 +329,8 @@ class Templates extends Content
                 "Add a new template"
             ) .
         "</div>";
+
+        return html;
     }
 
     private function setData(array data)

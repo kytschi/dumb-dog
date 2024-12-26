@@ -264,13 +264,9 @@ class Appointments extends Content
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the appointment");
         }
-
-        if (this->back_url) {
-            let html .= this->renderBack();
-        } else {
-            let html .= this->renderToolbar();
-        }
-
+        
+        let html .= this->renderToolbar();
+        
         var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date;
         
         if (isset(_GET["date"])) {
@@ -566,10 +562,29 @@ class Appointments extends Content
 
     public function renderToolbar()
     {
-        return "
-        <div class='dd-page-toolbar'>" . 
-            this->buttons->add(this->global_url . "/add") .
+        var html;
+        
+        let html = "<div class='dd-page-toolbar'>";
+
+        if (this->back_url) {
+            let html .= this->buttons->round(
+                this->cfg->dumb_dog_url . this->back_url,
+                "Back",
+                "back",
+                "Go back to the appointments"
+            );
+        }
+
+        let html .= 
+            this->buttons->round(
+                this->global_url . "/add",
+                "add",
+                "add",
+                "Add a new appointment"
+            ) .
         "</div>";
+
+        return html;
     }
 
     private function setData(array data)
