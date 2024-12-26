@@ -73,7 +73,7 @@ class Buttons
         "</button>
         <div id='" . id . "' class='dd-inline-popup dd-delete-warning'>
             <div class='dd-inline-popup-body dd-flex'>
-                <div class='dd-col'>Are you sure?</div>
+                <div class='dd-col'><p>Are you sure?</p></div>
                 <div class='dd-col-auto'>
                     <button 
                         type='button'
@@ -153,7 +153,7 @@ class Buttons
         </button>
         <div id='" . id . "' class='dd-inline-popup dd-delete-warning'>
             <div class='dd-inline-popup-body dd-flex'>
-                <div class='dd-col'>Are you sure?</div>
+                <div class='dd-col'><p>Are you sure?</p></div>
                 <div class='dd-col-auto'>
                     <button 
                         type='button'
