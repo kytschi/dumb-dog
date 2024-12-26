@@ -693,6 +693,7 @@ class Style
             min-width: 260px;
         }
         .dd-inline-popup-body {
+            text-align: left;
             border: 1px solid var(--input-border-colour);
             border-radius: .375rem;
             padding: .375rem .75rem;
@@ -1172,8 +1173,8 @@ class Style
         }
 
         #dd-tabs-toolbar .dd-button {
-            display: block;
-            background-color: none !important;
+            display: inline-block;
+            background: none !important;
             border: none !important;
             width: 32px;
             padding: 0;

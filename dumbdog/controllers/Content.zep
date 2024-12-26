@@ -596,7 +596,7 @@ class Content extends Controller
                             </div>
                         </div>
                     </div>" .
-                    this->renderExtra(model);
+                    this->renderExtra(model, mode);
 
         if (mode == "edit") {
             let html .= this->renderStacks(model);
@@ -612,12 +612,12 @@ class Content extends Controller
         return html;
     }
 
-    public function renderExtra(model)
+    public function renderExtra(model, mode = "add")
     {
         return "";
     }
 
-    public function renderExtraMenu()
+    public function renderExtraMenu(mode = "add")
     {
         return "";
     }
@@ -884,7 +884,7 @@ class Content extends Controller
                     </span>
                 </div>
             </li> " .
-            this->renderExtraMenu();
+            this->renderExtraMenu(mode);
         if (mode == "edit") {
             let html .= "
                     <li class='dd-nav-item' role='presentation'>
