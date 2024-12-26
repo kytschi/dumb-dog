@@ -150,7 +150,8 @@ class Menu
                 if (this->cfg->apps->crm || this->cfg->apps->cms) {
                     let total = controller->database->get("SELECT count(id) AS total FROM messages WHERE status='unread' AND deleted_at IS NULL");
                     if (total) {
-                        if (total->total) {
+                        let total = total->total;
+                        if (total) {
                             let indicator = true;
                         }
                     }
@@ -159,7 +160,7 @@ class Menu
                         <div class='dd-box-body'>" . 
                             icons->messages() .
                             "<label>Messages</label>" . 
-                            (total ? "<span class='dd-icon-indicator'>" . total->total . "</span>" : "") .
+                            (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
                         "</div>
                     </a>";
                     let total = controller->database->get(
@@ -172,7 +173,8 @@ class Menu
                         ]
                     );
                     if (total) {
-                        if (total->total) {
+                        let total = total->total;
+                        if (total) {
                             let indicator = true;
                         }
                     }
@@ -180,8 +182,8 @@ class Menu
                     <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
                         <div class='dd-box-body'>" . 
                             icons->appointments() .
-                            "<label>Appointments</label>". 
-                            (total ? "<span class='dd-icon-indicator'>" . total->total . "</span>" : "") .
+                            "<label>Appointments</label>" . 
+                            (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
                         "</div>
                     </a>";
                 }

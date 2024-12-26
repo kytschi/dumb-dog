@@ -34,11 +34,13 @@ class Inputs
         string sub_label = ""
     ) {
         if (empty(value)) {
-            let value = (isset(_POST[var_name]) ? _POST[var_name] : date("Y-m-d"));
+            let value = (isset(_POST[var_name]) ? _POST[var_name] : (value == "now" ? date("Y-m-d") : null));
         }
 
-        if (strpos(value, "-") !== false) {
-            let value = date("d/m/Y", strtotime(value));
+        if (value != null) {
+            if (strpos(value, "-") !== false) {
+                let value = date("d/m/Y", strtotime(value));
+            }
         }
 
         var style = "";

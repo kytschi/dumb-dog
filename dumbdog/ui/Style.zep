@@ -226,12 +226,11 @@ class Style
             text-align: right;
         }
         .dd-tools {
-            padding: 10px 15px !important;
-            width: 120px;
-            text-align: right;
+            padding: 10px 0 !important;
+            width: 85px;
+            text-align: center !important;
         }
         .dd-tools a {
-            float: right;
             margin-left: 5px;
         }
         .dd-box-title img {
@@ -478,7 +477,7 @@ class Style
             font-size: 0;
         }
         .dd-tools .dd-link {
-            display: block;
+            display: inline-block;
             cursor: pointer;
             width: 32px !important;
             height: 32px !important;

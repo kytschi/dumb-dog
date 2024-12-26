@@ -85,7 +85,9 @@ class Tables
                                         let key = (key) ? "Yes": "No";
                                         break;
                                     case "date":
-                                        let key = date("d/m/Y", strtotime(key));
+                                        if (key) {
+                                            let key = date("d/m/Y", strtotime(key));
+                                        }
                                         break;
                                     case "decrypt":
                                         let key = security->decrypt(key);
@@ -127,11 +129,11 @@ class Tables
                         <td class='dd-tools'>
                             <a 
                                 href='" . url . "/edit/" . data[iLoop]->id . "'
-                                class='dd-link dd-float-right'
+                                class='dd-link'
                                 title='Edit me'>" . icons->edit() . "</a>";
                         if (property_exists(data[iLoop], "url")) {
                             let html .= "<a  href='" . data[iLoop]->url . "' target='_blank' 
-                                class='dd-link dd-float-right'
+                                class='dd-link'
                                 title='View me live'>" . icons->view() . "</a>";
                         }
                         let html .= "
