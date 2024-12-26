@@ -18,6 +18,11 @@ try {
      */
     $engine = null;
 
+    /**
+     * No libs.
+     */
+    $libs = null;
+
     // Include the autoload file when using composer.
     //require_once "../vendor/autoload.php";
 
@@ -83,7 +88,7 @@ try {
         'cache' => '../cache',
         'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/website')
     ]);*/
-    new DumbDog("../.dumbdog.json", $engine);
+    new DumbDog("../.dumbdog.json", $libs, $engine, "../migrations");
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();
 }
