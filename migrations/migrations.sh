@@ -4,5 +4,4 @@ if [ -n "$1" ]; then
 else
     cfg="../dumbdog.json"
 fi
-dir="$(dirname "$0")"
-php -r "use DumbDog\DumbDog;new DumbDog('$cfg', null, '$dir');";
+php -r "use DumbDog\DumbDog;$dd = new DumbDog('$cfg', null, null, true);$dd->runMigrations();";

@@ -26,12 +26,29 @@ class Users extends Content
 
     public required = ["name", "nickname", "group_id"];
 
+    public routes = [
+        "/users/add": [
+            "Users",
+            "add",
+            "add a user"
+        ],
+        "/users/edit": [
+            "Users",
+            "edit",
+            "edit the user"
+        ],
+        "/users": [
+            "Users",
+            "index",
+            "users"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, model;
         let html = this->titles->page("Add a user", "add");
-        let html .= this->renderToolbar();
-
+        
         let model = new \stdClass();
         let model->deleted_at = null;
         let model->name = "";
@@ -110,11 +127,6 @@ class Users extends Content
         return html;
     }
 
-    public function delete(string path)
-    {
-        return this->triggerDelete(path, "users");
-    }
-
     public function edit(string path)
     {
         var html, model, data = [];
@@ -140,6 +152,18 @@ class Users extends Content
         }
         
         if (!empty(_POST)) {
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("users", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("users", path);
+                }
+            }
+
             if (isset(_POST["save"])) {
                 var status = false, query;
 
@@ -241,11 +265,6 @@ class Users extends Content
         return html;
     }
 
-    public function recover(string path)
-    {
-        return this->triggerRecover(path, "users");
-    }
-
     public function render(model, mode = "add")
     {
         return "
@@ -266,23 +285,9 @@ class Users extends Content
                             </div>
                         </div>
                     </div>
-                </div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#user-tab'
-                            aria-controls='user-tab' 
-                            aria-selected='true'>User</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+                </div>" .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
     }
 
@@ -312,6 +317,54 @@ class Users extends Content
             this->database->all(query, data),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() . 
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Add a new user"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "User
+                    </span>
+                </div>
+            </li>
+        </ul>";
+        return html;
     }
 
     public function renderToolbar()

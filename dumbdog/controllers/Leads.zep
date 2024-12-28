@@ -31,6 +31,24 @@ class Leads extends Content
     public title = "Leads";
     public type = "lead";
 
+    public routes = [
+        "/leads/add": [
+            "Leads",
+            "add",
+            "create a lead"
+        ],
+        "/leads/edit": [
+            "Leads",
+            "edit",
+            "manage the lead"
+        ],
+        "/leads": [
+            "Leads",
+            "index",
+            "leads"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data, status = false, contacts;

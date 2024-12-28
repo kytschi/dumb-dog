@@ -25,6 +25,7 @@ class Controller
     public database;
 
     public global_url = "";
+    public routes = [];
 
     public function __construct()
     {

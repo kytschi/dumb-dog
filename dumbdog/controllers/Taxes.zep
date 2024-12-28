@@ -20,6 +20,24 @@ class Taxes extends Content
     public type = "tax";
     public required = ["name"];
 
+    public routes = [
+        "/taxes/add": [
+            "Taxes",
+            "add",
+            "add a tax"
+        ],
+        "/taxes/edit": [
+            "Taxes",
+            "edit",
+            "edit the tax"
+        ],
+        "/taxes": [
+            "Taxes",
+            "index",
+            "taxes"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data;

@@ -20,6 +20,24 @@ class Templates extends Content
     public back_url = "/pages";
     public required = ["name", "file", "type"];
 
+    public routes = [
+        "/templates/add": [
+            "Templates",
+            "add",
+            "add a template"
+        ],
+        "/templates/edit": [
+            "Templates",
+            "edit",
+            "edit the template"
+        ],
+        "/templates": [
+            "Templates",
+            "index",
+            "templates"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data, model, path = "";

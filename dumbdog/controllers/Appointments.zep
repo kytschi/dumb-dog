@@ -28,6 +28,24 @@ class Appointments extends Content
         "title"        
     ];
 
+    public routes = [
+        "/appointments/add": [
+            "Appointments",
+            "add",
+            "create an appointment"
+        ],
+        "/appointments/edit": [
+            "Appointments",
+            "edit",
+            "edit the appointment"
+        ],
+        "/appointments": [
+            "Appointments",
+            "index",
+            "appointments"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data = [], model;
@@ -428,7 +446,7 @@ class Appointments extends Content
                     <div id='look-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
-                                <div class='dd-box-title'>Look and Feel</div>
+                                <div class='dd-box-title'>Look &amp; Feel</div>
                                 <div class='dd-box-body'>" .
                                     this->templatesSelect(model->template_id) . 
                                     this->inputs->image("Banner image", "banner_image", "Upload your banner image here", false, model->banner_image) . 
@@ -442,121 +460,141 @@ class Appointments extends Content
             let html .= this->renderOldUrls(model);
         }
 
-        let html .= "
-                </div>
-                <ul class='dd-col dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Appointment</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#public-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='public-tab' 
-                            aria-selected='true'>Public</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#seo-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='seo-tab' 
-                            aria-selected='true'>SEO</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#look-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='look-tab' 
-                            aria-selected='true'>Look and Feel</button>
-                    </li>";
-        if (mode == "edit") {
-            let html .= "
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#stack-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='stack-tab' 
-                            aria-selected='true'>Stacks</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            data-tab='#old-urls-tab'
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            aria-controls='old-urls-tab' 
-                            aria-selected='true'>Old URLs</button>
-                    </li>";
-        }
+        let html .= "</div> " .
+            this->renderSidebar(model, mode) .
+            "</div>
+        </form>";
 
-        let html .= "<li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
+        return html;
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
                         this->buttons->generic(
                             isset(_GET["lead_id"]) ?
                                 this->cfg->dumb_dog_url . "/leads/edit/" . _GET["lead_id"] :
                                 this->global_url,
-                            "back",
+                            "",
                             "back",
                             isset(_GET["lead_id"]) ?
                                 "Back to the lead" :
                                 "Go back to the list"
                         ) .
-                    "</li>";
+                        this->buttons->save() . 
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Add a new appointment"
+                        );
         if (mode == "edit") {
-            let html .= "
-                <li class='dd-nav-item' role='presentation'>" . 
-                    this->buttons->generic(
-                        this->global_url . "/add",
-                        "add",
-                        "add",
-                        "Create a new " . str_replace("-", " ", this->type)
-                    ) .
-                "</li>
-                <li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->view(model->url) .
-                "</li>";
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
             if (!empty(model->lead_id)) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
+                let html .=
                     this->buttons->generic(
                         this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id,
                         "lead",
                         "leads",
                         "View the lead"
-                    ) .
-                "</li>";
-            }
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
+                    );
             }
         }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
-        </form>";
-
+        let html .= "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Appointment
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#public-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='public-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("public-tab") .
+                        "Public
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#seo-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='seo-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("seo-tab") .
+                        "SEO
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#look-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='look-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("look-tab") .
+                        "Look &amp; feel
+                    </span>
+                </div>
+            </li>";
+        if (mode == "edit") {
+            let html .= "
+                <li class='dd-nav-item' role='presentation'>
+                    <div class='dd-nav-link dd-flex'>
+                        <span 
+                            data-tab='#stacks-tab'
+                            class='dd-tab-link dd-col'
+                            role='tab'
+                            aria-controls='stacks-tab' 
+                            aria-selected='true'>" .
+                            this->buttons->tab("stacks-tab") .
+                            "Stacks
+                        </span>
+                    </div>
+                </li>
+                <li class='dd-nav-item' role='presentation'>
+                    <div class='dd-nav-link dd-flex'>
+                        <span 
+                            data-tab='#old-urls-tab'
+                            class='dd-tab-link dd-col'
+                            role='tab'
+                            aria-controls='old-urls-tab' 
+                            aria-selected='true'>" .
+                            this->buttons->tab("old-urls-tab") .
+                            "Old URLs
+                        </span>
+                    </div>
+                </li>";
+        }
+        let html .= "</ul>";
         return html;
     }
 

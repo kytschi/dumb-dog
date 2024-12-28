@@ -30,6 +30,24 @@ class Themes extends Content
         "status"
     ];
 
+    public routes = [
+        "/themes/add": [
+            "Themes",
+            "add",
+            "add a theme"
+        ],
+        "/themes/edit": [
+            "Themes",
+            "edit",
+            "edit the theme"
+        ],
+        "/themes": [
+            "Themes",
+            "index",
+            "themes"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data = [], status = false, model;

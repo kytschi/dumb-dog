@@ -26,6 +26,24 @@ class ContentCategories extends Content
         "template"
     ];
 
+    public routes = [
+        "/page-categories/add": [
+            "PageCategories",
+            "add",
+            "create a page category"
+        ],
+        "/page-categories/edit": [
+            "PageCategories",
+            "edit",
+            "edit the page category"
+        ],
+        "/page-categories": [
+            "PageCategories",
+            "index",
+            "page categories"
+        ]
+    ];
+
     public function renderToolbar()
     {
         var html;

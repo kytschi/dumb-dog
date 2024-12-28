@@ -27,6 +27,24 @@ class PaymentGateways extends Content
         "status"
     ];
 
+    public routes = [
+        "/payment-gateways/add": [
+            "PaymentGateways",
+            "add",
+            "add a payment gateway"
+        ],
+        "/payment-gateways/edit": [
+            "PaymentGateways",
+            "edit",
+            "edit the payment gateway"
+        ],
+        "/payment-gateways": [
+            "PaymentGateways",
+            "index",
+            "payment gateways"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data;

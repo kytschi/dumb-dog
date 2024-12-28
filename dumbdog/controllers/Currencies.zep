@@ -21,6 +21,24 @@ class Currencies extends Content
     public title = "Currencies";
     public required = ["name"];
 
+    public routes = [
+        "/currencies/add": [
+            "Currencies",
+            "add",
+            "create a currency"
+        ],
+        "/currencies/edit": [
+            "Currencies",
+            "edit",
+            "edit the currency"
+        ],
+        "/currencies": [
+            "Currencies",
+            "index",
+            "currencies"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data, model;

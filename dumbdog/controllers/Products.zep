@@ -47,6 +47,39 @@ class Products extends Content
         "DESC"
     ];
 
+    public routes = [
+        "/products/add": [
+            "Products",
+            "add",
+            "create a product"
+        ],
+        "/products/edit": [
+            "Products",
+            "edit",
+            "edit the product"
+        ],
+        "/products": [
+            "Products",
+            "index",
+            "products"
+        ],
+        "/product-categories/add": [
+            "ProductCategories",
+            "add",
+            "create a product category"
+        ],
+        "/product-categories/edit": [
+            "ProductCategories",
+            "edit",
+            "edit the product category"
+        ],
+        "/product-categories": [
+            "ProductCategories",
+            "index",
+            "product categories"
+        ]
+    ];
+
     private function createPrice(id)
     {
         var data = [
