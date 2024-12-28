@@ -46,6 +46,24 @@ class Content extends Controller
 
     public required = ["name", "title", "template_id"];
 
+    public routes = [
+        "/pages/add": [
+            "Pages",
+            "add",
+            "create a page"
+        ],
+        "/pages/edit": [
+            "Pages",
+            "edit",
+            "edit the page"
+        ],
+        "/pages": [
+            "Pages",
+            "index",
+            "pages"
+        ]
+    ];
+
     public function __globals()
     {
         let this->tables = new Tables();
@@ -578,7 +596,7 @@ class Content extends Controller
                     <div id='look-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
-                                <div class='dd-box-title'>Look and Feel</div>
+                                <div class='dd-box-title'>Look &amp; Feel</div>
                                 <div class='dd-box-body'>" .
                                     this->templatesSelect(model->template_id);
 

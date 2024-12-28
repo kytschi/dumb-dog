@@ -20,6 +20,24 @@ class Countries extends Content
     public titles = "Countries";
     public type = "country";
     public required = ["name"];
+
+    public routes = [
+        "/countries/add": [
+            "Countries",
+            "add",
+            "create a country"
+        ],
+        "/countries/edit": [
+            "Countries",
+            "edit",
+            "edit the country"
+        ],
+        "/countries": [
+            "Countries",
+            "index",
+            "countries"
+        ]
+    ];
     
     public function add(string path)
     {

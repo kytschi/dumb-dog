@@ -41,6 +41,34 @@ class Messages extends Content
     public title = "Messages";
     public type = "message";
 
+    public routes = [
+        "/messages/convert-to-group-lead": [
+            "Messages",
+            "convertToGroupsLead",
+            "group lead"
+        ],
+        "/messages/convert-to-my-lead": [
+            "Messages",
+            "convertToMyLead",
+            "my lead"
+        ],
+        "/messages/edit": [
+            "Messages",
+            "edit",
+            "view the message"
+        ],
+        "/messages/read": [
+            "Messages",
+            "read",
+            "mark the message as read"
+        ],
+        "/messages": [
+            "Messages",
+            "index",
+            "messages"
+        ]
+    ];
+
     public function convertToGroupsLead(string path)
     {
         this->convertToLead(path);
@@ -108,11 +136,6 @@ class Messages extends Content
         this->redirect(this->global_url . "/edit/" . model->id);
     }
 
-    public function delete(string path)
-    {
-        return this->triggerDelete(path, "messages");
-    }
-
     public function edit(string path)
     {
         var html, model, data = [];
@@ -150,6 +173,12 @@ class Messages extends Content
             if (isset(_POST["delete"])) {
                 if (!empty(_POST["delete"])) {
                     this->triggerDelete("messages", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("messages", path);
                 }
             }
         }
@@ -249,11 +278,6 @@ class Messages extends Content
         </form>";
 
         return html;
-    }
-
-    public function recover(string path)
-    {
-        return this->triggerRecover(path, "messages");
     }
 
     public function renderList(string path)

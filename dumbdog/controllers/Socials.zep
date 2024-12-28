@@ -26,6 +26,24 @@ class Socials extends Content
         "title"        
     ];
 
+    public routes = [
+        "/socials/add": [
+            "Socials",
+            "add",
+            "create a social media link"
+        ],
+        "/socials/edit": [
+            "Socials",
+            "edit",
+            "edit the social"
+        ],
+        "/socials": [
+            "Socials",
+            "index",
+            "socials"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data;

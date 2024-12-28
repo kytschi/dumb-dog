@@ -17,4 +17,22 @@ class BlogCategories extends ContentCategories
     public type = "blog-category";
     public title = "Blog categories";
     public back_url = "/blog-posts";
+
+    public routes = [
+        "/blog-categories/add": [
+            "BlogCategories",
+            "add",
+            "create a blog category"
+        ],
+        "/blog-categories/edit": [
+            "BlogCategories",
+            "edit",
+            "edit the blog category"
+        ],
+        "/blog-categories": [
+            "BlogCategories",
+            "index",
+            "blog categories"
+        ]
+    ];
 }

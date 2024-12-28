@@ -27,6 +27,24 @@ class Reviews extends Content
         "title"        
     ];
 
+    public routes = [
+        "/reviews/add": [
+            "Reviews",
+            "add",
+            "create a review"
+        ],
+        "/reviews/edit": [
+            "Reviews",
+            "edit",
+            "edit the review"
+        ],
+        "/reviews": [
+            "Reviews",
+            "index",
+            "reviews"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data, model, path = "";

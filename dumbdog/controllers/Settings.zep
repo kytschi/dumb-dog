@@ -17,6 +17,14 @@ use DumbDog\Exceptions\SaveException;
 
 class Settings extends Content
 {
+    public routes = [
+        "/settings": [
+            "Settings",
+            "index",
+            "settings"
+        ]
+    ];
+
     public function index(string path)
     {
         var html, model, data = [], status = false;
@@ -103,12 +111,13 @@ class Settings extends Content
                     <div id='look-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
+                                <div class='dd-box-title'>Theme</div>
                                 <div class='dd-box-body'>".
                                 this->inputs->selectDB(
                                     "Theme",
                                     "theme_id",
                                     "Your current theme",
-                                    "SELECT * FROM themes WHERE deleted_at IS NULL ORDER BY `default` DESC",
+                                    "SELECT * FROM themes WHERE deleted_at IS NULL ORDER BY `is_default` DESC",
                                     true,
                                     model->theme_id
                                 ) .
@@ -119,6 +128,7 @@ class Settings extends Content
                     <div id='seo-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
+                                <div class='dd-box-title'>SEO</div>
                                 <div class='dd-box-body'>".
                                 this->inputs->text("Meta author", "meta_author", "Author of your site", false, model->meta_author) .
                                 this->inputs->text("Meta keywords", "meta_keywords", "Keywords to describe your site", false, model->meta_keywords) .
@@ -131,6 +141,7 @@ class Settings extends Content
                     <div id='offline-tab' class='dd-row'>
                         <div class='dd-col-12'>
                             <div class='dd-box'>
+                                <div class='dd-box-title'>Offline</div>
                                 <div class='dd-box-body'>" .
                                 this->inputs->toggle("Online", "status", false, (model->status=="online" ? 1 : 0)) . 
                                 this->inputs->text("Title", "offline_title", "Set an offline title", false, model->offline_title) .
@@ -139,67 +150,86 @@ class Settings extends Content
                             </div>
                         </div>
                     </div>
-                </div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div id='dd-tabs-toolbar'>
-                            <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
-                                this->buttons->save() . 
-                            "</div>
-                        </div>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div class='dd-nav-link dd-flex'>
-                            <span 
-                                data-tab='#settings-tab'
-                                class='dd-tab-link dd-col'
-                                role='tab'
-                                aria-controls='settings-tab' 
-                                aria-selected='true'>
-                                Settings
-                            </span>
-                        </div>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div class='dd-nav-link dd-flex'>
-                            <span 
-                                data-tab='#look-tab'
-                                class='dd-tab-link dd-col'
-                                role='tab'
-                                aria-controls='look-tab' 
-                                aria-selected='true'>
-                                Look and feel
-                            </span>
-                        </div>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div class='dd-nav-link dd-flex'>
-                            <span 
-                                data-tab='#seo-tab'
-                                class='dd-tab-link dd-col'
-                                role='tab'
-                                aria-controls='seo-tab' 
-                                aria-selected='true'>
-                                SEO
-                            </span>
-                        </div>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'>
-                        <div class='dd-nav-link dd-flex'>
-                            <span 
-                                data-tab='#offline-tab'
-                                class='dd-tab-link dd-col'
-                                role='tab'
-                                aria-controls='offline-tab' 
-                                aria-selected='true'>
-                                Offline
-                            </span>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+                </div>" .
+                this->renderSidebar(model) .
+            "</div>
         </form>";
 
+        return html;
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->save() .
+                    "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Settings
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#look-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='look-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("look-tab") .
+                        "Look &amp; Feel
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#seo-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='seo-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("seo-tab") .
+                        "SEO
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#offline-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='offline-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("offline-tab") .
+                        "Offline
+                    </span>
+                </div>
+            </li>
+        </ul>";
         return html;
     }
 

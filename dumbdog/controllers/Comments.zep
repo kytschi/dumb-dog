@@ -19,6 +19,24 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Comments extends Controller
 {
+    public routes = [
+        "/comments/add": [
+            "Comments",
+            "add",
+            "create a comment"
+        ],
+        "/comments/edit": [
+            "Comments",
+            "edit",
+            "edit the comment"
+        ],
+        "/comments": [
+            "Comments",
+            "index",
+            "comments"
+        ]
+    ];
+
     /*public function add(string path)
     {
         var titles, html, database;
@@ -164,11 +182,6 @@ class Comments extends Controller
         return html;
     }
 
-    public function delete(string path)
-    {
-        return this->triggerDelete(path, "comments");
-    }
-
     public function edit(string path)
     {
         var titles, html, database, model, data = [];
@@ -202,6 +215,18 @@ class Comments extends Controller
         let html .= "</div>";
 
         if (!empty(_POST)) {
+            if (isset(_POST["delete"])) {
+                if (!empty(_POST["delete"])) {
+                    this->triggerDelete("users", path);
+                }
+            }
+
+            if (isset(_POST["recover"])) {
+                if (!empty(_POST["recover"])) {
+                    this->triggerRecover("users", path);
+                }
+            }
+
             if (isset(_POST["save"])) {
                 var database, status = false;
 
@@ -318,8 +343,5 @@ class Comments extends Controller
         return html . "</div>";
     }
 
-    public function recover(string path)
-    {
-        return this->triggerRecover(path, "comments");
-    }*/
+    */
 }

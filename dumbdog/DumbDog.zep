@@ -23,6 +23,7 @@ use DumbDog\Controllers\Dashboard;
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Events;
 use DumbDog\Controllers\Files;
+use DumbDog\Controllers\Groups;
 use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
@@ -51,7 +52,6 @@ use DumbDog\Ui\Javascript;
 use DumbDog\Ui\Gfx\Icons;
 use DumbDog\Ui\Gfx\Titles;
 use DumbDog\Ui\Menu;
-use DumbDog\Ui\Routes;
 
 class DumbDog
 {
@@ -63,7 +63,7 @@ class DumbDog
         string cfg_file,
         libs = null,
         template_engine = null,
-        string migrations_folder = ""
+        bool commandline = false
     ) {
         var cfg, err;
         let cfg = new \stdClass();
@@ -75,7 +75,7 @@ class DumbDog
             throw new Exception(
                 "Failed to load the config file",
                 500,
-                (!empty(migrations_folder) ? true : false)
+                commandline
             );
         }
 
@@ -88,7 +88,7 @@ class DumbDog
             throw new Exception(
                 "Failed to decode the JSON in config file",
                 500,
-                (!empty(migrations_folder) ? true : false)
+                commandline
             );
         }
 
@@ -101,8 +101,8 @@ class DumbDog
         let cfg->dumb_dog_url = rtrim(cfg->dumb_dog_url, "/");
         let this->cfg = cfg;
         
-        if (!empty(migrations_folder)) {
-            this->runMigrations(migrations_folder);
+        if (commandline) {
+            return;
         }
 
         var database;
@@ -177,6 +177,7 @@ class DumbDog
             "Dashboard": new Dashboard(),
             "Events": new Events(),
             "Files": new Files(),
+            "Groups": new Groups(),
             "Leads": new Leads(),
             "Menus": new Menus(),
             "Messages": new Messages(),
@@ -194,7 +195,27 @@ class DumbDog
             "Users": new Users()
         ];
 
-        var routes = (new Routes())->routes;                      
+        var routes = [
+            "/dashboard": [
+                "Dashboard",
+                "index",
+                "dashboard"
+            ],
+            "/the-pound": [
+                "Dashboard",
+                "login",
+                "login"
+            ],
+            "/give-up": [
+                "Dashboard",
+                "logout",
+                "logout"
+            ]
+        ];
+
+        for url, route in controllers {
+            let routes = array_merge(routes, route->routes);
+        }
         
         for url, route in routes {
             if (strpos(path, url) === false) {
@@ -228,6 +249,9 @@ class DumbDog
         }
 
         this->ddHead(location, code);
+        if (this->runMigrations(true)) {
+            echo "<div class='dd-warning dd-alert'><span>migrations available</span></div>";
+        }
         echo output;
         this->ddFooter(isset(_SESSION["dd"]) ? true : false);
         exit();
@@ -629,12 +653,15 @@ class DumbDog
         }
     }
 
-    private function runMigrations(string migrations_folder)
+    private function runMigrations(bool check = false)
     {
         var migration, migrations, err, found, database;
         let database = new Database(this->cfg);
 
-        let migration = shell_exec("ls " . rtrim(migrations_folder, "/") . "/*.sql");
+        if (!check) {
+            echo "Running Dumb Dog migrations\n";
+        }
+        let migration = shell_exec("ls ../migrations/*.sql");
         if (empty(migration)) {
             return;
         }
@@ -662,15 +689,20 @@ class DumbDog
 
             if (found) {
                 continue;
+            } elseif(check) {
+                return true;
             }
 
             try {
+                if (!check) {
+                    echo "Excuting migration " . migration . "...";
+                }
                 let found = database->execute(
                     file_get_contents(migration),
                     [],
                     true
                 );
-                if (!is_bool(found)) {
+                if (!is_bool(found) && !check) {
                     echo "Failed to run the migration " . basename(migration) .
                         "\n Error: ". found . "\n";
                     die();
@@ -688,11 +720,19 @@ class DumbDog
                         " in the migrations table\n Error: ". found . "\n";
                     die();
                 }
+                if (!check) {
+                    echo "complete\n";
+                }
             } catch \Exception, err {
-                echo "Failed to run the migration " . basename(migration) .
-                    "\n Error: " . err->getMessage() . "\n";
-                die();
+                if (!check) {
+                    echo "Failed to run the migration " . basename(migration) .
+                        "\n Error: " . err->getMessage() . "\n";
+                    die();
+                }
             }
+        }
+        if (!check) {
+            echo "Migrations finished\n";
         }
     }
 

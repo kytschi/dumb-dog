@@ -15,6 +15,24 @@ use DumbDog\Exceptions\NotFoundException;
 
 class Events extends Content
 {
+    public routes =[
+        "/events/add": [
+            "Events",
+            "add",
+            "create an event"
+        ],
+        "/events/edit": [
+            "Events",
+            "edit",
+            "edit the event"
+        ],
+        "/events": [
+            "Events",
+            "index",
+            "events"
+        ]
+    ];
+
     /*public global_url = "/dumb-dog/events";
     
     public function add(string path, string type = "event")

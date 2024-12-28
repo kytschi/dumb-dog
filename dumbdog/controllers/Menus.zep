@@ -26,6 +26,24 @@ class Menus extends Content
         "title"
     ];
 
+    public routes = [
+        "/menus/add": [
+            "Menus",
+            "add",
+            "create a menu"
+        ],
+        "/menus/edit": [
+            "Menus",
+            "edit",
+            "edit the menu"
+        ],
+        "/menus": [
+            "Menus",
+            "index",
+            "menus"
+        ]
+    ];
+
     public function add(string path)
     {
         var html, data, model;

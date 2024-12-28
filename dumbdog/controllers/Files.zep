@@ -21,6 +21,24 @@ class Files extends Controller
     public folder = "/website/files/";
     protected inputs;
 
+    public routes = [
+        "/files/add": [
+            "Files",
+            "add",
+            "create a file"
+        ],
+        "/files/edit": [
+            "Files",
+            "edit",
+            "edit the file"
+        ],
+        "/files": [
+            "Files",
+            "index",
+            "files"
+        ]
+    ];
+
     public function __globals()
     {
         let this->inputs = new Inputs();
