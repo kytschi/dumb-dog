@@ -194,7 +194,7 @@ class Style
             margin-left: 20px;
         }
         .dd-table td {
-            padding: 15px 15px 0px 15px;
+            padding: 15px;
             border-bottom: 3px solid var(--box-title-border-colour);
         }
         .dd-box-title, .dd-table th {

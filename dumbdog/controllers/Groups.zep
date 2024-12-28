@@ -13,6 +13,7 @@ namespace DumbDog\Controllers;
 use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
+use DumbDog\Models\Group;
 
 class Groups extends Content
 {
@@ -152,7 +153,7 @@ class Groups extends Content
             if (isset(_POST["save"])) {
                 var status = false, query;
 
-                if (!this->validate(_POST, ["name", "nickname"])) {
+                if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
                     let query = "
@@ -190,6 +191,31 @@ class Groups extends Content
         let html .= this->render(model);
 
         return html;
+    }
+
+    public function groupSelect(selected = null)
+    {
+        var select = [], data, item;
+        let data = this->database->all("SELECT * FROM groups ORDER BY name");
+        
+        if (isset(_POST["group_id"])) {
+            let selected = _POST["group_id"];
+        }
+
+        let select["00000000-0000-0000-0000-000000000001"] = "Super user";
+
+        for item in data {
+            let select[item->id] = item->name;
+        }
+        
+        return this->inputs->select(
+            "Group",
+            "group_id",
+            "What group to they belong to?",
+            select,
+            true,
+            selected
+        );
     }
 
     public function index(string path)
@@ -234,11 +260,12 @@ class Groups extends Content
 
     public function renderList(string path)
     {
-        var data = [], query;
+        var data = [], query, results = [];
 
         let query = "
             SELECT
-                groups.* 
+                groups.*,
+                1 AS can_edit
             FROM groups
             WHERE groups.id IS NOT NULL";
         if (isset(_POST["q"])) {
@@ -251,9 +278,18 @@ class Groups extends Content
         }
         let query .= " ORDER BY groups.name";
 
+        let results[] = new Group(
+            "00000000-0000-0000-0000-000000000001",
+            "Super user",
+            "su",
+            "active",
+            0
+        );
+        let results = array_merge(results, this->database->all(query, data));
+
         return this->tables->build(
             this->list,
-            this->database->all(query, data),
+            results,
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
@@ -328,17 +364,19 @@ class Groups extends Content
     private function setData(data, model)
     {
         let data["name"] = _POST["name"];
+        let data["slug"] = _POST["slug"];
 
         if (model->name != data["name"]) {
             var found;                        
             let found = this->database->get(
-                "SELECT * FROM groups WHERE name=:name",
+                "SELECT * FROM groups WHERE name=:name OR slug=:slug",
                 [
-                    "name": data["name"]
+                    "name": data["name"],
+                    "slug": data["slug"]
                 ]
             );
             if (found) {
-                throw new \Exception("Group already taken");
+                throw new \Exception("Group name or slug already taken");
             }
         }
 

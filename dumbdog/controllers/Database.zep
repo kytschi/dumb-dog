@@ -68,14 +68,14 @@ class Database
         let this->security = new Security(cfg);
     }
 
-    public function all(string query, array data = [])
+    public function all(string query, array data = [], string model = "DumbDog\\Models\\Model")
     {
         var results = [];
         
         this->connect();
         let this->statement = this->db->prepare(query);
         this->statement->execute(data);
-        let results = this->statement->fetchAll(\PDO::FETCH_CLASS, "DumbDog\\Models\\Model");
+        let results = this->statement->fetchAll(\PDO::FETCH_CLASS, model);
         this->close();
 
         return results;

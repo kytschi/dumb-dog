@@ -15,13 +15,6 @@ use DumbDog\Ui\Style;
 
 class Head
 {
-    private cfg;
-
-    public function __construct()
-    {
-        let this->cfg = constant("CFG");   
-    }
-
     public function build(string location)
     {
         var style, js;

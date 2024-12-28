@@ -6,7 +6,6 @@
  * @copyright   2024 Mike Welsh
  * @version     0.0.1
  *
- 
 */
 namespace DumbDog\Models;
 

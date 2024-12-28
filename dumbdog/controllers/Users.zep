@@ -11,6 +11,7 @@
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\Groups;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 
@@ -223,29 +224,6 @@ class Users extends Content
         return html;
     }
 
-    private function groupSelect(selected = null)
-    {
-        var select = [], data, item;
-        let data = this->database->all("SELECT * FROM groups ORDER BY name");
-        
-        if (isset(_POST["group_id"])) {
-            let selected = _POST["group_id"];
-        }
-
-        for item in data {
-            let select[item->id] = item->name;
-        }
-        
-        return this->inputs->select(
-            "Group",
-            "group_id",
-            "What group to they belong to?",
-            select,
-            true,
-            selected
-        );
-    }
-
     public function index(string path)
     {
         var html;        
@@ -277,7 +255,7 @@ class Users extends Content
                                 <div class='dd-box-body'>" .
                                 this->inputs->text("username", "name", "what is their username?", true, model->name) .
                                 this->inputs->text("nickname", "nickname", "what shall I call them?", true, model->nickname) .
-                                this->groupSelect(model->group_id) . 
+                                (new Groups())->groupSelect(model->group_id) . 
                                 this->inputs->image("picture", "file", "upload a picture?", false, model->profile) .
                                 this->inputs->password("password", "password", "sssh, it is our secret!") .
                                 this->inputs->password("password check", "password_check", "same again please!") .
