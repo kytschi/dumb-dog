@@ -102,6 +102,7 @@ class DumbDog
         let this->cfg = cfg;
         
         if (commandline) {
+            define("CFG", this->cfg);
             return;
         }
 
@@ -653,7 +654,7 @@ class DumbDog
         }
     }
 
-    private function runMigrations(bool check = false)
+    public function runMigrations(bool check = false)
     {
         var migration, migrations, err, found, database;
         let database = new Database(this->cfg);
@@ -661,7 +662,7 @@ class DumbDog
         if (!check) {
             echo "Running Dumb Dog migrations\n";
         }
-        let migration = shell_exec("ls ../migrations/*.sql");
+        let migration = shell_exec("ls *.sql");
         if (empty(migration)) {
             return;
         }

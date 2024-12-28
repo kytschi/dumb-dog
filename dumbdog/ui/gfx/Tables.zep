@@ -68,6 +68,7 @@ class Tables
                 <tbody>";
 
                 let iLoop = 0;
+                var can_edit = 1;
                 while (iLoop < count(data)) {
                     let html .=
                     "<tr" . (data[iLoop]->deleted_at ? " class='dd-deleted'" : "") . ">";
@@ -132,11 +133,16 @@ class Tables
                                 class='dd-link'
                                 title='View me live'>" . icons->view() . "</a>";
                         }
-                        let html .= "
-                            <a 
-                                href='" . url . "/edit/" . data[iLoop]->id . "'
-                                class='dd-link'
-                                title='Edit me'>" . icons->edit() . "</a>";
+                        if (property_exists(data[iLoop], "can_edit")) {
+                            let can_edit = data[iLoop]->can_edit;
+                        }
+                        if (can_edit) {
+                            let html .= "
+                                <a 
+                                    href='" . url . "/edit/" . data[iLoop]->id . "'
+                                    class='dd-link'
+                                    title='Edit me'>" . icons->edit() . "</a>";
+                        }
                         let html .= "
                         </td>
                     </tr>";
