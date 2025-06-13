@@ -8,7 +8,7 @@ The dumbest dog on the CMS block you'll ever see!
 
 ## Requirements
 
-* PHP 7+
+* PHP 8+
 * Your favourite SQL database
 * Webserver (Nginx recommended)
 

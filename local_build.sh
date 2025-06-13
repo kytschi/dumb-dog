@@ -1,5 +1,5 @@
 #!/bin/bash
-version="8.2"
+version="8.3"
 printf " Building Dumb Dog for PHP $version\n"
 ./vendor/bin/zephir fullclean
 ./vendor/bin/zephir build

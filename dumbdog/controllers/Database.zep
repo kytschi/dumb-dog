@@ -223,7 +223,7 @@ class Database
         return this->system_uuid;
     }
 
-    public function toDate(string str)
+    public function toDate(string str = "")
     {
         var date;
         let date = \DateTime::createFromFormat("d/m/Y H:i:s", str);

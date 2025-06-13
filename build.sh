@@ -1,5 +1,5 @@
 #!/bin/bash
-versions=("7.4" "8.0" "8.1" "8.2")
+versions=("8.0" "8.1" "8.2", "8.3")
 for version in ${versions[@]}; do
     printf " Building Dumb Dog for PHP $version\n"
     if [ -f "/usr/bin/php$version" ]; then
