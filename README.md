@@ -24,10 +24,8 @@ https://github.com/kytschi/dumb-dog/blob/main/compiled
 Now create an ini to load the module in your PHP modules ini folder.
 ```
 ; configuration for php to enable dumb dog
-extension=dumbdog.so
+extension=/var/www/dumbdog/compiled/php8.3-dumbdog.so
 ```
-
-You can also just create the ini and point the `extension` to the folder with the `dumbdog.so`.
 
 **And don't forget to restart your webserver.**
 
