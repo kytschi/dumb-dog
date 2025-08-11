@@ -81,11 +81,22 @@ table td {
 footer {
     font-family: 'subheading', Helvetica, sans-serif;
     line-height: 44pt;
+    display: flex;
 }
 
 .footer-item {
+    flex-direction: column;
     text-align: left;
     vertical-align: middle;
+    width: 100%;
+}
+.footer-item div {
+    float: left;
+    width: 100%;
+}
+.footer-item small {
+    font-size: 12pt;
+    font-family: Helvetica, sans-serif;
 }
 .footer-item a {
     float: left;
@@ -104,7 +115,7 @@ footer .button {
     margin-left: 20px;
 }
 .float-right {
-    float: right;
+    float: right !important;
 }
 
 /* Inputs */
@@ -343,4 +354,8 @@ h2, h3 {
     break-inside: avoid-column;
     margin: 0 0 40px 0;
     width: 100%;
+}
+
+.text-right {
+    text-align: right;
 }
