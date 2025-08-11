@@ -367,10 +367,13 @@ class Style
             border-left: 3px solid var(--text-heading-border-colour);
         }
         #dd-calendar-month {
+            background-color: var(--box-background-colour);
+            border: 3px solid var(--tabs-toolbar-border-colour);
             font-family: 'heading', Helvetica, sans-serif;
             font-size: 1.6rem;
             margin-top: 20px;
             margin-bottom: 20px;
+            padding: 10px 0px;
         }
         #dd-calendar-month a {
             display: block;
@@ -1396,7 +1399,7 @@ class Style
             display: flex;
             -webkit-flex-wrap: wrap;
             flex-wrap: wrap;
-            gap: 40px;
+            gap: 30px;
             overflow-y: scroll;
             padding-top: 20px;
         }

@@ -285,7 +285,7 @@ class Appointments extends Content
         
         let html .= this->renderToolbar();
         
-        var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date;
+        var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date, select_data = [], helper;
         
         if (isset(_GET["date"])) {
             let date = _GET["date"];
@@ -298,12 +298,44 @@ class Appointments extends Content
             let today = intval(date("d"));
         }
         
+        let data = this->database->all(
+            "SELECT
+                appointments.*,
+                content.*,
+                appointments.id AS id 
+            FROM content 
+            JOIN appointments ON appointments.content_id = content.id  
+            WHERE 
+                deleted_at IS NULL
+            ORDER BY on_date"
+        );
+        
+        if (data) {
+            let helper = new Dates();
+            let select_data["00-00"] = "Please select an appointment";
+            for entry in data {
+                let select_data[entry->on_date] = entry->name . " (" . helper->prettyDate(entry->on_date) . ")";
+            }
+        }
+
         let html .= "
-        <div id='dd-calendar-month' class='dd-flex'>" .
-            this->buttons->previous(this->global_url . "?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))), "Previous month") .
-            "<span>" . date("F Y", strtotime(date . "-01")) . "</span>" . 
-            this->buttons->next(this->global_url . "?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))), "Next month") .
-        "</div>
+        <div id='dd-calendar-month' class='dd-row'>
+            <div class='dd-col-6'>
+                <div class='dd-flex'> " .
+                    this->buttons->previous(this->global_url . "?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))), "Previous month") .
+                    "<span class='dd-mt-3'>" . date("F Y", strtotime(date . "-01")) . "</span>" . 
+                    this->buttons->next(this->global_url . "?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))), "Next month") . "
+                </div>
+            </div>
+            <div class='dd-col-6'>" .
+                this->inputs->select(
+                    "Active appointments",
+                    "active_appointments",
+                    "Active appointments",
+                    select_data
+                ) .
+            "</div>
+        </div>
         <div id='dd-calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         while(iLoop < count(days)) {

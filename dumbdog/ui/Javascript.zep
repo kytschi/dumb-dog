@@ -132,6 +132,20 @@ class Javascript
                     }
                     $($(target).data('inline-popup-close')).hide();
                 });
+
+                $('#dd-calendar-month select').on('change', function() {
+                    $('#dd-calendar-month select option:selected').each(function() {
+                        if ($(this).val() != '00-00') {
+                            var date = new Date($(this).val());
+                            var month = date.getMonth() + 1;
+                            if (month < 10) {
+                                month = '0' + month;
+                            }
+                            window.location.href=window.location.href.split('?')[0] + '?date=' + date.getFullYear() + '-' + month
+                        }
+                    });
+                });
+                
             });
             </script>";
     }

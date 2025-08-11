@@ -151,14 +151,9 @@ class APIApps extends Controller
     public function edit(path)
     {
         var html = "", model, data = [];
-                
+
         let data["id"] = this->getPageId(path);
-
-        let model = this->database->get(
-            "SELECT * FROM api_apps WHERE id=:id",
-            data
-        );
-
+        let model = this->database->get("SELECT * FROM api_apps WHERE id=:id", data);
         if (empty(model)) {
             throw new NotFoundException("API app not found");
         }
@@ -196,12 +191,19 @@ class APIApps extends Controller
             } else {
                 let path = path . "?saved=true";
                 let data = this->setData(data);
+
+                if (_POST["regenerate"]) {
+                    let data["api_key"] = (new Security())->randomString(128);
+                } else {
+                    let data["api_key"] = model->api_key;
+                }
  
                 let status = this->database->execute(
                     "UPDATE api_apps SET 
                         status=:status,
                         name=:name,
                         description=:description,
+                        api_key=:api_key,
                         updated_at=NOW(),
                         updated_by=:updated_by,
                         tags=:tags 
@@ -255,8 +257,31 @@ class APIApps extends Controller
                                     this->inputs->toggle("Set active", "status", false, (model->status=="active" ? 1 : 0)) . 
                                     this->inputs->text("Name", "name", "Name the API app", true, model->name) .
                                     this->inputs->text("Description", "description", "Describe the API app", true, model->description) .
-                                    this->inputs->text("API key", "api_key", "API key", false, model->api_key, true, "The system will auto-generate the key") .
                                 "
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id='key-tab' class='dd-row'>
+                        <div class='dd-col-lg-12'>
+                            <div class='dd-box'>
+                                <div class='dd-box-title'>API key</div>
+                                <div class='dd-box-body'>
+                                    <div class='dd-row'>
+                                        <div class='dd-col-12 dd-flex'>
+                                            <div class='dd-col'>" .
+                                                this->inputs->text("API key", "api_key", "API key", false, model->api_key, true, "The system will auto-generate the key") .
+                                            "</div>
+                                            <div class='dd-col-auto dd-mt-4'>" .
+                                                this->buttons->copy(model->api_key) .
+                                            "</div>
+                                        </div>
+                                    </div>
+                                    <div class='dd-row'>
+                                        <div class='dd-col-12'>" .
+                                            this->inputs->toggle("Re-generate the key", "regenerate", false, 0) . 
+                                        "</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -347,6 +372,19 @@ class APIApps extends Controller
                         aria-selected='true'>" .
                         this->buttons->tab("content-tab") .
                         "Content
+                    </span>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#key-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='key-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("key-tab") .
+                        "API key
                     </span>
                 </div>
             </li>
