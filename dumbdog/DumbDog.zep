@@ -2,13 +2,14 @@
  * Dumb Dog - A different type of CMS
  *
  * @package     DumbDog\DumbDog
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
- * @version     0.0.9 alpha
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
+ * @version     0.0.10 alpha
  *
  */
 namespace DumbDog;
 
+use DumbDog\Controllers\APIApps;
 use DumbDog\Controllers\Appointments;
 use DumbDog\Controllers\Blog;
 use DumbDog\Controllers\BlogCategories;
@@ -57,7 +58,7 @@ class DumbDog
 {
     private cfg;
     private template_engine = null;
-    private version = "0.0.9 alpha";
+    private version = "0.0.10 alpha";
 
     public function __construct(
         string cfg_file,
@@ -151,7 +152,7 @@ class DumbDog
         }
     }
     
-    private function backend(string path)
+    private function backend(path)
     {
         var location = "", url = "", route, output, code = 200, controller;
 
@@ -168,6 +169,7 @@ class DumbDog
         this->secure(path);
 
         var controllers = [
+            "APIApps": new APIApps(),
             "Appointments": new Appointments(),
             "Blog": new Blog(),
             "BlogCategories": new BlogCategories(),
@@ -316,7 +318,7 @@ class DumbDog
         echo javascript->logo();
     }
 
-    private function frontend(string path)
+    private function frontend(path)
     {
         var database, data = [], page, settings, menu, files;         
         let database = new Database();
@@ -737,7 +739,7 @@ class DumbDog
         }
     }
 
-    private function secure(string path)
+    private function secure(path)
     {
         if (!isset(_SESSION["dd"])) {
             if (path != "/the-pound") {

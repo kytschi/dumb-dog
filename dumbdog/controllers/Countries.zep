@@ -2,8 +2,8 @@
  * Dumb dog countries
  *
  * @package     DumbDog\Controllers\Countries
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
 */
 namespace DumbDog\Controllers;
@@ -39,7 +39,7 @@ class Countries extends Content
         ]
     ];
     
-    public function add(string path)
+    public function add(path)
     {
         var html, data, model;
 
@@ -109,7 +109,7 @@ class Countries extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -201,7 +201,7 @@ class Countries extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
         
@@ -275,7 +275,7 @@ class Countries extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 

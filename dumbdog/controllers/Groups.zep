@@ -2,8 +2,8 @@
  * Dumb Dog groups builder
  *
  * @package     DumbDog\Controllers\Groups
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -45,7 +45,7 @@ class Groups extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, model;
         let html = this->titles->page("Add a group", "add");
@@ -116,7 +116,7 @@ class Groups extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
 
@@ -218,7 +218,7 @@ class Groups extends Content
         );
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;        
         let html = this->titles->page("Groups", "groups");
@@ -258,7 +258,7 @@ class Groups extends Content
         </form>";
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query, results = [];
 

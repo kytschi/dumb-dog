@@ -2,8 +2,8 @@
  * Dumb Dog controller helper
  *
  * @package     DumbDog\Controllers\Controller
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -114,7 +114,7 @@ class Controller
         return null;
     }
 
-    public function getPageId(string path)
+    public function getPageId(path)
     {
         var splits;
 
@@ -185,7 +185,7 @@ class Controller
         }
     }
 
-    public function tags(string path, string table, string type = "")
+    public function tags(path, string table, string type = "")
     {
         var database, data, html = "";
 
@@ -243,7 +243,7 @@ class Controller
         return data;
     }
 
-    public function triggerDelete(string table, string path, string id = "")
+    public function triggerDelete(string table, path, string id = "")
     {
         var data = [], status = false;
 
@@ -276,7 +276,7 @@ class Controller
         }
     }
 
-    public function triggerRecover(string table, string path, string id = "")
+    public function triggerRecover(string table, path, string id = "")
     {
         var data = [], status = false;
 

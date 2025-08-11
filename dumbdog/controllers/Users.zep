@@ -2,8 +2,8 @@
  * Dumb Dog users builder
  *
  * @package     DumbDog\Controllers\Users
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -45,7 +45,7 @@ class Users extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, model;
         let html = this->titles->page("Add a user", "add");
@@ -128,7 +128,7 @@ class Users extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
 
@@ -224,7 +224,7 @@ class Users extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;        
         let html = this->titles->page("Users", "users");
@@ -269,7 +269,7 @@ class Users extends Content
         </form>";
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 

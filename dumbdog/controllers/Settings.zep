@@ -2,8 +2,8 @@
  * Dumb Dog settings builder
  *
  * @package     DumbDog\Controllers\Settings
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -25,7 +25,7 @@ class Settings extends Content
         ]
     ];
 
-    public function index(string path)
+    public function index(path)
     {
         var html, model, data = [], status = false;
 

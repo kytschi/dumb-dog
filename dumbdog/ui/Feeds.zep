@@ -2,8 +2,8 @@
  * Dumb Dog feeds
  *
  * @package     DumbDog\Ui\Feeds
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  *
 */
 namespace DumbDog\Ui;
@@ -19,7 +19,7 @@ class Feeds extends Controller
         let this->url = (_SERVER["HTTPS"] ? "https://" : "http://") . _SERVER["SERVER_NAME"];
     }
 
-    public function process(string path)
+    public function process(path)
     {
         if(
             path == "/rss" ||

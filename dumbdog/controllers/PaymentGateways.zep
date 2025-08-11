@@ -2,8 +2,8 @@
  * DumbDog payment gateways builder
  *
  * @package     DumbDog\Controllers\PaymentGateways
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
 */
 namespace DumbDog\Controllers;
@@ -45,7 +45,7 @@ class PaymentGateways extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, data;
 
@@ -125,7 +125,7 @@ class PaymentGateways extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -228,7 +228,7 @@ class PaymentGateways extends Content
         return data;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;       
         
@@ -294,7 +294,7 @@ class PaymentGateways extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -402,7 +402,7 @@ class PaymentGateways extends Content
         return html;
     }
 
-    public function process(string path)
+    public function process(path)
     {
         if (strpos(path, "/payment-gateway/") !== false) {
             if (strpos(path, "/payment-gateway/create/") !== false) {

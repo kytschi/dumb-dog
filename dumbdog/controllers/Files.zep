@@ -2,8 +2,8 @@
  * Dumb Dog file handler
  *
  * @package     DumbDog\Controllers\Files
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -76,7 +76,7 @@ class Files extends Controller
         imagewebp(save, getcwd() . this->folder . "thumb-" . filename);
     }
 
-    public function deleteResource(string id, string path)
+    public function deleteResource(string id, path)
     {
         var status;
         let status = this->database->execute("

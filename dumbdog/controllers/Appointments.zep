@@ -2,8 +2,8 @@
  * Dumb Dog appointments
  *
  * @package     DumbDog\Controllers\Appointments
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -46,7 +46,7 @@ class Appointments extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, data = [], model;
 
@@ -171,7 +171,7 @@ class Appointments extends Content
         return html;
     }
     
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -273,7 +273,7 @@ class Appointments extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
         

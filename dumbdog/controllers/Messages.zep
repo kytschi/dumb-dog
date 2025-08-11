@@ -2,8 +2,8 @@
  * Dumb Dog messages
  *
  * @package     DumbDog\Controllers\Messages
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -69,17 +69,17 @@ class Messages extends Content
         ]
     ];
 
-    public function convertToGroupsLead(string path)
+    public function convertToGroupsLead(path)
     {
         this->convertToLead(path);
     }
 
-    public function convertToMyLead(string path)
+    public function convertToMyLead(path)
     {
         this->convertToLead(path, this->database->getUserId());
     }
 
-    private function convertToLead(string path, string user_id = null)
+    private function convertToLead(path, string user_id = null)
     {
         var id, model, status = false;
         let id = this->getPageId(path);
@@ -136,7 +136,7 @@ class Messages extends Content
         this->redirect(this->global_url . "/edit/" . model->id);
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -219,7 +219,7 @@ class Messages extends Content
         return html;
     }
 
-    public function read(string path)
+    public function read(path)
     {
         var html, data = [], model;
 
@@ -280,7 +280,7 @@ class Messages extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 

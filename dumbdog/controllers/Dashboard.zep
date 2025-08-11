@@ -2,8 +2,8 @@
  * Dumb Dog dashboard
  *
  * @package     DumbDog\Controllers\Dashboard
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -23,7 +23,7 @@ use DumbDog\Ui\Gfx\Titles;
 
 class Dashboard extends Controller
 {
-    public function index(string path)
+    public function index(path)
     {
         var titles, html, model, data = [], icons;
         let titles = new Titles();
@@ -253,7 +253,7 @@ class Dashboard extends Controller
         return html;
     }
 
-    public function login(string path)
+    public function login(path)
     {
         var titles, html, model, data = [], captcha, input;
 
@@ -313,7 +313,7 @@ class Dashboard extends Controller
         return html;
     }
 
-    public function logout(string path)
+    public function logout(path)
     {   
         let _SESSION["dd"] = null;
         session_unset();

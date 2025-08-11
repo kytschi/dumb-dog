@@ -2,8 +2,8 @@
  * Dumb Dog style builder
  *
  * @package     DumbDog\Ui\Style
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -280,11 +280,14 @@ class Style
         }
         .dd-button, .dd-button-blank, .dd-nav-link {
             background-color: var(--tabs-toolbar-background-colour);
-            border: 3px solid var(--tabs-toolbar-border-colour);
+            border: none;
             padding: 5px 15px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+        }
+        .dd-nav-link {
+            border: 3px solid var(--tabs-toolbar-border-colour);
         }
         .dd-button svg, .dd-button span {
             float: left;

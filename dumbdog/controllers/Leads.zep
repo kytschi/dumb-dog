@@ -2,8 +2,8 @@
  * Dumb Dog leads
  *
  * @package     DumbDog\Controllers\Leads
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 */
@@ -49,7 +49,7 @@ class Leads extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, data, status = false, contacts;
         
@@ -115,7 +115,7 @@ class Leads extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [], contacts, err, status = false;
 
@@ -389,7 +389,7 @@ class Leads extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -414,6 +414,7 @@ class Leads extends Content
         }
 
         if (!this->database->isManager()) {
+            let query .= " AND leads.user_id=:user_id";
             let data["user_id"] = this->getUserId();
         }
 

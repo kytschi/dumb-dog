@@ -1,7 +1,7 @@
 /**
- * DumbDog currencies
+ * DumbDog APIApps controller
  *
- * @package     DumbDog\Controllers\Currencies
+ * @package     DumbDog\Controllers\APIApps
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -9,42 +9,73 @@
 */
 namespace DumbDog\Controllers;
 
-use DumbDog\Controllers\Content;
+use DumbDog\Controllers\Controller;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
-use DumbDog\Exceptions\ValidationException;
+use DumbDog\Helper\Security;
+use DumbDog\Helper\Dates;
+use DumbDog\Ui\Gfx\Buttons;
+use DumbDog\Ui\Gfx\Icons;
+use DumbDog\Ui\Gfx\Inputs;
+use DumbDog\Ui\Gfx\Tables;
+use DumbDog\Ui\Gfx\Titles;
 
-class Currencies extends Content
+class APIApps extends Controller
 {
-    public global_url = "/currencies";
-    public type = "currency";
-    public title = "Currencies";
-    public required = ["name"];
+    protected tables;
+    protected titles;
+    protected buttons;
+    protected inputs;
+    protected icons;
+
+    public global_url = "/api-apps";
+    public type = "api-app";
+    public title = "API apps";
+    public back_url = "";
+    
+    public list = [
+        "name|with_tags",
+        "description",
+        "status"
+    ];
+
+    public required = ["name", "description"];
 
     public routes = [
-        "/currencies/add": [
-            "Currencies",
+        "/api-apps/add": [
+            "APIApps",
             "add",
-            "create a currency"
+            "create an API app"
         ],
-        "/currencies/edit": [
-            "Currencies",
+        "/api-apps/edit": [
+            "APIApps",
             "edit",
-            "edit the currency"
+            "edit the API app"
         ],
-        "/currencies": [
-            "Currencies",
+        "/api-apps": [
+            "APIApps",
             "index",
-            "currencies"
+            "API apps"
         ]
     ];
+
+    public function __globals()
+    {
+        let this->tables = new Tables();
+        let this->titles = new Titles();
+        let this->inputs = new Inputs();
+        let this->buttons = new Buttons();
+        let this->icons = new Icons();
+    }
 
     public function add(path)
     {
         var html, data, model;
-
-        let model = new \stdClass();
-        let html = this->titles->page("Create the currency", "add");
+        
+        let html = this->titles->page(
+            "Create an API app",
+            "add"
+        );
 
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -54,36 +85,35 @@ class Currencies extends Content
                 if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
+                    let path = this->global_url;
+
                     let data["id"] = this->database->uuid();
-                    let data["created_by"] = this->database->getUserId();
+                    let data["created_by"] = this->getUserId();
 
                     let data = this->setData(data);
 
+                    let data["api_key"] = (new Security())->randomString(128);
+
                     let status = this->database->execute(
-                        "INSERT INTO currencies 
+                        "INSERT INTO api_apps 
                             (id,
-                            name,
-                            title,
-                            symbol,
-                            exchange_rate,
-                            exchange_rate_safety_buffer,
-                            locale_code,
-                            is_default,
                             status,
+                            name,
+                            description,
+                            tags,
+                            api_key,
                             created_at,
                             created_by,
                             updated_at,
                             updated_by) 
                         VALUES 
-                            (:id,
-                            :name,
-                            :title,
-                            :symbol,
-                            :exchange_rate,
-                            :exchange_rate_safety_buffer,
-                            :locale_code,
-                            :is_default,
+                            (
+                            :id,
                             :status,
+                            :name,
+                            :description,
+                            :tags,
+                            :api_key,
                             NOW(),
                             :created_by,
                             NOW(),
@@ -92,29 +122,27 @@ class Currencies extends Content
                     );
 
                     if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to save the currency");
+                        let html .= this->saveFailed("Failed to save the API app");
                         let html .= this->consoleLogError(status);
                     } else {
-                        this->redirect(this->global_url . "?saved=true");
+                        this->redirect(this->global_url . "/edit/" . data["id"]);
                     }
                 }
             }
         }
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("Currency has been saved");
+            let html .= this->saveSuccess("Entry has been saved");
         }
 
+        let model = new \stdClass();
         let model->deleted_at = null;
-        let model->name = "";
-        let model->title = "";
-        let model->symbol = "";
-        let model->exchange_rate = 1;
-        let model->exchange_rate_safety_buffer = 0;
-        let model->locale_code = "";
-        let model->is_default = 0;
         let model->status = "active";
-
+        let model->name = "";
+        let model->description = "";
+        let model->api_key = "";
+        let model->tags = "";
+        
         let html .= this->render(model);
 
         return html;
@@ -122,22 +150,27 @@ class Currencies extends Content
 
     public function edit(path)
     {
-        var html, model, data = [];
-        
+        var html = "", model, data = [];
+                
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("
-            SELECT currencies.* 
-            FROM currencies 
-            WHERE currencies.id=:id", data);
+
+        let model = this->database->get(
+            "SELECT * FROM api_apps WHERE id=:id",
+            data
+        );
 
         if (empty(model)) {
-            throw new NotFoundException("Currency not found");
+            throw new NotFoundException("API app not found");
         }
 
-        let html = this->titles->page("Edit the currency", "edit");
+        let html = this->titles->page("Edit the API app", "edit");
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("Currency has been updated");
+            let html .= this->saveSuccess("I've updated the API app");
+        }
+
+        if (isset(_GET["deleted"])) {
+            let html .= this->saveSuccess("I've deleted the entry");
         }
 
         if (model->deleted_at) {
@@ -146,18 +179,15 @@ class Currencies extends Content
 
         if (!empty(_POST)) {
             var status = false, err;
-
             let path = this->global_url . "/edit/" . model->id;
 
             if (isset(_POST["delete"])) {
                 if (!empty(_POST["delete"])) {
-                    this->triggerDelete("currencies", path);
+                    this->triggerDelete("content", path);
                 }
-            }
-
-            if (isset(_POST["recover"])) {
+            } elseif (isset(_POST["recover"])) {
                 if (!empty(_POST["recover"])) {
-                    this->triggerRecover("currencies", path);
+                    this->triggerRecover("content", path);
                 }
             }
 
@@ -165,56 +195,47 @@ class Currencies extends Content
                 let html .= this->missingRequired();
             } else {
                 let path = path . "?saved=true";
-
                 let data = this->setData(data);
-
+ 
                 let status = this->database->execute(
-                    "UPDATE currencies SET 
-                        name=:name,
-                        title=:title,
-                        symbol=:symbol,
-                        exchange_rate=:exchange_rate,
-                        exchange_rate_safety_buffer=:exchange_rate_safety_buffer,
-                        locale_code=:locale_code,
-                        is_default=:is_default,
+                    "UPDATE api_apps SET 
                         status=:status,
+                        name=:name,
+                        description=:description,
                         updated_at=NOW(),
-                        updated_by=:updated_by 
+                        updated_by=:updated_by,
+                        tags=:tags 
                     WHERE id=:id",
                     data
                 );
             
                 if (!is_bool(status)) {
-                    let html .= this->saveFailed("Failed to update the currency");
+                    let html .= this->saveFailed("Failed to update the API app");
                     let html .= this->consoleLogError(status);
                 } else {
-                    try {
-                        this->redirect(path);
-                    } catch ValidationException, err {
-                        let html .= this->missingRequired(err->getMessage());
-                    }
+                    this->redirect(path);
                 }
             }
         }
-        
+
         let html .= this->render(model, "edit");
         return html;
     }
 
     public function index(path)
     {
-        var html;
+        var html;       
         
-        let html = this->titles->page("Currencies", "currencies");
+        let html = this->titles->page(this->title, strtolower(str_replace(" ", "", this->title)));
 
         if (isset(_GET["deleted"])) {
             let html .= this->saveSuccess("I've deleted the entry");
         }
 
-        let html .= this->renderToolbar();
-
         let html .= 
-            this->inputs->searchBox(this->global_url, "Search the currencies") . 
+            this->renderToolbar() .
+            this->inputs->searchBox(this->global_url, "Search the " . strtolower(this->title)) . 
+            this->tags(path, "content", this->type) .
             this->renderList(path);
         return html;
     }
@@ -222,7 +243,7 @@ class Currencies extends Content
     public function render(model, mode = "add")
     {
         var html;
-        
+
         let html = "
         <form method='post' enctype='multipart/form-data'>
             <div class='dd-tabs'>
@@ -231,28 +252,26 @@ class Currencies extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
-                                    this->inputs->toggle("Default", "is_default", false, model->is_default) . 
-                                    this->inputs->text("Name", "name", "Name the currency", true, model->name) .
-                                    this->inputs->text("Title", "title", "The display title for the currency", true, model->title) .
-                                    this->inputs->text("Symbol", "symbol", "The display symbol for the currency", true, model->symbol) .
-                                    this->inputs->text("Locale", "locale_code", "i.e. en_GB", false, model->locale_code) .
-                                "</div>
+                                    this->inputs->toggle("Set active", "status", false, (model->status=="active" ? 1 : 0)) . 
+                                    this->inputs->text("Name", "name", "Name the API app", true, model->name) .
+                                    this->inputs->text("Description", "description", "Describe the API app", true, model->description) .
+                                    this->inputs->text("API key", "api_key", "API key", false, model->api_key, true, "The system will auto-generate the key") .
+                                "
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div id='exchange-tab' class='dd-row'>
-                        <div class='dd-col-12'>
+                    <div id='nav-tab' class='dd-row'>
+                        <div class='dd-col-lg-12'>
                             <div class='dd-box'>
-                                <div class='dd-box-title'>Exchange</div>
+                                <div class='dd-box-title'>Tags</div>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->text("Exchange rate", "exchange_rate", "The currency exchange rate", false, model->exchange_rate) .
-                                    this->inputs->text("Safety buffer", "exchange_rate_safety_buffer", "The exchange safety buffer", false, model->exchange_rate_safety_buffer) .
+                                    this->inputs->tags("Tags", "tags", "Tag the API app", false, model->tags) . 
                                 "</div>
                             </div>
                         </div>
                     </div>
-                </div>" .
+                </div> " .
                 this->renderSidebar(model, mode) .
             "</div>
         </form>";
@@ -265,22 +284,22 @@ class Currencies extends Content
         var data = [], query;
 
         let query = "
-            SELECT currencies.* FROM currencies";
+            SELECT * FROM api_apps 
+            WHERE id IS NOT NULL";
         if (isset(_POST["q"])) {
-            let query .= " AND currencies.name LIKE :query";
+            let query .= " AND (name LIKE :query OR description LIKE :query)";
             let data["query"] = "%" . _POST["q"] . "%";
         }
-        let query .= " ORDER BY currencies.name";
+        if (isset(_GET["tag"])) {
+            let query .= " AND tags LIKE :tag";
+            let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
+        }
+        let query .= " ORDER BY name";
 
         return this->tables->build(
-            [
-                "name",
-                "title",
-                "symbol",
-                "exchange_rate"
-            ],
+            this->list,
             this->database->all(query, data),
-            this->cfg->dumb_dog_url . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
 
@@ -304,8 +323,9 @@ class Currencies extends Content
                             this->global_url . "/add",
                             "",
                             "add",
-                            "Add a new currency"
+                            "Create a new API app"
                         );
+
         if (mode == "edit") {
             if (model->deleted_at) {
                 let html .= this->buttons->recover(model->id);
@@ -313,6 +333,7 @@ class Currencies extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
+
         let html .= "</div>
                 </div>
             </li>
@@ -325,20 +346,20 @@ class Currencies extends Content
                         aria-controls='content-tab' 
                         aria-selected='true'>" .
                         this->buttons->tab("content-tab") .
-                        "Currency
+                        "Content
                     </span>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
                 <div class='dd-nav-link dd-flex'>
                     <span 
-                        data-tab='#exchange-tab'
+                        data-tab='#nav-tab'
                         class='dd-tab-link dd-col'
                         role='tab'
-                        aria-controls='exchange-tab' 
+                        aria-controls='nav-tab' 
                         aria-selected='true'>" .
-                        this->buttons->tab("exchange-tab") .
-                        "Exchange
+                        this->buttons->tab("nav-tab") .
+                        "Tags
                     </span>
                 </div>
             </li>
@@ -348,28 +369,37 @@ class Currencies extends Content
 
     public function renderToolbar()
     {
-        return "
-        <div class='dd-page-toolbar'>" . 
-            this->buttons->round(
+        var html;
+
+        let html = "<div class='dd-page-toolbar'>";
+
+        if (this->back_url) {
+            let html .= this->buttons->round(
+                this->cfg->dumb_dog_url . this->back_url,
+                "Back",
+                "back",
+                "Go back to the API apps"
+            );
+        }
+
+        let html .= this->buttons->round(
                 this->global_url . "/add",
                 "add",
                 "add",
-                "Add a new " . str_replace("-", " ", this->type)
+                "Add a new API app"
             ) .
         "</div>";
+
+        return html;
     }
 
-    private function setData(data)
-    {
+    private function setData(array data)
+    {   
         let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
-        let data["title"] = _POST["title"];
-        let data["symbol"] = _POST["symbol"];
-        let data["locale_code"] = _POST["locale_code"];
-        let data["exchange_rate"] = floatval(_POST["exchange_rate"]);
-        let data["exchange_rate_safety_buffer"] = floatval(_POST["exchange_rate_safety_buffer"]);
-        let data["updated_by"] = this->database->getUserId();
+        let data["description"] = _POST["description"];
+        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
+        let data["updated_by"] = this->getUserId();
 
         return data;
     }

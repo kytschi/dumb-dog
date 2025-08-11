@@ -2,8 +2,8 @@
  * Dumb Dog event builder
  *
  * @package     DumbDog\Controllers\Events
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -35,7 +35,7 @@ class Events extends Content
 
     /*public global_url = "/dumb-dog/events";
     
-    public function add(string path, string type = "event")
+    public function add(path, string type = "event")
     {
         return parent::add(path, type);
     }
@@ -60,7 +60,7 @@ class Events extends Content
             );
     }
 
-    public function edit(string path, string type = "event")
+    public function edit(path, string type = "event")
     {
         return parent::edit(path, type);
     }
@@ -87,7 +87,7 @@ class Events extends Content
             );
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var titles, table, database, html, query, data;
         let titles = new Titles();

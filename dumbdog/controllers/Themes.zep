@@ -2,8 +2,8 @@
  * Dumb Dog themes
  *
  * @package     DumbDog\Controllers\Themes
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -48,7 +48,7 @@ class Themes extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, data = [], status = false, model;
         let html = this->titles->page("Add a theme", "add");
@@ -95,7 +95,7 @@ class Themes extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [], status = false;
         
@@ -167,7 +167,7 @@ class Themes extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
                 
@@ -227,7 +227,7 @@ class Themes extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 

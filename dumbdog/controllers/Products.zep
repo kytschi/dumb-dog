@@ -2,8 +2,8 @@
  * DumbDog products
  *
  * @package     DumbDog\Controllers\Products
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -510,7 +510,7 @@ class Products extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
