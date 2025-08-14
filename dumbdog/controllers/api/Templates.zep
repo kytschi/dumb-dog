@@ -25,9 +25,17 @@ class Templates extends Controller
             "Templates",
             "add"
         ],
+        "/api/templates/delete": [
+            "Templates",
+            "delete"
+        ],
         "/api/templates/edit": [
             "Templates",
             "edit"
+        ],
+        "/api/templates/recover": [
+            "Templates",
+            "recover"
         ],
         "/api/templates": [
             "Templates",
@@ -109,6 +117,32 @@ class Templates extends Controller
         throw new SaveException(
             "Failed to save the template, no post data",
             400
+        );
+    }
+
+    public function delete(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new MainTemplates();
+
+        let data["id"] = controller->getPageId(path);
+
+        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+
+        if (empty(model)) {
+            throw new NotFoundException("Template not found");
+        }
+
+        controller->triggerDelete("templates", path, data["id"], this->api_app->created_by, false);
+
+        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+
+        return this->createReturn(
+            "Template successfully marked as deleted",
+            model
         );
     }
 
@@ -236,6 +270,32 @@ class Templates extends Controller
             "Templates",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
+        );
+    }
+
+    public function recover(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new MainTemplates();
+
+        let data["id"] = controller->getPageId(path);
+
+        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+
+        if (empty(model)) {
+            throw new NotFoundException("Template not found");
+        }
+
+        controller->triggerRecover("templates", path, data["id"], this->api_app->created_by, false);
+
+        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+
+        return this->createReturn(
+            "Template successfully recovered from the deleted state",
+            model
         );
     }
 }

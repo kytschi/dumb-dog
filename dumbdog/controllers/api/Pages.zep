@@ -25,9 +25,17 @@ class Pages extends Controller
             "Pages",
             "add"
         ],
+        "/api/pages/delete": [
+            "Pages",
+            "delete"
+        ],
         "/api/pages/edit": [
             "Pages",
             "edit"
+        ],
+        "/api/pages/recover": [
+            "Pages",
+            "recover"
         ],
         "/api/pages": [
             "Pages",
@@ -140,6 +148,54 @@ class Pages extends Controller
         throw new SaveException(
             "Failed to save the page, no post data",
             400
+        );
+    }
+
+    public function delete(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Content();
+
+        let data["id"] = controller->getPageId(path);
+
+        let model = this->database->get(
+            "SELECT main_page.*,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.id=:id",
+            [
+                "id": data["id"]
+            ]
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Page not found");
+        }
+
+        controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
+
+        let model = this->database->get(
+            "SELECT main_page.*,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.id=:id",
+            [
+                "id": data["id"]
+            ]
+        );
+
+        return this->createReturn(
+            "Page successfully marked as deleted",
+            model
         );
     }
 
@@ -289,6 +345,54 @@ class Pages extends Controller
             "Pages",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
+        );
+    }
+
+    public function recover(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Content();
+
+        let data["id"] = controller->getPageId(path);
+
+        let model = this->database->get(
+            "SELECT main_page.*,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.id=:id",
+            [
+                "id": data["id"]
+            ]
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Page not found");
+        }
+
+        controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
+
+        let model = this->database->get(
+            "SELECT main_page.*,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.id=:id",
+            [
+                "id": data["id"]
+            ]
+        );
+
+        return this->createReturn(
+            "Page successfully recovered from the deleted state",
+            model
         );
     }
 }

@@ -66,6 +66,7 @@ class Controller
 
             let obj->copyright = "(c)" . date("Y") . " Mike Welsh";
             let obj->website = "https://dumb-dog.kytschi.com";
+            let obj->save_mode = this->cfg->save_mode;
             let obj->code = code;
             let obj->message = message;
             let obj->query = query;

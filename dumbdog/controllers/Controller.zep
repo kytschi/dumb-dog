@@ -243,13 +243,13 @@ class Controller
         return data;
     }
 
-    public function triggerDelete(string table, path, string id = "")
+    public function triggerDelete(string table, path, string id = "", user_id = "", redirect = true)
     {
         var data = [], status = false;
 
         if (this->cfg->save_mode == true) {
             let data["id"] = id ? id : this->getPageId(path);
-            let data["updated_by"] = this->getUserId();
+            let data["updated_by"] = user_id ? user_id : this->getUserId();
             let status = this->database->execute("
                 UPDATE " . table . " 
                 SET 
@@ -266,7 +266,7 @@ class Controller
 
         if (!is_bool(status)) {
             throw new Exception("Failed to delete the entry");
-        } else {
+        } elseif (redirect) {
             if (strpos(path, "?") !== false) {
                 let path = path . "&deleted=true";
             } else {
@@ -274,15 +274,17 @@ class Controller
             }
             this->redirect(path);
         }
+
+        return status;
     }
 
-    public function triggerRecover(string table, path, string id = "")
+    public function triggerRecover(string table, path, string id = "", user_id = "", redirect = true)
     {
         var data = [], status = false;
 
         if (this->cfg->save_mode == true) {
             let data["id"] = id ? id : this->getPageId(path);
-            let data["updated_by"] = this->getUserId();
+            let data["updated_by"] = user_id ? user_id : this->getUserId();
             let status = this->database->execute("
                 UPDATE " . table . " 
                 SET 
@@ -299,7 +301,7 @@ class Controller
 
         if (!is_bool(status)) {
             throw new Exception("Failed to recover the entry");
-        } else {
+        } elseif(redirect) {
             if (strpos(path, "?") !== false) {
                 let path = path . "&recovered=true";
             } else {
@@ -307,6 +309,8 @@ class Controller
             }
             this->redirect(path);
         }
+
+        return status;
     }
 
     public function validate(array data, array checks)
