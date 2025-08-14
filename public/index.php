@@ -88,6 +88,7 @@ try {
         'cache' => '../cache',
         'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/website')
     ]);*/
+
     new DumbDog("../.dumbdog.json", $libs, $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();

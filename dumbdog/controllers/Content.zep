@@ -6,8 +6,8 @@
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Controller;

@@ -9,7 +9,8 @@
  */
 namespace DumbDog;
 
-use DumbDog\Controllers\APIApps;
+use DumbDog\Controllers\ApiApps;
+use DumbDog\Controllers\Api\ApiControl;
 use DumbDog\Controllers\Appointments;
 use DumbDog\Controllers\Blog;
 use DumbDog\Controllers\BlogCategories;
@@ -76,6 +77,7 @@ class DumbDog
             throw new Exception(
                 "Failed to load the config file",
                 500,
+                null,
                 commandline
             );
         }
@@ -89,6 +91,7 @@ class DumbDog
             throw new Exception(
                 "Failed to decode the JSON in config file",
                 500,
+                null,
                 commandline
             );
         }
@@ -132,6 +135,12 @@ class DumbDog
         if (template_engine) {
             this->setTemplateEngine(template_engine);
         }
+
+        // API handling.
+        if (strpos(path, "/api/") !== false) {
+            (new ApiControl())->process(path);
+            exit();
+        }
         
         try {
             if (strpos(path . "/", this->cfg->dumb_dog_url . "/") !== false) {
@@ -161,7 +170,7 @@ class DumbDog
             let path = "/dashboard";
         }
 
-        // Payment gateway handling.        
+        // Payment gateway handling.
         let controller = new PaymentGateways();
         controller->process(path);
 
@@ -169,7 +178,7 @@ class DumbDog
         this->secure(path);
 
         var controllers = [
-            "APIApps": new APIApps(),
+            "ApiApps": new ApiApps(),
             "Appointments": new Appointments(),
             "Blog": new Blog(),
             "BlogCategories": new BlogCategories(),

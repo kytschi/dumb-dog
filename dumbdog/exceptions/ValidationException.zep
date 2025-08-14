@@ -14,11 +14,12 @@ use DumbDog\Exceptions\Exception;
 
 class ValidationException extends Exception
 {    
-	public function __construct(string message, int code = 400)
+	public function __construct(string message, int code = 400, data = null)
 	{
         //Trigger the parent construct.
-        parent::__construct(message, code);
+        parent::__construct(message, code, data);
 
         let this->code = code;
+        let this->data = data;
     }
 }

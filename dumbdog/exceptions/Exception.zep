@@ -18,14 +18,21 @@ class Exception extends \Exception
 {
     public code;
     public cli;
+    public data = null;
     
-	public function __construct(string message, int code = 500, bool cli = false)
+	public function __construct(string message, int code = 500, data = null, bool cli = false)
 	{
         //Trigger the parent construct.
         parent::__construct(message, code);
 
         let this->code = code;
         let this->cli = cli;
+        let this->data = data;
+    }
+
+    public function getData()
+    {
+        return this->data;
     }
     
     /**
