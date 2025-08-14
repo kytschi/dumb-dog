@@ -6,8 +6,8 @@
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
@@ -58,7 +58,7 @@ class Templates extends Content
                     let path = this->global_url;
 
                     let data["id"] = this->database->uuid();
-                    let data["created_by"] = this->getUserId();                    
+                    let data["created_by"] = this->getUserId();
                                         
                     let data = this->setData(data);
 
@@ -171,7 +171,12 @@ class Templates extends Content
                         }
                         let status = this->database->execute(
                             "UPDATE templates SET 
-                                name=:name, file=:file, `is_default`=:is_default, updated_at=NOW(), updated_by=:updated_by
+                                name=:name,
+                                file=:file,
+                                type=:type,
+                                `is_default`=:is_default,
+                                updated_at=NOW(),
+                                updated_by=:updated_by
                             WHERE id=:id",
                             data
                         );
@@ -351,13 +356,13 @@ class Templates extends Content
         return html;
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {   
         let data["name"] = _POST["name"];
         let data["file"] = _POST["file"];
-        let data["type"] = _POST["type"];
+        let data["type"] = isset(_POST["type"]) ? _POST["type"] : (!empty(model) ? model->type : "page");
         let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
-        let data["updated_by"] = this->getUserId();
+        let data["updated_by"] = user_id ? user_id : this->getUserId();
 
         return data;
     }

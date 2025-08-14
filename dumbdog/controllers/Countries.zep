@@ -310,7 +310,7 @@ class Countries extends Content
         "</div>";
     }
 
-    private function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
         let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;

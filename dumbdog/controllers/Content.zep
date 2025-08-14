@@ -995,18 +995,20 @@ class Content extends Controller
         return html;
     }
 
-    public function setContentData(array data)
+    public function setContentData(array data, user_id = null)
     {
         var date;
         let date = new Dates();
 
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
+        let data["template_id"] = _POST["template_id"];
         let data["title"] = _POST["title"];
-        let data["sub_title"] = _POST["sub_title"];
-        let data["slogan"] = _POST["slogan"];
 
-        if (empty(_POST["url"])) {
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : null;
+        let data["slogan"] = isset(_POST["slogan"]) ? _POST["slogan"] : null;
+
+        if (!isset(_POST["url"])) {
             let data["url"] = "/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
         } else {
             let data["url"] = this->cleanUrl(_POST["url"]);
@@ -1014,38 +1016,24 @@ class Content extends Controller
 
         this->validUrl(data);
 
-        let data["content"] = this->cleanContent(_POST["content"]);
-        let data["template_id"] = _POST["template_id"];
-        let data["meta_keywords"] = _POST["meta_keywords"];
-        let data["meta_author"] = _POST["meta_author"];
-        let data["meta_description"] = this->cleanContent(_POST["meta_description"]);
+        let data["content"] = (isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : null); 
+        let data["meta_keywords"] = (isset(_POST["meta_keywords"]) ?_POST["meta_keywords"] : null);
+        let data["meta_author"] = (isset(_POST["meta_author"]) ? _POST["meta_author"] : null);
+        let data["meta_description"] = (isset(_POST["meta_description"]) ? this->cleanContent(_POST["meta_description"]) : null);
         let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
         let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
-        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
-        let data["updated_by"] = this->database->getUserId();
+        let data["tags"] = (isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : null);
+        let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
 
         return data;
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {   
-        let data = this->setContentData(data);
+        let data = this->setContentData(data, user_id);
 
-        /*let data["event_on"] = null;                    
-        let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
-        let data["author"] = isset(_POST["author"]) ? _POST["author"] : null;
-        let data["company_name"] = isset(_POST["company_name"]) ? _POST["company_name"] : null;*/
-        let data["parent_id"] = _POST["parent_id"];
-        let data["sort"] = intval(_POST["sort"]);
-/*
-        if (isset(_POST["event_on"])) {
-            if (!isset(_POST["event_time"])) {
-                let _POST["event_time"] = "00:00";
-            } elseif (empty(_POST["event_time"])) {
-                let _POST["event_time"] = "00:00";
-            }
-            let data["event_on"] = this->database->toDate(_POST["event_on"] . " " . _POST["event_time"] . ":00");
-        }*/
+        let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : null;
+        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : 0;
 
         return data;
     }

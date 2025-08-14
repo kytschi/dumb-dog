@@ -639,21 +639,19 @@ class Leads extends Content
         "</div>";
     }
 
-    private function setData(array data, bool add = false)
+    public function setData(array data, user_id = null, model = null)
     {
-        if (add) {
-            let data["title"] = _POST["title"];
-            let data["last_name"] = _POST["last_name"];
-            let data["email"] = _POST["email"];
-            let data["phone"] = _POST["phone"];
-            let data["website"] = _POST["website"];
-            let data["position"] = _POST["position"];
-            let data["tags"] = _POST["tags"];
-        } else {
-            let data["ranking"] = _POST["ranking"];
-            let data["user_id"] = _POST["user_id"];
-            let data["updated_by"] = this->database->getUserId();
-        }
+        let data["title"] = _POST["title"];
+        let data["last_name"] = _POST["last_name"];
+        let data["email"] = _POST["email"];
+        let data["phone"] = _POST["phone"];
+        let data["website"] = _POST["website"];
+        let data["position"] = _POST["position"];
+        let data["tags"] = _POST["tags"];
+    
+        let data["ranking"] = isset(_POST["ranking"]) ? _POST["ranking"] : null;
+        let data["user_id"] = isset(_POST["user_id"]) ? _POST["user_id"] : null;
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }

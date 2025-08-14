@@ -657,7 +657,7 @@ class Appointments extends Content
         return html;
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {
         if (empty(_POST["url"])) {
             let data["url"] = "/appointments/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);

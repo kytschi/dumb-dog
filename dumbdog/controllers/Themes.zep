@@ -336,7 +336,7 @@ class Themes extends Content
         return html;
     }
 
-    public function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
         let data["folder"] = _POST["folder"];

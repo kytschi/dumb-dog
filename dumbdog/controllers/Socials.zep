@@ -370,7 +370,7 @@ class Socials extends Content
         "</div>";
     }
 
-    private function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];

@@ -59,52 +59,62 @@ class Controller
 
     public function createReturn(message, data = null, query = null, code = 200)
     {
-        var obj, pagination, pages, check, offset = 0;
+        var obj, pagination, pages = 1, check, offset = 0, err;
 
-        let obj = new \stdClass();
+        try {
+            let obj = new \stdClass();
 
-        let obj->copyright = "(c)" . date("Y") . " Mike Welsh";
-        let obj->website = "https://dumb-dog.kytschi.com";
-        let obj->code = code;
-        let obj->message = message;
-        let obj->query = query;
+            let obj->copyright = "(c)" . date("Y") . " Mike Welsh";
+            let obj->website = "https://dumb-dog.kytschi.com";
+            let obj->code = code;
+            let obj->message = message;
+            let obj->query = query;
 
-        let pages = intval(count(data) / this->pagination_per_page);
-        if (pages < 1) {
-            let pages = 1;
+            if (is_array(data)) {
+                let pages = intval(count(data) / this->pagination_per_page);
+                if (pages < 1) {
+                    let pages = 1;
+                }
+            
+                let check = pages * this->pagination_per_page;
+                if (check < count(data)) {
+                    let pages = pages + 1;
+                }
+            }
+
+            let pagination = new \stdClass();
+            let pagination->per_page = this->pagination_per_page;
+            let pagination->total = is_array(data) ? count(data) : 1;
+            let pagination->page_first = 1;
+            let pagination->page_previous = (this->pagination_page - 1);
+            if (pagination->page_previous < 1) {
+                let pagination->page_previous = 1;
+            }
+            let pagination->page_next = (this->pagination_page + 1);
+            if (pagination->page_next > pages) {
+                let pagination->page_next = pages;
+            }
+            let pagination->page_last = pages;
+            let pagination->pages = pages;
+
+            let obj->pagination = pagination;
+
+            let offset = (this->pagination_page - 1) * this->pagination_per_page;
+
+            if (is_array(data)) {
+                let obj->data = array_slice(
+                    data,
+                    offset,
+                    this->pagination_per_page
+                );
+            } else {
+                let obj->data = data;
+            }
+
+            return this->outputJson(obj, code);
+        } catch \Exception, err {
+            return this->jsonError(err);
         }
-
-        let check = pages * this->pagination_per_page;
-        if (check < count(data)) {
-            let pages = pages + 1;
-        }
-
-        let pagination = new \stdClass();
-        let pagination->per_page = this->pagination_per_page;
-        let pagination->total = count(data);
-        let pagination->page_first = 1;
-        let pagination->page_previous = (this->pagination_page - 1);
-        if (pagination->page_previous < 1) {
-            let pagination->page_previous = 1;
-        }
-        let pagination->page_next = (this->pagination_page + 1);
-        if (pagination->page_next > pages) {
-            let pagination->page_next = pages;
-        }
-        let pagination->page_last = pages;
-        let pagination->pages = pages;
-
-        let obj->pagination = pagination;
-
-        let offset = (this->pagination_page - 1) * this->pagination_per_page;
-
-        let obj->data = array_slice(
-            data,
-            offset,
-            this->pagination_per_page
-        );
-
-        return this->outputJson(obj, code);
     }
 
     public function jsonError(err)

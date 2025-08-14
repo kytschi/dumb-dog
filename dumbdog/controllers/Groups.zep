@@ -63,7 +63,7 @@ class Groups extends Content
                     let html .= this->missingRequired();
                 } else {
                     try {
-                        let data = this->setData(data, model);
+                        let data = this->setData(data, null, model);
                         let data["created_by"] = this->database->getUserId();
                         let data["id"] = this->database->uuid();
                         
@@ -167,7 +167,7 @@ class Groups extends Content
 
                     let query .= " WHERE id=:id";
 
-                    let data = this->setData(data, model);
+                    let data = this->setData(data, null, model);
 
                     let status = this->database->execute(
                         query,
@@ -361,7 +361,7 @@ class Groups extends Content
         "</div>";
     }
 
-    private function setData(data, model)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
         let data["slug"] = _POST["slug"];

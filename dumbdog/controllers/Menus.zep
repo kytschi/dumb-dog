@@ -578,7 +578,7 @@ class Menus extends Content
         "</div>";
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];

@@ -431,7 +431,7 @@ class ApiApps extends Controller
         return html;
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {   
         let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
         let data["name"] = _POST["name"];

@@ -70,7 +70,7 @@ class Users extends Content
                             throw new \Exception("passwords do not match!");
                         }
 
-                        let data = this->setData(data, model);
+                        let data = this->setData(data, null, model);
                         let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
                         let data["created_by"] = this->database->getUserId();
                         let data["id"] = this->database->uuid();
@@ -193,7 +193,7 @@ class Users extends Content
 
                     let query .= " WHERE id=:id";
 
-                    let data = this->setData(data, model);
+                    let data = this->setData(data, null, model);
 
                     let status = this->database->execute(
                         query,
@@ -364,7 +364,7 @@ class Users extends Content
         "</div>";
     }
 
-    private function setData(data, model)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
 

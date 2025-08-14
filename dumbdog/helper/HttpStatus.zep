@@ -89,6 +89,10 @@ class HttpStatus
 
     public function setHttpStatus(code = 200)
     {
+        if (is_string(code)) {
+            let code = 400;
+        }
+
         header("HTTP/1.1 " . code . " " . this->http_status_codes[code]);
     }
 }

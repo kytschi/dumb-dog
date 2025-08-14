@@ -12,6 +12,7 @@ namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
 use DumbDog\Controllers\Api\Pages;
+use DumbDog\Controllers\Api\Templates;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
@@ -36,7 +37,8 @@ class ApiControl extends Controller
 
         let this->controllers = [
             "this": "this",
-            "Pages": new Pages()
+            "Pages": new Pages(),
+            "Templates": new Templates()
         ];
 
         for controller in this->controllers {
