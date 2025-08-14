@@ -214,10 +214,6 @@ class Style
             vertical-align: top;
             border-right: 3px solid var(--box-title-border-colour);
         }
-        .dd-table tr.dd-deleted {
-            color: var(--text-deleted);
-            text-decoration: line-through;
-        }
         .dd-table tr .dd-blank {
             background-color: var(--box-disabled-background-colour);
         }
@@ -247,8 +243,12 @@ class Style
             padding: 0;
             margin: 0;
         }
-        .dd-deleted.dd-alert, .dd-deleted .dd-box-title {
-            background-color: var(--box-deleted-background-colour);
+        .dd-deleted.dd-alert, .dd-deleted .dd-box-title, .dd-deleted {
+            background-color: var(--box-deleted-background-colour) !important;
+        }
+        .dd-deleted {
+            color: var(--text-deleted) !important;
+            text-decoration: line-through !important;
         }
         .dd-warning.dd-alert {
             background-color: var(--box-warning-background-colour);

@@ -89,7 +89,7 @@ class HttpStatus
 
     public function setHttpStatus(code = 200)
     {
-        if (is_string(code)) {
+        if (is_string(code) || code == 0) {
             let code = 400;
         }
 

@@ -6,8 +6,8 @@
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
@@ -246,7 +246,15 @@ class Appointments extends Content
                         updated_by=:updated_by,
                         tags=:tags,
                         featured=:featured,
-                        sitemap_include=:sitemap_include 
+                        sitemap_include=:sitemap_include,
+                        public_facing=:public_facing,
+                        user_id=:user_id,
+                        with_email=:with_email,
+                        with_number=:with_number,
+                        free_slot=:free_slot,
+                        appointment_length=:appointment_length,
+                        on_date=:on_date,
+                        lead_id=:lead_id
                     WHERE id=:id",
                     data
                 );
@@ -383,6 +391,9 @@ class Appointments extends Content
                     let html .= "<div class='dd-calendar-event";
                     if (entry->free_slot) {
                         let html .= " dd-calendar-free-slot";
+                    }
+                    if (entry->deleted_at) {
+                        let html .= " dd-deleted";
                     }
                     let html .= "'><a href='" .this->global_url . "/edit/" . entry->id . "' class='dd-link'>
                         <small>" .date("H:i", strtotime(entry->on_date));
@@ -536,7 +547,7 @@ class Appointments extends Content
                 let html .=
                     this->buttons->generic(
                         this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id,
-                        "lead",
+                        "",
                         "leads",
                         "View the lead"
                     );
@@ -659,12 +670,18 @@ class Appointments extends Content
 
     public function setData(array data, user_id = null, model = null)
     {
-        if (empty(_POST["url"])) {
-            let data["url"] = "/appointments/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
-        }
-        let data = this->setContentData(data);
+        let data = this->setContentData(data, user_id);
 
-        let data["public_facing"] = isset(_POST["public_facing"]) ? 1 : 0;
+        if (!empty(model) && !isset(_POST["template_id"])) {
+            let data["template_id"] = model->template_id;
+        }
+
+        if (!isset(_POST["url"])) {
+            let data["url"] = "/appointments/" .
+                this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
+        }
+
+        this->validUrl(data);
 
         return data;
     }

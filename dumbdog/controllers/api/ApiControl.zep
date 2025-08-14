@@ -11,6 +11,7 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
+use DumbDog\Controllers\Api\Appointments;
 use DumbDog\Controllers\Api\Pages;
 use DumbDog\Controllers\Api\Templates;
 use DumbDog\Controllers\Database;
@@ -37,6 +38,7 @@ class ApiControl extends Controller
 
         let this->controllers = [
             "this": "this",
+            "Appointments": new Appointments(),
             "Pages": new Pages(),
             "Templates": new Templates()
         ];

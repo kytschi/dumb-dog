@@ -997,44 +997,53 @@ class Content extends Controller
 
     public function setContentData(array data, user_id = null)
     {
-        var date;
-        let date = new Dates();
+        var result;
 
         let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
-        let data["template_id"] = _POST["template_id"];
-        let data["title"] = _POST["title"];
 
-        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : null;
-        let data["slogan"] = isset(_POST["slogan"]) ? _POST["slogan"] : null;
+        if (!isset(_POST["template_id"])) {
+            let result = this->database->get("SELECT id FROM templates WHERE is_default=1");
+            if (empty(result)) {
+                throw new Exception(
+                    "No default template found, either set a template_id or set a default template"
+                );
+            }
+            let data["template_id"] = result->id;
+        } else {
+            let data["template_id"] = _POST["template_id"];
+        }
 
         if (!isset(_POST["url"])) {
-            let data["url"] = "/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
+            let data["url"] = "/" . this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
         } else {
             let data["url"] = this->cleanUrl(_POST["url"]);
         }
 
         this->validUrl(data);
 
+        let data["title"] = isset(_POST["title"]) ? _POST["title"] : null;
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : null;
+        let data["slogan"] = isset(_POST["slogan"]) ? _POST["slogan"] : null;
         let data["content"] = (isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : null); 
         let data["meta_keywords"] = (isset(_POST["meta_keywords"]) ?_POST["meta_keywords"] : null);
         let data["meta_author"] = (isset(_POST["meta_author"]) ? _POST["meta_author"] : null);
         let data["meta_description"] = (isset(_POST["meta_description"]) ? this->cleanContent(_POST["meta_description"]) : null);
         let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
         let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
+        let data["public_facing"] = isset(_POST["public_facing"]) ? 1 : 0;
         let data["tags"] = (isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : null);
-        let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
 
+        let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : null;
+        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : 0;
+        let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
+        
         return data;
     }
 
     public function setData(array data, user_id = null, model = null)
     {   
         let data = this->setContentData(data, user_id);
-
-        let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : null;
-        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : 0;
-
         return data;
     }
 
