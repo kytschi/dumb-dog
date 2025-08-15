@@ -178,12 +178,11 @@ class Appointments extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "appointment";
 
         let model = this->database->get(
-            "SELECT content.* FROM content WHERE content.id=:id",
-            [
-                "id": data["id"]
-            ]
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
+            data
         );
 
         if (empty(model)) {
@@ -228,8 +227,9 @@ class Appointments extends Controller
         let controller = new Main();
                 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "appointment";
         let model = this->database->get(
-            "SELECT content.* FROM content WHERE id=:id",
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
             data
         );
 
@@ -395,12 +395,11 @@ class Appointments extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "appointment";
 
         let model = this->database->get(
-            "SELECT content.* FROM content WHERE content.id=:id",
-            [
-                "id": data["id"]
-            ]
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
+            data
         );
 
         if (empty(model)) {

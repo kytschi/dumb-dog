@@ -1,7 +1,7 @@
 /**
- * DumbDog API for pages controller
+ * DumbDog API for page categories controller
  *
- * @package     DumbDog\Controllers\Api\Pages
+ * @package     DumbDog\Controllers\Api\PageCategories
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -11,34 +11,34 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\Content;
+use DumbDog\Controllers\ContentCategories as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
-class Pages extends Controller
+class PageCategories extends Controller
 {
     public api_routes = [
-        "/api/pages/add": [
-            "Pages",
+        "/api/page-categories/add": [
+            "PageCategories",
             "add"
         ],
-        "/api/pages/delete": [
-            "Pages",
+        "/api/page-categories/delete": [
+            "PageCategories",
             "delete"
         ],
-        "/api/pages/edit": [
-            "Pages",
+        "/api/page-categories/edit": [
+            "PageCategories",
             "edit"
         ],
-        "/api/pages/recover": [
-            "Pages",
+        "/api/page-categories/recover": [
+            "PageCategories",
             "recover"
         ],
-        "/api/pages": [
-            "Pages",
+        "/api/page-categories": [
+            "PageCategories",
             "list"
         ]
     ];
@@ -52,7 +52,7 @@ class Pages extends Controller
         this->secure();
 
         if (!empty(_POST)) {
-            let controller = new Content();
+            let controller = new Main();
 
             if (!controller->validate(_POST, controller->required)) {
                 throw new ValidationException(
@@ -64,7 +64,7 @@ class Pages extends Controller
 
             let data["id"] = this->database->uuid();
             let data["created_by"] = this->api_app->created_by;
-            let data["type"] = "page";
+            let data["type"] = "page-category";
 
             let data = controller->setData(data, this->api_app->created_by);
 
@@ -88,13 +88,13 @@ class Pages extends Controller
                     parent_id,
                     sort,
                     sitemap_include,
+                    public_facing,
                     created_at,
                     created_by,
                     updated_at,
                     updated_by) 
                 VALUES 
-                    (
-                    :id,
+                    (:id,
                     :status,
                     :name,
                     :title,
@@ -112,6 +112,7 @@ class Pages extends Controller
                     :parent_id,
                     :sort,
                     :sitemap_include,
+                    :public_facing,
                     NOW(),
                     :created_by,
                     NOW(),
@@ -121,7 +122,7 @@ class Pages extends Controller
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the page",
+                    "Failed to save the page category",
                     400
                 );
             } else {
@@ -139,14 +140,14 @@ class Pages extends Controller
                 );
 
                 return this->createReturn(
-                    "Page successfully created",
+                    "Page category successfully created",
                     model
                 );
             }
         }
 
         throw new SaveException(
-            "Failed to save the page, no post data",
+            "Failed to save the page category, no post data",
             400
         );
     }
@@ -157,25 +158,18 @@ class Pages extends Controller
 
         this->secure();
 
-        let controller = new Content();
+        let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "page-category";
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
+            data
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Page not found");
+            throw new NotFoundException("Page category not found");
         }
 
         controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
@@ -194,7 +188,7 @@ class Pages extends Controller
         );
 
         return this->createReturn(
-            "Page successfully marked as deleted",
+            "Page category successfully marked as deleted",
             model
         );
     }
@@ -205,17 +199,17 @@ class Pages extends Controller
 
         this->secure();
 
-        let controller = new Content();
+        let controller = new Main();
                 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "page";
+        let data["type"] = "page-category";
         let model = this->database->get(
-            "SELECT * FROM content WHERE type=:type AND id=:id",
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
             data
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Page not found");
+            throw new NotFoundException("Page category not found");
         }
 
         if (!empty(_POST)) {
@@ -230,33 +224,32 @@ class Pages extends Controller
                 
                 let status = this->database->execute(
                     "UPDATE content SET 
-                        type=:type,
                         status=:status,
                         name=:name,
-                        template_id=:template_id,
-                        url=:url,
                         title=:title,
                         sub_title=:sub_title,
                         slogan=:slogan,
+                        url=:url,
+                        template_id=:template_id,
                         content=:content,
                         meta_keywords=:meta_keywords,
                         meta_author=:meta_author,
                         meta_description=:meta_description,
-                        featured=:featured,
-                        sitemap_include=:sitemap_include,
-                        public_facing=:public_facing,
+                        updated_at=NOW(),
+                        updated_by=:updated_by,
                         tags=:tags,
+                        featured=:featured,
                         parent_id=:parent_id,
                         sort=:sort,
-                        updated_by=:updated_by,
-                        updated_at=NOW() 
+                        sitemap_include=:sitemap_include,
+                        public_facing=:public_facing 
                     WHERE id=:id",
                     data
                 );
             
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the page",
+                        "Failed to update the page category",
                         400
                     );
                 } else {
@@ -274,7 +267,7 @@ class Pages extends Controller
                     );
     
                     return this->createReturn(
-                        "Page successfully updated",
+                        "Page category successfully updated",
                         model
                     );
                 }
@@ -282,7 +275,7 @@ class Pages extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the page, no post data",
+            "Failed to update the page category, no post data",
             400
         );
     }
@@ -294,21 +287,15 @@ class Pages extends Controller
         this->secure();
 
         let query = "
-            SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.type='page'";
+            SELECT content.* FROM content WHERE type='page-category'";
 
         if (isset(_GET["query"])) {
-            let query .= " AND main_page.name LIKE :query";
+            let query .= " AND content.name LIKE :query";
             let data["query"] = "%" . _GET["query"] . "%";
         }
 
         if (isset(_GET["tag"])) {
-            let query .= " AND main_page.tags LIKE :tag";
+            let query .= " AND content.tags LIKE :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
 
@@ -333,15 +320,15 @@ class Pages extends Controller
                 );
             }
 
-            let query .= " ORDER BY main_page." . strtolower(_GET["sort"]) . " " . sort_dir;
+            let query .= " ORDER BY content." . strtolower(_GET["sort"]) . " " . sort_dir;
         } else {
-            let query .= " ORDER BY main_page.name " . sort_dir;
+            let query .= " ORDER BY content.name " . sort_dir;
         }        
 
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Pages",
+            "Page categories",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
@@ -353,31 +340,24 @@ class Pages extends Controller
 
         this->secure();
 
-        let controller = new Content();
+        let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "page-category";
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
+            data
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Page not found");
+            throw new NotFoundException("Page category not found");
         }
 
         controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
-            "SELECT main_page.*,
+            "SELECT main_page.*, 
             IFNULL(templates.name, 'No template') AS template, 
             IFNULL(parent_page.name, 'No parent') AS parent 
             FROM content AS main_page 
@@ -390,7 +370,7 @@ class Pages extends Controller
         );
 
         return this->createReturn(
-            "Page successfully recovered from the deleted state",
+            "Page category successfully recovered from the deleted state",
             model
         );
     }
