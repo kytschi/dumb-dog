@@ -1,7 +1,7 @@
 /**
- * DumbDog API for appointments controller
+ * DumbDog API for blog controller
  *
- * @package     DumbDog\Controllers\Api\Appointments
+ * @package     DumbDog\Controllers\Api\Blogs
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -11,34 +11,34 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\Appointments as Main;
+use DumbDog\Controllers\Blog as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
-class Appointments extends Controller
+class Blog extends Controller
 {
     public api_routes = [
-        "/api/appointments/add": [
-            "Appointments",
+        "/api/blog/add": [
+            "Blog",
             "add"
         ],
-        "/api/appointments/delete": [
-            "Appointments",
+        "/api/blog/delete": [
+            "Blog",
             "delete"
         ],
-        "/api/appointments/edit": [
-            "Appointments",
+        "/api/blog/edit": [
+            "Blog",
             "edit"
         ],
-        "/api/appointments/recover": [
-            "Appointments",
+        "/api/blog/recover": [
+            "Blog",
             "recover"
         ],
-        "/api/appointments": [
-            "Appointments",
+        "/api/blog": [
+            "Blog",
             "list"
         ]
     ];
@@ -64,7 +64,7 @@ class Appointments extends Controller
 
             let data["id"] = this->database->uuid();
             let data["created_by"] = this->api_app->created_by;
-            let data["type"] = "appointment";
+            let data["type"] = "blog";
 
             let data = controller->setData(data, this->api_app->created_by);
 
@@ -122,32 +122,15 @@ class Appointments extends Controller
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the appointment",
+                    "Failed to save the blog",
                     400
                 );
             } else {
                 let model = this->database->get(
-                    "SELECT content.* FROM content WHERE id=:id",
-                    [
-                        "id": data["id"]
-                    ]
-                );
-
-                controller->updateExtra(model, path);
-
-                let model = this->database->get(
                     "SELECT main_page.*,
-                    appointments.user_id,
-                    appointments.lead_id,
-                    appointments.with_email, 
-                    appointments.with_number,
-                    appointments.on_date,
-                    appointments.appointment_length,
-                    appointments.free_slot,
                     IFNULL(templates.name, 'No template') AS template, 
                     IFNULL(parent_page.name, 'No parent') AS parent 
                     FROM content AS main_page 
-                    JOIN appointments ON appointments.content_id = main_page.id 
                     LEFT JOIN templates ON templates.id=main_page.template_id 
                     LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
                     WHERE main_page.id=:id",
@@ -157,14 +140,14 @@ class Appointments extends Controller
                 );
 
                 return this->createReturn(
-                    "Appointment successfully created",
+                    "Blog successfully created",
                     model
                 );
             }
         }
 
         throw new SaveException(
-            "Failed to save the appointment, no post data",
+            "Failed to save the blog, no post data",
             400
         );
     }
@@ -187,24 +170,16 @@ class Appointments extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Appointment not found");
+            throw new NotFoundException("Blog not found");
         }
 
         controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
             "SELECT main_page.*,
-            appointments.user_id,
-            appointments.lead_id,
-            appointments.with_email, 
-            appointments.with_number,
-            appointments.on_date,
-            appointments.appointment_length,
-            appointments.free_slot, 
             IFNULL(templates.name, 'No template') AS template, 
             IFNULL(parent_page.name, 'No parent') AS parent 
             FROM content AS main_page 
-            JOIN appointments ON appointments.content_id = content.id 
             LEFT JOIN templates ON templates.id=main_page.template_id 
             LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
             WHERE main_page.id=:id",
@@ -214,7 +189,7 @@ class Appointments extends Controller
         );
 
         return this->createReturn(
-            "Appointment successfully marked as deleted",
+            "Blog successfully marked as deleted",
             model
         );
     }
@@ -234,7 +209,7 @@ class Appointments extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Appointment not found");
+            throw new NotFoundException("Blog not found");
         }
 
         if (!empty(_POST)) {
@@ -274,32 +249,15 @@ class Appointments extends Controller
             
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the appointment",
+                        "Failed to update the blog",
                         400
                     );
                 } else {
                     let model = this->database->get(
-                        "SELECT content.* FROM content WHERE id=:id",
-                        [
-                            "id": data["id"]
-                        ]
-                    );
-    
-                    controller->updateExtra(model, path);
-
-                    let model = this->database->get(
                         "SELECT main_page.*,
-                        appointments.user_id,
-                        appointments.lead_id,
-                        appointments.with_email, 
-                        appointments.with_number,
-                        appointments.on_date,
-                        appointments.appointment_length,
-                        appointments.free_slot, 
                         IFNULL(templates.name, 'No template') AS template, 
                         IFNULL(parent_page.name, 'No parent') AS parent 
                         FROM content AS main_page 
-                        JOIN appointments ON appointments.content_id = main_page.id 
                         LEFT JOIN templates ON templates.id=main_page.template_id 
                         LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
                         WHERE main_page.id=:id",
@@ -309,7 +267,7 @@ class Appointments extends Controller
                     );
     
                     return this->createReturn(
-                        "Appointment successfully updated",
+                        "Blog successfully updated",
                         model
                     );
                 }
@@ -317,7 +275,7 @@ class Appointments extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the appointment, no post data",
+            "Failed to update the blog, no post data",
             400
         );
     }
@@ -329,17 +287,7 @@ class Appointments extends Controller
         this->secure();
 
         let query = "
-            SELECT
-                content.*,
-                appointments.user_id,
-                appointments.lead_id,
-                appointments.with_email, 
-                appointments.with_number,
-                appointments.on_date,
-                appointments.appointment_length,
-                appointments.free_slot 
-            FROM content 
-            JOIN appointments ON appointments.content_id = content.id ";
+            SELECT content.* FROM content WHERE type='blog'";
 
         if (isset(_GET["query"])) {
             let query .= " AND content.name LIKE :query";
@@ -380,7 +328,7 @@ class Appointments extends Controller
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Appointments",
+            "Blogs",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
@@ -404,24 +352,16 @@ class Appointments extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Appointment not found");
+            throw new NotFoundException("Blog not found");
         }
 
         controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            appointments.user_id,
-            appointments.lead_id,
-            appointments.with_email, 
-            appointments.with_number,
-            appointments.on_date,
-            appointments.appointment_length,
-            appointments.free_slot, 
+            "SELECT main_page.*, 
             IFNULL(templates.name, 'No template') AS template, 
             IFNULL(parent_page.name, 'No parent') AS parent 
             FROM content AS main_page 
-            JOIN appointments ON appointments.content_id = content.id 
             LEFT JOIN templates ON templates.id=main_page.template_id 
             LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
             WHERE main_page.id=:id",
@@ -431,7 +371,7 @@ class Appointments extends Controller
         );
 
         return this->createReturn(
-            "Appointment successfully recovered from the deleted state",
+            "Blog successfully recovered from the deleted state",
             model
         );
     }

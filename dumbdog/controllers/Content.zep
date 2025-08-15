@@ -44,7 +44,7 @@ class Content extends Controller
         "template"
     ];
 
-    public required = ["name", "title", "template_id"];
+    public required = ["name", "title"];
 
     public routes = [
         "/pages/add": [
@@ -995,7 +995,7 @@ class Content extends Controller
         return html;
     }
 
-    public function setContentData(array data, user_id = null)
+    public function setContentData(array data, user_id = null, model = null)
     {
         var result;
 
@@ -1003,13 +1003,17 @@ class Content extends Controller
         let data["name"] = _POST["name"];
 
         if (!isset(_POST["template_id"])) {
-            let result = this->database->get("SELECT id FROM templates WHERE is_default=1");
-            if (empty(result)) {
-                throw new Exception(
-                    "No default template found, either set a template_id or set a default template"
-                );
+            if (!empty(model)) {
+                let data["template_id"] = model->template_id;
+            } else {
+                let result = this->database->get("SELECT id FROM templates WHERE is_default=1");
+                if (empty(result)) {
+                    throw new Exception(
+                        "No default template found, either set a template_id or set a default template"
+                    );
+                }
+                let data["template_id"] = result->id;
             }
-            let data["template_id"] = result->id;
         } else {
             let data["template_id"] = _POST["template_id"];
         }
@@ -1043,7 +1047,7 @@ class Content extends Controller
 
     public function setData(array data, user_id = null, model = null)
     {   
-        let data = this->setContentData(data, user_id);
+        let data = this->setContentData(data, user_id, model);
         return data;
     }
 

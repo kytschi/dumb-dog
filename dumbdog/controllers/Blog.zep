@@ -18,8 +18,6 @@ class Blog extends Content
     public type = "blog";
     public title = "Blog";
 
-    public required = ["name", "title", "template_id"];
-
     public routes = [
         "/blog-posts/add": [
             "Blog",

@@ -11,7 +11,7 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\Templates as MainTemplates;
+use DumbDog\Controllers\Templates as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
@@ -52,7 +52,7 @@ class Templates extends Controller
         this->secure();
 
         if (!empty(_POST)) {
-            let controller = new MainTemplates();
+            let controller = new Main();
 
             if (!controller->validate(_POST, controller->required)) {
                 throw new ValidationException(
@@ -126,7 +126,7 @@ class Templates extends Controller
 
         this->secure();
 
-        let controller = new MainTemplates();
+        let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
 
@@ -152,7 +152,7 @@ class Templates extends Controller
 
         this->secure();
 
-        let controller = new MainTemplates();
+        let controller = new Main();
         
         let data["id"] = controller->getPageId(path);
         let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
@@ -279,7 +279,7 @@ class Templates extends Controller
 
         this->secure();
 
-        let controller = new MainTemplates();
+        let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
 
