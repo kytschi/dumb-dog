@@ -1,7 +1,7 @@
 /**
- * DumbDog API for blog controller
+ * DumbDog API for blog categories controller
  *
- * @package     DumbDog\Controllers\Api\Blog
+ * @package     DumbDog\Controllers\Api\BlogCategories
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -11,34 +11,34 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\Blog as Main;
+use DumbDog\Controllers\BlogCategories as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
-class Blog extends Controller
+class BlogCategories extends Controller
 {
     public api_routes = [
-        "/api/blog/add": [
-            "Blog",
+        "/api/blog-categories/add": [
+            "BlogCategories",
             "add"
         ],
-        "/api/blog/delete": [
-            "Blog",
+        "/api/blog-categories/delete": [
+            "BlogCategories",
             "delete"
         ],
-        "/api/blog/edit": [
-            "Blog",
+        "/api/blog-categories/edit": [
+            "BlogCategories",
             "edit"
         ],
-        "/api/blog/recover": [
-            "Blog",
+        "/api/blog-categories/recover": [
+            "BlogCategories",
             "recover"
         ],
-        "/api/blog": [
-            "Blog",
+        "/api/blog-categories": [
+            "BlogCategories",
             "list"
         ]
     ];
@@ -64,7 +64,7 @@ class Blog extends Controller
 
             let data["id"] = this->database->uuid();
             let data["created_by"] = this->api_app->created_by;
-            let data["type"] = "blog";
+            let data["type"] = "blog-category";
 
             let data = controller->setData(data, this->api_app->created_by);
 
@@ -122,7 +122,7 @@ class Blog extends Controller
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the blog",
+                    "Failed to save the blog category",
                     400
                 );
             } else {
@@ -140,14 +140,14 @@ class Blog extends Controller
                 );
 
                 return this->createReturn(
-                    "Blog successfully created",
+                    "Blog category successfully created",
                     model
                 );
             }
         }
 
         throw new SaveException(
-            "Failed to save the blog, no post data",
+            "Failed to save the blog category, no post data",
             400
         );
     }
@@ -170,7 +170,7 @@ class Blog extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Blog not found");
+            throw new NotFoundException("Blog category not found");
         }
 
         controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
@@ -189,7 +189,7 @@ class Blog extends Controller
         );
 
         return this->createReturn(
-            "Blog successfully marked as deleted",
+            "Blog category successfully marked as deleted",
             model
         );
     }
@@ -209,7 +209,7 @@ class Blog extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Blog not found");
+            throw new NotFoundException("Blog category not found");
         }
 
         if (!empty(_POST)) {
@@ -249,7 +249,7 @@ class Blog extends Controller
             
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the blog",
+                        "Failed to update the blog category",
                         400
                     );
                 } else {
@@ -267,7 +267,7 @@ class Blog extends Controller
                     );
     
                     return this->createReturn(
-                        "Blog successfully updated",
+                        "Blog category successfully updated",
                         model
                     );
                 }
@@ -275,7 +275,7 @@ class Blog extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the blog, no post data",
+            "Failed to update the blog category, no post data",
             400
         );
     }
@@ -287,7 +287,7 @@ class Blog extends Controller
         this->secure();
 
         let query = "
-            SELECT content.* FROM content WHERE type='blog'";
+            SELECT content.* FROM content WHERE type='blog-category'";
 
         if (isset(_GET["query"])) {
             let query .= " AND content.name LIKE :query";
@@ -328,7 +328,7 @@ class Blog extends Controller
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Blogs",
+            "Blog categories",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
@@ -352,7 +352,7 @@ class Blog extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Blog not found");
+            throw new NotFoundException("Blog category not found");
         }
 
         controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
@@ -371,7 +371,7 @@ class Blog extends Controller
         );
 
         return this->createReturn(
-            "Blog successfully recovered from the deleted state",
+            "Blog category successfully recovered from the deleted state",
             model
         );
     }
