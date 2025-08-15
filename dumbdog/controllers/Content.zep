@@ -395,6 +395,7 @@ class Content extends Controller
                         featured=:featured,
                         parent_id=:parent_id,
                         sort=:sort,
+                        public_facing=:public_facing,
                         sitemap_include=:sitemap_include
                     WHERE id=:id",
                     data
@@ -550,7 +551,7 @@ class Content extends Controller
                                                 true,
                                                 model->url,
                                                 false,
-                                                "If you leave it blank I'll auto-generate a URL for you") .
+                                                "If you leave it blank I'll auto-generate a URL for you") .                                            
                                         "</div>
                                     </div>
                                 </div>
@@ -999,7 +1000,13 @@ class Content extends Controller
     {
         var result;
 
-        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
+        let data["status"] = isset(_POST["status"]) ? "live" : (model ? model->status : "offline");
+
+        let data["public_facing"] = 0;
+        if (isset(_POST["public_facing"]) || data["status"] == "live") {
+            let data["public_facing"] = 1;
+        }
+
         let data["name"] = _POST["name"];
 
         if (!isset(_POST["template_id"])) {
@@ -1019,27 +1026,31 @@ class Content extends Controller
         }
 
         if (!isset(_POST["url"])) {
-            let data["url"] = "/" . this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
+            if (!model) {
+                let data["url"] = 
+                    "/" . this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
+            } else {
+                let data["url"] = model->url;
+            }
         } else {
             let data["url"] = this->cleanUrl(_POST["url"]);
         }
 
         this->validUrl(data);
 
-        let data["title"] = isset(_POST["title"]) ? _POST["title"] : null;
-        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : null;
-        let data["slogan"] = isset(_POST["slogan"]) ? _POST["slogan"] : null;
-        let data["content"] = (isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : null); 
-        let data["meta_keywords"] = (isset(_POST["meta_keywords"]) ?_POST["meta_keywords"] : null);
-        let data["meta_author"] = (isset(_POST["meta_author"]) ? _POST["meta_author"] : null);
-        let data["meta_description"] = (isset(_POST["meta_description"]) ? this->cleanContent(_POST["meta_description"]) : null);
-        let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
-        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
-        let data["public_facing"] = isset(_POST["public_facing"]) ? 1 : 0;
-        let data["tags"] = (isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : null);
-
-        let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : null;
-        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : 0;
+        let data["title"] = isset(_POST["title"]) ? _POST["title"] : (model ? model->title : null);
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : (model ? model->sub_title : null);
+        let data["slogan"] = isset(_POST["slogan"]) ? _POST["slogan"] : (model ? model->slogan : null);
+        let data["content"] = (isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : (model ? model->content : null)); 
+        let data["meta_keywords"] = (isset(_POST["meta_keywords"]) ?_POST["meta_keywords"] : (model ? model->meta_keywords : null));
+        let data["meta_author"] = (isset(_POST["meta_author"]) ? _POST["meta_author"] : (model ? model->meta_author : null));
+        let data["meta_description"] = (isset(_POST["meta_description"]) ? this->cleanContent(_POST["meta_description"]) : (model ? model->meta_description : null));
+        
+        let data["featured"] = isset(_POST["featured"]) ? 1 : (model ? model->featured : 0);
+        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : (model ? model->sitemap_include : null);
+        let data["tags"] = (isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : (model ? model->tags : null));
+        let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : (model ? model->parent_id : null);
+        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : (model ? model->sort : 0);
         let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
         
         return data;

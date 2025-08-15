@@ -14,6 +14,7 @@ use DumbDog\Controllers\Api\Controller;
 use DumbDog\Controllers\Api\Appointments;
 use DumbDog\Controllers\Api\Blog;
 use DumbDog\Controllers\Api\BlogCategories;
+use DumbDog\Controllers\Api\ContentStacks;
 use DumbDog\Controllers\Api\PageCategories;
 use DumbDog\Controllers\Api\Pages;
 use DumbDog\Controllers\Api\Templates;
@@ -44,6 +45,7 @@ class ApiControl extends Controller
             "Appointments": new Appointments(),
             "BlogCategories": new BlogCategories(),
             "Blog": new Blog(),
+            "ContentStacks": new ContentStacks(),
             "PageCategories": new PageCategories(),
             "Pages": new Pages(),
             "Templates": new Templates()

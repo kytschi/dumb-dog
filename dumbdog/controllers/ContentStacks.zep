@@ -405,7 +405,7 @@ class ContentStacks extends Content
                             this->inputs->text("Name", "stack_name[]", "The name of the stack item", true, item->name) .
                             this->inputs->text("Title", "stack_title[]", "The title of the stack item", false, item->title) .
                             this->inputs->text("Sub title", "stack_sub_title[]", "The display sub title for the stack", false, item->sub_title) .
-                            this->inputs->wysiwyg("Description", "stack_description[]", "The stack description item", false, item->description) . 
+                            this->inputs->wysiwyg("Content", "stack_content[]", "The stack content item", false, item->content) . 
                             this->inputs->image("Image", "stack_image[]", "Upload an image here", false, item) . 
                             this->inputs->number("Sort", "stack_sort[]", "Sort the stack item", false, item->sort) .
                             this->inputs->hidden("stack_id[]", item->id) . 
@@ -512,10 +512,30 @@ class ContentStacks extends Content
     public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
-        let data["title"] = _POST["title"];
-        let data["description"] = _POST["description"];
-        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
-        let data["updated_by"] = this->database->getUserId();
+
+        let data["title"] = isset(_POST["title"]) ? _POST["title"] : (model ? model->title : null);
+        let data["content"] = isset(_POST["content"]) ? _POST["content"] : (model ? model->content : null);
+        let data["sort"] = isset(_POST["sort"]) ? _POST["sort"] : (model ? model->sort : 0);
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : (model ? model->sub_title : null);
+
+        let data["template_id"] = 
+            isset(_POST["template_id"]) ?
+                _POST["template_id"] :
+                (model ? model->template_id : null);
+        
+        let data["content_id"] =
+            isset(_POST["content_id"]) ? 
+                _POST["content_id"] : 
+                (model ? model->content_id : null);
+
+        let data["content_stack_id"] =
+            isset(_POST["content_stack_id"]) ?
+                _POST["content_stack_id"] :
+                (model ? model->content_stack_id : null);
+
+        let data["tags"] = isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : (model ? model->tags : null);
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }
@@ -533,7 +553,7 @@ class ContentStacks extends Content
                 "name": "",
                 "title": "",
                 "sub_title": "",
-                "description": "",
+                "content": "",
                 "sort": 0
             ];
 
@@ -550,8 +570,8 @@ class ContentStacks extends Content
             if (isset(_POST["stack_sub_title"][key])) {
                 let data["sub_title"] = _POST["stack_sub_title"][key];
             }
-            if (isset(_POST["stack_description"][key])) {
-                let data["description"] = _POST["stack_description"][key];
+            if (isset(_POST["stack_content"][key])) {
+                let data["content"] = _POST["stack_content"][key];
             }
             if (isset(_POST["stack_sort"][key])) {
                 let data["sort"] = intval(_POST["stack_sort"][key]);
@@ -562,7 +582,7 @@ class ContentStacks extends Content
                     name=:name,
                     title=:title,
                     sub_title=:sub_title,
-                    description=:description,
+                    content=:content,
                     sort=:sort 
                 WHERE id=:id",
                 data
