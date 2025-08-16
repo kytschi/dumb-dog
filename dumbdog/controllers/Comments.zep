@@ -37,6 +37,8 @@ class Comments extends Controller
         ]
     ];
 
+    public required = ["name"];
+
     /*public function add(path)
     {
         var titles, html, database;
@@ -344,4 +346,9 @@ class Comments extends Controller
     }
 
     */
+
+    public function setData(array data, user_id = null, model = null)
+    {   
+        return data;
+    }
 }

@@ -68,57 +68,61 @@ class Appointments extends Controller
 
             let data = controller->setData(data, this->api_app->created_by);
 
-            let status = this->database->execute(
-                "INSERT INTO content 
-                    (id,
-                    status,
-                    name,
-                    title,
-                    sub_title,
-                    slogan,
-                    url,
-                    content,
-                    template_id,
-                    meta_keywords,
-                    meta_author,
-                    meta_description,
-                    type,
-                    tags,
-                    featured,
-                    parent_id,
-                    sort,
-                    sitemap_include,
-                    public_facing,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (:id,
-                    :status,
-                    :name,
-                    :title,
-                    :sub_title,
-                    :slogan,
-                    :url,
-                    :content,                            
-                    :template_id,
-                    :meta_keywords,
-                    :meta_author,
-                    :meta_description,
-                    :type,
-                    :tags,
-                    :featured,
-                    :parent_id,
-                    :sort,
-                    :sitemap_include,
-                    :public_facing,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
-                data
-            );
+            if (this->cfg->save_mode == true) {
+                let status = this->database->execute(
+                    "INSERT INTO content 
+                        (id,
+                        status,
+                        name,
+                        title,
+                        sub_title,
+                        slogan,
+                        url,
+                        content,
+                        template_id,
+                        meta_keywords,
+                        meta_author,
+                        meta_description,
+                        type,
+                        tags,
+                        featured,
+                        parent_id,
+                        sort,
+                        sitemap_include,
+                        public_facing,
+                        created_at,
+                        created_by,
+                        updated_at,
+                        updated_by) 
+                    VALUES 
+                        (:id,
+                        :status,
+                        :name,
+                        :title,
+                        :sub_title,
+                        :slogan,
+                        :url,
+                        :content,                            
+                        :template_id,
+                        :meta_keywords,
+                        :meta_author,
+                        :meta_description,
+                        :type,
+                        :tags,
+                        :featured,
+                        :parent_id,
+                        :sort,
+                        :sitemap_include,
+                        :public_facing,
+                        NOW(),
+                        :created_by,
+                        NOW(),
+                        :updated_by)",
+                    data
+                );
+            } else {
+                let status = true;
+            }
 
             if (!is_bool(status)) {
                 throw new SaveException(
@@ -133,7 +137,9 @@ class Appointments extends Controller
                     ]
                 );
 
-                controller->updateExtra(model, path);
+                if (this->cfg->save_mode == true) {
+                    controller->updateExtra(model, path);
+                }
 
                 let model = this->database->get(
                     "SELECT main_page.*,
@@ -189,7 +195,9 @@ class Appointments extends Controller
             throw new NotFoundException("Appointment not found");
         }
 
-        controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
+        if (this->cfg->save_mode == true) {
+            controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
+        }
 
         let model = this->database->get(
             "SELECT main_page.*,
@@ -247,30 +255,34 @@ class Appointments extends Controller
             } else {
                 let data = controller->setData(data, this->api_app->created_by, model);
                 
-                let status = this->database->execute(
-                    "UPDATE content SET 
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        url=:url,
-                        template_id=:template_id,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags,
-                        featured=:featured,
-                        parent_id=:parent_id,
-                        sort=:sort,
-                        sitemap_include=:sitemap_include,
-                        public_facing=:public_facing 
-                    WHERE id=:id",
-                    data
-                );
+                if (this->cfg->save_mode == true) {
+                    let status = this->database->execute(
+                        "UPDATE content SET 
+                            status=:status,
+                            name=:name,
+                            title=:title,
+                            sub_title=:sub_title,
+                            slogan=:slogan,
+                            url=:url,
+                            template_id=:template_id,
+                            content=:content,
+                            meta_keywords=:meta_keywords,
+                            meta_author=:meta_author,
+                            meta_description=:meta_description,
+                            updated_at=NOW(),
+                            updated_by=:updated_by,
+                            tags=:tags,
+                            featured=:featured,
+                            parent_id=:parent_id,
+                            sort=:sort,
+                            sitemap_include=:sitemap_include,
+                            public_facing=:public_facing 
+                        WHERE id=:id",
+                        data
+                    );
+                } else {
+                    let status = true;
+                }
             
                 if (!is_bool(status)) {
                     throw new SaveException(
@@ -285,7 +297,9 @@ class Appointments extends Controller
                         ]
                     );
     
-                    controller->updateExtra(model, path);
+                    if (this->cfg->save_mode == true) {
+                        controller->updateExtra(model, path);
+                    }
 
                     let model = this->database->get(
                         "SELECT main_page.*,
@@ -406,7 +420,9 @@ class Appointments extends Controller
             throw new NotFoundException("Appointment not found");
         }
 
-        controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
+        if (this->cfg->save_mode == true) {
+            controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
+        }
 
         let model = this->database->get(
             "SELECT main_page.*,

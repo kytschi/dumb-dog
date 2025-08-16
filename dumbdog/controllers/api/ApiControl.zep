@@ -15,8 +15,10 @@ use DumbDog\Controllers\Api\Appointments;
 use DumbDog\Controllers\Api\Blog;
 use DumbDog\Controllers\Api\BlogCategories;
 use DumbDog\Controllers\Api\ContentStacks;
+use DumbDog\Controllers\Api\Currencies;
 use DumbDog\Controllers\Api\PageCategories;
 use DumbDog\Controllers\Api\Pages;
+use DumbDog\Controllers\Api\Products;
 use DumbDog\Controllers\Api\Templates;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\AccessException;
@@ -46,8 +48,10 @@ class ApiControl extends Controller
             "BlogCategories": new BlogCategories(),
             "Blog": new Blog(),
             "ContentStacks": new ContentStacks(),
+            "Currencies": new Currencies(),
             "PageCategories": new PageCategories(),
             "Pages": new Pages(),
+            "Products": new Products(),
             "Templates": new Templates()
         ];
 

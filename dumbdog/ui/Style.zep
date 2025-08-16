@@ -1524,6 +1524,12 @@ class Style
         .dd-border-none {
             border: 0 !important;
         }
+        .dd-border-top-none {
+            border-top: 0 !important;
+        }
+        .dd-border-bottom-none {
+            border-bottom: 0 !important;
+        }
         ";
     }
 

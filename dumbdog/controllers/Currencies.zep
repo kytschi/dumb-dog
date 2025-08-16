@@ -19,7 +19,7 @@ class Currencies extends Content
     public global_url = "/currencies";
     public type = "currency";
     public title = "Currencies";
-    public required = ["name"];
+    public required = ["name", "title", "symbol"];
 
     public routes = [
         "/currencies/add": [
@@ -280,7 +280,7 @@ class Currencies extends Content
                 "exchange_rate"
             ],
             this->database->all(query, data),
-            this->cfg->dumb_dog_url . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
 
@@ -361,15 +361,25 @@ class Currencies extends Content
 
     public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
         let data["symbol"] = _POST["symbol"];
-        let data["locale_code"] = _POST["locale_code"];
-        let data["exchange_rate"] = floatval(_POST["exchange_rate"]);
-        let data["exchange_rate_safety_buffer"] = floatval(_POST["exchange_rate_safety_buffer"]);
-        let data["updated_by"] = this->database->getUserId();
+
+        let data["status"] = isset(_POST["status"]) ? "active" : (model ? model->status : "inactive");
+        let data["is_default"] = isset(_POST["is_default"]) ? 1 : (model ? model->is_default : 0);
+        let data["locale_code"] = isset(_POST["locale_code"]) ? 1 : (model ? model->locale_code : "en_GB");
+
+        let data["exchange_rate"] = 
+            isset(_POST["exchange_rate"]) ? 
+                floatval(_POST["exchange_rate"]) : 
+                (model ? model->exchange_rate : 0);
+        
+        let data["exchange_rate_safety_buffer"] = 
+            isset(_POST["exchange_rate_safety_buffer"]) ?
+                floatval(_POST["exchange_rate_safety_buffer"]) :
+                (model ? model->exchange_rate_safety_buffer : 0);
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }

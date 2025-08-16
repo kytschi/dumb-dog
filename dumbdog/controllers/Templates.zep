@@ -166,7 +166,9 @@ class Templates extends Content
                         if (data["is_default"]) {
                             let status = this->database->execute(
                                 "UPDATE templates SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
-                                data
+                                [
+                                    "updated_by": data["updated_by"]
+                                ]
                             );
                         }
                         let status = this->database->execute(

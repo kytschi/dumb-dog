@@ -246,7 +246,7 @@ class PageCategories extends Controller
                     WHERE id=:id",
                     data
                 );
-            
+
                 if (!is_bool(status)) {
                     throw new SaveException(
                         "Failed to update the page category",

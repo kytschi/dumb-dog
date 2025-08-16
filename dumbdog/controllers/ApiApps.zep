@@ -94,32 +94,36 @@ class ApiApps extends Controller
 
                     let data["api_key"] = (new Security())->randomString(128);
 
-                    let status = this->database->execute(
-                        "INSERT INTO api_apps 
-                            (id,
-                            status,
-                            name,
-                            description,
-                            tags,
-                            api_key,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (
-                            :id,
-                            :status,
-                            :name,
-                            :description,
-                            :tags,
-                            :api_key,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
-                        data
-                    );
+                    if (this->cfg->save_mode == true) {
+                        let status = this->database->execute(
+                            "INSERT INTO api_apps 
+                                (id,
+                                status,
+                                name,
+                                description,
+                                tags,
+                                api_key,
+                                created_at,
+                                created_by,
+                                updated_at,
+                                updated_by) 
+                            VALUES 
+                                (
+                                :id,
+                                :status,
+                                :name,
+                                :description,
+                                :tags,
+                                :api_key,
+                                NOW(),
+                                :created_by,
+                                NOW(),
+                                :updated_by)",
+                            data
+                        );
+                    } else {
+                        let status = true;
+                    }
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to save the API app");
@@ -198,18 +202,22 @@ class ApiApps extends Controller
                     let data["api_key"] = model->api_key;
                 }
  
-                let status = this->database->execute(
-                    "UPDATE api_apps SET 
-                        status=:status,
-                        name=:name,
-                        description=:description,
-                        api_key=:api_key,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags 
-                    WHERE id=:id",
-                    data
-                );
+                if (this->cfg->save_mode == true) {
+                    let status = this->database->execute(
+                        "UPDATE api_apps SET 
+                            status=:status,
+                            name=:name,
+                            description=:description,
+                            api_key=:api_key,
+                            updated_at=NOW(),
+                            updated_by=:updated_by,
+                            tags=:tags 
+                        WHERE id=:id",
+                        data
+                    );
+                } else {
+                    let status = true;
+                }
             
                 if (!is_bool(status)) {
                     let html .= this->saveFailed("Failed to update the API app");

@@ -101,7 +101,8 @@ class Content extends Controller
 
                     let status = this->database->execute(
                         "INSERT INTO content 
-                            (id,
+                        (
+                            id,
                             status,
                             name,
                             title,
@@ -119,12 +120,14 @@ class Content extends Controller
                             parent_id,
                             sort,
                             sitemap_include,
+                            public_facing,
                             created_at,
                             created_by,
                             updated_at,
-                            updated_by) 
+                            updated_by
+                        ) 
                         VALUES 
-                            (
+                        (
                             :id,
                             :status,
                             :name,
@@ -143,10 +146,12 @@ class Content extends Controller
                             :parent_id,
                             :sort,
                             :sitemap_include,
+                            :public_facing,
                             NOW(),
                             :created_by,
                             NOW(),
-                            :updated_by)",
+                            :updated_by
+                        )",
                         data
                     );
 
@@ -1025,12 +1030,13 @@ class Content extends Controller
             let data["template_id"] = _POST["template_id"];
         }
 
-        if (!isset(_POST["url"])) {
-            if (!model) {
+        if (!isset(_POST["url"]) || empty(_POST["url"])) {
+            if (!empty(model) && !empty(model->url)) {
+                let data["url"] = model->url;
+                
+            } else {
                 let data["url"] = 
                     "/" . this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
-            } else {
-                let data["url"] = model->url;
             }
         } else {
             let data["url"] = this->cleanUrl(_POST["url"]);
@@ -1047,7 +1053,7 @@ class Content extends Controller
         let data["meta_description"] = (isset(_POST["meta_description"]) ? this->cleanContent(_POST["meta_description"]) : (model ? model->meta_description : null));
         
         let data["featured"] = isset(_POST["featured"]) ? 1 : (model ? model->featured : 0);
-        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : (model ? model->sitemap_include : null);
+        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : (model ? model->sitemap_include : 0);
         let data["tags"] = (isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : (model ? model->tags : null));
         let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : (model ? model->parent_id : null);
         let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : (model ? model->sort : 0);
@@ -1394,7 +1400,7 @@ class Content extends Controller
                 "id": data["id"]
             ]
         )) {
-            throw new Exception("URL already taken by another piece of content");
+            throw new Exception("URL, " . data["url"] . ",  already taken by another piece of content");
         }
     }
 }

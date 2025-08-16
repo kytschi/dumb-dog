@@ -26,6 +26,12 @@ class Controller
 
     public global_url = "";
     public routes = [];
+    public required = ["name"];
+
+    public valid_dir = [
+        "ASC",
+        "DESC"
+    ];
 
     public function __construct()
     {

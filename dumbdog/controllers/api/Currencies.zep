@@ -1,7 +1,7 @@
 /**
- * DumbDog API for templates controller
+ * DumbDog API for currencies controller
  *
- * @package     DumbDog\Controllers\Api\Templates
+ * @package     DumbDog\Controllers\Api\Currencies
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -11,34 +11,34 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\Templates as Main;
+use DumbDog\Controllers\Currencies as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
-class Templates extends Controller
+class Currencies extends Controller
 {
     public api_routes = [
-        "/api/templates/add": [
-            "Templates",
+        "/api/currencies/add": [
+            "Currencies",
             "add"
         ],
-        "/api/templates/delete": [
-            "Templates",
+        "/api/currencies/delete": [
+            "Currencies",
             "delete"
         ],
-        "/api/templates/edit": [
-            "Templates",
+        "/api/currencies/edit": [
+            "Currencies",
             "edit"
         ],
-        "/api/templates/recover": [
-            "Templates",
+        "/api/currencies/recover": [
+            "Currencies",
             "recover"
         ],
-        "/api/templates": [
-            "Templates",
+        "/api/currencies": [
+            "Currencies",
             "list"
         ]
     ];
@@ -68,12 +68,16 @@ class Templates extends Controller
             let data = controller->setData(data, this->api_app->created_by);
 
             let status = this->database->execute(
-                "INSERT INTO templates  
+                "INSERT INTO currencies  
                     (id,
-                    type,
                     name,
-                    file,
-                    is_default,
+                    title,
+                    symbol,
+                    exchange_rate,
+                    exchange_rate_safety_buffer,
+                    locale_code,
+                    `is_default`,
+                    status,
                     created_at,
                     created_by,
                     updated_at,
@@ -81,10 +85,14 @@ class Templates extends Controller
                 VALUES 
                     (
                     :id,
-                    :type,
                     :name,
-                    :file,
+                    :title,
+                    :symbol,
+                    :exchange_rate,
+                    :exchange_rate_safety_buffer,
+                    :locale_code,
                     :is_default,
+                    :status,
                     NOW(),
                     :created_by,
                     NOW(),
@@ -99,23 +107,21 @@ class Templates extends Controller
                 );
             } else {
                 let model = this->database->get(
-                    "SELECT * 
-                    FROM templates 
-                    WHERE id=:id",
+                    "SELECT * FROM currencies WHERE id=:id",
                     [
                         "id": data["id"]
                     ]
                 );
 
                 return this->createReturn(
-                    "Template successfully created",
+                    "Currency successfully created",
                     model
                 );
             }
         }
 
         throw new SaveException(
-            "Failed to save the template, no post data",
+            "Failed to save the currency, no post data",
             400
         );
     }
@@ -130,18 +136,18 @@ class Templates extends Controller
 
         let data["id"] = controller->getPageId(path);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM currencies WHERE id=:id", data);
 
         if (empty(model)) {
-            throw new NotFoundException("Template not found");
+            throw new NotFoundException("Currency not found");
         }
 
-        controller->triggerDelete("templates", path, data["id"], this->api_app->created_by, false);
+        controller->triggerDelete("currencies", path, data["id"], this->api_app->created_by, false);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM currencies WHERE id=:id", data);
 
         return this->createReturn(
-            "Template successfully marked as deleted",
+            "Currency successfully marked as deleted",
             model
         );
     }
@@ -155,36 +161,41 @@ class Templates extends Controller
         let controller = new Main();
         
         let data["id"] = controller->getPageId(path);
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM currencies WHERE id=:id", data);
 
         if (empty(model)) {
-            throw new NotFoundException("Template not found");
+            throw new NotFoundException("Currency not found");
         }
 
         if (!empty(_POST)) {
-            if (!controller->validate(_POST, ["name", "file"])) {
+            if (!controller->validate(_POST, controller->required)) {
                 throw new ValidationException(
                     "Missing required fields",
                     400,
-                    ["name", "file"]
+                    controller->required
                 );
             } else {
                 let data = controller->setData(data, this->api_app->created_by, model);
-                
+
                 if (data["is_default"]) {
                     let status = this->database->execute(
-                        "UPDATE templates SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
+                        "UPDATE currencies SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
                         [
                             "updated_by": data["updated_by"]
                         ]
                     );
                 }
+
                 let status = this->database->execute(
-                    "UPDATE templates SET 
+                    "UPDATE currencies SET 
                         name=:name,
-                        file=:file,
-                        type=:type,
+                        title=:title,
+                        symbol=:symbol,
+                        exchange_rate=:exchange_rate,
+                        exchange_rate_safety_buffer=:exchange_rate_safety_buffer,
+                        locale_code=:locale_code,
                         `is_default`=:is_default,
+                        status=:status,
                         updated_at=NOW(),
                         updated_by=:updated_by
                     WHERE id=:id",
@@ -193,21 +204,19 @@ class Templates extends Controller
 
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the template",
+                        "Failed to update the currency",
                         400
                     );
                 } else {
                     let model = this->database->get(
-                        "SELECT * 
-                        FROM templates 
-                        WHERE id=:id",
+                        "SELECT * FROM currencies WHERE id=:id",
                         [
                             "id": data["id"]
                         ]
                     );
 
                     return this->createReturn(
-                        "Template successfully updated",
+                        "Currency successfully updated",
                         model
                     );
                 }
@@ -215,7 +224,7 @@ class Templates extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the template, no post data",
+            "Failed to update the currency, no post data",
             400
         );
     }
@@ -226,10 +235,7 @@ class Templates extends Controller
 
         this->secure();
 
-        let query = "
-            SELECT * 
-            FROM templates 
-            WHERE id IS NOT NULL";
+        let query = "SELECT * FROM currencies WHERE id IS NOT NULL";
 
         if (isset(_GET["query"])) {
             let query .= " AND name LIKE :query";
@@ -265,7 +271,7 @@ class Templates extends Controller
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Templates",
+            "Currencies",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
@@ -281,18 +287,18 @@ class Templates extends Controller
 
         let data["id"] = controller->getPageId(path);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM currencies WHERE id=:id", data);
 
         if (empty(model)) {
-            throw new NotFoundException("Template not found");
+            throw new NotFoundException("Currency not found");
         }
 
-        controller->triggerRecover("templates", path, data["id"], this->api_app->created_by, false);
+        controller->triggerRecover("currencies", path, data["id"], this->api_app->created_by, false);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get("SELECT * FROM currencies WHERE id=:id", data);
 
         return this->createReturn(
-            "Template successfully recovered from the deleted state",
+            "Currency successfully recovered from the deleted state",
             model
         );
     }

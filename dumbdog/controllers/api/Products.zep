@@ -1,7 +1,7 @@
 /**
- * DumbDog API for blog categories controller
+ * DumbDog API for products controller
  *
- * @package     DumbDog\Controllers\Api\BlogCategories
+ * @package     DumbDog\Controllers\Api\Appointments
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -11,39 +11,71 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\BlogCategories as Main;
+use DumbDog\Controllers\Products as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
-class BlogCategories extends Controller
+class Products extends Controller
 {
     public api_routes = [
-        "/api/blog-categories/add": [
-            "BlogCategories",
+        "/api/products/add": [
+            "Products",
             "add"
         ],
-        "/api/blog-categories/delete": [
-            "BlogCategories",
+        "/api/products/delete": [
+            "Products",
             "delete"
         ],
-        "/api/blog-categories/edit": [
-            "BlogCategories",
+        "/api/products/edit": [
+            "Products",
             "edit"
         ],
-        "/api/blog-categories/recover": [
-            "BlogCategories",
+        "/api/products/recover": [
+            "Products",
             "recover"
         ],
-        "/api/blog-categories": [
-            "BlogCategories",
+        "/api/products": [
+            "Products",
             "list"
         ]
     ];
 
+    private query = "";
+
     public valid_sorts = ["name", "created_at"];
+
+    public function __globals()
+    {
+        let this->query = "
+        SELECT
+            content.*,
+            products.code,
+            products.stock,
+            products.on_offer, 
+            IF(products.on_offer,product_prices.offer_price,product_prices.price) AS price,
+            currencies.symbol,
+            currencies.locale_code,
+            IFNULL(templates.name, 'No template') AS template, 
+            IFNULL(parent_page.name, 'No parent') AS parent 
+        FROM content 
+        JOIN products ON products.content_id = content.id 
+        JOIN templates ON templates.id=content.template_id 
+        LEFT JOIN content AS parent_page ON parent_page.id=content.parent_id 
+        LEFT JOIN product_prices ON 
+            product_prices.id = 
+            (
+                SELECT id
+                FROM product_prices AS pp
+                WHERE
+                    pp.product_id = products.id AND
+                    pp.deleted_at IS NULL 
+                LIMIT 1
+            )
+        LEFT JOIN currencies ON currencies.id = product_prices.currency_id AND currencies.deleted_at IS NULL";
+    }
     
     public function add(path)
     {
@@ -64,7 +96,7 @@ class BlogCategories extends Controller
 
             let data["id"] = this->database->uuid();
             let data["created_by"] = this->api_app->created_by;
-            let data["type"] = "blog-category";
+            let data["type"] = "product";
 
             let data = controller->setData(data, this->api_app->created_by);
 
@@ -122,32 +154,36 @@ class BlogCategories extends Controller
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the blog category",
+                    "Failed to save the appointment",
                     400
                 );
             } else {
                 let model = this->database->get(
-                    "SELECT main_page.*,
-                    IFNULL(templates.name, 'No template') AS template, 
-                    IFNULL(parent_page.name, 'No parent') AS parent 
-                    FROM content AS main_page 
-                    LEFT JOIN templates ON templates.id=main_page.template_id 
-                    LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-                    WHERE main_page.id=:id",
+                    "SELECT content.* FROM content WHERE id=:id",
+                    [
+                        "id": data["id"]
+                    ]
+                );
+
+                controller->updateExtra(model, path, this->api_app->created_by);
+
+                let model = this->database->get(
+                    this->query . 
+                    " WHERE content.id=:id",
                     [
                         "id": data["id"]
                     ]
                 );
 
                 return this->createReturn(
-                    "Blog category successfully created",
+                    "Product successfully created",
                     model
                 );
             }
         }
 
         throw new SaveException(
-            "Failed to save the blog category, no post data",
+            "Failed to save the product, no post data",
             400
         );
     }
@@ -161,7 +197,7 @@ class BlogCategories extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "blog-category";
+        let data["type"] = "appointment";
 
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
@@ -169,26 +205,21 @@ class BlogCategories extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Blog category not found");
+            throw new NotFoundException("Product not found");
         }
 
         controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
+            this->query . 
+            " WHERE content.id=:id",
             [
                 "id": data["id"]
             ]
         );
 
         return this->createReturn(
-            "Blog category successfully marked as deleted",
+            "Product successfully marked as deleted",
             model
         );
     }
@@ -202,14 +233,14 @@ class BlogCategories extends Controller
         let controller = new Main();
                 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "blog-category";
+        let data["type"] = "product";
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
             data
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Blog category not found");
+            throw new NotFoundException("Appointment not found");
         }
 
         if (!empty(_POST)) {
@@ -221,7 +252,7 @@ class BlogCategories extends Controller
                 );
             } else {
                 let data = controller->setData(data, this->api_app->created_by, model);
-
+                
                 let status = this->database->execute(
                     "UPDATE content SET 
                         status=:status,
@@ -249,25 +280,29 @@ class BlogCategories extends Controller
             
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the blog category",
+                        "Failed to update the product",
                         400
                     );
                 } else {
                     let model = this->database->get(
-                        "SELECT main_page.*,
-                        IFNULL(templates.name, 'No template') AS template, 
-                        IFNULL(parent_page.name, 'No parent') AS parent 
-                        FROM content AS main_page 
-                        LEFT JOIN templates ON templates.id=main_page.template_id 
-                        LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-                        WHERE main_page.id=:id",
+                        "SELECT content.* FROM content WHERE id=:id",
+                        [
+                            "id": data["id"]
+                        ]
+                    );
+    
+                    controller->updateExtra(model, path);
+
+                    let model = this->database->get(
+                        this->query . 
+                        " WHERE content.id=:id",
                         [
                             "id": data["id"]
                         ]
                     );
     
                     return this->createReturn(
-                        "Blog category successfully updated",
+                        "Product successfully updated",
                         model
                     );
                 }
@@ -275,7 +310,7 @@ class BlogCategories extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the blog category, no post data",
+            "Failed to update the product, no post data",
             400
         );
     }
@@ -286,8 +321,7 @@ class BlogCategories extends Controller
 
         this->secure();
 
-        let query = "
-            SELECT content.* FROM content WHERE type='blog-category'";
+        let query = this->query;
 
         if (isset(_GET["query"])) {
             let query .= " AND content.name LIKE :query";
@@ -328,7 +362,7 @@ class BlogCategories extends Controller
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Blog categories",
+            "Products",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
@@ -343,7 +377,7 @@ class BlogCategories extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "blog-category";
+        let data["type"] = "product";
 
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
@@ -351,26 +385,21 @@ class BlogCategories extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Blog category not found");
+            throw new NotFoundException("Product not found");
         }
 
         controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
-            "SELECT main_page.*, 
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
+            this->query . 
+            "WHERE content.id=:id",
             [
                 "id": data["id"]
             ]
         );
 
         return this->createReturn(
-            "Blog category successfully recovered from the deleted state",
+            "Product successfully recovered from the deleted state",
             model
         );
     }
