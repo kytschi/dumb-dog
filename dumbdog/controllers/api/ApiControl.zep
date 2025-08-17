@@ -20,6 +20,7 @@ use DumbDog\Controllers\Api\Currencies;
 use DumbDog\Controllers\Api\PageCategories;
 use DumbDog\Controllers\Api\Pages;
 use DumbDog\Controllers\Api\Products;
+use DumbDog\Controllers\Api\Taxes;
 use DumbDog\Controllers\Api\Templates;
 use DumbDog\Controllers\Database;
 use DumbDog\Exceptions\AccessException;
@@ -54,6 +55,7 @@ class ApiControl extends Controller
             "PageCategories": new PageCategories(),
             "Pages": new Pages(),
             "Products": new Products(),
+            "Taxes": new Taxes(),
             "Templates": new Templates()
         ];
 

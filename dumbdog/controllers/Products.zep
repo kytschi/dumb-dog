@@ -592,6 +592,8 @@ class Products extends Content
                                 item->name
                             ) .
                             this->countriesSelect(item->country_id) . 
+                            this->currenciesSelect(item->currency_id) . 
+                            this->taxesSelect(item->tax_id) . 
                             this->inputs->text(
                                 "Price",
                                 "shipping_price[]",
@@ -843,7 +845,7 @@ class Products extends Content
     }
 
 
-    private function updatePrices(model)
+    private function updatePrices(model, user_id)
     {
         if (!isset(_POST["price_id"])) {
             return;
@@ -885,6 +887,8 @@ class Products extends Content
                     let data["offer_price"] = floatval(_POST["offer_price"][key]);
                 }
             }
+
+            let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
             
             let status = this->database->execute(
                 "UPDATE product_prices SET 
@@ -892,7 +896,9 @@ class Products extends Content
                     price=:price,
                     offer_price=:offer_price,
                     currency_id=:currency_id,
-                    tax_id=:tax_id 
+                    tax_id=:tax_id,
+                    updated_at=NOW(),
+                    updated_by=:updated_by
                 WHERE id=:id",
                 data
             );
@@ -903,7 +909,7 @@ class Products extends Content
         }
     }
 
-    private function updateShipping(model)
+    private function updateShipping(model, user_id)
     {
         if (!isset(_POST["shipping_id"])) {
             return;
@@ -934,13 +940,21 @@ class Products extends Content
             let data["name"] = _POST["shipping_name"][key];
             let data["price"] = floatval(_POST["shipping_price"][key]);
             let data["country_id"] = _POST["country_id"][key];
+            let data["currency_id"] = _POST["currency_id"][key];
+            let data["tax_id"] = _POST["tax_id"][key];
+
+            let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
                         
             let status = this->database->execute(
                 "UPDATE product_shipping SET 
                     status=:status,
                     name=:name,
                     price=:price,
-                    country_id=:country_id
+                    country_id=:country_id,
+                    currency_id=:currency_id,
+                    tax_id=:tax_id,
+                    updated_at=NOW(),
+                    updated_by=:updated_by
                 WHERE id=:id",
                 data
             );
