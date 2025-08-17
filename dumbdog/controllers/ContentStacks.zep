@@ -540,7 +540,7 @@ class ContentStacks extends Content
         return data;
     }
 
-    public function updateStacks()
+    public function updateStacks(model = null, user_id = null)
     {
         if (!isset(_POST["stack_name"])) {
             return;

@@ -78,7 +78,7 @@ class Taxes extends Controller
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the template",
+                    "Failed to save the tax",
                     400
                 );
             } else {
@@ -97,7 +97,7 @@ class Taxes extends Controller
         }
 
         throw new SaveException(
-            "Failed to save the template, no post data",
+            "Failed to save the tax, no post data",
             400
         );
     }
@@ -177,7 +177,7 @@ class Taxes extends Controller
 
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the template",
+                        "Failed to update the tax",
                         400
                     );
                 } else {
@@ -197,7 +197,7 @@ class Taxes extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the template, no post data",
+            "Failed to update the tax, no post data",
             400
         );
     }
@@ -247,7 +247,7 @@ class Taxes extends Controller
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Taxs",
+            "Taxes",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
