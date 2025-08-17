@@ -46,6 +46,30 @@ class Appointments extends Content
         ]
     ];
 
+    public query_appointment = "";
+
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query_appointment = "
+            SELECT main_page.*,
+                appointments.user_id,
+                appointments.lead_id,
+                appointments.with_email, 
+                appointments.with_number,
+                appointments.on_date,
+                appointments.appointment_length,
+                appointments.free_slot, 
+                IFNULL(templates.name, 'No template') AS template, 
+                IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            JOIN appointments ON appointments.content_id = main_page.id 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.type=:type AND main_page.id=:id";
+    }
+
     public function add(path)
     {
         var html, data = [], model;
@@ -67,51 +91,7 @@ class Appointments extends Content
                     let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO content 
-                            (id,
-                            status,
-                            name,
-                            title,
-                            sub_title,
-                            slogan,
-                            url,
-                            content,
-                            template_id,
-                            meta_keywords,
-                            meta_author,
-                            meta_description,
-                            type,                            
-                            tags,
-                            featured,
-                            sitemap_include,
-                            public_facing,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (
-                            :id,
-                            :status,
-                            :name,
-                            :title,
-                            :sub_title,
-                            :slogan,
-                            :url,
-                            :content,                            
-                            :template_id,
-                            :meta_keywords,
-                            :meta_author,
-                            :meta_description,
-                            :type,
-                            :tags,
-                            :featured,
-                            :sitemap_include,
-                            :public_facing,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -176,6 +156,7 @@ class Appointments extends Content
         var html, model, data = [];
         
         let data["id"] = this->getPageId(path);
+        let data["type"] =  this->type;
         let model = this->database->get("
             SELECT 
                 appointments.*,
@@ -187,7 +168,7 @@ class Appointments extends Content
                 resource='banner-image' AND
                 banner.deleted_at IS NULL
             JOIN appointments ON appointments.content_id = content.id 
-            WHERE content.type='" . this->type . "' AND content.id=:id", data);
+            WHERE content.type=:type AND content.id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Appointment not found");
@@ -230,32 +211,7 @@ class Appointments extends Content
                 }
 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        url=:url,
-                        template_id=:template_id,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags,
-                        featured=:featured,
-                        sitemap_include=:sitemap_include,
-                        public_facing=:public_facing,
-                        user_id=:user_id,
-                        with_email=:with_email,
-                        with_number=:with_number,
-                        free_slot=:free_slot,
-                        appointment_length=:appointment_length,
-                        on_date=:on_date,
-                        lead_id=:lead_id
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -530,7 +486,6 @@ class Appointments extends Content
                                 "Back to the lead" :
                                 "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -553,7 +508,8 @@ class Appointments extends Content
                     );
             }
         }
-        let html .= "</div>
+
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -670,18 +626,15 @@ class Appointments extends Content
 
     public function setData(array data, user_id = null, model = null)
     {
-        let data = this->setContentData(data, user_id);
-
-        if (!empty(model) && !isset(_POST["template_id"])) {
-            let data["template_id"] = model->template_id;
-        }
+        let data = this->setContentData(data, user_id, model);
 
         if (!isset(_POST["url"])) {
             let data["url"] = "/appointments/" .
                 this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
         }
-
         this->validUrl(data);
+
+        let data["public_facing"] = isset(_POST["public_facing"]) ? 1 : 0;
 
         return data;
     }

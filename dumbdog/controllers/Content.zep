@@ -64,6 +64,15 @@ class Content extends Controller
         ]
     ];
 
+    public query = "";
+    public query_insert = "";
+    public query_update = "";
+    public query_children = "";
+    public query_images = "";
+    public query_old_urls = "";
+    public query_parent = "";
+    public query_stacks = "";
+
     public function __globals()
     {
         let this->tables = new Tables();
@@ -72,6 +81,148 @@ class Content extends Controller
         let this->files = new Files();
         let this->buttons = new Buttons();
         let this->icons = new Icons();
+
+        let this->query = "
+            SELECT main_page.*,
+                IFNULL(templates.name, 'No template') AS template, 
+                IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id";
+        
+        let this->query_insert = "
+            INSERT INTO content 
+            (
+                id,
+                status,
+                name,
+                title,
+                sub_title,
+                slogan,
+                url,
+                content,
+                template_id,
+                meta_keywords,
+                meta_author,
+                meta_description,
+                type,
+                tags,
+                featured,
+                parent_id,
+                sort,
+                sitemap_include,
+                public_facing,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by
+            ) 
+            VALUES 
+            (
+                :id,
+                :status,
+                :name,
+                :title,
+                :sub_title,
+                :slogan,
+                :url,
+                :content,                            
+                :template_id,
+                :meta_keywords,
+                :meta_author,
+                :meta_description,
+                :type,
+                :tags,
+                :featured,
+                :parent_id,
+                :sort,
+                :sitemap_include,
+                :public_facing,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by
+            )";
+
+        let this->query_update = "
+            UPDATE content SET 
+                type=:type,
+                status=:status,
+                name=:name,
+                template_id=:template_id,
+                url=:url,
+                title=:title,
+                sub_title=:sub_title,
+                slogan=:slogan,
+                content=:content,
+                meta_keywords=:meta_keywords,
+                meta_author=:meta_author,
+                meta_description=:meta_description,
+                featured=:featured,
+                sitemap_include=:sitemap_include,
+                public_facing=:public_facing,
+                tags=:tags,
+                parent_id=:parent_id,
+                sort=:sort,
+                updated_by=:updated_by,
+                updated_at=NOW() 
+            WHERE id=:id";
+
+        let this->query_children = "
+            SELECT
+                content.*,
+                templates.file AS template 
+            FROM content 
+            JOIN templates ON templates.id=content.template_id 
+            WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
+            ORDER BY content.created_at DESC, content.name";
+
+        let this->query_images = "
+            SELECT 
+                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
+                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
+            FROM files 
+            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+            ORDER BY sort ASC";
+        
+        let this->query_old_urls = "SELECT * FROM old_urls WHERE content_id=:id AND deleted_at IS NULL";
+
+        let this->query_parent = "
+            SELECT
+                content.*,
+                templates.file AS template 
+            FROM content 
+            JOIN templates ON templates.id=content.template_id 
+            WHERE 
+                content.id=:id AND 
+                content.status='live' AND 
+                content.public_facing=1 AND 
+                content.deleted_at IS NULL";
+
+        let this->query_stacks = "
+            SELECT
+                content_stacks.*,
+                templates.file AS template,
+                IF(
+                    files.filename IS NOT NULL, 
+                    CONCAT('" . this->files->folder . "', files.filename),
+                    ''
+                ) AS image,
+                IF(
+                    files.filename IS NOT NULL,
+                    CONCAT('" . this->files->folder . "thumb-', files.filename),
+                    ''
+                ) AS thumbnail 
+            FROM content_stacks 
+            LEFT JOIN templates ON
+                templates.id = content_stacks.template_id AND templates.deleted_at IS NULL 
+            LEFT JOIN files ON
+                files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+            WHERE 
+                content_id=:id AND 
+                content_stacks.deleted_at IS NULL AND 
+                content_stack_id IS NULL
+            ORDER BY sort ASC";
     }
 
     public function add(path)
@@ -100,58 +251,7 @@ class Content extends Controller
                     let data = this->setData(data);
 
                     let status = this->database->execute(
-                        "INSERT INTO content 
-                        (
-                            id,
-                            status,
-                            name,
-                            title,
-                            sub_title,
-                            slogan,
-                            url,
-                            content,
-                            template_id,
-                            meta_keywords,
-                            meta_author,
-                            meta_description,
-                            type,
-                            tags,
-                            featured,
-                            parent_id,
-                            sort,
-                            sitemap_include,
-                            public_facing,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by
-                        ) 
-                        VALUES 
-                        (
-                            :id,
-                            :status,
-                            :name,
-                            :title,
-                            :sub_title,
-                            :slogan,
-                            :url,
-                            :content,                            
-                            :template_id,
-                            :meta_keywords,
-                            :meta_author,
-                            :meta_description,
-                            :type,
-                            :tags,
-                            :featured,
-                            :parent_id,
-                            :sort,
-                            :sitemap_include,
-                            :public_facing,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by
-                        )",
+                        this->query_insert,
                         data
                     );
 
@@ -381,28 +481,7 @@ class Content extends Controller
                 }
 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        type=:type,
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        url=:url,
-                        template_id=:template_id,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags,
-                        featured=:featured,
-                        parent_id=:parent_id,
-                        sort=:sort,
-                        public_facing=:public_facing,
-                        sitemap_include=:sitemap_include
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -424,35 +503,21 @@ class Content extends Controller
         }
         
         let model->images = this->database->all(
-            "SELECT 
-                *,
-                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
-                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
-            FROM files 
-            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
-            ORDER BY sort ASC",
+            this->query_images,
             [
                 "resource_id": model->id
             ]
         );
 
-        let model->stacks = this->database->all("
-            SELECT
-                content_stacks.*,
-                files.id AS image_id,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content_stacks 
-            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL
-            WHERE content_id=:id AND content_stacks.deleted_at IS NULL AND content_stack_id IS NULL
-            ORDER BY sort ASC",
+        let model->stacks = this->database->all(
+            this->query_stacks,
             [
                 "id": model->id
             ]
         );
 
         let model->old_urls = this->database->all(
-            "SELECT * FROM old_urls WHERE content_id=:id AND deleted_at IS NULL",
+            this->query_old_urls,
             [
                 "id": model->id
             ]
@@ -851,7 +916,6 @@ class Content extends Controller
                             "back",
                             "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -859,14 +923,15 @@ class Content extends Controller
                             "Create a new " . str_replace("-", " ", this->type)
                         );
         if (mode == "edit") {
-            let html .= this->buttons->view(model->url);
             if (model->deleted_at) {
                 let html .= this->buttons->recover(model->id);
             } else {
                 let html .= this->buttons->delete(model->id);
             }
+            let html .= this->buttons->view(model->url);
         }
-        let html .= "</div>
+        let html .=     this->buttons->save() . 
+                    "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>

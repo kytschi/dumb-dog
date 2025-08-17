@@ -42,6 +42,8 @@ class Products extends Content
         "updated_at"
     ];
 
+    public required = ["name", "title", "code", "stock"];
+
     public routes = [
         "/products/add": [
             "Products",
@@ -107,10 +109,11 @@ class Products extends Content
             );
         } else {
             let data["name"] = isset(_POST["price_name"]) ? _POST["price_name"] : "Standard price";
-            let data["currency_id"] = isset(_POST["currency_id"]) ? _POST["currency_id"] : null;
-            let data["tax_id"] = isset(_POST["tax_id"]) ? _POST["tax_id"] : null;
-            let data["price"] = isset(_POST["price"]) ? floatval(_POST["price"]) : 0.00;
+            let data["currency_id"] = isset(_POST["price_currency_id"]) ? _POST["price_currency_id"] : null;
+            let data["tax_id"] = isset(_POST["price_tax_id"]) ? _POST["price_tax_id"] : null;
+            let data["price"] = isset(_POST["price"]) ? floatval(_POST["price"]) : 1.00;
             let data["offer_price"] = isset(_POST["offer_price"]) ? floatval(_POST["offer_price"]) : 0.00;
+            let data["status"] = isset(_POST["price_status"]) ? _POST["price_status"] : "active";
             
             let status = this->database->execute(
                 "INSERT INTO product_prices 
@@ -121,6 +124,7 @@ class Products extends Content
                     name,
                     price,
                     offer_price,
+                    status,
                     created_at,
                     created_by,
                     updated_at,
@@ -133,6 +137,7 @@ class Products extends Content
                     :name,
                     :price,
                     :offer_price,
+                    :status,
                     NOW(),
                     :created_by,
                     NOW(),
@@ -154,34 +159,76 @@ class Products extends Content
             "updated_by": user_id ? user_id : this->getUserId()
         ], status;
 
-        let data["name"] = _POST["create_shipping"];
-        
-        let status = this->database->execute(
-            "INSERT INTO product_shipping 
-                (id,
-                product_id,
-                name,
-                created_at,
-                created_by,
-                updated_at,
-                updated_by) 
-            VALUES 
-                (UUID(),
-                :product_id,
-                :name,
-                NOW(),
-                :created_by,
-                NOW(),
-                :updated_by)",
-            data
-        );
+        if (mode == "edit") {
+            let data["name"] = _POST["create_shipping"];
+            
+            let status = this->database->execute(
+                "INSERT INTO product_shipping 
+                    (id,
+                    product_id,
+                    name,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :product_id,
+                    :name,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                data
+            );
+        } else {
+            let data["name"] = isset(_POST["shipping_name"]) ? _POST["shipping_name"] : "Standard shipping";
+            if (empty(data["name"])) {
+                let data["name"] = "Standard shipping";
+            }
+            let data["country_id"] = isset(_POST["shipping_country_id"]) ? _POST["shipping_country_id"] : null;
+            let data["currency_id"] = isset(_POST["shipping_currency_id"]) ? _POST["shipping_currency_id"] : null;
+            let data["tax_id"] = isset(_POST["shipping_tax_id"]) ? _POST["shipping_tax_id"] : null;
+            let data["status"] = isset(_POST["shipping_status"]) ? _POST["shipping_status"] : "active";
+            let data["price"] = isset(_POST["shipping_price"]) ? floatval(_POST["shipping_price"]) : 1.00;
+
+            let status = this->database->execute(
+                "INSERT INTO product_shipping 
+                    (id,
+                    product_id,
+                    country_id,
+                    currency_id,
+                    tax_id,
+                    name,
+                    price,
+                    status,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :product_id,
+                    :country_id,
+                    :currency_id,
+                    :tax_id,
+                    :name,
+                    :price,
+                    :status,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                data
+            );
+        }
 
         if (!is_bool(status)) {
             throw new Exception("Failed to save the product shipping");
         }
     }
 
-    private function countriesSelect(selected = null, mode = "edit")
+    private function countriesSelect(selected = null, mode = "edit", label = "country_id")
     {
         var select = [], data, iLoop = 0;
         let data = this->database->all("SELECT * FROM countries ORDER BY is_default DESC, name");
@@ -196,7 +243,7 @@ class Products extends Content
 
         return this->inputs->select(
             "Country",
-            (mode == "edit" ? "country_id[]" : "country_id"),
+            (mode == "edit" ? label . "[]" : label),
             "The country",
             select,
             true,
@@ -204,7 +251,7 @@ class Products extends Content
         );
     }
 
-    private function currenciesSelect(selected = null, mode = "edit")
+    private function currenciesSelect(selected = null, mode = "edit", label = "currency_id")
     {
         var select = [], data, iLoop = 0;
         let data = this->database->all("SELECT * FROM currencies ORDER BY is_default DESC, name");
@@ -219,7 +266,7 @@ class Products extends Content
 
         return this->inputs->select(
             "Currency",
-            (mode == "edit" ? "currency_id[]" : "currency_id"),
+            (mode == "edit" ? label . "[]" : label),
             "The currency",
             select,
             true,
@@ -408,14 +455,14 @@ class Products extends Content
                     <div class='dd-box-body'>" .
                         this->inputs->toggle("On offer", "on_offer", false, model->on_offer) . 
                         this->inputs->text("Code", "code", "The product code", true, model->code) .
-                        this->inputs->number("Stock", "stock", "The stock", true, model->stock) .
+                        this->inputs->number("Stock", "stock", "The stock", true, (model->stock ? model->stock : 1)) .
                     "</div>
                 </div>
             </div>
         </div>
         <div class='dd-row'>
             <div class='dd-col-12'>
-                <div class='dd-box dd-mb-0'>
+                <div class='dd-box" . (mode == "edit" ? "" : " dd-mb-0" ) . "'>
                     <div class='dd-box-title dd-flex dd-border-none'>";
 
         if (mode == "edit") {
@@ -448,6 +495,12 @@ class Products extends Content
                     "   </div>
                     </div>
                     <div class='dd-box-body'>" .
+                        this->inputs->toggle(
+                            "Active",
+                            "price_status[]",
+                            false,
+                            item->status
+                        ) . 
                         this->inputs->text("Name", "price_name[]", "The price name", true, item->name) .
                         this->currenciesSelect(item->currency_id) . 
                         this->taxesSelect(item->tax_id) . 
@@ -463,13 +516,18 @@ class Products extends Content
                 "   </div>
                 </div>";
             }
-        } else {
+        } elseif (mode == "add") {
             let html .= "
                 <div class='dd-box dd-border-top-none'>
                     <div class='dd-box-body'>" .
+                        this->inputs->toggle(
+                            "Active",
+                            "price_status",
+                            false
+                        ) . 
                         this->inputs->text("Name", "price_name", "The price name", true) .
-                        this->currenciesSelect(null, "add") . 
-                        this->taxesSelect(null, "add") . 
+                        this->currenciesSelect(null, "add", "price_currency_id") . 
+                        this->taxesSelect(null, "add", "price_tax_id") . 
                         this->inputs->text("Price", "price", "The price", true) .
                         this->inputs->text(
                             "Offer price",
@@ -486,17 +544,22 @@ class Products extends Content
         </div>
         <div id='shipping-tab' class='dd-row'>
             <div class='dd-col-12'>
-                <div class='dd-box'>
+                <div class='dd-box" . (mode == "edit" ? "" : " dd-mb-0" ) . "'>
                     <div class='dd-box-title dd-flex dd-border-none'>
-                        <div class='dd-col'>Shipping</div>
+                        <div class='dd-col'>Shipping</div>";
+
+        if (mode == "edit") {
+            let html .= "
                         <div class='dd-col-auto'>" . 
                             this->inputs->inputPopup(
                                 "create-shipping",
                                 "create_shipping",
                                 "Create a new shipping location"
                             ) .
-                    "   </div>
-                    </div>
+                    "   </div>";
+        }
+
+        let html .= "</div>
                 </div>";
 
         if (count(model->shipping)) {
@@ -540,7 +603,34 @@ class Products extends Content
                     "   </div>
                     </div>";
             }
+        } elseif (mode == "add") {
+            let html .= "
+                    <div class='dd-box dd-border-top-none'>
+                        <div class='dd-box-body'>" .
+                            this->inputs->toggle(
+                                "Active",
+                                "shipping_status",
+                                false
+                            ) . 
+                            this->inputs->text(
+                                "Name",
+                                "shipping_name",
+                                "The shpping name",
+                                true
+                            ) .
+                            this->inputs->text(
+                                "Price",
+                                "shipping_price",
+                                "The shipping price",
+                                true
+                            ) .
+                            this->currenciesSelect(null, "add", "shipping_currency_id") . 
+                            this->countriesSelect(null, "add", "shipping_country_id") . 
+                            this->taxesSelect(null, "add", "shipping_tax_id") . 
+                    "   </div>
+                    </div>";
         }
+
         let html .= "
             </div>
         </div>";
@@ -616,7 +706,7 @@ class Products extends Content
         );
     }
 
-    private function taxesSelect(selected = null, mode = "edit")
+    private function taxesSelect(selected = null, mode = "edit", label = "tax_id")
     {
         var select = [], data;
         
@@ -635,7 +725,7 @@ class Products extends Content
 
         return this->inputs->select(
             "Tax rate",
-            (mode == "edit" ? "tax_id[]" : "tax_id"),
+            (mode == "edit" ? label . "[]" : label),
             "The tax rate",
             select,
             false,
@@ -703,8 +793,12 @@ class Products extends Content
                 }
             }
 
-            this->updatePrices(model);
-            this->updateShipping(model);
+            if (isset(_POST["price_name"])) {
+                this->updatePrices(model, user_id);
+            }
+            if (isset(_POST["shipping_name"])) {
+                this->updateShipping(model, user_id);
+            }
         } else {
             let data = [
                 "id": this->database->uuid(),
@@ -737,8 +831,12 @@ class Products extends Content
                 throw new Exception("Failed to create the product");
             }
 
-            this->createPrice(data["id"], "add", user_id);
-            //this->createShipping(data["id"], "add", user_id);
+            if (isset(_POST["price_name"])) {
+                this->createPrice(data["id"], "add", user_id);
+            }
+            if (isset(_POST["shipping_name"])) {
+                this->createShipping(data["id"], "add", user_id);
+            }
         }
 
         return path;

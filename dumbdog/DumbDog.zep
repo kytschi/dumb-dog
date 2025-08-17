@@ -476,32 +476,18 @@ class DumbDog
     private function pageExtra(database, page, files)
     {
         var item, controller;
-        let controller = new Controller();
+        let controller = new Content();
 
         let page->images = database->all(
-            "SELECT 
-                IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
-                IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
-            FROM files 
-            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
-            ORDER BY sort ASC",
+            controller->query_images,
             [
                 "resource_id": page->id
             ]
         );
 
         // Get the parent
-        let item = database->get("
-            SELECT
-                content.*,
-                templates.file AS template 
-            FROM content 
-            JOIN templates ON templates.id=content.template_id 
-            WHERE 
-                content.id=:id AND 
-                content.status='live' AND 
-                content.public_facing=1 AND 
-                content.deleted_at IS NULL",
+        let item = database->get(
+            controller->query_parent,
             [
                 "id": page->parent_id
             ]
@@ -509,12 +495,7 @@ class DumbDog
 
         if (item) {
             let item->images = database->all(
-                "SELECT 
-                    IF(filename IS NOT NULL, CONCAT('" . files->folder . "', filename), '') AS image,
-                    IF(filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', filename), '') AS thumbnail 
-                FROM files 
-                WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
-                ORDER BY sort ASC",
+                controller->query_images,
                 [
                     "resource_id": page->parent_id
                 ]
@@ -528,14 +509,8 @@ class DumbDog
             let item = "content.created_at DESC";
         }
 
-        let page->children = database->all("
-            SELECT
-                content.*,
-                templates.file AS template 
-            FROM content 
-            JOIN templates ON templates.id=content.template_id 
-            WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
-            ORDER BY content.created_at DESC, content.name", 
+        let page->children = database->all(
+            controller->query_children, 
             [
                 "parent_id": page->id
             ]
@@ -549,35 +524,16 @@ class DumbDog
             }
         }
 
-        let page->stacks = database->all("
-            SELECT
-                content_stacks.*,
-                templates.file AS template,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content_stacks 
-            LEFT JOIN templates ON templates.id = content_stacks.template_id AND templates.deleted_at IS NULL 
-            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
-            WHERE 
-                content_id=:id AND 
-                content_stacks.deleted_at IS NULL AND 
-                content_stack_id IS NULL
-            ORDER BY sort ASC",
+        let page->stacks = database->all(
+            controller->query_stacks,
             [
                 "id": page->id
             ]
         );
 
         for item in page->stacks {
-            let item->stacks = database->all("
-                SELECT
-                    content_stacks.*,
-                    IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "', files.filename), '') AS image,
-                    IF(files.filename IS NOT NULL, CONCAT('" . files->folder . "thumb-', files.filename), '') AS thumbnail 
-                FROM content_stacks 
-                LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
-                WHERE content_stack_id=:id AND content_stacks.deleted_at IS NULL 
-                ORDER BY sort ASC",
+            let item->stacks = database->all(
+                controller->query_stacks,
                 [
                     "id": item->id
                 ]

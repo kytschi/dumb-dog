@@ -15,6 +15,7 @@ use DumbDog\Controllers\Api\Appointments;
 use DumbDog\Controllers\Api\Blog;
 use DumbDog\Controllers\Api\BlogCategories;
 use DumbDog\Controllers\Api\ContentStacks;
+use DumbDog\Controllers\Api\Countries;
 use DumbDog\Controllers\Api\Currencies;
 use DumbDog\Controllers\Api\PageCategories;
 use DumbDog\Controllers\Api\Pages;
@@ -48,6 +49,7 @@ class ApiControl extends Controller
             "BlogCategories": new BlogCategories(),
             "Blog": new Blog(),
             "ContentStacks": new ContentStacks(),
+            "Countries": new Countries(),
             "Currencies": new Currencies(),
             "PageCategories": new PageCategories(),
             "Pages": new Pages(),

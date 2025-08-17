@@ -1,7 +1,7 @@
 /**
  * DumbDog API for products controller
  *
- * @package     DumbDog\Controllers\Api\Appointments
+ * @package     DumbDog\Controllers\Api\Products
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -37,6 +37,10 @@ class Products extends Controller
             "Products",
             "recover"
         ],
+        "/api/products/view": [
+            "Products",
+            "view"
+        ],
         "/api/products": [
             "Products",
             "list"
@@ -55,12 +59,13 @@ class Products extends Controller
             products.code,
             products.stock,
             products.on_offer, 
+            products.id AS product_id, 
             IF(products.on_offer,product_prices.offer_price,product_prices.price) AS price,
             currencies.symbol,
             currencies.locale_code,
             IFNULL(templates.name, 'No template') AS template, 
             IFNULL(parent_page.name, 'No parent') AS parent 
-        FROM content 
+        FROM content  
         JOIN products ON products.content_id = content.id 
         JOIN templates ON templates.id=content.template_id 
         LEFT JOIN content AS parent_page ON parent_page.id=content.parent_id 
@@ -101,60 +106,13 @@ class Products extends Controller
             let data = controller->setData(data, this->api_app->created_by);
 
             let status = this->database->execute(
-                "INSERT INTO content 
-                    (id,
-                    status,
-                    name,
-                    title,
-                    sub_title,
-                    slogan,
-                    url,
-                    content,
-                    template_id,
-                    meta_keywords,
-                    meta_author,
-                    meta_description,
-                    type,
-                    tags,
-                    featured,
-                    parent_id,
-                    sort,
-                    sitemap_include,
-                    public_facing,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (:id,
-                    :status,
-                    :name,
-                    :title,
-                    :sub_title,
-                    :slogan,
-                    :url,
-                    :content,                            
-                    :template_id,
-                    :meta_keywords,
-                    :meta_author,
-                    :meta_description,
-                    :type,
-                    :tags,
-                    :featured,
-                    :parent_id,
-                    :sort,
-                    :sitemap_include,
-                    :public_facing,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
+                controller->query_insert,
                 data
             );
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the appointment",
+                    "Failed to save the product",
                     400
                 );
             } else {
@@ -197,7 +155,7 @@ class Products extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "appointment";
+        let data["type"] = "product";
 
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
@@ -240,7 +198,7 @@ class Products extends Controller
         );
 
         if (empty(model)) {
-            throw new NotFoundException("Appointment not found");
+            throw new NotFoundException("Product not found");
         }
 
         if (!empty(_POST)) {
@@ -254,27 +212,7 @@ class Products extends Controller
                 let data = controller->setData(data, this->api_app->created_by, model);
                 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        url=:url,
-                        template_id=:template_id,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags,
-                        featured=:featured,
-                        parent_id=:parent_id,
-                        sort=:sort,
-                        sitemap_include=:sitemap_include,
-                        public_facing=:public_facing 
-                    WHERE id=:id",
+                    controller->query_update,
                     data
                 );
             
@@ -291,7 +229,7 @@ class Products extends Controller
                         ]
                     );
     
-                    controller->updateExtra(model, path);
+                    controller->updateExtra(model, path, this->api_app->created_by);
 
                     let model = this->database->get(
                         this->query . 
@@ -400,6 +338,38 @@ class Products extends Controller
 
         return this->createReturn(
             "Product successfully recovered from the deleted state",
+            model
+        );
+    }
+
+    public function view(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Main();
+                
+        let data["id"] = controller->getPageId(path);
+        let data["type"] = "product";
+        let model = this->database->get(
+            this->query . " WHERE content.type=:type AND content.id=:id",
+            data
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Product not found");
+        }
+
+        let model->prices = this->database->all(
+            "SELECT * FROM product_prices WHERE product_id=:id",
+            [
+                "id": model->product_id
+            ]
+        );
+
+        return this->createReturn(
+            "Product",
             model
         );
     }

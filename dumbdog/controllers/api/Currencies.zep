@@ -37,6 +37,10 @@ class Currencies extends Controller
             "Currencies",
             "recover"
         ],
+        "/api/currencies/view": [
+            "Currencies",
+            "view"
+        ],
         "/api/currencies": [
             "Currencies",
             "list"
@@ -299,6 +303,28 @@ class Currencies extends Controller
 
         return this->createReturn(
             "Currency successfully recovered from the deleted state",
+            model
+        );
+    }
+
+    public function view(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Main();
+                
+        let data["id"] = controller->getPageId(path);
+                
+        let model = this->database->get("SELECT * FROM currencies WHERE id=:id", data);
+
+        if (empty(model)) {
+            throw new NotFoundException("Currency not found");
+        }
+
+        return this->createReturn(
+            "Currency",
             model
         );
     }

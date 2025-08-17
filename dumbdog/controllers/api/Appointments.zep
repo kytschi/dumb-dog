@@ -37,6 +37,10 @@ class Appointments extends Controller
             "Appointments",
             "recover"
         ],
+        "/api/appointments/view": [
+            "Appointments",
+            "view"
+        ],
         "/api/appointments": [
             "Appointments",
             "list"
@@ -64,65 +68,14 @@ class Appointments extends Controller
 
             let data["id"] = this->database->uuid();
             let data["created_by"] = this->api_app->created_by;
-            let data["type"] = "appointment";
+            let data["type"] = controller->type;
 
             let data = controller->setData(data, this->api_app->created_by);
 
-            if (this->cfg->save_mode == true) {
-                let status = this->database->execute(
-                    "INSERT INTO content 
-                        (id,
-                        status,
-                        name,
-                        title,
-                        sub_title,
-                        slogan,
-                        url,
-                        content,
-                        template_id,
-                        meta_keywords,
-                        meta_author,
-                        meta_description,
-                        type,
-                        tags,
-                        featured,
-                        parent_id,
-                        sort,
-                        sitemap_include,
-                        public_facing,
-                        created_at,
-                        created_by,
-                        updated_at,
-                        updated_by) 
-                    VALUES 
-                        (:id,
-                        :status,
-                        :name,
-                        :title,
-                        :sub_title,
-                        :slogan,
-                        :url,
-                        :content,                            
-                        :template_id,
-                        :meta_keywords,
-                        :meta_author,
-                        :meta_description,
-                        :type,
-                        :tags,
-                        :featured,
-                        :parent_id,
-                        :sort,
-                        :sitemap_include,
-                        :public_facing,
-                        NOW(),
-                        :created_by,
-                        NOW(),
-                        :updated_by)",
-                    data
-                );
-            } else {
-                let status = true;
-            }
+            let status = this->database->execute(
+                controller->query_insert,
+                data
+            );
 
             if (!is_bool(status)) {
                 throw new SaveException(
@@ -142,23 +95,10 @@ class Appointments extends Controller
                 }
 
                 let model = this->database->get(
-                    "SELECT main_page.*,
-                    appointments.user_id,
-                    appointments.lead_id,
-                    appointments.with_email, 
-                    appointments.with_number,
-                    appointments.on_date,
-                    appointments.appointment_length,
-                    appointments.free_slot,
-                    IFNULL(templates.name, 'No template') AS template, 
-                    IFNULL(parent_page.name, 'No parent') AS parent 
-                    FROM content AS main_page 
-                    JOIN appointments ON appointments.content_id = main_page.id 
-                    LEFT JOIN templates ON templates.id=main_page.template_id 
-                    LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-                    WHERE main_page.id=:id",
+                    controller->query_appointment,
                     [
-                        "id": data["id"]
+                        "id": data["id"],
+                        "type": data["type"]
                     ]
                 );
 
@@ -184,7 +124,7 @@ class Appointments extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "appointment";
+        let data["type"] = controller->type;
 
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
@@ -200,24 +140,8 @@ class Appointments extends Controller
         }
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            appointments.user_id,
-            appointments.lead_id,
-            appointments.with_email, 
-            appointments.with_number,
-            appointments.on_date,
-            appointments.appointment_length,
-            appointments.free_slot, 
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            JOIN appointments ON appointments.content_id = content.id 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            controller->query_appointment,
+            data
         );
 
         return this->createReturn(
@@ -235,7 +159,7 @@ class Appointments extends Controller
         let controller = new Main();
                 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "appointment";
+        let data["type"] = controller->type;
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
             data
@@ -255,35 +179,11 @@ class Appointments extends Controller
             } else {
                 let data = controller->setData(data, this->api_app->created_by, model);
                 
-                if (this->cfg->save_mode == true) {
-                    let status = this->database->execute(
-                        "UPDATE content SET 
-                            status=:status,
-                            name=:name,
-                            title=:title,
-                            sub_title=:sub_title,
-                            slogan=:slogan,
-                            url=:url,
-                            template_id=:template_id,
-                            content=:content,
-                            meta_keywords=:meta_keywords,
-                            meta_author=:meta_author,
-                            meta_description=:meta_description,
-                            updated_at=NOW(),
-                            updated_by=:updated_by,
-                            tags=:tags,
-                            featured=:featured,
-                            parent_id=:parent_id,
-                            sort=:sort,
-                            sitemap_include=:sitemap_include,
-                            public_facing=:public_facing 
-                        WHERE id=:id",
-                        data
-                    );
-                } else {
-                    let status = true;
-                }
-            
+                let status = this->database->execute(
+                    controller->query_update,
+                    data
+                );
+                
                 if (!is_bool(status)) {
                     throw new SaveException(
                         "Failed to update the appointment",
@@ -302,23 +202,10 @@ class Appointments extends Controller
                     }
 
                     let model = this->database->get(
-                        "SELECT main_page.*,
-                        appointments.user_id,
-                        appointments.lead_id,
-                        appointments.with_email, 
-                        appointments.with_number,
-                        appointments.on_date,
-                        appointments.appointment_length,
-                        appointments.free_slot, 
-                        IFNULL(templates.name, 'No template') AS template, 
-                        IFNULL(parent_page.name, 'No parent') AS parent 
-                        FROM content AS main_page 
-                        JOIN appointments ON appointments.content_id = main_page.id 
-                        LEFT JOIN templates ON templates.id=main_page.template_id 
-                        LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-                        WHERE main_page.id=:id",
+                        controller->query_appointment,
                         [
-                            "id": data["id"]
+                            "id": data["id"],
+                            "type": data["type"]
                         ]
                     );
     
@@ -338,30 +225,21 @@ class Appointments extends Controller
 
     public function list(path)
     {       
-        var data = [], query, results, sort_dir = "ASC";
+        var data = [], query, results, sort_dir = "ASC", controller;
 
         this->secure();
 
-        let query = "
-            SELECT
-                content.*,
-                appointments.user_id,
-                appointments.lead_id,
-                appointments.with_email, 
-                appointments.with_number,
-                appointments.on_date,
-                appointments.appointment_length,
-                appointments.free_slot 
-            FROM content 
-            JOIN appointments ON appointments.content_id = content.id ";
+        let controller = new Main();
+
+        let query = controller->query_appointment;
 
         if (isset(_GET["query"])) {
-            let query .= " AND content.name LIKE :query";
+            let query .= " AND main_page.name LIKE :query";
             let data["query"] = "%" . _GET["query"] . "%";
         }
 
         if (isset(_GET["tag"])) {
-            let query .= " AND content.tags LIKE :tag";
+            let query .= " AND main_page.tags LIKE :tag";
             let data["tag"] = "%{\"value\":\"" . urldecode(_GET["tag"]) . "\"}%"; 
         }
 
@@ -386,9 +264,9 @@ class Appointments extends Controller
                 );
             }
 
-            let query .= " ORDER BY content." . strtolower(_GET["sort"]) . " " . sort_dir;
+            let query .= " ORDER BY main_page." . strtolower(_GET["sort"]) . " " . sort_dir;
         } else {
-            let query .= " ORDER BY content.name " . sort_dir;
+            let query .= " ORDER BY main_page.name " . sort_dir;
         }        
 
         let results = this->database->all(query, data);
@@ -409,7 +287,7 @@ class Appointments extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
-        let data["type"] = "appointment";
+        let data["type"] = controller->type;
 
         let model = this->database->get(
             "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
@@ -425,28 +303,38 @@ class Appointments extends Controller
         }
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            appointments.user_id,
-            appointments.lead_id,
-            appointments.with_email, 
-            appointments.with_number,
-            appointments.on_date,
-            appointments.appointment_length,
-            appointments.free_slot, 
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            JOIN appointments ON appointments.content_id = content.id 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            controller->query_appointment,
+            data
         );
 
         return this->createReturn(
             "Appointment successfully recovered from the deleted state",
+            model
+        );
+    }
+
+    public function view(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Main();
+                
+        let data["id"] = controller->getPageId(path);
+        let data["type"] = controller->type;
+
+        let model = this->database->get(
+            controller->query_appointment,
+            data
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Appointment not found");
+        }
+
+        return this->createReturn(
+            "Appointment",
             model
         );
     }

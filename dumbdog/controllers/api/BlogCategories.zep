@@ -37,6 +37,10 @@ class BlogCategories extends Controller
             "BlogCategories",
             "recover"
         ],
+        "/api/blog-categories/view": [
+            "BlogCategories",
+            "view"
+        ],
         "/api/blog-categories": [
             "BlogCategories",
             "list"
@@ -371,6 +375,32 @@ class BlogCategories extends Controller
 
         return this->createReturn(
             "Blog category successfully recovered from the deleted state",
+            model
+        );
+    }
+
+    public function view(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Main();
+                
+        let data["id"] = controller->getPageId(path);
+        let data["type"] = "blog-category";
+
+        let model = this->database->get(
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
+            data
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Blog category not found");
+        }
+
+        return this->createReturn(
+            "Blog category",
             model
         );
     }

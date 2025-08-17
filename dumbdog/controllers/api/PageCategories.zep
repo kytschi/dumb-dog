@@ -37,6 +37,10 @@ class PageCategories extends Controller
             "PageCategories",
             "recover"
         ],
+        "/api/page-categories/view": [
+            "PageCategories",
+            "view"
+        ],
         "/api/page-categories": [
             "PageCategories",
             "list"
@@ -371,6 +375,32 @@ class PageCategories extends Controller
 
         return this->createReturn(
             "Page category successfully recovered from the deleted state",
+            model
+        );
+    }
+
+    public function view(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Main();
+                
+        let data["id"] = controller->getPageId(path);
+        let data["type"] = "page-category";
+        
+        let model = this->database->get(
+            "SELECT content.* FROM content WHERE content.type=:type AND content.id=:id",
+            data
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Page category not found");
+        }
+
+        return this->createReturn(
+            "Page category",
             model
         );
     }

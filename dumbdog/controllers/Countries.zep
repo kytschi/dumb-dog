@@ -175,21 +175,7 @@ class Countries extends Content
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
-                        let status = this->database->execute(
-                            "UPDATE product_shipping 
-                            SET country_code=:country_code
-                            WHERE country_id=:country_id",
-                            [
-                                "country_code": data["code"],
-                                "country_id": data["id"]
-                            ]
-                        );
-                        if (!is_bool(status)) {
-                            let html .= this->saveFailed("Failed to update the shipping country codes");
-                            let html .= this->consoleLogError(status);
-                        } else {
-                            this->redirect(path);
-                        }
+                        this->redirect(path);
                     } catch ValidationException, err {
                         let html .= this->missingRequired(err->getMessage());
                     }
@@ -238,38 +224,9 @@ class Countries extends Content
                             </div>
                         </div>
                     </div>
-                </div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Country</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
-                        this->buttons->back(this->global_url) .   
-                    "</li>";
-        if (mode == "edit") {    
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+                </div> " .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
@@ -293,8 +250,58 @@ class Countries extends Content
                 "status"
             ],
             this->database->all(query, data),
-            this->cfg->dumb_dog_url . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Create a new country"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .=     this->buttons->save() . 
+                    "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Country
+                    </span>
+                </div>
+            </li>
+        </ul>";
+
+        return html;
     }
 
     public function renderToolbar()

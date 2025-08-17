@@ -12,6 +12,7 @@ namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
 use DumbDog\Controllers\Content;
+use DumbDog\Controllers\Files;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
@@ -37,6 +38,10 @@ class Pages extends Controller
             "Pages",
             "recover"
         ],
+        "/api/pages/view": [
+            "Pages",
+            "view"
+        ],
         "/api/pages": [
             "Pages",
             "list"
@@ -44,7 +49,7 @@ class Pages extends Controller
     ];
 
     public valid_sorts = ["name", "created_at"];
-    
+
     public function add(path)
     {
         var data = [], model = null, status = false, controller;
@@ -69,53 +74,7 @@ class Pages extends Controller
             let data = controller->setData(data, this->api_app->created_by);
 
             let status = this->database->execute(
-                "INSERT INTO content 
-                    (id,
-                    status,
-                    name,
-                    title,
-                    sub_title,
-                    slogan,
-                    url,
-                    content,
-                    template_id,
-                    meta_keywords,
-                    meta_author,
-                    meta_description,
-                    type,
-                    tags,
-                    featured,
-                    parent_id,
-                    sort,
-                    sitemap_include,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (
-                    :id,
-                    :status,
-                    :name,
-                    :title,
-                    :sub_title,
-                    :slogan,
-                    :url,
-                    :content,                            
-                    :template_id,
-                    :meta_keywords,
-                    :meta_author,
-                    :meta_description,
-                    :type,
-                    :tags,
-                    :featured,
-                    :parent_id,
-                    :sort,
-                    :sitemap_include,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
+                controller->query_insert,
                 data
             );
 
@@ -126,13 +85,7 @@ class Pages extends Controller
                 );
             } else {
                 let model = this->database->get(
-                    "SELECT main_page.*,
-                    IFNULL(templates.name, 'No template') AS template, 
-                    IFNULL(parent_page.name, 'No parent') AS parent 
-                    FROM content AS main_page 
-                    LEFT JOIN templates ON templates.id=main_page.template_id 
-                    LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-                    WHERE main_page.id=:id",
+                    controller->query . " WHERE main_page.id=:id",
                     [
                         "id": data["id"]
                     ]
@@ -151,6 +104,70 @@ class Pages extends Controller
         );
     }
 
+    public function createReturn(message, data = null, query = null, code = 200)
+    {
+        var parent_page = null, controller;
+
+        let controller = new Content();
+
+        if (!is_array(data)) {
+            let data->tags = controller->toTags(data->tags);
+
+            let data->images = this->database->all(
+                controller->query_images,
+                [
+                    "resource_id": data->id
+                ]
+            );
+            let data->stacks = this->database->all(
+                controller->query_stacks,
+                [
+                    "id": data->id
+                ]
+            );
+
+            if (data->parent_id) {
+                let parent_page = this->database->get(
+                    controller->query_parent,
+                    [
+                        "id": data->parent_id
+                    ]
+                );
+
+                let parent_page->images = this->database->all(
+                    controller->query_images,
+                    [
+                        "resource_id": parent_page->id
+                    ]
+                );
+                let parent_page->stacks = this->database->all(
+                    controller->query_stacks,
+                    [
+                        "id": parent_page->id
+                    ]
+                );
+            }
+
+            let data->parent = parent_page;
+
+            let data->children = this->database->all(
+                controller->query_children, 
+                [
+                    "parent_id": data->id
+                ]
+            );
+
+            let data->old_urls = this->database->all(
+                controller->query_old_urls,
+                [
+                    "id": data->id
+                ]
+            );
+        }
+
+        return parent::createReturn(message, data, query, code);
+    }
+
     public function delete(path)
     {
         var model, data = [], controller;
@@ -160,18 +177,11 @@ class Pages extends Controller
         let controller = new Content();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "page";
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            "SELECT * FROM content WHERE type=:type AND id=:id",
+            data
         );
 
         if (empty(model)) {
@@ -181,13 +191,7 @@ class Pages extends Controller
         controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
+            controller->query . " WHERE main_page.id=:id",
             [
                 "id": data["id"]
             ]
@@ -229,28 +233,7 @@ class Pages extends Controller
                 let data = controller->setData(data, this->api_app->created_by, model);
                 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        type=:type,
-                        status=:status,
-                        name=:name,
-                        template_id=:template_id,
-                        url=:url,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        featured=:featured,
-                        sitemap_include=:sitemap_include,
-                        public_facing=:public_facing,
-                        tags=:tags,
-                        parent_id=:parent_id,
-                        sort=:sort,
-                        updated_by=:updated_by,
-                        updated_at=NOW() 
-                    WHERE id=:id",
+                    controller->query_update,
                     data
                 );
             
@@ -261,13 +244,7 @@ class Pages extends Controller
                     );
                 } else {
                     let model = this->database->get(
-                        "SELECT main_page.*,
-                        IFNULL(templates.name, 'No template') AS template, 
-                        IFNULL(parent_page.name, 'No parent') AS parent 
-                        FROM content AS main_page 
-                        LEFT JOIN templates ON templates.id=main_page.template_id 
-                        LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-                        WHERE main_page.id=:id",
+                        controller->query . " WHERE main_page.id=:id",
                         [
                             "id": data["id"]
                         ]
@@ -289,18 +266,13 @@ class Pages extends Controller
 
     public function list(path)
     {       
-        var data = [], query, results, sort_dir = "ASC";
+        var data = [], query, results, sort_dir = "ASC", controller;
 
         this->secure();
 
-        let query = "
-            SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.type='page'";
+        let controller = new Content();
+
+        let query = controller->query . " WHERE main_page.type='page'";
 
         if (isset(_GET["query"])) {
             let query .= " AND main_page.name LIKE :query";
@@ -356,18 +328,11 @@ class Pages extends Controller
         let controller = new Content();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = "page";
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            "SELECT * FROM content WHERE type=:type AND id=:id",
+            data
         );
 
         if (empty(model)) {
@@ -377,20 +342,38 @@ class Pages extends Controller
         controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
 
         let model = this->database->get(
-            "SELECT main_page.*,
-            IFNULL(templates.name, 'No template') AS template, 
-            IFNULL(parent_page.name, 'No parent') AS parent 
-            FROM content AS main_page 
-            LEFT JOIN templates ON templates.id=main_page.template_id 
-            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
-            WHERE main_page.id=:id",
-            [
-                "id": data["id"]
-            ]
+            controller->query . " WHERE main_page.type=:type AND main_page.id=:id",
+            data
         );
 
         return this->createReturn(
             "Page successfully recovered from the deleted state",
+            model
+        );
+    }
+
+    public function view(path)
+    {
+        var model, data = [], controller;
+
+        this->secure();
+
+        let controller = new Content();
+                
+        let data["id"] = controller->getPageId(path);
+        let data["type"] = "page";
+
+        let model = this->database->get(
+            controller->query . " WHERE main_page.type=:type AND main_page.id=:id",
+            data
+        );
+
+        if (empty(model)) {
+            throw new NotFoundException("Page not found");
+        }
+
+        return this->createReturn(
+            "Page",
             model
         );
     }
