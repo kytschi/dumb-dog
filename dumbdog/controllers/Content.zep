@@ -220,7 +220,6 @@ class Content extends Controller
                 files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
             WHERE 
                 content_id=:id AND 
-                content_stacks.deleted_at IS NULL AND 
                 content_stack_id IS NULL
             ORDER BY sort ASC";
     }
@@ -388,6 +387,11 @@ class Content extends Controller
         }
     }
 
+    public function deleteStack(path, string id)
+    {
+        this->triggerDelete("content_stacks", path, id);
+    }
+
     public function edit(path)
     {
         var html = "", model, data = [];
@@ -436,10 +440,17 @@ class Content extends Controller
                 }
             }
 
-            if (isset(_POST["delete_stack"])) {
-                if (!empty(_POST["delete_stack"])) {
+            if (isset(_POST["stack_delete"])) {
+                if (!empty(_POST["stack_delete"])) {
                     let path = path . "?scroll=stack-tab";
-                    this->triggerDelete("content_stacks", path, reset(_POST["delete_stack"]));
+                    this->deleteStack(path, reset(_POST["stack_delete"]));
+                }
+            }
+
+            if (isset(_POST["stack_recover"])) {
+                if (!empty(_POST["stack_recover"])) {
+                    let path = path . "?scroll=stack-tab";
+                    this->recoverStack(path, reset(_POST["stack_recover"]));
                 }
             }
 
@@ -581,6 +592,11 @@ class Content extends Controller
             false,
             selected
         );
+    }
+
+    public function recoverStack(path, string id)
+    {
+        this->triggerRecover("content_stacks", path, id);
     }
 
     public function render(model, mode = "add")
@@ -827,7 +843,7 @@ class Content extends Controller
         if (count(model->stacks)) {
             for key, item in model->stacks {
                 let html .= "
-                <div id='" . this->createSlug(item->name) . "-stack' class='dd-box'>
+                <div id='" . this->createSlug(item->name) . "-stack' class='dd-box" . (item->deleted_at ? " dd-deleted" : "") . "'>
                     <div class='dd-box-title dd-flex'>
                         <div class='dd-col'>" . item->name . "</div>
                         <div class='dd-col-auto'>" .
@@ -837,11 +853,10 @@ class Content extends Controller
                                 "Add to the " . item->name . " stack",
                                 "add"
                             ) .
-                            this->buttons->delete(
-                                item->id,
-                                "delete-stack-" . item->id,
-                                "delete_stack[]",
-                                "Delete the stack"
+                            (
+                                item->deleted_at ?
+                                this->buttons->recover(item->id, "stack-recover-" . item->id, "stack_recover[]", "Recover the stack item") :
+                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete[]", "Delete the stack item")
                             ) .
                         "</div>
                     </div>
@@ -856,14 +871,14 @@ class Content extends Controller
                         LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
                         WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL
                         ORDER BY sort ASC");
-                    let html .= this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name) .
-                                this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title) .
-                                this->inputs->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title) .
-                                this->inputs->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content) . 
-                                this->inputs->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags) . 
-                                this->inputs->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item) . 
-                                this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort) .
-                                this->stackTemplatesSelect(item->template_id, "stack_template[" . item->id . "]") . 
+                    let html .= this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name, (item->deleted_at ? true : false)) .
+                                this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title, (item->deleted_at ? true : false)) .
+                                this->inputs->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title, (item->deleted_at ? true : false)) .
+                                this->inputs->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content, (item->deleted_at ? true : false)) . 
+                                this->inputs->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags, (item->deleted_at ? true : false)) . 
+                                this->inputs->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item, (item->deleted_at ? true : false)) . 
+                                this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort, (item->deleted_at ? true : false)) .
+                                this->stackTemplatesSelect(item->template_id, "stack_template[" . item->id . "]", (item->deleted_at ? true : false)) . 
                                 "<h3 class='dd-mt-5 dd-mb-0'>Stack items</h3>";
                                 for key_stack, item_stack in item->stacks {
                                     let html .= "
@@ -874,18 +889,18 @@ class Content extends Controller
                                                 this->buttons->delete(
                                                     item_stack->id, 
                                                     "delete-stack-" . item_stack->id,
-                                                    "delete_stack[]",
+                                                    "stack_delete[]",
                                                     "Delete the stack item"
                                                 ) .
                                             "</div>
                                         </div>
                                         <div class='dd-stack-body'>" .
-                                            this->inputs->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name) .
-                                            this->inputs->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title) .
-                                            this->inputs->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title) .
-                                            this->inputs->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content) . 
-                                            this->inputs->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack) . 
-                                            this->inputs->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort) .
+                                            this->inputs->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name, (item_stack->deleted_at ? true : false)) .
+                                            this->inputs->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title, (item_stack->deleted_at ? true : false)) .
+                                            this->inputs->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title, (item_stack->deleted_at ? true : false)) .
+                                            this->inputs->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content, (item_stack->deleted_at ? true : false)) . 
+                                            this->inputs->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack, (item_stack->deleted_at ? true : false)) . 
+                                            this->inputs->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort, (item_stack->deleted_at ? true : false)) .
                                         "</div>
                                     </div>";
                                 }
@@ -1218,7 +1233,7 @@ class Content extends Controller
         return html;
     }
 
-    public function stackTemplatesSelect(selected = null, string id = "template_id")
+    public function stackTemplatesSelect(selected = null, string id = "template_id", bool disabled = false)
     {
         var select = [], data;
         let data = this->database->all("
@@ -1245,7 +1260,8 @@ class Content extends Controller
             "The stack's template",
             select,
             true,
-            selected
+            selected,
+            disabled
         );
     }
 

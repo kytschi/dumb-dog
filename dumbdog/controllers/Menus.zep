@@ -118,7 +118,7 @@ class Menus extends Content
                 content.* 
             FROM content 
             JOIN menus ON menus.content_id = content.id 
-            WHERE parent_id=:id AND deleted_at IS NULL AND type=:type
+            WHERE parent_id=:id AND type=:type
             ORDER BY sort ASC";
 
         let this->query_update_stack = "
@@ -245,7 +245,7 @@ class Menus extends Content
         this->updateExtra(model);
     }
 
-    private function contentSelect(selected = "", string name = "link_to")
+    private function contentSelect(selected = "", string name = "link_to", bool disabled = false)
     {
         var select = ["": "no content"], data;
         let data = this->database->all(
@@ -269,36 +269,34 @@ class Menus extends Content
             "Link to a piece of content",
             select,
             false,
-            selected
+            selected,
+            disabled
         );
     }
 
-    public function deleteItem(string id, string item_id)
+    public function deleteItem(string id, string item_id, user_id = null, bool redirect = true)
     {
         var data = [], status = false;
 
-        if (this->cfg->save_mode == true) {
-            let data["id"] = item_id;
-            let data["updated_by"] = this->getUserId();
-            let status = this->database->execute("
-                UPDATE 
-                    content
-                SET
-                    deleted_at=NOW(),
-                    deleted_by=:updated_by,
-                    updated_at=NOW(),
-                    updated_by=:updated_by
-                WHERE 
-                    id=:id",
-                data
-            );
-        } else {
-            let status = true;
-        }
+        let data["id"] = item_id;
+        let data["updated_by"] = user_id ? user_id : this->getUserId();
+
+        let status = this->database->execute("
+            UPDATE 
+                content
+            SET
+                deleted_at=NOW(),
+                deleted_by=:updated_by,
+                updated_at=NOW(),
+                updated_by=:updated_by
+            WHERE 
+                id=:id",
+            data
+        );
 
         if (!is_bool(status)) {
             throw new Exception("Failed to delete the menu item");
-        } else {
+        } elseif (redirect) {
             this->redirect(this->global_url . "/edit/" . id . "?deleted=true&scroll=stack-tab");
         }
     }
@@ -355,6 +353,12 @@ class Menus extends Content
             if (isset(_POST["stack_delete"])) {
                 if (!empty(_POST["stack_delete"])) {
                     this->deleteItem(model->id, _POST["stack_delete"]);
+                }
+            }
+
+            if (isset(_POST["stack_recover"])) {
+                if (!empty(_POST["stack_recover"])) {
+                    this->recoverItem(model->id, _POST["stack_recover"]);
                 }
             }
 
@@ -579,21 +583,70 @@ class Menus extends Content
         if (count(model->stacks)) {
             for item in model->stacks {
                 let html .= "
-                    <div class='dd-box'>
+                    <div class='dd-box" . (item->deleted_at ? " dd-deleted" : "") . "'>
                         <div class='dd-box-title dd-flex'>
                             <div class='dd-col'>" . item->name . "</div>
                             <div class='dd-col-auto'>" . 
-                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "Delete the item") .
+                                (
+                                    item->deleted_at ?
+                                    this->buttons->recover(item->id, "stack-recover-" . item->id, "stack_recover", "Recover the item") :
+                                    this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete", "Delete the item")
+                                ) .
                         "   </div>
                         </div>
                         <div class='dd-box-body'>" .
-                            this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the menu item", true, item->name) .
-                            this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the menu item", true, item->title) .
-                            this->inputs->text("Alt text", "stack_sub_title[" . item->id . "]", "The alt text for the menu item", false, item->sub_title) . 
-                            this->inputs->text("URL", "stack_url[" . item->id . "]", "The URL for the menu item", false, item->url) . 
-                            this->contentSelect(item->link_to, "stack_link_to[" . item->id . "]") . 
-                            this->inputs->toggle("New window", "stack_new_window[" . item->id . "]", false, item->new_window) . 
-                            this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the menu item", false, item->sort) .
+                            this->inputs->text(
+                                "Name",
+                                "stack_name[" . item->id . "]",
+                                "The name of the menu item",
+                                true,
+                                item->name,
+                                (item->deleted_at ? true : false)
+                            ) .
+                            this->inputs->text(
+                                "Title",
+                                "stack_title[" . item->id . "]",
+                                "The title of the menu item",
+                                true,
+                                item->title,
+                                (item->deleted_at ? true : false)
+                            ) .
+                            this->inputs->text(
+                                "Alt text",
+                                "stack_sub_title[" . item->id . "]",
+                                "The alt text for the menu item",
+                                false,
+                                item->sub_title,
+                                (item->deleted_at ? true : false)
+                            ) . 
+                            this->inputs->text(
+                                "URL",
+                                "stack_url[" . item->id . "]",
+                                "The URL for the menu item",
+                                false,
+                                item->url,
+                                (item->deleted_at ? true : false)
+                            ) . 
+                            this->contentSelect(
+                                item->link_to,
+                                "stack_link_to[" . item->id . "]",
+                                (item->deleted_at ? true : false)
+                            ) . 
+                            this->inputs->toggle(
+                                "New window",
+                                "stack_new_window[" . item->id . "]",
+                                false,
+                                item->new_window,
+                                (item->deleted_at ? true : false)
+                            ) . 
+                            this->inputs->number(
+                                "Sort",
+                                "stack_sort[" . item->id . "]",
+                                "Sort the menu item",
+                                false,
+                                item->sort,
+                                (item->deleted_at ? true : false)
+                            ) .
                         "</div>
                     </div>";
             }
@@ -612,6 +665,33 @@ class Menus extends Content
         <div class='dd-page-toolbar'>" . 
             this->buttons->add(this->global_url . "/add") .
         "</div>";
+    }
+
+    public function recoverItem(string id, string item_id, user_id = null, bool redirect = true)
+    {
+        var data = [], status = false;
+
+        let data["id"] = item_id;
+        let data["updated_by"] = user_id ? user_id : this->getUserId();
+
+        let status = this->database->execute("
+            UPDATE 
+                content
+            SET
+                deleted_at=null,
+                deleted_by=null,
+                updated_at=NOW(),
+                updated_by=:updated_by
+            WHERE 
+                id=:id",
+            data
+        );
+
+        if (!is_bool(status)) {
+            throw new Exception("Failed to recover the menu item");
+        } elseif (redirect) {
+            this->redirect(this->global_url . "/edit/" . id . "?recover=true&scroll=stack-tab");
+        }
     }
 
     public function setData(array data, user_id = null, model = null)
