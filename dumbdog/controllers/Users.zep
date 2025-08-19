@@ -100,7 +100,7 @@ class Users extends Content
                                     :created_by,
                                     NOW(),
                                     :updated_by,
-                                    'active'
+                                    'live'
                                 )",
                             data
                         );

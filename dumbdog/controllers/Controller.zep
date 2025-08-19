@@ -121,7 +121,11 @@ class Controller
         return str_replace(
             [" "],
             "-",
-            str_replace([",", "=", "&", "?", "#", ":", ";", "/", "//", "\\", "\\\\", "’"], "", strtolower(value))
+            str_replace(
+                [",", "=", "&", "?", "#", ":", ";", "/", "//", "\\", "\\\\", "’"],
+                "",
+                strtolower(value)
+            )
         );
     }
 

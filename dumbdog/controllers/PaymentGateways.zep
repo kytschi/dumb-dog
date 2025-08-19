@@ -256,7 +256,7 @@ class PaymentGateways extends Content
         let data = this->database->all("
             SELECT payment_gateways.*
             FROM payment_gateways
-            WHERE deleted_at IS NULL AND status='active' 
+            WHERE deleted_at IS NULL AND status='live' 
             ORDER BY is_default DESC, title");
         
         for item in data {

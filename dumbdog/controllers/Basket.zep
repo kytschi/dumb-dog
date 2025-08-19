@@ -31,7 +31,7 @@ class Basket extends Controller
 
         let currency_id = this->session("currency");
         if (empty(currency_id)) {
-            let product = this->database->get("SELECT currencies.id FROM currencies WHERE is_default=1 AND status='active'");
+            let product = this->database->get("SELECT currencies.id FROM currencies WHERE is_default=1 AND status='live'");
             if (!empty(product)) {
                 let currency_id = product->id;
                 this->session("currency", currency_id);
@@ -681,7 +681,7 @@ class Basket extends Controller
         }
 
         let result = this->database->get(
-            "SELECT currencies.id FROM currencies WHERE id=:id AND deleted_at IS NULL AND status='active'",
+            "SELECT currencies.id FROM currencies WHERE id=:id AND deleted_at IS NULL AND status='live'",
             [
                 "id": currency_id
             ]
@@ -728,7 +728,7 @@ class Basket extends Controller
         }
 
         let result = this->database->get(
-            "SELECT id, type FROM payment_gateways WHERE id=:id AND deleted_at IS NULL AND status='active'",
+            "SELECT id, type FROM payment_gateways WHERE id=:id AND deleted_at IS NULL AND status='live'",
             [
                 "id": payment_gateway_id
             ]

@@ -357,7 +357,7 @@ class Products extends Content
                                 let join .= " LEFT JOIN 
                                     product_shipping ON product_shipping.product_id = products.id AND 
                                         product_shipping.deleted_at IS NULL AND 
-                                        product_shipping.status = 'active'";
+                                        product_shipping.status = 'live'";
                             }
                             let data = array_merge(data, item["data"]);
                         }

@@ -45,6 +45,65 @@ class Groups extends Content
         ]
     ];
 
+    public system = [];
+
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "SELECT 
+            groups.*,
+            true AS can_edit
+            FROM groups 
+            WHERE groups.id=:id";
+
+        let this->query_insert = "
+            INSERT INTO groups 
+                (
+                    id,
+                    name,
+                    slug,
+                    status,
+                    tags,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by
+                ) 
+            VALUES 
+                (
+                    :id,
+                    :name,
+                    :slug,
+                    :status,
+                    :tags,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by
+                )";
+
+        let this->query_update = "
+            UPDATE
+                groups
+            SET 
+                name=:name,
+                slug=:slug,
+                status=:status,
+                tags=:tags,
+                updated_at=NOW(),
+                updated_by=:updated_by 
+            WHERE id=:id";
+
+        let this->system[] = new Group(
+            "00000000-0000-0000-0000-000000000001",
+            "Super user",
+            "su",
+            "live",
+            false
+        );
+    }
+
     public function add(path)
     {
         var html, model;
@@ -52,8 +111,10 @@ class Groups extends Content
         
         let model = new \stdClass();
         let model->deleted_at = null;
+        let model->status = "live";
         let model->name = "";
         let model->slug = "";
+        let model->tags = "";
         
         if (!empty(_POST)) {
             if (isset(_POST["save"])) {
@@ -68,28 +129,7 @@ class Groups extends Content
                         let data["id"] = this->database->uuid();
                         
                         let status = this->database->execute(
-                            "INSERT INTO groups 
-                                (
-                                    id,
-                                    name,
-                                    slug,
-                                    created_at,
-                                    created_by,
-                                    updated_at,
-                                    updated_by,
-                                    status
-                                ) 
-                            VALUES 
-                                (
-                                    :id,
-                                    :name,
-                                    :slug,
-                                    NOW(),
-                                    :created_by,
-                                    NOW(),
-                                    :updated_by,
-                                    'active'
-                                )",
+                            this->query_insert,
                             data
                         );
 
@@ -118,13 +158,11 @@ class Groups extends Content
 
     public function edit(path)
     {
-        var html, model, data = [];
+        var html, model, data = [], status = false;
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get(
-            "SELECT groups.* 
-            FROM groups 
-            WHERE groups.id=:id",
+            this->query,
             data
         );
 
@@ -151,26 +189,13 @@ class Groups extends Content
             }
 
             if (isset(_POST["save"])) {
-                var status = false, query;
-
                 if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
-                    let query = "
-                        UPDATE
-                            groups
-                        SET 
-                            name=:name,
-                            slug=:slug,
-                            updated_at=NOW(),
-                            updated_by=:updated_by";
-
-                    let query .= " WHERE id=:id";
-
                     let data = this->setData(data, null, model);
 
                     let status = this->database->execute(
-                        query,
+                        this->query_update,
                         data
                     );
 
@@ -202,8 +227,10 @@ class Groups extends Content
             let selected = _POST["group_id"];
         }
 
-        let select["00000000-0000-0000-0000-000000000001"] = "Super user";
-
+        for item in this->system {
+            let select[item->id] = item->name;
+        }
+        
         for item in data {
             let select[item->id] = item->name;
         }
@@ -246,8 +273,10 @@ class Groups extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
+                                this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                 this->inputs->text("name", "name", "what is the group called?", true, model->name) .
                                 this->inputs->text("slug", "slug", "Slug for the group", true, model->slug) .
+                                this->inputs->tags("Tags", "tags", "Tag the group", false, model->tags) . 
                                 "</div>
                             </div>
                         </div>
@@ -278,14 +307,7 @@ class Groups extends Content
         }
         let query .= " ORDER BY groups.name";
 
-        let results[] = new Group(
-            "00000000-0000-0000-0000-000000000001",
-            "Super user",
-            "su",
-            "live",
-            0
-        );
-        let results = array_merge(results, this->database->all(query, data));
+        let results = array_merge(this->system, this->database->all(query, data));
 
         return this->tables->build(
             this->list,
@@ -307,8 +329,7 @@ class Groups extends Content
                             "",
                             "back",
                             "Go back to the list"
-                        ) .
-                        this->buttons->save() . 
+                        ) .                        
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -322,7 +343,7 @@ class Groups extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -364,10 +385,10 @@ class Groups extends Content
     public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
-        let data["slug"] = _POST["slug"];
+        let data["slug"] = this->createSlug(_POST["slug"]);
 
-        if (model->name != data["name"]) {
-            var found;                        
+        if (!model) {
+            var found;
             let found = this->database->get(
                 "SELECT * FROM groups WHERE name=:name OR slug=:slug",
                 [
@@ -380,7 +401,16 @@ class Groups extends Content
             }
         }
 
-        let data["updated_by"] = this->database->getUserId();
+        let data["tags"] = 
+            (isset(_POST["tags"]) ? 
+                this->inputs->isTagify(_POST["tags"]) : 
+                (model ? model->tags : null));
+
+        let data["status"] = isset(_POST["status"]) ? 
+            "live" :
+            (model ? model->status : "offline");
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }
