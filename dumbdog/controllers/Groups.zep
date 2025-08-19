@@ -282,7 +282,7 @@ class Groups extends Content
             "00000000-0000-0000-0000-000000000001",
             "Super user",
             "su",
-            "active",
+            "live",
             0
         );
         let results = array_merge(results, this->database->all(query, data));

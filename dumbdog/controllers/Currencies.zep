@@ -113,7 +113,7 @@ class Currencies extends Content
         let model->exchange_rate_safety_buffer = 0;
         let model->locale_code = "";
         let model->is_default = 0;
-        let model->status = "active";
+        let model->status = "live";
 
         let html .= this->render(model);
 
@@ -231,7 +231,7 @@ class Currencies extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "Name the currency", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title for the currency", true, model->title) .
@@ -365,7 +365,7 @@ class Currencies extends Content
         let data["title"] = _POST["title"];
         let data["symbol"] = _POST["symbol"];
 
-        let data["status"] = isset(_POST["status"]) ? "active" : (model ? model->status : "inactive");
+        let data["status"] = isset(_POST["status"]) ? "live" : (model ? model->status : "offline");
         let data["is_default"] = isset(_POST["is_default"]) ? 1 : (model ? model->is_default : 0);
         let data["locale_code"] = isset(_POST["locale_code"]) ? 1 : (model ? model->locale_code : "en_GB");
 

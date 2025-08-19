@@ -141,7 +141,7 @@ class ApiApps extends Controller
 
         let model = new \stdClass();
         let model->deleted_at = null;
-        let model->status = "active";
+        let model->status = "live";
         let model->name = "";
         let model->description = "";
         let model->api_key = "";
@@ -154,7 +154,7 @@ class ApiApps extends Controller
 
     public function edit(path)
     {
-        var html = "", model, data = [];
+        var html = "", model, data = [], status = false;
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get("SELECT * FROM api_apps WHERE id=:id", data);
@@ -177,7 +177,6 @@ class ApiApps extends Controller
         }
 
         if (!empty(_POST)) {
-            var status = false, err;
             let path = this->global_url . "/edit/" . model->id;
 
             if (isset(_POST["delete"])) {
@@ -202,22 +201,18 @@ class ApiApps extends Controller
                     let data["api_key"] = model->api_key;
                 }
  
-                if (this->cfg->save_mode == true) {
-                    let status = this->database->execute(
-                        "UPDATE api_apps SET 
-                            status=:status,
-                            name=:name,
-                            description=:description,
-                            api_key=:api_key,
-                            updated_at=NOW(),
-                            updated_by=:updated_by,
-                            tags=:tags 
-                        WHERE id=:id",
-                        data
-                    );
-                } else {
-                    let status = true;
-                }
+                let status = this->database->execute(
+                    "UPDATE api_apps SET 
+                        status=:status,
+                        name=:name,
+                        description=:description,
+                        api_key=:api_key,
+                        updated_at=NOW(),
+                        updated_by=:updated_by,
+                        tags=:tags 
+                    WHERE id=:id",
+                    data
+                );
             
                 if (!is_bool(status)) {
                     let html .= this->saveFailed("Failed to update the API app");
@@ -262,7 +257,7 @@ class ApiApps extends Controller
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Set active", "status", false, (model->status=="active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status=="live" ? 1 : 0)) . 
                                     this->inputs->text("Name", "name", "Name the API app", true, model->name) .
                                     this->inputs->text("Description", "description", "Describe the API app", true, model->description) .
                                 "
@@ -441,7 +436,7 @@ class ApiApps extends Controller
 
     public function setData(array data, user_id = null, model = null)
     {   
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
+        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["name"] = _POST["name"];
         let data["description"] = _POST["description"];
         let data["tags"] = this->inputs->isTagify(_POST["tags"]);

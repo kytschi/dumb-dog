@@ -72,6 +72,7 @@ class Content extends Controller
     public query_old_urls = "";
     public query_parent = "";
     public query_stacks = "";
+    public query_list = "";
 
     public function __globals()
     {
@@ -89,7 +90,7 @@ class Content extends Controller
             FROM content AS main_page 
             LEFT JOIN templates ON templates.id=main_page.template_id 
             LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id";
-        
+            
         let this->query_insert = "
             INSERT INTO content 
             (
@@ -143,7 +144,7 @@ class Content extends Controller
                 NOW(),
                 :updated_by
             )";
-
+            
         let this->query_update = "
             UPDATE content SET 
                 type=:type,

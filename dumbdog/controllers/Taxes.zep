@@ -249,7 +249,7 @@ class Taxes extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "Name the tax", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title for the tax", true, model->title) .
@@ -374,8 +374,8 @@ class Taxes extends Content
     public function setData(array data, user_id = null, model = null)
     {
         let data["status"] = isset(_POST["status"]) ?
-            "active" :
-            (model ? model->status : "inactive");
+            "live" :
+            (model ? model->status : "offline");
 
         let data["is_default"] = isset(_POST["is_default"]) ?
             1 :

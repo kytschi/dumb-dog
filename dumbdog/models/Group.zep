@@ -18,7 +18,7 @@ class Group extends Model
     public name = "";
     public slug = "";
     public can_edit = 1;
-    public status = "active";
+    public status = "live";
     public created_at = null;
     public created_by = null;
     public updated_at = null;
@@ -26,7 +26,7 @@ class Group extends Model
     public deleted_at = null;
     public deleted_by = null;
 
-    public function __construct(string id = "", string name = "", string slug = "", string status = "active", int can_edit = 1)
+    public function __construct(string id = "", string name = "", string slug = "", string status = "live", int can_edit = 1)
     {
         let this->id = id;
         let this->name = name;

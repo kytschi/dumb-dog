@@ -113,7 +113,7 @@ class Products extends Content
             let data["tax_id"] = isset(_POST["price_tax_id"]) ? _POST["price_tax_id"] : null;
             let data["price"] = isset(_POST["price"]) ? floatval(_POST["price"]) : 1.00;
             let data["offer_price"] = isset(_POST["offer_price"]) ? floatval(_POST["offer_price"]) : 0.00;
-            let data["status"] = isset(_POST["price_status"]) ? _POST["price_status"] : "active";
+            let data["status"] = isset(_POST["price_status"]) ? _POST["price_status"] : "live";
             
             let status = this->database->execute(
                 "INSERT INTO product_prices 
@@ -189,7 +189,7 @@ class Products extends Content
             let data["country_id"] = isset(_POST["shipping_country_id"]) ? _POST["shipping_country_id"] : null;
             let data["currency_id"] = isset(_POST["shipping_currency_id"]) ? _POST["shipping_currency_id"] : null;
             let data["tax_id"] = isset(_POST["shipping_tax_id"]) ? _POST["shipping_tax_id"] : null;
-            let data["status"] = isset(_POST["shipping_status"]) ? _POST["shipping_status"] : "active";
+            let data["status"] = isset(_POST["shipping_status"]) ? _POST["shipping_status"] : "live";
             let data["price"] = isset(_POST["shipping_price"]) ? floatval(_POST["shipping_price"]) : 1.00;
 
             let status = this->database->execute(
@@ -496,7 +496,7 @@ class Products extends Content
                     </div>
                     <div class='dd-box-body'>" .
                         this->inputs->toggle(
-                            "Active",
+                            "Live",
                             "price_status[]",
                             false,
                             item->status
@@ -521,7 +521,7 @@ class Products extends Content
                 <div class='dd-box dd-border-top-none'>
                     <div class='dd-box-body'>" .
                         this->inputs->toggle(
-                            "Active",
+                            "Live",
                             "price_status",
                             false
                         ) . 
@@ -579,10 +579,10 @@ class Products extends Content
                         </div>
                         <div class='dd-box-body'>" .
                             this->inputs->toggle(
-                                "Active",
+                                "Live",
                                 "shipping_status[]",
                                 false,
-                                (item->status == "active" ? 1 : 0)
+                                (item->status == "live" ? 1 : 0)
                             ) . 
                             this->inputs->text(
                                 "Name",
@@ -610,7 +610,7 @@ class Products extends Content
                     <div class='dd-box dd-border-top-none'>
                         <div class='dd-box-body'>" .
                             this->inputs->toggle(
-                                "Active",
+                                "Live",
                                 "shipping_status",
                                 false
                             ) . 
@@ -921,7 +921,7 @@ class Products extends Content
                 "id": id,
                 "name": "",
                 "price": 0.00,
-                "status": "active"
+                "status": "live"
             ];
 
             if (!isset(_POST["shipping_name"][key])) {
@@ -936,7 +936,7 @@ class Products extends Content
                 throw new ValidationException("Missing currency for the shipping");
             }
 
-            let data["status"] = isset(_POST["shipping_status"][key]) ? "active" : "inactive";
+            let data["status"] = isset(_POST["shipping_status"][key]) ? "live" : "offline";
             let data["name"] = _POST["shipping_name"][key];
             let data["price"] = floatval(_POST["shipping_price"][key]);
             let data["country_id"] = _POST["country_id"][key];

@@ -44,9 +44,23 @@ class Socials extends Content
         ]
     ];
 
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "
+            SELECT 
+                content.*,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
+            FROM content 
+            LEFT JOIN files ON files.resource_id = content.id AND resource='image' AND files.deleted_at IS NULL 
+            WHERE content.type=:type AND content.id=:id";
+    }
+
     public function add(path)
     {
-        var html, data;
+        var html, data, model;
 
         let html = this->titles->page("Create the social media link", "socialmedia");
 
@@ -65,39 +79,7 @@ class Socials extends Content
                     let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO content 
-                            (id,
-                            status,
-                            name,
-                            title,
-                            sub_title,
-                            content,
-                            type,
-                            tags,
-                            url,
-                            sort,
-                            sitemap_include,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (
-                            :id,
-                            :status,
-                            :name,
-                            :title,
-                            :sub_title,
-                            :content,
-                            :type,
-                            :tags,
-                            :url,
-                            :sort,
-                            0,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -120,7 +102,6 @@ class Socials extends Content
             let html .= this->saveSuccess("Social media link has been saved");
         }
 
-        var model;
         let model = new \stdClass();
         let model->deleted_at = null;
         let model->status = "live";
@@ -144,14 +125,11 @@ class Socials extends Content
         var html, model, data = [];
         
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("
-            SELECT 
-                content.*,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content 
-            LEFT JOIN files ON files.resource_id = content.id AND resource='image' AND files.deleted_at IS NULL 
-            WHERE content.type='" . this->type . "' AND content.id=:id", data);
+        let data["type"] = this->type;
+        let model = this->database->get(
+            this->query,
+            data
+        );
 
         if (empty(model)) {
             throw new NotFoundException("Social media link not found");
@@ -197,18 +175,7 @@ class Socials extends Content
                 }
 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        content=:content,
-                        tags=:tags,
-                        url=:url,
-                        sort=:sort,
-                        updated_at=NOW(),
-                        updated_by=:updated_by 
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -315,7 +282,6 @@ class Socials extends Content
                             "back",
                             "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -329,7 +295,7 @@ class Socials extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -372,17 +338,25 @@ class Socials extends Content
 
     public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
+        let data["status"] = isset(_POST["status"]) ? "live" : (model ? model->status : "offline");
         let data["name"] = _POST["name"];
-        let data["url"] = _POST["url"];
-        let data["title"] = _POST["title"];
-        let data["sort"] = intval(_POST["sort"]);
-        let data["sub_title"] = _POST["sub_title"];
-        let data["content"] = this->cleanContent(_POST["content"]);
-        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
-        let data["updated_by"] = this->database->getUserId();
+        let data["url"] = isset(_POST["url"]) ? _POST["url"] : (model ? model->url : null);
+        let data["title"] = isset(_POST["title"]) ? _POST["title"] : (model ? model->title : null);
+        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : (model ? model->sort : 0);
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : (model ? model->sub_title : null);
+        let data["content"] = isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : (model ? model->content : null);
+        let data["tags"] = isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : (model ? model->tags : null);
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
-        this->validUrl(data);
+        let data["template_id"] = null;
+        let data["public_facing"] = 0;
+        let data["featured"] = 0;
+        let data["sitemap_include"] = 0;
+        let data["parent_id"] = null;
+        let data["slogan"] = null;
+        let data["meta_keywords"] = null;
+        let data["meta_author"] = null;
+        let data["meta_description"] = null;
 
         return data;
     }

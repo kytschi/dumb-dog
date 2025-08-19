@@ -14,6 +14,7 @@ use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Notes;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Ui\Gfx\Titles;
 
@@ -85,6 +86,24 @@ class Controller
             "-",
             strtolower(rtrim(url, "/"))
         );
+    }
+
+    public function clearDefault(string table, string user_id)
+    {
+        var status = false;
+        let status = this->database->execute(
+            "UPDATE " . table . " SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
+            [
+                "updated_by": user_id
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new SaveException(
+                "Failed to update the default on " . str_replace("_", " ", table),
+                400
+            );
+        }
     }
 
     public function consoleLogError(message)

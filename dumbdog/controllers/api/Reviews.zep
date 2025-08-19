@@ -1,7 +1,7 @@
 /**
- * DumbDog API for countries controller
+ * DumbDog API for Reviews controller
  *
- * @package     DumbDog\Controllers\Api\Currencies
+ * @package     DumbDog\Controllers\Api\Reviews
  * @author 		Mike Welsh (hello@kytschi.com)
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
@@ -11,38 +11,38 @@
 namespace DumbDog\Controllers\Api;
 
 use DumbDog\Controllers\Api\Controller;
-use DumbDog\Controllers\Countries as Main;
+use DumbDog\Controllers\Reviews as Main;
 use DumbDog\Exceptions\AccessException;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
-class Countries extends Controller
+class Reviews extends Controller
 {
     public api_routes = [
-        "/api/countries/add": [
-            "Countries",
+        "/api/reviews/add": [
+            "Reviews",
             "add"
         ],
-        "/api/countries/delete": [
-            "Countries",
+        "/api/reviews/delete": [
+            "Reviews",
             "delete"
         ],
-        "/api/countries/edit": [
-            "Countries",
+        "/api/reviews/edit": [
+            "Reviews",
             "edit"
         ],
-        "/api/countries/recover": [
-            "Countries",
+        "/api/reviews/recover": [
+            "Reviews",
             "recover"
         ],
-        "/api/countries/view": [
-            "Countries",
+        "/api/reviews/view": [
+            "Reviews",
             "view"
         ],
-        "/api/countries": [
-            "Countries",
+        "/api/reviews": [
+            "Reviews",
             "list"
         ]
     ];
@@ -67,64 +67,48 @@ class Countries extends Controller
             }
 
             let data["id"] = this->database->uuid();
+            let data["type"] = controller->type;
             let data["created_by"] = this->api_app->created_by;
 
-            let data = controller->setData(data, this->api_app->created_by);
-
-            if (data["is_default"]) {
-                controller->clearDefault(
-                    "countries",
-                    data["updated_by"]
-                );
-            }
+            let data = controller->setData(data, this->api_app->created_by);     
 
             let status = this->database->execute(
-                "INSERT INTO countries  
-                    (id,
-                    name,
-                    code,
-                    `is_default`,
-                    status,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (
-                    :id,
-                    :name,
-                    :code,
-                    :is_default,
-                    :status,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
+                controller->query_insert,
                 data
             );
 
             if (!is_bool(status)) {
                 throw new SaveException(
-                    "Failed to save the template",
+                    "Failed to save the review entry",
                     400
                 );
             } else {
                 let model = this->database->get(
-                    "SELECT * FROM countries WHERE id=:id",
+                    controller->query,
                     [
-                        "id": data["id"]
+                        "id": data["id"],
+                        "type": data["type"]
                     ]
                 );
+                controller->updateExtra(model, path);
 
+                let model = this->database->get(
+                    controller->query,
+                    [
+                        "id": data["id"],
+                        "type": data["type"]
+                    ]
+                );
+                
                 return this->createReturn(
-                    "Country successfully created",
+                    "Review entry successfully created",
                     model
                 );
             }
         }
 
         throw new SaveException(
-            "Failed to save the country, no post data",
+            "Failed to save the review entry, no post data",
             400
         );
     }
@@ -138,19 +122,26 @@ class Countries extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = controller->type;
 
-        let model = this->database->get("SELECT * FROM countries WHERE id=:id", data);
+        let model = this->database->get(
+            controller->query,
+            data
+        );
 
         if (empty(model)) {
-            throw new NotFoundException("Country not found");
+            throw new NotFoundException("Review entry not found");
         }
 
-        controller->triggerDelete("countries", path, data["id"], this->api_app->created_by, false);
+        controller->triggerDelete("content", path, data["id"], this->api_app->created_by, false);
 
-        let model = this->database->get("SELECT * FROM countries WHERE id=:id", data);
+        let model = this->database->get(
+            controller->query,
+            data
+        );
 
         return this->createReturn(
-            "Country successfully marked as deleted",
+            "Review entry successfully marked as deleted",
             model
         );
     }
@@ -164,10 +155,14 @@ class Countries extends Controller
         let controller = new Main();
         
         let data["id"] = controller->getPageId(path);
-        let model = this->database->get("SELECT * FROM countries WHERE id=:id", data);
+        let data["type"] = controller->type;
+        let model = this->database->get(
+            controller->query,
+            data
+        );
 
         if (empty(model)) {
-            throw new NotFoundException("Country not found");
+            throw new NotFoundException("Review entry not found");
         }
 
         if (!empty(_POST)) {
@@ -179,41 +174,38 @@ class Countries extends Controller
                 );
             } else {
                 let data = controller->setData(data, this->api_app->created_by, model);
-
-                if (data["is_default"]) {
-                    controller->clearDefault(
-                        "countries",
-                        data["updated_by"]
-                    );
-                }
-
+                                
                 let status = this->database->execute(
-                    "UPDATE countries SET 
-                        name=:name,
-                        code=:code,
-                        `is_default`=:is_default,
-                        status=:status,
-                        updated_at=NOW(),
-                        updated_by=:updated_by
-                    WHERE id=:id",
+                    controller->query_update,
                     data
                 );
 
                 if (!is_bool(status)) {
                     throw new SaveException(
-                        "Failed to update the country",
+                        "Failed to update the review entry",
                         400
                     );
                 } else {
                     let model = this->database->get(
-                        "SELECT * FROM countries WHERE id=:id",
+                        controller->query,
                         [
-                            "id": data["id"]
+                            "id": data["id"],
+                            "type": data["type"]
+                        ]
+                    );
+
+                    controller->updateExtra(model, path);
+    
+                    let model = this->database->get(
+                        controller->query,
+                        [
+                            "id": data["id"],
+                            "type": data["type"]
                         ]
                     );
 
                     return this->createReturn(
-                        "Country successfully updated",
+                        "Review entry successfully updated",
                         model
                     );
                 }
@@ -221,21 +213,24 @@ class Countries extends Controller
         }
 
         throw new SaveException(
-            "Failed to update the country, no post data",
+            "Failed to update the review entry, no post data",
             400
         );
     }
 
     public function list(path)
     {       
-        var data = [], query, results, sort_dir = "ASC";
+        var data = [], query, results, sort_dir = "ASC", controller;
 
         this->secure();
 
-        let query = "SELECT * FROM countries WHERE id IS NOT NULL";
+        let controller = new Main();
+        let data["type"] = controller->type;
+
+        let query = controller->query_list;
 
         if (isset(_GET["query"])) {
-            let query .= " AND name LIKE :query";
+            let query .= " AND content.name LIKE :query";
             let data["query"] = "%" . _GET["query"] . "%";
         }
 
@@ -260,15 +255,15 @@ class Countries extends Controller
                 );
             }
 
-            let query .= " ORDER BY " . strtolower(_GET["sort"]) . " " . sort_dir;
+            let query .= " ORDER BY content." . strtolower(_GET["sort"]) . " " . sort_dir;
         } else {
-            let query .= " ORDER BY name " . sort_dir;
+            let query .= " ORDER BY content.name " . sort_dir;
         }        
 
         let results = this->database->all(query, data);
 
         return this->createReturn(
-            "Countries",
+            "Reviews",
             results,
             isset(_GET["query"]) ? _GET["query"] : null
         );
@@ -283,19 +278,26 @@ class Countries extends Controller
         let controller = new Main();
 
         let data["id"] = controller->getPageId(path);
+        let data["type"] = controller->type;
 
-        let model = this->database->get("SELECT * FROM countries WHERE id=:id", data);
+        let model = this->database->get(
+            controller->query,
+            data
+        );
 
         if (empty(model)) {
-            throw new NotFoundException("Country not found");
+            throw new NotFoundException("Review entry not found");
         }
 
-        controller->triggerRecover("countries", path, data["id"], this->api_app->created_by, false);
+        controller->triggerRecover("content", path, data["id"], this->api_app->created_by, false);
 
-        let model = this->database->get("SELECT * FROM countries WHERE id=:id", data);
+        let model = this->database->get(
+            controller->query,
+            data
+        );
 
         return this->createReturn(
-            "Country successfully recovered from the deleted state",
+            "Review entry successfully recovered from the deleted state",
             model
         );
     }
@@ -309,15 +311,19 @@ class Countries extends Controller
         let controller = new Main();
                 
         let data["id"] = controller->getPageId(path);
-                
-        let model = this->database->get("SELECT * FROM countries WHERE id=:id", data);
+        let data["type"] = controller->type;
+        
+        let model = this->database->get(
+            controller->query,
+            data
+        );
 
         if (empty(model)) {
-            throw new NotFoundException("Country not found");
+            throw new NotFoundException("Review entry not found");
         }
 
         return this->createReturn(
-            "Country",
+            "Review entry",
             model
         );
     }

@@ -6,8 +6,8 @@
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
@@ -20,7 +20,7 @@ class Reviews extends Content
     public global_url = "/reviews";
     public type = "review";
     public title = "Reviews";
-    public required = ["name"];
+    public required = ["name", "score"];
     public list = [
         "icon|score",
         "name|with_tags",
@@ -44,6 +44,32 @@ class Reviews extends Content
             "reviews"
         ]
     ];
+
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "
+            SELECT 
+                content.*,
+                reviews.score,
+                reviews.author,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
+                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
+            FROM content 
+            LEFT JOIN files ON files.resource_id = content.id AND resource='image' AND files.deleted_at IS NULL 
+            LEFT JOIN reviews ON reviews.content_id = content.id 
+            WHERE content.type=:type AND content.id=:id";
+        
+        let this->query_list = "
+            SELECT
+                content.*,
+                reviews.score,
+                reviews.author 
+            FROM content 
+            LEFT JOIN reviews ON reviews.content_id = content.id 
+            WHERE content.type=:type";
+    }
 
     public function add(path)
     {
@@ -71,37 +97,7 @@ class Reviews extends Content
                     let data = this->setData(data);
 
                     let status = this->database->execute(
-                        "INSERT INTO content 
-                            (id,
-                            status,
-                            name,
-                            title,
-                            sub_title,
-                            content,
-                            type,
-                            featured,
-                            tags,
-                            sitemap_include,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (
-                            :id,
-                            :status,
-                            :name,
-                            :title,
-                            :sub_title,
-                            :content,
-                            :type,
-                            :featured,
-                            :tags,
-                            0,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -111,10 +107,12 @@ class Reviews extends Content
                     } else {
                         let path = path . "?saved=true";
                         let model = this->database->get(
-                            "SELECT * FROM content WHERE id=:id",
+                            this->query,
                             [
-                                "id": data["id"]
-                            ]);
+                                "id": data["id"],
+                                "type": data["type"]
+                            ]
+                        );
                         let path = this->updateExtra(model, path);
 
                         if (isset(_FILES["image"]["name"])) {
@@ -155,17 +153,11 @@ class Reviews extends Content
         var html, model, data = [];
         
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("
-            SELECT 
-                content.*,
-                reviews.score,
-                reviews.author,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content 
-            LEFT JOIN files ON files.resource_id = content.id AND resource='image' AND files.deleted_at IS NULL 
-            JOIN reviews ON reviews.content_id = content.id 
-            WHERE content.type='" . this->type . "' AND content.id=:id", data);
+        let data["type"] = this->type;
+        let model = this->database->get(
+            this->query, 
+            data
+        );
 
         if (empty(model)) {
             throw new NotFoundException("Review not found");
@@ -212,17 +204,7 @@ class Reviews extends Content
                 }
 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        content=:content,
-                        tags=:tags,
-                        featured=:featured,
-                        updated_at=NOW(),
-                        updated_by=:updated_by 
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -231,6 +213,14 @@ class Reviews extends Content
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
+                        let model = this->database->get(
+                            this->query,
+                            [
+                                "id": data["id"],
+                                "type": data["type"]
+                            ]
+                        );
+
                         let path = this->updateExtra(model, path);
                         this->redirect(path);
                     } catch ValidationException, err {
@@ -345,7 +335,7 @@ class Reviews extends Content
                                     this->inputs->text("Name", "name", "Name the review entry", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title", false, model->title) .
                                     this->inputs->text("Sub title", "sub_title", "Set a sub title", false, model->sub_title) .
-                                    this->inputs->text("Author", "auhtor", "The author of the review", false, model->author) .
+                                    this->inputs->text("Author", "author", "The author of the review", false, model->author) .
                                     this->inputs->wysiwyg("Content", "content", "What did the review say?", false, model->content) . 
                                     this->inputs->tags("Tags", "tags", "Tag the review", false, model->tags) . 
                                     this->inputs->toggle("Feature", "featured", false, model->featured) . 
@@ -375,14 +365,10 @@ class Reviews extends Content
     {
         var data = [], query;
 
-        let query = "
-            SELECT
-                content.*,
-                reviews.score,
-                reviews.author 
-            FROM content 
-            JOIN reviews ON reviews.content_id = content.id 
-            WHERE content.type='" . this->type . "'";
+        let query = this->query_list;
+
+        let data["type"] = this->type;
+
         if (isset(_POST["q"])) {
             let query .= " AND content.name LIKE :query";
             let data["query"] = "%" . _POST["q"] . "%";
@@ -394,6 +380,7 @@ class Reviews extends Content
         let query .= " ORDER BY content.name";
 
         let data = this->database->all(query, data);
+
         for query in data {
             switch (query->score) {
                 case 5:
@@ -439,7 +426,6 @@ class Reviews extends Content
                             "back",
                             "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -453,7 +439,7 @@ class Reviews extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -496,14 +482,25 @@ class Reviews extends Content
 
     public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
+        let data["status"] = isset(_POST["status"]) ? "live" : (model ? model->status : "offline");
         let data["name"] = _POST["name"];
-        let data["title"] = _POST["title"];
-        let data["sub_title"] = _POST["sub_title"];
-        let data["content"] = this->cleanContent(_POST["content"]);
-        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
-        let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
-        let data["updated_by"] = this->database->getUserId();
+        let data["url"] = isset(_POST["url"]) ? _POST["url"] : (model ? model->url : null);
+        let data["title"] = isset(_POST["title"]) ? _POST["title"] : (model ? model->title : null);
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : (model ? model->sub_title : null);
+        let data["content"] = isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : (model ? model->content : null);
+        let data["tags"] = isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : (model ? model->tags : null);
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
+        let data["featured"] = isset(_POST["featured"]) ? 1 : (model ? model->featured : 0);
+        
+        let data["template_id"] = null;
+        let data["public_facing"] = 0;
+        let data["sitemap_include"] = 0;
+        let data["sort"] = 0;
+        let data["parent_id"] = null;
+        let data["slogan"] = null;
+        let data["meta_keywords"] = null;
+        let data["meta_author"] = null;
+        let data["meta_description"] = null;
 
         return data;
     }
@@ -515,7 +512,11 @@ class Reviews extends Content
         let data = this->database->get("
             SELECT *
             FROM reviews 
-            WHERE content_id='" . model->id . "'");
+            WHERE content_id=:id",
+            [
+                "id": model->id
+            ]
+        );
 
         if (!empty(data)) {
             if (!isset(_POST["score"])) {
@@ -525,13 +526,15 @@ class Reviews extends Content
             }
 
             let status = this->database->get("
-                UPDATE reviews SET
-                    score=:score, author=:author
+                UPDATE reviews
+                SET
+                    score=:score,
+                    author=:author
                 WHERE id=:id",
                 [
                     "id": data->id,
                     "score": intval(_POST["score"]),
-                    "author": _POST["author"]
+                    "author": isset(_POST["author"]) ? _POST["author"] : (model ? model->author : null)
                 ]
             );
 
@@ -556,7 +559,7 @@ class Reviews extends Content
                 [
                     "content_id": model->id,
                     "score": intval(_POST["score"]),
-                    "author": _POST["author"]
+                    "author": isset(_POST["author"]) ? _POST["author"] : (model ? model->author : null)
                 ]
             );
 

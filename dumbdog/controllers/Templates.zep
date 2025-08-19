@@ -162,29 +162,24 @@ class Templates extends Content
                     let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
                     let data["updated_by"] = this->database->getUserId();
 
-                    if (this->cfg->save_mode == true) {
-                        if (data["is_default"]) {
-                            let status = this->database->execute(
-                                "UPDATE templates SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
-                                [
-                                    "updated_by": data["updated_by"]
-                                ]
-                            );
-                        }
-                        let status = this->database->execute(
-                            "UPDATE templates SET 
-                                name=:name,
-                                file=:file,
-                                type=:type,
-                                `is_default`=:is_default,
-                                updated_at=NOW(),
-                                updated_by=:updated_by
-                            WHERE id=:id",
-                            data
+                    if (data["is_default"]) {
+                        this->clearDefault(
+                            "templates",
+                            data["updated_by"]
                         );
-                    } else {
-                        let status = true;
                     }
+
+                    let status = this->database->execute(
+                        "UPDATE templates SET 
+                            name=:name,
+                            file=:file,
+                            type=:type,
+                            `is_default`=:is_default,
+                            updated_at=NOW(),
+                            updated_by=:updated_by
+                        WHERE id=:id",
+                        data
+                    );
 
                     if (!is_bool(status)) {
                         let html .= this->saveFailed("Failed to update the template");

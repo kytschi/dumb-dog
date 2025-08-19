@@ -101,7 +101,7 @@ class Countries extends Content
         let model->deleted_at = null;
         let model->name = "";
         let model->code = "";
-        let model->status = "active";
+        let model->status = "live";
         let model->is_default = 0;
 
         let html .= this->render(model);
@@ -216,7 +216,7 @@ class Countries extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "The country name", true, model->name) .
                                     this->inputs->text("Code", "code", "The country code", true, model->code) .
@@ -319,11 +319,16 @@ class Countries extends Content
 
     public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
         let data["code"] = _POST["code"];
-        let data["updated_by"] = this->database->getUserId();
+
+        let data["status"] = isset(_POST["status"]) ? 
+            "live" :
+            (model ? model->status : "offline");
+
+        let data["is_default"] = isset(_POST["is_default"]) ? 1 : (model ? model->is_default : 0);
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }

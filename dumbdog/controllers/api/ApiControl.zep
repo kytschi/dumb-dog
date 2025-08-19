@@ -20,7 +20,10 @@ use DumbDog\Controllers\Api\Currencies;
 use DumbDog\Controllers\Api\Menus;
 use DumbDog\Controllers\Api\PageCategories;
 use DumbDog\Controllers\Api\Pages;
+use DumbDog\Controllers\Api\PaymentGateways;
 use DumbDog\Controllers\Api\Products;
+use DumbDog\Controllers\Api\Reviews;
+use DumbDog\Controllers\Api\Socials;
 use DumbDog\Controllers\Api\Taxes;
 use DumbDog\Controllers\Api\Templates;
 use DumbDog\Controllers\Database;
@@ -56,7 +59,10 @@ class ApiControl extends Controller
             "Menus": new Menus(),
             "PageCategories": new PageCategories(),
             "Pages": new Pages(),
+            "PaymentGateways": new PaymentGateways(),
             "Products": new Products(),
+            "Reviews": new Reviews(),
+            "Socials": new Socials(),
             "Taxes": new Taxes(),
             "Templates": new Templates()
         ];

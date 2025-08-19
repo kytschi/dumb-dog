@@ -71,6 +71,13 @@ class Currencies extends Controller
 
             let data = controller->setData(data, this->api_app->created_by);
 
+            if (data["is_default"]) {
+                controller->clearDefault(
+                    "currencies",
+                    data["updated_by"]
+                );
+            }
+
             let status = this->database->execute(
                 "INSERT INTO currencies  
                     (id,
@@ -182,11 +189,9 @@ class Currencies extends Controller
                 let data = controller->setData(data, this->api_app->created_by, model);
 
                 if (data["is_default"]) {
-                    let status = this->database->execute(
-                        "UPDATE currencies SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
-                        [
-                            "updated_by": data["updated_by"]
-                        ]
+                    controller->clearDefault(
+                        "currencies",
+                        data["updated_by"]
                     );
                 }
 

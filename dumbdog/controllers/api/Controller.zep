@@ -172,8 +172,8 @@ class Controller
             this->jsonError(new AccessException("Invalid API key"));
         }
 
-        if (this->api_app->status != "active") {
-            this->jsonError(new AccessException("Invalid API key, your key is currently not active."));
+        if (this->api_app->status != "live") {
+            this->jsonError(new AccessException("Invalid API key, your key is currently not live."));
         }
 
         let status = this->database->execute(

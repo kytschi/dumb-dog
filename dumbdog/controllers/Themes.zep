@@ -88,7 +88,7 @@ class Themes extends Content
         let model->name = "";
         let model->is_default = 0;
         let model->id = "";
-        let model->status = "active";
+        let model->status = "live";
         
         let html .= this->render(model);
 
@@ -197,7 +197,7 @@ class Themes extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Set live", "status", false, (model->status=="active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status=="live" ? 1 : 0)) . 
                                     this->inputs->text("Name", "name", "Name the theme", true, model->name) .
                                     this->inputs->text("Folder", "folder", "Where am I located?", true, model->folder) .
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
@@ -341,7 +341,7 @@ class Themes extends Content
         let data["name"] = _POST["name"];
         let data["folder"] = _POST["folder"];
         let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
+        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["annual"] = isset(_POST["annual"]) ? 1 : 0;
         let data["active_from"] = isset(_POST["active_from"]) ? (new Dates())->toSQL(_POST["active_from"], false) : null;
         let data["active_to"] = isset(_POST["active_to"]) ? (new Dates())->toSQL(_POST["active_to"], false) : null;
