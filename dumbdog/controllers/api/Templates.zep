@@ -79,27 +79,7 @@ class Templates extends Controller
             }
 
             let status = this->database->execute(
-                "INSERT INTO templates  
-                    (id,
-                    type,
-                    name,
-                    file,
-                    is_default,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (
-                    :id,
-                    :type,
-                    :name,
-                    :file,
-                    :is_default,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
+                controller->query_insert,
                 data
             );
 
@@ -110,9 +90,7 @@ class Templates extends Controller
                 );
             } else {
                 let model = this->database->get(
-                    "SELECT * 
-                    FROM templates 
-                    WHERE id=:id",
+                    controller->query,
                     [
                         "id": data["id"]
                     ]
@@ -141,7 +119,7 @@ class Templates extends Controller
 
         let data["id"] = controller->getPageId(path);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get(controller->query, data);
 
         if (empty(model)) {
             throw new NotFoundException("Template not found");
@@ -149,7 +127,7 @@ class Templates extends Controller
 
         controller->triggerDelete("templates", path, data["id"], this->api_app->created_by, false);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get(controller->query, data);
 
         return this->createReturn(
             "Template successfully marked as deleted",
@@ -166,7 +144,7 @@ class Templates extends Controller
         let controller = new Main();
         
         let data["id"] = controller->getPageId(path);
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get(controller->query, data);
 
         if (empty(model)) {
             throw new NotFoundException("Template not found");
@@ -190,14 +168,7 @@ class Templates extends Controller
                 }
 
                 let status = this->database->execute(
-                    "UPDATE templates SET 
-                        name=:name,
-                        file=:file,
-                        type=:type,
-                        `is_default`=:is_default,
-                        updated_at=NOW(),
-                        updated_by=:updated_by
-                    WHERE id=:id",
+                    controller->query_update,
                     data
                 );
 
@@ -208,9 +179,7 @@ class Templates extends Controller
                     );
                 } else {
                     let model = this->database->get(
-                        "SELECT * 
-                        FROM templates 
-                        WHERE id=:id",
+                        controller->query,
                         [
                             "id": data["id"]
                         ]
@@ -232,14 +201,13 @@ class Templates extends Controller
 
     public function list(path)
     {       
-        var data = [], query, results, sort_dir = "ASC";
+        var data = [], query, results, sort_dir = "ASC", controller;
 
         this->secure();
 
-        let query = "
-            SELECT * 
-            FROM templates 
-            WHERE id IS NOT NULL";
+        let controller = new Main();
+
+        let query = controller->query_list;
 
         if (isset(_GET["query"])) {
             let query .= " AND name LIKE :query";
@@ -291,7 +259,7 @@ class Templates extends Controller
 
         let data["id"] = controller->getPageId(path);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get(controller->query, data);
 
         if (empty(model)) {
             throw new NotFoundException("Template not found");
@@ -299,7 +267,7 @@ class Templates extends Controller
 
         controller->triggerRecover("templates", path, data["id"], this->api_app->created_by, false);
 
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get(controller->query, data);
 
         return this->createReturn(
             "Template successfully recovered from the deleted state",
@@ -317,7 +285,7 @@ class Templates extends Controller
                 
         let data["id"] = controller->getPageId(path);
         
-        let model = this->database->get("SELECT * FROM templates WHERE id=:id", data);
+        let model = this->database->get(controller->query, data);
 
         if (empty(model)) {
             throw new NotFoundException("Template not found");

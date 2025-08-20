@@ -75,7 +75,7 @@ CREATE TABLE `api_apps` (
   `api_key` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` mediumtext DEFAULT NULL,
-  `status` varchar(10) NOT NULL DEFAULT 'active',
+  `status` varchar(10) NOT NULL DEFAULT 'live',
   `tags` text DEFAULT NULL,
   `last_used_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL,
@@ -1410,7 +1410,7 @@ CREATE TABLE `themes` (
   `is_default` tinyint(1) DEFAULT 0,
   `name` varchar(255) NOT NULL,
   `folder` varchar(255) NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `status` varchar(20) NOT NULL DEFAULT 'live',
   `active_from` date DEFAULT NULL,
   `active_to` date DEFAULT NULL,
   `annual` tinyint(1) DEFAULT 0,
@@ -1444,7 +1444,7 @@ CREATE TABLE `themes` (
 LOCK TABLES `themes` WRITE;
 /*!40000 ALTER TABLE `themes` DISABLE KEYS */;
 INSERT INTO `themes` VALUES
-('b2d86900-d982-11ed-8a12-5254003f8571',1,'default','default','active',NULL,NULL,0,'2023-04-12 23:38:09','00000000-0000-0000-0000-000000000000','2024-12-26 14:57:13','89c759f3-da4b-11ed-89f5-5254003f8571',NULL,NULL),
+('b2d86900-d982-11ed-8a12-5254003f8571',1,'default','default','live',NULL,NULL,0,'2023-04-12 23:38:09','00000000-0000-0000-0000-000000000000','2024-12-26 14:57:13','89c759f3-da4b-11ed-89f5-5254003f8571',NULL,NULL),
 /*!40000 ALTER TABLE `themes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1461,7 +1461,7 @@ CREATE TABLE `users` (
   `name` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `nickname` varchar(255) DEFAULT NULL,
-  `status` varchar(10) NOT NULL DEFAULT 'active',
+  `status` varchar(10) NOT NULL DEFAULT 'live',
   `file` varchar(255) DEFAULT NULL,
   `tags` text DEFAULT NULL,
   `created_at` datetime NOT NULL,
@@ -1491,7 +1491,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-('89c759f3-da4b-11ed-89f5-5254003f8571','00000000-0000-0000-0000-000000000001','dumbdog','$2y$10$hv7daGztxRPzlN71oHyF8OntAtchU6p/lp8tpV6qTQSl1339QO4nC','Doggie','active',NULL,NULL,'2023-04-13 23:35:48','00000000-0000-0000-0000-000000000000','2025-08-19 13:16:58','89c759f3-da4b-11ed-89f5-5254003f8571',NULL,NULL);
+('89c759f3-da4b-11ed-89f5-5254003f8571','00000000-0000-0000-0000-000000000001','dumbdog','$2y$10$hv7daGztxRPzlN71oHyF8OntAtchU6p/lp8tpV6qTQSl1339QO4nC','Doggie','live',NULL,NULL,'2023-04-13 23:35:48','00000000-0000-0000-0000-000000000000','2025-08-19 13:16:58','89c759f3-da4b-11ed-89f5-5254003f8571',NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
