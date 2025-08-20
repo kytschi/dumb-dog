@@ -6,6 +6,7 @@
  * @copyright   2025 Mike Welsh
  *
 */
+
 namespace DumbDog\Ui;
 
 use DumbDog\Controllers\Controller;
@@ -155,19 +156,6 @@ class Feeds extends Controller
 
         return this->database->all(query, data);
     }
-
-    /*
-    <OpenSearchDescription>
-<ShortName>Dumb Dog</ShortName>
-<Description>
-Dumb dog
-</Description>
-<InputEncoding>UTF-8</InputEncoding>
-<Image width="16" height="16" type="image/x-icon">
-https://dumbdog
-</Image>
-<Url type="text/html" method="get" template="https://dumbdog/search?q={searchTerms}"/>
-</OpenSearchDescription>*/
 
     private function robots()
     {

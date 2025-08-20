@@ -25,6 +25,7 @@ use DumbDog\Controllers\Api\Pages;
 use DumbDog\Controllers\Api\PaymentGateways;
 use DumbDog\Controllers\Api\Products;
 use DumbDog\Controllers\Api\Reviews;
+use DumbDog\Controllers\Api\Settings;
 use DumbDog\Controllers\Api\Socials;
 use DumbDog\Controllers\Api\Taxes;
 use DumbDog\Controllers\Api\Templates;
@@ -66,6 +67,7 @@ class ApiControl extends Controller
             "PaymentGateways": new PaymentGateways(),
             "Products": new Products(),
             "Reviews": new Reviews(),
+            "Settings": new Settings(),
             "Socials": new Socials(),
             "Taxes": new Taxes(),
             "Templates": new Templates()
