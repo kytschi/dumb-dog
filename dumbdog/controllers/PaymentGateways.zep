@@ -473,6 +473,7 @@ class PaymentGateways extends Content
         if (!in_array(data["type"], array_keys(this->types))) {
             throw new ValidationException(
                 "Invalid payment type",
+                400,
                 this->types
             );
         }

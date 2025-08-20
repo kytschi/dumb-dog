@@ -46,6 +46,7 @@ class Security
         }
 
         let key = explode("::", str);
+
         let str = key[0];
         let iv = hex2bin(key[1]);
         let key = openssl_digest(this->cfg->encryption, "SHA256", true);

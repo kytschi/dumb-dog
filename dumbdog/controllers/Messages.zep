@@ -432,7 +432,11 @@ class Messages extends Content
         }
 
         if (!this->validate(data, this->required)) {
-            throw new ValidationException("Missing required data");
+            throw new ValidationException(
+                "Missing required fields",
+                400,
+                this->required
+            );
         }
 
         try {

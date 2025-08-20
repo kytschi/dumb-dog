@@ -1351,7 +1351,9 @@ class Content extends Controller
             ];
 
             if (empty(val)) {
-                throw new ValidationException("Missing name for stack");
+                throw new ValidationException(
+                    "Missing name for stack"
+                );
             }
 
             let data["name"] = val;

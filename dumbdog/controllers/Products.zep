@@ -12,6 +12,7 @@ namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\Exception;
+use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
 class Products extends Content
@@ -147,7 +148,7 @@ class Products extends Content
         }
 
         if (!is_bool(status)) {
-            throw new Exception("Failed to save the product price");
+            throw new SaveException("Failed to save the product price");
         }
     }
 
@@ -224,7 +225,7 @@ class Products extends Content
         }
 
         if (!is_bool(status)) {
-            throw new Exception("Failed to save the product shipping");
+            throw new SaveException("Failed to save the product shipping");
         }
     }
 
@@ -748,7 +749,11 @@ class Products extends Content
 
         if (!empty(data)) {
             if (!this->validate(_POST, required)) {
-                throw new ValidationException("Missing required data");
+                throw new ValidationException(
+                    "Missing required fields",
+                    400,
+                    required
+                );
             }
 
             let status = this->database->get("
@@ -766,7 +771,7 @@ class Products extends Content
             );
 
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the product");
+                throw new SaveException("Failed to update the product");
             }
 
             if (isset(_POST["create_price"])) {
@@ -830,7 +835,7 @@ class Products extends Content
             );
 
             if (!is_bool(status)) {
-                throw new Exception("Failed to create the product");
+                throw new SaveException("Failed to create the product");
             }
 
             if (isset(_POST["price_name"])) {
@@ -904,7 +909,7 @@ class Products extends Content
             );
         
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the price");
+                throw new SaveException("Failed to update the price");
             }
         }
     }
@@ -960,7 +965,7 @@ class Products extends Content
             );
         
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the shipping");
+                throw new SaveException("Failed to update the shipping");
             }
         }
     }

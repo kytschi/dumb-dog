@@ -7,17 +7,18 @@
  * @version     0.0.1
  *
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Contacts;
-use DumbDog\Controllers\Content;
 use DumbDog\Controllers\Messages;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Dates;
 
-class Leads extends Content
+class Leads extends Contacts
 {
     public global_url = "/leads";
     public list = [
@@ -27,7 +28,7 @@ class Leads extends Content
         "phone|decrypt",
         "owner"
     ];
-    public required = ["first_name"];
+
     public title = "Leads";
     public type = "lead";
 
@@ -49,12 +50,89 @@ class Leads extends Content
         ]
     ];
 
+    public rankings = [
+        "terrible",
+        "poor",
+        "ok",
+        "good",
+        "excellent"
+    ];
+
+    public person_titles = [
+        "": "Unknown",
+        "Mr": "Mr",
+        "Ms": "Ms",
+        "Mrs": "Mrs",
+        "Dr": "Dr"
+    ];
+
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "
+            SELECT 
+                users.nickname AS owner,
+                contacts.*,
+                leads.id,
+                leads.contact_id,
+                leads.ranking,
+                appointments.content_id AS appointment_id,
+                appointments.on_date 
+            FROM leads
+            JOIN contacts ON contacts.id = leads.contact_id 
+            LEFT JOIN appointments ON appointments.lead_id = leads.id  
+            LEFT JOIN users ON users.id = leads.user_id";
+
+        let this->query_insert = "
+            INSERT INTO leads 
+                (
+                    id,
+                    contact_id,
+                    user_id,
+                    ranking,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by
+                ) 
+            VALUES 
+                (
+                    :id,
+                    :contact_id,
+                    :user_id,
+                    :ranking,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by
+                )";
+
+        let this->query_update = "
+            UPDATE leads 
+            SET 
+                user_id=:user_id,
+                ranking=:ranking,
+                updated_by=:updated_by,
+                updated_at=NOW()
+            WHERE id=:id";
+
+        let this->query_list = "
+            SELECT 
+                users.nickname AS owner,
+                contacts.*,
+                leads.id,
+                leads.ranking  
+            FROM leads
+            JOIN contacts ON contacts.id = leads.contact_id 
+            LEFT JOIN users ON users.id = leads.user_id 
+            WHERE leads.id IS NOT NULL ";
+    }
+
     public function add(path)
     {
-        var html, data, status = false, contacts;
+        var html, data, status = false;
         
-        let contacts = new Contacts();
-
         let html = this->titles->page("Create a lead", "leads");
 
         if (!empty(_POST)) {
@@ -64,29 +142,15 @@ class Leads extends Content
                 if (!this->validate(_POST, this->required)) {
                     let html .= this->missingRequired();
                 } else {
-                    let data["contact_id"] = contacts->save(this->setData(data, true));
+                    let data["id"] = this->database->uuid();
                     let data["user_id"] = this->database->getUserId();
+
+                    let data["contact_id"] = this->saveContact(this->setData(data));
+
                     let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO leads 
-                            (id,
-                            contact_id,
-                            user_id,
-                            ranking,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (UUID(),
-                            :contact_id,
-                            :user_id,
-                            :ranking,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -115,25 +179,73 @@ class Leads extends Content
         return html;
     }
 
+    private function setRankingIcon(item)
+    {
+        switch (item->ranking) {
+            case "excellent":
+                let item->icon = this->icons->rankingExcellent();
+                break;
+            case "good":
+                let item->icon = this->icons->rankingGood();
+                break;
+            case "ok":
+                let item->icon = this->icons->rankingOK();
+                break;
+            case "poor":
+                let item->icon = this->icons->rankingPoor();
+                break;
+            case "terrible":
+                let item->icon = this->icons->rankingTerrible();
+                break;
+            default:
+                let item->icon = item->ranking;
+                break;
+        }
+
+        return item;
+    }
+
+    public function decryptData(data)
+    {
+        var item, key;
+
+        let data = this->database->decrypt(this->encrypt, data);
+
+        if (is_array(data)) {
+            for key, item in data {
+                if (isset(item->first_name) && isset(item->last_name)) {
+                    let item->full_name = 
+                        item->first_name . 
+                        " " . 
+                        item->last_name;
+                }
+
+                let item = this->setRankingIcon(item);
+
+                let data[key] = item;
+            }
+        } else {
+            if (isset(data->first_name) && isset(data->last_name)) {
+                let data->full_name = 
+                    data->first_name . 
+                    " " . 
+                    data->last_name;
+            }
+            let data = this->setRankingIcon(data);
+        }
+
+        return data;
+    }
+
     public function edit(path)
     {
-        var html, model, data = [], contacts, err, status = false;
+        var html, model, data = [], err, status = false;
 
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("
-            SELECT 
-                users.nickname AS owner,
-                contacts.*,
-                leads.id,
-                leads.contact_id,
-                leads.ranking,
-                appointments.content_id AS appointment_id,
-                appointments.on_date 
-            FROM leads
-            JOIN contacts ON contacts.id = leads.contact_id 
-            LEFT JOIN appointments ON appointments.lead_id = leads.id  
-            LEFT JOIN users ON users.id = leads.user_id 
-            WHERE leads.id=:id", data);
+        let model = this->database->get(
+            this->query . " WHERE leads.id=:id",
+            data
+        );
 
         if (empty(model)) {
             throw new NotFoundException("Lead not found");
@@ -149,10 +261,8 @@ class Leads extends Content
             let html .= this->deletedState("I'm in a deleted state");
         }
 
-        let contacts = new Contacts();
-
         let model = this->database->decrypt(
-            contacts->encrypt,
+            this->encrypt,
             model
         );
 
@@ -171,29 +281,45 @@ class Leads extends Content
                 }
             }
 
-            if (!this->validate(_POST, contacts->required)) {
+            if (!this->validate(_POST, this->required)) {
                 let html .= this->missingRequired();
             } else {
-                
                 this->notes->actions(model->id);
-                let data = this->setData(data);
-                let status = this->database->execute(
-                    "UPDATE leads 
-                    SET 
-                        user_id=:user_id,
-                        ranking=:ranking,
-                        updated_by=:updated_by,
-                        updated_at=NOW()
-                    WHERE id=:id",
-                    data
+
+                this->updateContact(
+                    [
+                        "id": model->contact_id
+                    ],
+                    null,
+                    model
                 );
+
+                let data = this->setLeadData(
+                    [
+                        "id": model->id
+                    ],
+                    null,
+                    model
+                );
+
+                try {
+                    let status = this->database->execute(
+                        this->query_update,
+                        data
+                    );
+                } catch Exception, err {
+                    throw new SaveException(
+                        "Failed to update the lead entry",
+                        err->getCode(),
+                        err->getMessage()
+                    );
+                }
 
                 if (!is_bool(status)) {
                     let html .= this->saveFailed("Failed to save the menu");
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
-                        contacts->update(model->contact_id);
                         this->redirect(path . "?saved=true");
                     } catch ValidationException, err {
                         let html .= this->missingRequired(err->getMessage());
@@ -330,6 +456,9 @@ class Leads extends Content
                             <div class='dd-box'>
                                 <div class='dd-box-body'>
                                     <div class='dd-row'>
+                                    <div class='dd-col-12'>" . 
+                                            this->inputs->toggle("Live", "status", false, (model->status=="live" ? 1 : 0)) . 
+                                        "</div>
                                         <div class='dd-col-12'>" . 
                                             this->userSelect(model->user_id) .
                                         "</div>
@@ -354,13 +483,7 @@ class Leads extends Content
                                                 "Title",
                                                 "title",
                                                 "Their title",
-                                                [
-                                                    "": "Unknown",
-                                                    "mr": "Mr",
-                                                    "ms": "Ms",
-                                                    "mrs": "Mrs",
-                                                    "dr": "Dr"
-                                                ],
+                                                this->person_titles,
                                                 false,
                                                 model->title
                                             ) .
@@ -370,7 +493,7 @@ class Leads extends Content
                                         "</div>
                                     </div>" . 
                                     this->inputs->text("Website", "website", "Do they have a website?", false, model->website) .
-                                    this->inputs->tags("Tags", "tags", "Tag the menu", false, model->tags) . 
+                                    this->inputs->tags("Tags", "tags", "Tag the lead", false, model->tags) . 
                                 "</div>
                             </div>
                         </div>
@@ -393,16 +516,7 @@ class Leads extends Content
     {
         var data = [], query;
 
-        let query = "
-            SELECT 
-                users.nickname AS owner,
-                contacts.*,
-                leads.id,
-                leads.ranking  
-            FROM leads
-            JOIN contacts ON contacts.id = leads.contact_id 
-            LEFT JOIN users ON users.id = leads.user_id 
-            WHERE leads.id IS NOT NULL ";
+        let query = this->query_list;
 
         if (isset(_POST["q"])) {
             let query .= " AND contacts.first_name=:first_name";
@@ -418,39 +532,9 @@ class Leads extends Content
             let data["user_id"] = this->getUserId();
         }
 
-        let data = this->database->all(query, data);
-        for query in data {
-            if (isset(query->first_name) && isset(query->last_name)) {
-                let query->full_name = this->database->decrypt(query->first_name) . " " . this->database->decrypt(query->last_name);
-            } elseif (isset(query["first_name"])) {
-                let query->full_name = this->database->decrypt(query->first_name);
-            }
-
-            switch (query->ranking) {
-                case "excellent":
-                    let query->icon = this->icons->rankingExcellent();
-                    break;
-                case "good":
-                    let query->icon = this->icons->rankingGood();
-                    break;
-                case "ok":
-                    let query->icon = this->icons->rankingOK();
-                    break;
-                case "poor":
-                    let query->icon = this->icons->rankingPoor();
-                    break;
-                case "terrible":
-                    let query->icon = this->icons->rankingTerrible();
-                    break;
-                default:
-                    let query->icon = query->ranking;
-                    break;
-            }
-        }
-
         return this->tables->build(
             this->list,
-            data,
+            this->decryptData(this->database->all(query, data)),
             this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
@@ -548,8 +632,7 @@ class Leads extends Content
                             "",
                             "back",
                             "Go back to the list"
-                        ) .
-                        this->buttons->save() .                         
+                        ) .                  
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -557,14 +640,19 @@ class Leads extends Content
                             "Add a new lead"
                         );
         if (mode == "edit") {
-            let html .= this->buttons->view(model->website);
+            if (model->website) {
+                let html .= this->buttons->view(
+                    model->website,
+                    "View their website"
+                );
+            }
             if (model->deleted_at) {
                 let html .= this->buttons->recover(model->id);
             } else {
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -639,21 +727,90 @@ class Leads extends Content
         "</div>";
     }
 
+    public function saveContact(array data, user_id = null, model = null)
+    {
+        return this->save(this->setData(data, user_id, model));
+    }
+
     public function setData(array data, user_id = null, model = null)
     {
-        let data["title"] = _POST["title"];
-        let data["last_name"] = _POST["last_name"];
-        let data["email"] = _POST["email"];
-        let data["phone"] = _POST["phone"];
-        let data["website"] = _POST["website"];
-        let data["position"] = _POST["position"];
-        let data["tags"] = _POST["tags"];
-    
-        let data["ranking"] = isset(_POST["ranking"]) ? _POST["ranking"] : null;
-        let data["user_id"] = isset(_POST["user_id"]) ? _POST["user_id"] : null;
+        let data["first_name"] = _POST["first_name"];
+
+        let data["title"] = isset(_POST["title"]) ?
+            _POST["title"] :
+            (model ? model->title : "");
+
+        if (!in_array(data["title"], array_keys(this->person_titles))) {
+            throw new ValidationException(
+                "Invalid title",
+                400,
+                array_values(this->person_titles)
+            );
+        }
+
+        if (data["title"] == "Unknown") {
+            let data["title"] = "";
+        }
+
+        let data["last_name"] = isset(_POST["last_name"]) ?
+            _POST["last_name"] :
+            (model ? model->last_name : null);
+
+        let data["email"] = isset(_POST["email"]) ?
+            _POST["email"] :
+            (model ? model->email : null);
+
+        let data["phone"] = isset(_POST["phone"]) ?
+            _POST["phone"] :
+            (model ? model->phone : null);
+
+        let data["website"] = isset(_POST["website"]) ?
+            _POST["website"] :
+            (model ? model->website : null);
+
+        let data["position"] = isset(_POST["position"]) ?
+            _POST["position"] :
+            (model ? model->position : null);
+
+        let data["tags"] = isset(_POST["tags"]) ?
+            (this->inputs->isTagify(_POST["tags"]) ? _POST["tags"] : this->createTags(_POST["tags"])) : 
+            (model ? model->tags : null);
+
+        let data["status"] = isset(_POST["status"]) ?
+            "live" :
+            (model ? model->status : "offline");
+
         let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
+    }
+
+    public function setLeadData(array data, user_id = null, model = null)
+    {    
+        let data["ranking"] = isset(_POST["ranking"]) ?
+            _POST["ranking"] :
+            (model ? model->ranking : "ok");
+
+        if (!in_array(data["ranking"], this->rankings)) {
+            throw new ValidationException(
+                "Invalid ranking",
+                400,
+                this->rankings
+            );
+        }
+
+        let data["user_id"] = isset(_POST["user_id"]) ?
+            _POST["user_id"] :
+            (model ? model->user_id : null);
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
+
+        return data;
+    }
+
+    public function updateContact(array data, user_id = null, model = null)
+    {
+        return this->update(this->setData(data, user_id, model));
     }
 
     private function userSelect(selected = null)

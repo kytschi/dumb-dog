@@ -663,7 +663,11 @@ class Appointments extends Content
 
         if (!empty(data)) {
             if (!this->validate(_POST, required)) {
-                throw new ValidationException("Missing required data");
+                throw new ValidationException(
+                    "Missing required fields",
+                    400,
+                    required
+                );
             }
 
             let data = this->setAppointmentData(["id": data->id]);

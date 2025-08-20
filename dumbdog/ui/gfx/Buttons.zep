@@ -212,12 +212,12 @@ class Buttons
         "</button>";
     }
 
-    public function view(string url)
+    public function view(string url, string label = "View live")
     {
         return "
         <a 
             href='" . url ."'
-            title='View live'
+            title='" . label . "'
             class='dd-button'
             target='_blank'>" .
             this->icons->view() .

@@ -13,6 +13,7 @@ use DumbDog\Controllers\Controller;
 use DumbDog\Controllers\Files;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Exceptions\ValidationException;
 use DumbDog\Helper\Security;
 
 class Basket extends Controller
@@ -341,7 +342,7 @@ class Basket extends Controller
 
     private function addAddress(array data, string type = "billing")
     {
-        var id, basket, model, status, key, required = [
+        var id, basket, model, status, required = [
             "first_name",
             "last_name",
             "email",
@@ -352,12 +353,12 @@ class Basket extends Controller
             "country"
         ];
         
-        for key in required {
-            if (!isset(data[key])) {
-                throw new Exception("Missing required data");
-            } elseif (empty(data[key])) {
-                throw new Exception("Missing required data");
-            }
+        if (!this->validate(data, required)) {
+            throw new ValidationException(
+                "Missing required fields",
+                400,
+                required
+            );
         }
 
         let basket = this->get();

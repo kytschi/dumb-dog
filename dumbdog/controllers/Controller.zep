@@ -129,6 +129,11 @@ class Controller
         );
     }
 
+    public function createTags(tags)
+    {
+        return tags;
+    }
+
     public function deletedState(string message)
     {
         return "<div class='dd-deleted dd-alert'><span>deleted</span></div>";

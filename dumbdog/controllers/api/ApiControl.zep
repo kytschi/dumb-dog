@@ -18,6 +18,7 @@ use DumbDog\Controllers\Api\ContentStacks;
 use DumbDog\Controllers\Api\Countries;
 use DumbDog\Controllers\Api\Currencies;
 use DumbDog\Controllers\Api\Groups;
+use DumbDog\Controllers\Api\Leads;
 use DumbDog\Controllers\Api\Menus;
 use DumbDog\Controllers\Api\PageCategories;
 use DumbDog\Controllers\Api\Pages;
@@ -58,6 +59,7 @@ class ApiControl extends Controller
             "Countries": new Countries(),
             "Currencies": new Currencies(),
             "Groups": new Groups(),
+            "Leads": new Leads(),
             "Menus": new Menus(),
             "PageCategories": new PageCategories(),
             "Pages": new Pages(),

@@ -310,8 +310,7 @@ class Users extends Content
                             "",
                             "back",
                             "Go back to the list"
-                        ) .
-                        this->buttons->save() . 
+                        ) .                        
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -325,7 +324,7 @@ class Users extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>

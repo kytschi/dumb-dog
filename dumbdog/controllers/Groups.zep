@@ -102,6 +102,22 @@ class Groups extends Content
             "live",
             false
         );
+
+        let this->system[] = new Group(
+            "00000000-0000-0000-0000-000000000002",
+            "Administrator",
+            "admin",
+            "live",
+            false
+        );
+
+        let this->system[] = new Group(
+            "00000000-0000-0000-0000-000000000003",
+            "Manager",
+            "manager",
+            "live",
+            false
+        );
     }
 
     public function add(path)

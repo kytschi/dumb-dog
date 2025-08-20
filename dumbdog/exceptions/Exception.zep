@@ -6,10 +6,11 @@
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
- 
  */
+
 namespace DumbDog\Exceptions;
 
+use DumbDog\Helper\HttpStatus;
 use DumbDog\Ui\Head;
 use DumbDog\Ui\Javascript;
 use DumbDog\Ui\Gfx\Titles;
@@ -20,8 +21,12 @@ class Exception extends \Exception
     public cli;
     public data = null;
     
-	public function __construct(string message, int code = 500, data = null, bool cli = false)
+	public function __construct(string message, code = 500, data = null, bool cli = false)
 	{
+        if (is_string(code) || code == 0) {
+            let code = 500;
+        }
+
         //Trigger the parent construct.
         parent::__construct(message, code);
 
@@ -54,13 +59,7 @@ class Exception extends \Exception
             return "<p><strong>DUMB DOG ERROR</strong><br/>" . this->getMessage() . "</p>";
         }
 
-        if (this->code == 404) {
-            header("HTTP/1.1 404 Not Found");
-        } elseif (this->code == 400) {
-            header("HTTP/1.1 400 Bad Request");
-        } else {
-            header("HTTP/1.1 500 Internal Server Error");
-        }
+        (new HttpStatus())->setHttpStatus(this->code);
 
         let html = "<!DOCTYPE html><html lang='en'>" . head->build("error") .
             "<body id='dd-error' class='dd-error'>

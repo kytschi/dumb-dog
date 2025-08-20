@@ -10,6 +10,7 @@
 */
 namespace DumbDog\Controllers;
 
+use DumbDog\Controllers\Groups;
 use DumbDog\Exceptions\CfgException;
 use DumbDog\Helper\Security;
 
@@ -92,22 +93,38 @@ class Database
         let this->db = new \PDO(this->connection, this->username, this->password);
     }
 
-    public function decrypt(decrypt, model = null)
+    public function decrypt(decrypt, data = null)
     {
-        var key;
+        var key, data_key, item;
 
         if (!is_array(decrypt)) {
             return this->security->decrypt(decrypt);
-        } else {
-            for key in decrypt {
-                if (!isset(model->{key})) {
-                    continue;
+        }
+
+        if (is_array(data)) {
+            for data_key, item in data {
+                for key in decrypt {
+                    if (!isset(item->{key})) {
+                        continue;
+                    }
+
+                    let item->{key} = this->security->decrypt(item->{key});
                 }
 
-                let model->{key} = this->security->decrypt(model->{key});
+                let data[data_key] = item;
             }
-            return model;
+
+            return data;
         }
+
+        for key in decrypt {
+            if (!isset(data->{key})) {
+                continue;
+            }
+
+            let data->{key} = this->security->decrypt(data->{key});
+        }
+        return data;
     }
 
     public function encrypt(encrypt, array data = [])
@@ -116,17 +133,17 @@ class Database
 
         if (!is_array(encrypt)) {
             return this->security->encrypt(this->security->clean(encrypt));
-        } else {
-            for key in encrypt {
-                if (!isset(data[key])) {
-                    continue;
-                }
+        }
 
-                let data[key] = this->security->encrypt(this->security->clean(data[key]));
+        for key in encrypt {
+            if (!isset(data[key])) {
+                continue;
             }
 
-            return data;
+            let data[key] = this->security->encrypt(this->security->clean(data[key]));
         }
+
+        return data;
     }
 
     public function execute(string query, array data = [], bool always_save = false)
@@ -160,7 +177,9 @@ class Database
             substr(query, strlen("UPDATE")) == "UPDATE"
         ) {
             ob_start();
-            let this->statement = this->db->prepare("UPDATE settings SET last_update=NOW() WHERE name IS NOT NULL");
+            let this->statement = this->db->prepare(
+                "UPDATE settings SET last_update=NOW() WHERE name IS NOT NULL"
+            );
             let status = this->statement->execute();
             let errors = ob_get_contents();
             ob_end_clean();
@@ -191,28 +210,58 @@ class Database
 
     public function isAdmin()
     {
-        return this->get("
-            SELECT groups.slug
+        var groups, result, group;
+        let groups = new Groups();
+        
+        let result = this->get("
+            SELECT 
+                groups.slug,
+                users.group_id
             FROM users
-            JOIN groups ON groups.id AND users.group_id 
-            WHERE users.id=:id AND groups.slug IN ('su', 'admin')",
+            LEFT JOIN groups ON groups.id AND users.group_id 
+            WHERE users.id=:id",
             [
                 "id": this->getUserId()
             ]
-        ) ? true : false;
+        );
+
+        if (result) {
+            for group in groups->system {
+                if (result->group_id == group->id && result->group_id != "00000000-0000-0000-0000-000000000003") {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function isManager()
     {
-        return this->get("
-            SELECT groups.slug
+        var groups, result, group;
+        let groups = new Groups();
+        
+        let result = this->get("
+            SELECT 
+                groups.slug,
+                users.group_id
             FROM users
-            JOIN groups ON groups.id AND users.group_id 
-            WHERE users.id=:id AND groups.slug IN ('su', 'admin', 'manager')",
+            LEFT JOIN groups ON groups.id AND users.group_id 
+            WHERE users.id=:id",
             [
                 "id": this->getUserId()
             ]
-        ) ? true : false;
+        );
+        
+        if (result) {
+            for group in groups->system {
+                if (result->group_id == group->id) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function getUserId()
