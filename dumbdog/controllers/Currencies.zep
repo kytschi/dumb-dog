@@ -2,8 +2,8 @@
  * DumbDog currencies
  *
  * @package     DumbDog\Controllers\Currencies
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 */
@@ -19,7 +19,7 @@ class Currencies extends Content
     public global_url = "/currencies";
     public type = "currency";
     public title = "Currencies";
-    public required = ["name"];
+    public required = ["name", "title", "symbol"];
 
     public routes = [
         "/currencies/add": [
@@ -39,7 +39,7 @@ class Currencies extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, data, model;
 
@@ -113,14 +113,14 @@ class Currencies extends Content
         let model->exchange_rate_safety_buffer = 0;
         let model->locale_code = "";
         let model->is_default = 0;
-        let model->status = "active";
+        let model->status = "live";
 
         let html .= this->render(model);
 
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -201,7 +201,7 @@ class Currencies extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
         
@@ -231,7 +231,7 @@ class Currencies extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "Name the currency", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title for the currency", true, model->title) .
@@ -260,7 +260,7 @@ class Currencies extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -280,7 +280,7 @@ class Currencies extends Content
                 "exchange_rate"
             ],
             this->database->all(query, data),
-            this->cfg->dumb_dog_url . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
     }
 
@@ -359,17 +359,27 @@ class Currencies extends Content
         "</div>";
     }
 
-    private function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
         let data["symbol"] = _POST["symbol"];
-        let data["locale_code"] = _POST["locale_code"];
-        let data["exchange_rate"] = floatval(_POST["exchange_rate"]);
-        let data["exchange_rate_safety_buffer"] = floatval(_POST["exchange_rate_safety_buffer"]);
-        let data["updated_by"] = this->database->getUserId();
+
+        let data["status"] = isset(_POST["status"]) ? "live" : (model ? model->status : "offline");
+        let data["is_default"] = isset(_POST["is_default"]) ? 1 : (model ? model->is_default : 0);
+        let data["locale_code"] = isset(_POST["locale_code"]) ? 1 : (model ? model->locale_code : "en_GB");
+
+        let data["exchange_rate"] = 
+            isset(_POST["exchange_rate"]) ? 
+                floatval(_POST["exchange_rate"]) : 
+                (model ? model->exchange_rate : 0);
+        
+        let data["exchange_rate_safety_buffer"] = 
+            isset(_POST["exchange_rate_safety_buffer"]) ?
+                floatval(_POST["exchange_rate_safety_buffer"]) :
+                (model ? model->exchange_rate_safety_buffer : 0);
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }

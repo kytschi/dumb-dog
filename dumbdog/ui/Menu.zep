@@ -2,8 +2,8 @@
  * Dumb Dog menu builder
  *
  * @package     DumbDog\Ui\Menu
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -263,6 +263,12 @@ class Menu
                     </a>";
                 }
                 echo "
+                    <a href='" . this->cfg->dumb_dog_url . "/api-apps' title='Go to the API apps' class='dd-box'>
+                        <div class='dd-box-body'>" . 
+                            icons->apiapps() .
+                            "<label>API Apps</label>
+                        </div>
+                    </a>
                     <a href='" . this->cfg->dumb_dog_url . "/settings' title='Site wide settings' class='dd-box'>
                         <div class='dd-box-body'>" . 
                             icons->settings() .

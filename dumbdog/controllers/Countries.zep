@@ -2,8 +2,8 @@
  * Dumb dog countries
  *
  * @package     DumbDog\Controllers\Countries
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
 */
 namespace DumbDog\Controllers;
@@ -39,7 +39,7 @@ class Countries extends Content
         ]
     ];
     
-    public function add(string path)
+    public function add(path)
     {
         var html, data, model;
 
@@ -101,7 +101,7 @@ class Countries extends Content
         let model->deleted_at = null;
         let model->name = "";
         let model->code = "";
-        let model->status = "active";
+        let model->status = "live";
         let model->is_default = 0;
 
         let html .= this->render(model);
@@ -109,7 +109,7 @@ class Countries extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -175,21 +175,7 @@ class Countries extends Content
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
-                        let status = this->database->execute(
-                            "UPDATE product_shipping 
-                            SET country_code=:country_code
-                            WHERE country_id=:country_id",
-                            [
-                                "country_code": data["code"],
-                                "country_id": data["id"]
-                            ]
-                        );
-                        if (!is_bool(status)) {
-                            let html .= this->saveFailed("Failed to update the shipping country codes");
-                            let html .= this->consoleLogError(status);
-                        } else {
-                            this->redirect(path);
-                        }
+                        this->redirect(path);
                     } catch ValidationException, err {
                         let html .= this->missingRequired(err->getMessage());
                     }
@@ -201,7 +187,7 @@ class Countries extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
         
@@ -230,7 +216,7 @@ class Countries extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "The country name", true, model->name) .
                                     this->inputs->text("Code", "code", "The country code", true, model->code) .
@@ -238,44 +224,15 @@ class Countries extends Content
                             </div>
                         </div>
                     </div>
-                </div>
-                <ul class='dd-col dd-nav dd-nav-tabs' role='tablist'>
-                    <li class='dd-nav-item' role='presentation'>
-                        <button
-                            class='dd-nav-link'
-                            type='button'
-                            role='tab'
-                            data-tab='#content-tab'
-                            aria-controls='content-tab' 
-                            aria-selected='true'>Country</button>
-                    </li>
-                    <li class='dd-nav-item' role='presentation'><hr/></li>
-                    <li class='dd-nav-item' role='presentation'>" . 
-                        this->buttons->back(this->global_url) .   
-                    "</li>";
-        if (mode == "edit") {    
-            if (model->deleted_at) {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->recover(model->id) . 
-                "</li>";
-            } else {
-                let html .= "<li class='dd-nav-item' role='presentation'>" .
-                    this->buttons->delete(model->id) . 
-                "</li>";
-            }
-        }
-
-        let html .= "<li class='dd-nav-item' role='presentation'>". 
-                        this->buttons->save() .   
-                    "</li>
-                </ul>
-            </div>
+                </div> " .
+                this->renderSidebar(model, mode) .
+            "</div>
         </form>";
 
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -293,8 +250,58 @@ class Countries extends Content
                 "status"
             ],
             this->database->all(query, data),
-            this->cfg->dumb_dog_url . ltrim(path, "/")
+            this->cfg->dumb_dog_url . "/" . ltrim(path, "/")
         );
+    }
+
+    public function renderSidebar(model, mode = "add")
+    {
+        var html = "";
+
+        let html = "
+        <ul class='dd-col dd-nav-tabs' role='tablist'>
+            <li class='dd-nav-item' role='presentation'>
+                <div id='dd-tabs-toolbar'>
+                    <div id='dd-tabs-toolbar-buttons' class='dd-flex'>". 
+                        this->buttons->generic(
+                            this->global_url,
+                            "",
+                            "back",
+                            "Go back to the list"
+                        ) .
+                        this->buttons->generic(
+                            this->global_url . "/add",
+                            "",
+                            "add",
+                            "Create a new country"
+                        );
+        if (mode == "edit") {
+            if (model->deleted_at) {
+                let html .= this->buttons->recover(model->id);
+            } else {
+                let html .= this->buttons->delete(model->id);
+            }
+        }
+        let html .=     this->buttons->save() . 
+                    "</div>
+                </div>
+            </li>
+            <li class='dd-nav-item' role='presentation'>
+                <div class='dd-nav-link dd-flex'>
+                    <span 
+                        data-tab='#content-tab'
+                        class='dd-tab-link dd-col'
+                        role='tab'
+                        aria-controls='content-tab' 
+                        aria-selected='true'>" .
+                        this->buttons->tab("content-tab") .
+                        "Country
+                    </span>
+                </div>
+            </li>
+        </ul>";
+
+        return html;
     }
 
     public function renderToolbar()
@@ -310,13 +317,18 @@ class Countries extends Content
         "</div>";
     }
 
-    private function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
         let data["code"] = _POST["code"];
-        let data["updated_by"] = this->database->getUserId();
+
+        let data["status"] = isset(_POST["status"]) ? 
+            "live" :
+            (model ? model->status : "offline");
+
+        let data["is_default"] = isset(_POST["is_default"]) ? 1 : (model ? model->is_default : 0);
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }

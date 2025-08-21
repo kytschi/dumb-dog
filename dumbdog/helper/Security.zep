@@ -2,8 +2,8 @@
  * Dumb Dog security helper
  *
  * @package     DumbDog\Helper\Security
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -46,6 +46,7 @@ class Security
         }
 
         let key = explode("::", str);
+
         let str = key[0];
         let iv = hex2bin(key[1]);
         let key = openssl_digest(this->cfg->encryption, "SHA256", true);

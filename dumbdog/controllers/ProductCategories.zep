@@ -2,8 +2,8 @@
  * Dumb dog product categories
  *
  * @package     DumbDog\Controllers\ProductCategories
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 */
@@ -37,14 +37,9 @@ class ProductCategories extends ContentCategories
         "updated_at"
     ];
 
-    private valid_dir = [
-        "ASC",
-        "DESC"
-    ];
-
     /**
-    * I'm used by the helper for the frontend.
-    */
+     * I'm used by the helper for the frontend.
+     */
     public function get(array filters = [])
     {
         var query, where, join, data = [], order = "", item, item_sub, key;

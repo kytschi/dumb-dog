@@ -2,8 +2,8 @@
  * Dumb Dog users builder
  *
  * @package     DumbDog\Controllers\Users
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -45,7 +45,7 @@ class Users extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, model;
         let html = this->titles->page("Add a user", "add");
@@ -70,7 +70,7 @@ class Users extends Content
                             throw new \Exception("passwords do not match!");
                         }
 
-                        let data = this->setData(data, model);
+                        let data = this->setData(data, null, model);
                         let data["password"] = password_hash(_POST["password"], PASSWORD_DEFAULT);
                         let data["created_by"] = this->database->getUserId();
                         let data["id"] = this->database->uuid();
@@ -100,7 +100,7 @@ class Users extends Content
                                     :created_by,
                                     NOW(),
                                     :updated_by,
-                                    'active'
+                                    'live'
                                 )",
                             data
                         );
@@ -128,7 +128,7 @@ class Users extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
 
@@ -193,7 +193,7 @@ class Users extends Content
 
                     let query .= " WHERE id=:id";
 
-                    let data = this->setData(data, model);
+                    let data = this->setData(data, null, model);
 
                     let status = this->database->execute(
                         query,
@@ -224,7 +224,7 @@ class Users extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;        
         let html = this->titles->page("Users", "users");
@@ -269,7 +269,7 @@ class Users extends Content
         </form>";
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -310,8 +310,7 @@ class Users extends Content
                             "",
                             "back",
                             "Go back to the list"
-                        ) .
-                        this->buttons->save() . 
+                        ) .                        
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -325,7 +324,7 @@ class Users extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -364,7 +363,7 @@ class Users extends Content
         "</div>";
     }
 
-    private function setData(data, model)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
 

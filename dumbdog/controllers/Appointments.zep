@@ -2,12 +2,12 @@
  * Dumb Dog appointments
  *
  * @package     DumbDog\Controllers\Appointments
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
@@ -46,7 +46,31 @@ class Appointments extends Content
         ]
     ];
 
-    public function add(string path)
+    public query_appointment = "";
+
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query_appointment = "
+            SELECT main_page.*,
+                appointments.user_id,
+                appointments.lead_id,
+                appointments.with_email, 
+                appointments.with_number,
+                appointments.on_date,
+                appointments.appointment_length,
+                appointments.free_slot, 
+                IFNULL(templates.name, 'No template') AS template, 
+                IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            JOIN appointments ON appointments.content_id = main_page.id 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id 
+            WHERE main_page.type=:type AND main_page.id=:id";
+    }
+
+    public function add(path)
     {
         var html, data = [], model;
 
@@ -67,51 +91,7 @@ class Appointments extends Content
                     let data = this->setData(data);
                     
                     let status = this->database->execute(
-                        "INSERT INTO content 
-                            (id,
-                            status,
-                            name,
-                            title,
-                            sub_title,
-                            slogan,
-                            url,
-                            content,
-                            template_id,
-                            meta_keywords,
-                            meta_author,
-                            meta_description,
-                            type,                            
-                            tags,
-                            featured,
-                            sitemap_include,
-                            public_facing,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (
-                            :id,
-                            :status,
-                            :name,
-                            :title,
-                            :sub_title,
-                            :slogan,
-                            :url,
-                            :content,                            
-                            :template_id,
-                            :meta_keywords,
-                            :meta_author,
-                            :meta_description,
-                            :type,
-                            :tags,
-                            :featured,
-                            :sitemap_include,
-                            :public_facing,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -171,11 +151,12 @@ class Appointments extends Content
         return html;
     }
     
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
         let data["id"] = this->getPageId(path);
+        let data["type"] =  this->type;
         let model = this->database->get("
             SELECT 
                 appointments.*,
@@ -187,7 +168,7 @@ class Appointments extends Content
                 resource='banner-image' AND
                 banner.deleted_at IS NULL
             JOIN appointments ON appointments.content_id = content.id 
-            WHERE content.type='" . this->type . "' AND content.id=:id", data);
+            WHERE content.type=:type AND content.id=:id", data);
 
         if (empty(model)) {
             throw new NotFoundException("Appointment not found");
@@ -230,24 +211,7 @@ class Appointments extends Content
                 }
 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        url=:url,
-                        template_id=:template_id,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags,
-                        featured=:featured,
-                        sitemap_include=:sitemap_include 
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -273,7 +237,7 @@ class Appointments extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
         
@@ -285,7 +249,7 @@ class Appointments extends Content
         
         let html .= this->renderToolbar();
         
-        var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date;
+        var days, iLoop = 0, start, blanks = 0, data, entry, today = 0, date, select_data = [], helper;
         
         if (isset(_GET["date"])) {
             let date = _GET["date"];
@@ -298,12 +262,44 @@ class Appointments extends Content
             let today = intval(date("d"));
         }
         
+        let data = this->database->all(
+            "SELECT
+                appointments.*,
+                content.*,
+                appointments.id AS id 
+            FROM content 
+            JOIN appointments ON appointments.content_id = content.id  
+            WHERE 
+                deleted_at IS NULL
+            ORDER BY on_date"
+        );
+        
+        if (data) {
+            let helper = new Dates();
+            let select_data["00-00"] = "Please select an appointment";
+            for entry in data {
+                let select_data[entry->on_date] = entry->name . " (" . helper->prettyDate(entry->on_date) . ")";
+            }
+        }
+
         let html .= "
-        <div id='dd-calendar-month' class='dd-flex'>" .
-            this->buttons->previous(this->global_url . "?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))), "Previous month") .
-            "<span>" . date("F Y", strtotime(date . "-01")) . "</span>" . 
-            this->buttons->next(this->global_url . "?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))), "Next month") .
-        "</div>
+        <div id='dd-calendar-month' class='dd-row'>
+            <div class='dd-col-6'>
+                <div class='dd-flex'> " .
+                    this->buttons->previous(this->global_url . "?date=" . date("Y-m", strtotime("-1 months", strtotime(date . "-01"))), "Previous month") .
+                    "<span class='dd-mt-3'>" . date("F Y", strtotime(date . "-01")) . "</span>" . 
+                    this->buttons->next(this->global_url . "?date=" . date("Y-m", strtotime("+1 months", strtotime(date . "-01"))), "Next month") . "
+                </div>
+            </div>
+            <div class='dd-col-6'>" .
+                this->inputs->select(
+                    "Active appointments",
+                    "active_appointments",
+                    "Active appointments",
+                    select_data
+                ) .
+            "</div>
+        </div>
         <div id='dd-calendar'>";
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         while(iLoop < count(days)) {
@@ -351,6 +347,9 @@ class Appointments extends Content
                     let html .= "<div class='dd-calendar-event";
                     if (entry->free_slot) {
                         let html .= " dd-calendar-free-slot";
+                    }
+                    if (entry->deleted_at) {
+                        let html .= " dd-deleted";
                     }
                     let html .= "'><a href='" .this->global_url . "/edit/" . entry->id . "' class='dd-link'>
                         <small>" .date("H:i", strtotime(entry->on_date));
@@ -487,7 +486,6 @@ class Appointments extends Content
                                 "Back to the lead" :
                                 "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -504,13 +502,14 @@ class Appointments extends Content
                 let html .=
                     this->buttons->generic(
                         this->cfg->dumb_dog_url . "/leads/edit/" . model->lead_id,
-                        "lead",
+                        "",
                         "leads",
                         "View the lead"
                     );
             }
         }
-        let html .= "</div>
+
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -625,12 +624,15 @@ class Appointments extends Content
         return html;
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {
-        if (empty(_POST["url"])) {
-            let data["url"] = "/appointments/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
+        let data = this->setContentData(data, user_id, model);
+
+        if (!isset(_POST["url"])) {
+            let data["url"] = "/appointments/" .
+                this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
         }
-        let data = this->setContentData(data);
+        this->validUrl(data);
 
         let data["public_facing"] = isset(_POST["public_facing"]) ? 1 : 0;
 
@@ -661,7 +663,11 @@ class Appointments extends Content
 
         if (!empty(data)) {
             if (!this->validate(_POST, required)) {
-                throw new ValidationException("Missing required data");
+                throw new ValidationException(
+                    "Missing required fields",
+                    400,
+                    required
+                );
             }
 
             let data = this->setAppointmentData(["id": data->id]);

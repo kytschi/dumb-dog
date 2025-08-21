@@ -2,11 +2,12 @@
  * DumbDog taxes builder
  *
  * @package     DumbDog\Controllers\Taxes
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
@@ -18,7 +19,15 @@ class Taxes extends Content
 {
     public global_url = "/taxes";
     public type = "tax";
-    public required = ["name"];
+    public required = ["name", "title", "tax_rate", "tax_rate_type"];
+
+    public list = [
+        "name|with_tags",
+        "tax_rate",
+        "tax_rate_type",
+        "is_default|bool",
+        "status"
+    ];
 
     public routes = [
         "/taxes/add": [
@@ -38,7 +47,57 @@ class Taxes extends Content
         ]
     ];
 
-    public function add(string path)
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "SELECT * FROM taxes WHERE id=:id";
+
+        let this->query_insert = "
+            INSERT INTO taxes 
+            (
+                id,
+                name,
+                title,
+                tax_rate,
+                tax_rate_type,
+                is_default,
+                status,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by
+            ) 
+            VALUES 
+            (
+                :id,
+                :name,
+                :title,
+                :tax_rate,
+                :tax_rate_type,
+                :is_default,
+                :status,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by
+            )";
+
+        let this->query_update = "
+            UPDATE taxes 
+            SET 
+                name=:name,
+                title=:title,
+                tax_rate=:tax_rate,
+                tax_rate_type=:tax_rate_type,
+                is_default=:is_default,
+                status=:status,
+                updated_at=NOW(),
+                updated_by=:updated_by 
+            WHERE id=:id";
+    }
+
+    public function add(path)
     {
         var html, data;
         
@@ -58,28 +117,7 @@ class Taxes extends Content
                     let data = this->setData(data);
 
                     let status = this->database->execute(
-                        "INSERT INTO taxes 
-                            (id,
-                            name,
-                            title,
-                            tax_rate,
-                            is_default,
-                            status,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (:id,
-                            :name,
-                            :title,
-                            :tax_rate,                            
-                            :is_default,
-                            :status,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -103,6 +141,7 @@ class Taxes extends Content
         let model->name = "";
         let model->title = "";
         let model->tax_rate = 1;
+        let model->tax_rate_type = "percentage";
         let model->is_default = 0;
 
         let html .= this->render(model);
@@ -110,7 +149,7 @@ class Taxes extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
@@ -160,15 +199,7 @@ class Taxes extends Content
                 let data = this->setData(data);
 
                 let status = this->database->execute(
-                    "UPDATE taxes SET 
-                        name=:name,
-                        title=:title,
-                        tax_rate=:tax_rate,
-                        is_default=:is_default,
-                        status=:status,
-                        updated_at=NOW(),
-                        updated_by=:updated_by 
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -189,7 +220,7 @@ class Taxes extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;       
         
@@ -218,11 +249,22 @@ class Taxes extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->text("Name", "name", "Name the tax", true, model->name) .
                                     this->inputs->text("Title", "title", "The display title for the tax", true, model->title) .
                                     this->inputs->text("Tax rate", "tax_rate", "The tax rate as percentage", true, model->tax_rate) .
+                                    this->inputs->select(
+                                        "Tax rate type",
+                                        "tax_rate_type",
+                                        "Tax rate type",
+                                        [
+                                            "percentage": "Percentage",
+                                            "flat": "Flat"
+                                        ],
+                                        false,
+                                        model->tax_rate_type
+                                    ) .
                                 "</div>
                             </div>
                         </div>
@@ -235,7 +277,7 @@ class Taxes extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -269,7 +311,6 @@ class Taxes extends Content
                             "back",
                             "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -283,7 +324,7 @@ class Taxes extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -330,14 +371,26 @@ class Taxes extends Content
         return html;
     }
 
-    private function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
+        let data["status"] = isset(_POST["status"]) ?
+            "live" :
+            (model ? model->status : "offline");
+
+        let data["is_default"] = isset(_POST["is_default"]) ?
+            1 :
+            (model ? model->is_default : 0);
+
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
         let data["tax_rate"] = floatval(_POST["tax_rate"]);
-        let data["updated_by"] = this->database->getUserId();
+        if (in_array(_POST["tax_rate_type"], ["percentage", "flat"])) {
+            let data["tax_rate_type"] = _POST["tax_rate_type"];
+        } else {
+            let data["tax_rate_type"] = "percentage";
+        }
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
 
         return data;
     }

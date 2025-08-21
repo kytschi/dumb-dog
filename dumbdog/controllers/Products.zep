@@ -2,16 +2,17 @@
  * DumbDog products
  *
  * @package     DumbDog\Controllers\Products
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Content;
 use DumbDog\Exceptions\Exception;
+use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 
 class Products extends Content
@@ -42,10 +43,7 @@ class Products extends Content
         "updated_at"
     ];
 
-    private valid_dir = [
-        "ASC",
-        "DESC"
-    ];
+    public required = ["name", "title", "code", "stock"];
 
     public routes = [
         "/products/add": [
@@ -80,83 +78,161 @@ class Products extends Content
         ]
     ];
 
-    private function createPrice(id)
+    private function createPrice(id, mode = "edit", user_id = null)
     {
-        var data = [
-            "product_id": id,
-            "created_by": this->getUserId(),
-            "updated_by": this->getUserId()
-        ], status;
+        var data = [], status;
 
-        let data["name"] = _POST["create_price"];
-        
-        let status = this->database->execute(
-            "INSERT INTO product_prices 
-                (id,
-                product_id,
-                name,
-                created_at,
-                created_by,
-                updated_at,
-                updated_by) 
-            VALUES 
-                (UUID(),
-                :product_id,
-                :name,
-                NOW(),
-                :created_by,
-                NOW(),
-                :updated_by)",
-            data
-        );
+        let data["product_id"] = id;
+        let data["created_by"] = user_id ? user_id : this->getUserId();
+        let data["updated_by"] = user_id ? user_id : this->getUserId();
+
+        if (mode == "edit") {
+            let data["name"] = _POST["create_price"];
+            
+            let status = this->database->execute(
+                "INSERT INTO product_prices 
+                    (id,
+                    product_id,
+                    name,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :product_id,
+                    :name,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                data
+            );
+        } else {
+            let data["name"] = isset(_POST["price_name"]) ? _POST["price_name"] : "Standard price";
+            let data["currency_id"] = isset(_POST["price_currency_id"]) ? _POST["price_currency_id"] : null;
+            let data["tax_id"] = isset(_POST["price_tax_id"]) ? _POST["price_tax_id"] : null;
+            let data["price"] = isset(_POST["price"]) ? floatval(_POST["price"]) : 1.00;
+            let data["offer_price"] = isset(_POST["offer_price"]) ? floatval(_POST["offer_price"]) : 0.00;
+            let data["status"] = isset(_POST["price_status"]) ? _POST["price_status"] : "live";
+            
+            let status = this->database->execute(
+                "INSERT INTO product_prices 
+                    (id,
+                    product_id,
+                    currency_id,
+                    tax_id,
+                    name,
+                    price,
+                    offer_price,
+                    status,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :product_id,
+                    :currency_id,
+                    :tax_id,
+                    :name,
+                    :price,
+                    :offer_price,
+                    :status,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                data
+            );
+        }
 
         if (!is_bool(status)) {
-            throw new Exception("Failed to save the product price");
+            throw new SaveException("Failed to save the product price");
         }
     }
 
-    private function createShipping(id)
+    private function createShipping(id, mode = "edit", user_id = null)
     {
         var data = [
             "product_id": id,
-            "created_by": this->getUserId(),
-            "updated_by": this->getUserId()
+            "created_by": user_id ? user_id : this->getUserId(),
+            "updated_by": user_id ? user_id : this->getUserId()
         ], status;
 
-        let data["name"] = _POST["create_shipping"];
-        
-        let status = this->database->execute(
-            "INSERT INTO product_shipping 
-                (id,
-                product_id,
-                name,
-                created_at,
-                created_by,
-                updated_at,
-                updated_by) 
-            VALUES 
-                (UUID(),
-                :product_id,
-                :name,
-                NOW(),
-                :created_by,
-                NOW(),
-                :updated_by)",
-            data
-        );
+        if (mode == "edit") {
+            let data["name"] = _POST["create_shipping"];
+            
+            let status = this->database->execute(
+                "INSERT INTO product_shipping 
+                    (id,
+                    product_id,
+                    name,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :product_id,
+                    :name,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                data
+            );
+        } else {
+            let data["name"] = isset(_POST["shipping_name"]) ? _POST["shipping_name"] : "Standard shipping";
+            if (empty(data["name"])) {
+                let data["name"] = "Standard shipping";
+            }
+            let data["country_id"] = isset(_POST["shipping_country_id"]) ? _POST["shipping_country_id"] : null;
+            let data["currency_id"] = isset(_POST["shipping_currency_id"]) ? _POST["shipping_currency_id"] : null;
+            let data["tax_id"] = isset(_POST["shipping_tax_id"]) ? _POST["shipping_tax_id"] : null;
+            let data["status"] = isset(_POST["shipping_status"]) ? _POST["shipping_status"] : "live";
+            let data["price"] = isset(_POST["shipping_price"]) ? floatval(_POST["shipping_price"]) : 1.00;
+
+            let status = this->database->execute(
+                "INSERT INTO product_shipping 
+                    (id,
+                    product_id,
+                    country_id,
+                    currency_id,
+                    tax_id,
+                    name,
+                    price,
+                    status,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by) 
+                VALUES 
+                    (UUID(),
+                    :product_id,
+                    :country_id,
+                    :currency_id,
+                    :tax_id,
+                    :name,
+                    :price,
+                    :status,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by)",
+                data
+            );
+        }
 
         if (!is_bool(status)) {
-            throw new Exception("Failed to save the product shipping");
+            throw new SaveException("Failed to save the product shipping");
         }
     }
 
-    private function countriesSelect(selected)
+    private function countriesSelect(selected = null, mode = "edit", label = "country_id")
     {
-        var select = [], data;
-        let data = this->database->all("
-            SELECT * FROM countries 
-            ORDER BY is_default DESC, name");
-        var iLoop = 0;
+        var select = [], data, iLoop = 0;
+        let data = this->database->all("SELECT * FROM countries ORDER BY is_default DESC, name");
 
         while (iLoop < count(data)) {
             let select[data[iLoop]->id] = data[iLoop]->name;
@@ -168,7 +244,7 @@ class Products extends Content
 
         return this->inputs->select(
             "Country",
-            "country_id[]",
+            (mode == "edit" ? label . "[]" : label),
             "The country",
             select,
             true,
@@ -176,14 +252,11 @@ class Products extends Content
         );
     }
 
-    private function currenciesSelect(selected)
+    private function currenciesSelect(selected = null, mode = "edit", label = "currency_id")
     {
-        var select = [], data;
-        let data = this->database->all("
-            SELECT * FROM currencies 
-            ORDER BY is_default DESC, name");
-        var iLoop = 0;
-
+        var select = [], data, iLoop = 0;
+        let data = this->database->all("SELECT * FROM currencies ORDER BY is_default DESC, name");
+        
         while (iLoop < count(data)) {
             let select[data[iLoop]->id] = data[iLoop]->name;
             if (data[iLoop]->is_default && empty(selected)) {
@@ -194,7 +267,7 @@ class Products extends Content
 
         return this->inputs->select(
             "Currency",
-            "currency_id[]",
+            (mode == "edit" ? label . "[]" : label),
             "The currency",
             select,
             true,
@@ -203,8 +276,8 @@ class Products extends Content
     }
 
     /**
-    * I'm used by the helper for the frontend.
-    */
+     * I'm used by the helper for the frontend.
+     */
     public function get(array filters = [])
     {
         var query, where, join, data = [], order = "", item, item_sub, key, currency_id = "";
@@ -285,7 +358,7 @@ class Products extends Content
                                 let join .= " LEFT JOIN 
                                     product_shipping ON product_shipping.product_id = products.id AND 
                                         product_shipping.deleted_at IS NULL AND 
-                                        product_shipping.status = 'active'";
+                                        product_shipping.status = 'live'";
                             }
                             let data = array_merge(data, item["data"]);
                         }
@@ -347,7 +420,7 @@ class Products extends Content
 
     public function renderExtra(model, mode = "add")
     {
-        var data, item, html;
+        var data, item, html = "";
         
         let model->price = 0;
 
@@ -383,91 +456,187 @@ class Products extends Content
                     <div class='dd-box-body'>" .
                         this->inputs->toggle("On offer", "on_offer", false, model->on_offer) . 
                         this->inputs->text("Code", "code", "The product code", true, model->code) .
-                        this->inputs->number("Stock", "stock", "The stock", true, model->stock) .
+                        this->inputs->number("Stock", "stock", "The stock", true, (model->stock ? model->stock : 1)) .
                     "</div>
                 </div>
             </div>
-        </div>";
+        </div>
+        <div class='dd-row'>
+            <div class='dd-col-12'>
+                <div class='dd-box" . (mode == "edit" ? "" : " dd-mb-0" ) . "'>
+                    <div class='dd-box-title dd-flex dd-border-none'>";
+
         if (mode == "edit") {
             let html .= "
-            <div class='dd-row'>
-                <div class='dd-col-12'>
-                    <div class='dd-box'>
-                        <div class='dd-box-title dd-flex dd-border-none'>
-                            <div class='dd-col'>Prices</div>
-                            <div class='dd-col-auto'>" . 
-                                this->inputs->inputPopup("create-price", "create_price", "Create a new price") .
-                            "</div>
-                        </div>
-                    </div>";
-                    if (count(model->prices)) {
-                        for item in model->prices {
-                            let html .= "
-                            <div class='dd-box'>
-                                <div class='dd-box-title dd-flex'>
-                                    <div class='dd-col'>" . item->name . "</div>
-                                    <div class='dd-col-auto'>" .
-                                        this->buttons->delete(
-                                            item->id, 
-                                            "delete-price-" . item->id,
-                                            "delete_price[]",
-                                            ""
-                                        ) .
-                                "   </div>
-                                </div>
-                                <div class='dd-box-body'>" .
-                                    this->inputs->text("Name", "price_name[]", "The price name", true, item->name) .
-                                    this->currenciesSelect(item->currency_id) . 
-                                    this->taxesSelect(item->tax_id) . 
-                                    this->inputs->text("Price", "price[]", "The price", true, item->price) .
-                                    this->inputs->text("Offer price", "offer_price[]", "The offer price", false, item->offer_price) .
-                                    this->inputs->hidden("price_id[]", item->id) . 
-                            "   </div>
-                            </div>";
-                        }
-                    }
+                        <div class='dd-col'>Prices</div>
+                        <div class='dd-col-auto'>" . 
+                            this->inputs->inputPopup("create-price", "create_price", "Create a new price") .
+                        "</div>";
+        } else {
+            let html .= "<div class='dd-col'>Price</div>";
+        }
+
+        let html .= "
+                    </div>
+                </div>";
+
+        if (count(model->prices)) {
+            for item in model->prices {
+                let html .= "
+                <div class='dd-box'>
+                    <div class='dd-box-title dd-flex'>
+                        <div class='dd-col'>" . item->name . "</div>
+                        <div class='dd-col-auto'>" .
+                            this->buttons->delete(
+                                item->id, 
+                                "delete-price-" . item->id,
+                                "delete_price[]",
+                                ""
+                            ) .
+                    "   </div>
+                    </div>
+                    <div class='dd-box-body'>" .
+                        this->inputs->toggle(
+                            "Live",
+                            "price_status[]",
+                            false,
+                            item->status
+                        ) . 
+                        this->inputs->text("Name", "price_name[]", "The price name", true, item->name) .
+                        this->currenciesSelect(item->currency_id) . 
+                        this->taxesSelect(item->tax_id) . 
+                        this->inputs->text("Price", "price[]", "The price", true, item->price) .
+                        this->inputs->text(
+                            "Offer price",
+                            "offer_price[]",
+                            "The offer price",
+                            false,
+                            item->offer_price
+                        ) .
+                        this->inputs->hidden("price_id[]", item->id) . 
+                "   </div>
+                </div>";
+            }
+        } elseif (mode == "add") {
             let html .= "
-                </div>
+                <div class='dd-box dd-border-top-none'>
+                    <div class='dd-box-body'>" .
+                        this->inputs->toggle(
+                            "Live",
+                            "price_status",
+                            false
+                        ) . 
+                        this->inputs->text("Name", "price_name", "The price name", true) .
+                        this->currenciesSelect(null, "add", "price_currency_id") . 
+                        this->taxesSelect(null, "add", "price_tax_id") . 
+                        this->inputs->text("Price", "price", "The price", true) .
+                        this->inputs->text(
+                            "Offer price",
+                            "offer_price",
+                            "The offer price",
+                            false
+                        ) .
+                "   </div>
+                </div>";
+        }
+
+        let html .= "
             </div>
-            <div id='shipping-tab' class='dd-row'>
-                <div class='dd-col-12'>
+        </div>
+        <div id='shipping-tab' class='dd-row'>
+            <div class='dd-col-12'>
+                <div class='dd-box" . (mode == "edit" ? "" : " dd-mb-0" ) . "'>
+                    <div class='dd-box-title dd-flex dd-border-none'>
+                        <div class='dd-col'>Shipping</div>";
+
+        if (mode == "edit") {
+            let html .= "
+                        <div class='dd-col-auto'>" . 
+                            this->inputs->inputPopup(
+                                "create-shipping",
+                                "create_shipping",
+                                "Create a new shipping location"
+                            ) .
+                    "   </div>";
+        }
+
+        let html .= "</div>
+                </div>";
+
+        if (count(model->shipping)) {
+            for item in model->shipping {
+                let html .= "
                     <div class='dd-box'>
-                        <div class='dd-box-title dd-flex dd-border-none'>
-                            <div class='dd-col'>Shipping</div>
-                            <div class='dd-col-auto'>" . 
-                                this->inputs->inputPopup("create-shipping", "create_shipping", "Create a new shipping location") .
+                        <div class='dd-box-title dd-flex'>
+                            <div class='dd-col'>" . item->name . "</div>
+                            <div class='dd-col-auto'>" .
+                                this->buttons->delete(
+                                    item->id,
+                                    "delete-shpping-" . item->id,
+                                    "delete_shpping[]",
+                                    ""
+                                ) .
                         "   </div>
                         </div>
+                        <div class='dd-box-body'>" .
+                            this->inputs->toggle(
+                                "Live",
+                                "shipping_status[]",
+                                false,
+                                (item->status == "live" ? 1 : 0)
+                            ) . 
+                            this->inputs->text(
+                                "Name",
+                                "shipping_name[]",
+                                "The shpping name",
+                                true,
+                                item->name
+                            ) .
+                            this->countriesSelect(item->country_id) . 
+                            this->currenciesSelect(item->currency_id) . 
+                            this->taxesSelect(item->tax_id) . 
+                            this->inputs->text(
+                                "Price",
+                                "shipping_price[]",
+                                "The shipping price",
+                                false,
+                                item->price
+                            ) .
+                            this->inputs->hidden("shipping_id[]", item->id) . 
+                    "   </div>
                     </div>";
-                    if (count(model->shipping)) {
-                        for item in model->shipping {
-                            let html .= "
-                            <div class='dd-box'>
-                                <div class='dd-box-title dd-flex'>
-                                    <div class='dd-col'>" . item->name . "</div>
-                                    <div class='dd-col-auto'>" .
-                                        this->buttons->delete(
-                                            item->id,
-                                            "delete-shpping-" . item->id,
-                                            "delete_shpping[]",
-                                            ""
-                                        ) .
-                                "   </div>
-                                </div>
-                                <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "shipping_status[]", false, (item->status == "active" ? 1 : 0)) . 
-                                    this->inputs->text("Name", "shipping_name[]", "The shpping name", true, item->name) .
-                                    this->countriesSelect(item->country_id) . 
-                                    this->inputs->text("Price", "shipping_price[]", "The shipping price", false, item->price) .
-                                    this->inputs->hidden("shipping_id[]", item->id) . 
-                            "   </div>
-                            </div>";
-                        }
-                    }
+            }
+        } elseif (mode == "add") {
             let html .= "
-                </div>
-            </div>";
+                    <div class='dd-box dd-border-top-none'>
+                        <div class='dd-box-body'>" .
+                            this->inputs->toggle(
+                                "Live",
+                                "shipping_status",
+                                false
+                            ) . 
+                            this->inputs->text(
+                                "Name",
+                                "shipping_name",
+                                "The shpping name",
+                                true
+                            ) .
+                            this->inputs->text(
+                                "Price",
+                                "shipping_price",
+                                "The shipping price",
+                                true
+                            ) .
+                            this->currenciesSelect(null, "add", "shipping_currency_id") . 
+                            this->countriesSelect(null, "add", "shipping_country_id") . 
+                            this->taxesSelect(null, "add", "shipping_tax_id") . 
+                    "   </div>
+                    </div>";
         }
+
+        let html .= "
+            </div>
+        </div>";
 
         return html;
     }
@@ -510,7 +679,7 @@ class Products extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -540,13 +709,11 @@ class Products extends Content
         );
     }
 
-    private function taxesSelect(selected)
+    private function taxesSelect(selected = null, mode = "edit", label = "tax_id")
     {
         var select = [], data;
         
-        let data = this->database->all("
-            SELECT * FROM taxes 
-            ORDER BY is_default DESC, name");
+        let data = this->database->all("SELECT * FROM taxes ORDER BY is_default DESC, name");
         var iLoop = 0;
 
         let select = ["": "None"];
@@ -561,7 +728,7 @@ class Products extends Content
 
         return this->inputs->select(
             "Tax rate",
-            "tax_id[]",
+            (mode == "edit" ? label . "[]" : label),
             "The tax rate",
             select,
             false,
@@ -569,15 +736,24 @@ class Products extends Content
         );
     }
 
-    public function updateExtra(model, path)
+    public function updateExtra(model, path, user_id = null)
     {
         var data, status = false, required = ["code"];
 
-        let data = this->database->get("SELECT * FROM products WHERE content_id=:id", ["id":model->id]);
+        let data = this->database->get(
+            "SELECT * FROM products WHERE content_id=:id",
+            [
+                "id": model->id
+            ]
+        );
 
         if (!empty(data)) {
             if (!this->validate(_POST, required)) {
-                throw new ValidationException("Missing required data");
+                throw new ValidationException(
+                    "Missing required fields",
+                    400,
+                    required
+                );
             }
 
             let status = this->database->get("
@@ -588,14 +764,14 @@ class Products extends Content
                 WHERE id=:id",
                 [
                     "id": data->id,
-                    "stock": intval(_POST["stock"]),
-                    "code": _POST["code"],
-                    "on_offer": isset(_POST["on_offer"]) ? 1 : 0
+                    "stock": isset(_POST["stock"]) ? intval(_POST["stock"]) : model->stock,
+                    "code": isset(_POST["code"]) ? _POST["code"] : model->code,
+                    "on_offer": isset(_POST["on_offer"]) ? 1 : model->on_offer
                 ]
             );
 
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the product");
+                throw new SaveException("Failed to update the product");
             }
 
             if (isset(_POST["create_price"])) {
@@ -624,9 +800,21 @@ class Products extends Content
                 }
             }
 
-            this->updatePrices();
-            this->updateShipping();
+            if (isset(_POST["price_name"])) {
+                this->updatePrices(model, user_id);
+            }
+            if (isset(_POST["shipping_name"])) {
+                this->updateShipping(model, user_id);
+            }
         } else {
+            let data = [
+                "id": this->database->uuid(),
+                "content_id": model->id,
+                "code": _POST["code"],
+                "stock": intval(_POST["stock"]),
+                "on_offer": isset(_POST["on_offer"]) ? 1 : 0
+            ];
+
             let status = this->database->get("
                 INSERT INTO products 
                 (
@@ -637,29 +825,32 @@ class Products extends Content
                     on_offer
                 ) VALUES
                 (
-                    UUID(),
+                    :id,
                     :content_id,
                     :code,
                     :stock,
                     :on_offer
                 )",
-                [
-                    "content_id": model->id,
-                    "code": _POST["code"],
-                    "stock": intval(_POST["stock"]),
-                    "on_offer": isset(_POST["on_offer"]) ? 1 : 0
-                ]
+                data
             );
 
             if (!is_bool(status)) {
-                throw new Exception("Failed to create the product");
+                throw new SaveException("Failed to create the product");
+            }
+
+            if (isset(_POST["price_name"])) {
+                this->createPrice(data["id"], "add", user_id);
+            }
+            if (isset(_POST["shipping_name"])) {
+                this->createShipping(data["id"], "add", user_id);
             }
         }
 
         return path;
     }
 
-    private function updatePrices()
+
+    private function updatePrices(model, user_id)
     {
         if (!isset(_POST["price_id"])) {
             return;
@@ -701,6 +892,8 @@ class Products extends Content
                     let data["offer_price"] = floatval(_POST["offer_price"][key]);
                 }
             }
+
+            let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
             
             let status = this->database->execute(
                 "UPDATE product_prices SET 
@@ -708,18 +901,20 @@ class Products extends Content
                     price=:price,
                     offer_price=:offer_price,
                     currency_id=:currency_id,
-                    tax_id=:tax_id 
+                    tax_id=:tax_id,
+                    updated_at=NOW(),
+                    updated_by=:updated_by
                 WHERE id=:id",
                 data
             );
         
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the price");
+                throw new SaveException("Failed to update the price");
             }
         }
     }
 
-    private function updateShipping()
+    private function updateShipping(model, user_id)
     {
         if (!isset(_POST["shipping_id"])) {
             return;
@@ -731,7 +926,7 @@ class Products extends Content
                 "id": id,
                 "name": "",
                 "price": 0.00,
-                "status": "active"
+                "status": "live"
             ];
 
             if (!isset(_POST["shipping_name"][key])) {
@@ -746,23 +941,31 @@ class Products extends Content
                 throw new ValidationException("Missing currency for the shipping");
             }
 
-            let data["status"] = isset(_POST["shipping_status"][key]) ? "active" : "inactive";
+            let data["status"] = isset(_POST["shipping_status"][key]) ? "live" : "offline";
             let data["name"] = _POST["shipping_name"][key];
             let data["price"] = floatval(_POST["shipping_price"][key]);
             let data["country_id"] = _POST["country_id"][key];
+            let data["currency_id"] = _POST["currency_id"][key];
+            let data["tax_id"] = _POST["tax_id"][key];
+
+            let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
                         
             let status = this->database->execute(
                 "UPDATE product_shipping SET 
                     status=:status,
                     name=:name,
                     price=:price,
-                    country_id=:country_id
+                    country_id=:country_id,
+                    currency_id=:currency_id,
+                    tax_id=:tax_id,
+                    updated_at=NOW(),
+                    updated_by=:updated_by
                 WHERE id=:id",
                 data
             );
         
             if (!is_bool(status)) {
-                throw new Exception("Failed to update the shipping");
+                throw new SaveException("Failed to update the shipping");
             }
         }
     }

@@ -2,8 +2,8 @@
  * DumbDog payment gateways builder
  *
  * @package     DumbDog\Controllers\PaymentGateways
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
 */
 namespace DumbDog\Controllers;
@@ -27,6 +27,10 @@ class PaymentGateways extends Content
         "status"
     ];
 
+    public types = [
+        "stripe": "Stripe"
+    ];
+
     public routes = [
         "/payment-gateways/add": [
             "PaymentGateways",
@@ -45,7 +49,66 @@ class PaymentGateways extends Content
         ]
     ];
 
-    public function add(string path)
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "
+            SELECT payment_gateways.* 
+            FROM payment_gateways 
+            WHERE payment_gateways.id=:id";
+
+        let this->query_insert = "
+            INSERT INTO payment_gateways 
+                (
+                    id,
+                    name,
+                    title,
+                    type,
+                    description,
+                    is_default,
+                    status,
+                    public_api_key,
+                    private_api_key,
+                    created_at,
+                    created_by,
+                    updated_at,
+                    updated_by
+                ) 
+            VALUES 
+                (
+                    :id,
+                    :name,
+                    :title,
+                    :type,
+                    :description,
+                    :is_default,
+                    :status,
+                    :public_api_key,
+                    :private_api_key,
+                    NOW(),
+                    :created_by,
+                    NOW(),
+                    :updated_by
+                )";
+        
+        let this->query_update = "
+            UPDATE payment_gateways 
+            SET 
+                name=:name,
+                title=:title,
+                type=:type,
+                description=:description,
+                is_default=:is_default,
+                status=:status,
+                public_api_key=:public_api_key,
+                private_api_key=:private_api_key,
+                updated_at=NOW(),
+                updated_by=:updated_by 
+            WHERE id=:id";
+    }
+
+    public function add(path)
     {
         var html, data;
 
@@ -64,35 +127,15 @@ class PaymentGateways extends Content
 
                     let data = this->setData(data);
 
+                    if (data["is_default"]) {
+                        this->clearDefault(
+                            "payment_gateways",
+                            data["updated_by"]
+                        );
+                    }
+
                     let status = this->database->execute(
-                        "INSERT INTO payment_gateways 
-                            (id,
-                            name,
-                            title,
-                            type,
-                            description,
-                            is_default,
-                            status,
-                            public_api_key,
-                            private_api_key,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (:id,
-                            :name,
-                            :title,
-                            :type,
-                            :description,
-                            :is_default,
-                            :status,
-                            :public_api_key,
-                            :private_api_key,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -125,16 +168,15 @@ class PaymentGateways extends Content
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [];
         
         let data["id"] = this->getPageId(path);
-        let model = this->database->get("
-            SELECT 
-                payment_gateways.* 
-            FROM payment_gateways 
-            WHERE payment_gateways.id=:id", data);
+        let model = this->database->get(
+            this->query,
+            data
+        );
 
         if (empty(model)) {
             throw new NotFoundException("Payment gateway not found");
@@ -176,19 +218,15 @@ class PaymentGateways extends Content
 
                 let data = this->setData(data);
 
+                if (data["is_default"]) {
+                    this->clearDefault(
+                        "payment_gateways",
+                        data["updated_by"]
+                    );
+                }
+
                 let status = this->database->execute(
-                    "UPDATE payment_gateways SET 
-                        name=:name,
-                        title=:title,
-                        type=:type,
-                        description=:description,
-                        is_default=:is_default,
-                        status=:status,
-                        public_api_key=:public_api_key,
-                        private_api_key=:private_api_key,
-                        updated_at=NOW(),
-                        updated_by=:updated_by 
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -218,7 +256,7 @@ class PaymentGateways extends Content
         let data = this->database->all("
             SELECT payment_gateways.*
             FROM payment_gateways
-            WHERE deleted_at IS NULL AND status='active' 
+            WHERE deleted_at IS NULL AND status='live' 
             ORDER BY is_default DESC, title");
         
         for item in data {
@@ -228,7 +266,7 @@ class PaymentGateways extends Content
         return data;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;       
         
@@ -256,20 +294,19 @@ class PaymentGateways extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Active", "status", false, (model->status == "active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status == "live" ? 1 : 0)) . 
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
                                     this->inputs->select(
                                         "Type",
                                         "type",
                                         "The type of payment gateway",
-                                        [
-                                            "stripe": "stripe"
-                                        ],
+                                        this->types,
                                         true,
                                         model->type
                                     ) . 
                                     this->inputs->text("Name", "name", "Name the payment gateway", true, model->name) .
-                                    this->inputs->text("Title", "title", "The display title for the payment gateway", true, model->title) .                                    
+                                    this->inputs->text("Title", "title", "The display title for the payment gateway", true, model->title) .
+                                    this->inputs->tags("Tags", "tags", "Tag the gateway", false, model->tags) . 
                                     this->inputs->textarea("Description", "description", "The display description", false, model->description) .
                                 "</div>
                             </div>
@@ -294,7 +331,7 @@ class PaymentGateways extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -328,7 +365,6 @@ class PaymentGateways extends Content
                             "back",
                             "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -342,7 +378,7 @@ class PaymentGateways extends Content
                 let html .= this->buttons->delete(model->id);
             }
         }
-        let html .= "</div>
+        let html .= this->buttons->save() . "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -402,7 +438,7 @@ class PaymentGateways extends Content
         return html;
     }
 
-    public function process(string path)
+    public function process(path)
     {
         if (strpos(path, "/payment-gateway/") !== false) {
             if (strpos(path, "/payment-gateway/create/") !== false) {
@@ -428,18 +464,41 @@ class PaymentGateways extends Content
         }
     }
 
-    private function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
-        let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
         let data["name"] = _POST["name"];
         let data["title"] = _POST["title"];
         let data["type"] = _POST["type"];
-        let data["description"] = isset(_POST["description"]) ? _POST["description"] : "";
-        let data["updated_by"] = this->getUserId();
 
-        let data["public_api_key"] = this->database->encrypt(_POST["public_api_key"]);
-        let data["private_api_key"] = this->database->encrypt(_POST["private_api_key"]);
+        if (!in_array(data["type"], array_keys(this->types))) {
+            throw new ValidationException(
+                "Invalid payment type",
+                400,
+                this->types
+            );
+        }
+
+        let data["status"] = isset(_POST["status"]) ?
+            "live" :
+            (model ? model->status : "offline");
+
+        let data["is_default"] = isset(_POST["is_default"]) ? 1 : (model ? model->is_default : 0);
+        
+        let data["description"] = isset(_POST["description"]) ?
+            _POST["description"] :
+            (model ? model->description : null);
+
+        let data["updated_by"] = user_id ? user_id : this->getUserId();
+
+        let data["public_api_key"] = 
+            isset(_POST["public_api_key"]) ?
+                this->database->encrypt(_POST["public_api_key"]) :
+                (model ? model->public_api_key : null);
+
+        let data["private_api_key"] = 
+            isset(_POST["private_api_key"]) ?
+                this->database->encrypt(_POST["private_api_key"]) :
+                (model ? model->private_api_key : null);
 
         return data;
     }

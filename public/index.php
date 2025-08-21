@@ -4,7 +4,7 @@
  * DumbDog example index
  *
  * @author      Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  */
@@ -88,6 +88,7 @@ try {
         'cache' => '../cache',
         'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/website')
     ]);*/
+
     new DumbDog("../.dumbdog.json", $libs, $engine);
 } catch (\Exception $err) {
     (new Exception($err->getMessage()))->fatal();

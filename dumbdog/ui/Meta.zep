@@ -2,8 +2,8 @@
  * Dumb Dog meta
  *
  * @package     DumbDog\Ui\Meta
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  *
 */
 namespace DumbDog\Ui;

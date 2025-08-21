@@ -207,6 +207,7 @@ http://bythebutterfly.com
 
 Icons from\
 https://icons8.com
+https://www.svgrepo.com/collection/solar-linear-icons/8
 
 Jquery\
 https://jquery.com/

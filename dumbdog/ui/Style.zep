@@ -2,8 +2,8 @@
  * Dumb Dog style builder
  *
  * @package     DumbDog\Ui\Style
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
  
@@ -214,10 +214,6 @@ class Style
             vertical-align: top;
             border-right: 3px solid var(--box-title-border-colour);
         }
-        .dd-table tr.dd-deleted {
-            color: var(--text-deleted);
-            text-decoration: line-through;
-        }
         .dd-table tr .dd-blank {
             background-color: var(--box-disabled-background-colour);
         }
@@ -247,8 +243,12 @@ class Style
             padding: 0;
             margin: 0;
         }
-        .dd-deleted.dd-alert, .dd-deleted .dd-box-title {
-            background-color: var(--box-deleted-background-colour);
+        .dd-deleted.dd-alert, .dd-deleted .dd-box-title, .dd-deleted {
+            background-color: var(--box-deleted-background-colour) !important;
+        }
+        .dd-deleted {
+            color: var(--text-deleted) !important;
+            text-decoration: line-through !important;
         }
         .dd-warning.dd-alert {
             background-color: var(--box-warning-background-colour);
@@ -280,11 +280,14 @@ class Style
         }
         .dd-button, .dd-button-blank, .dd-nav-link {
             background-color: var(--tabs-toolbar-background-colour);
-            border: 3px solid var(--tabs-toolbar-border-colour);
+            border: none;
             padding: 5px 15px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+        }
+        .dd-nav-link {
+            border: 3px solid var(--tabs-toolbar-border-colour);
         }
         .dd-button svg, .dd-button span {
             float: left;
@@ -364,10 +367,13 @@ class Style
             border-left: 3px solid var(--text-heading-border-colour);
         }
         #dd-calendar-month {
+            background-color: var(--box-background-colour);
+            border: 3px solid var(--tabs-toolbar-border-colour);
             font-family: 'heading', Helvetica, sans-serif;
             font-size: 1.6rem;
             margin-top: 20px;
             margin-bottom: 20px;
+            padding: 10px 0px;
         }
         #dd-calendar-month a {
             display: block;
@@ -1393,7 +1399,7 @@ class Style
             display: flex;
             -webkit-flex-wrap: wrap;
             flex-wrap: wrap;
-            gap: 40px;
+            gap: 30px;
             overflow-y: scroll;
             padding-top: 20px;
         }
@@ -1517,6 +1523,12 @@ class Style
 
         .dd-border-none {
             border: 0 !important;
+        }
+        .dd-border-top-none {
+            border-top: 0 !important;
+        }
+        .dd-border-bottom-none {
+            border-bottom: 0 !important;
         }
         ";
     }

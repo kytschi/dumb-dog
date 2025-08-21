@@ -2,8 +2,8 @@
  * Dumb Dog themes
  *
  * @package     DumbDog\Controllers\Themes
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -48,7 +48,7 @@ class Themes extends Content
         ]
     ];
 
-    public function add(string path)
+    public function add(path)
     {
         var html, data = [], status = false, model;
         let html = this->titles->page("Add a theme", "add");
@@ -88,14 +88,14 @@ class Themes extends Content
         let model->name = "";
         let model->is_default = 0;
         let model->id = "";
-        let model->status = "active";
+        let model->status = "live";
         
         let html .= this->render(model);
 
         return html;
     }
 
-    public function edit(string path)
+    public function edit(path)
     {
         var html, model, data = [], status = false;
         
@@ -167,7 +167,7 @@ class Themes extends Content
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;
                 
@@ -197,7 +197,7 @@ class Themes extends Content
                         <div class='dd-col-12'>
                             <div class='dd-box'>
                                 <div class='dd-box-body'>" .
-                                    this->inputs->toggle("Set live", "status", false, (model->status=="active" ? 1 : 0)) . 
+                                    this->inputs->toggle("Live", "status", false, (model->status=="live" ? 1 : 0)) . 
                                     this->inputs->text("Name", "name", "Name the theme", true, model->name) .
                                     this->inputs->text("Folder", "folder", "Where am I located?", true, model->folder) .
                                     this->inputs->toggle("Default", "is_default", false, model->is_default) . 
@@ -227,7 +227,7 @@ class Themes extends Content
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -336,12 +336,12 @@ class Themes extends Content
         return html;
     }
 
-    public function setData(data)
+    public function setData(array data, user_id = null, model = null)
     {
         let data["name"] = _POST["name"];
         let data["folder"] = _POST["folder"];
         let data["is_default"] = isset(_POST["is_default"]) ? 1 : 0;
-        let data["status"] = isset(_POST["status"]) ? "active" : "inactive";
+        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
         let data["annual"] = isset(_POST["annual"]) ? 1 : 0;
         let data["active_from"] = isset(_POST["active_from"]) ? (new Dates())->toSQL(_POST["active_from"], false) : null;
         let data["active_to"] = isset(_POST["active_to"]) ? (new Dates())->toSQL(_POST["active_to"], false) : null;

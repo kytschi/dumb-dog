@@ -2,12 +2,12 @@
  * Dumb Dog page builder
  *
  * @package     DumbDog\Controllers\Content
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
-
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Controller;
@@ -44,7 +44,7 @@ class Content extends Controller
         "template"
     ];
 
-    public required = ["name", "title", "template_id"];
+    public required = ["name", "title"];
 
     public routes = [
         "/pages/add": [
@@ -64,6 +64,16 @@ class Content extends Controller
         ]
     ];
 
+    public query = "";
+    public query_insert = "";
+    public query_update = "";
+    public query_children = "";
+    public query_images = "";
+    public query_old_urls = "";
+    public query_parent = "";
+    public query_stacks = "";
+    public query_list = "";
+
     public function __globals()
     {
         let this->tables = new Tables();
@@ -72,11 +82,152 @@ class Content extends Controller
         let this->files = new Files();
         let this->buttons = new Buttons();
         let this->icons = new Icons();
+
+        let this->query = "
+            SELECT main_page.*,
+                IFNULL(templates.name, 'No template') AS template, 
+                IFNULL(parent_page.name, 'No parent') AS parent 
+            FROM content AS main_page 
+            LEFT JOIN templates ON templates.id=main_page.template_id 
+            LEFT JOIN content AS parent_page ON parent_page.id=main_page.parent_id";
+            
+        let this->query_insert = "
+            INSERT INTO content 
+            (
+                id,
+                status,
+                name,
+                title,
+                sub_title,
+                slogan,
+                url,
+                content,
+                template_id,
+                meta_keywords,
+                meta_author,
+                meta_description,
+                type,
+                tags,
+                featured,
+                parent_id,
+                sort,
+                sitemap_include,
+                public_facing,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by
+            ) 
+            VALUES 
+            (
+                :id,
+                :status,
+                :name,
+                :title,
+                :sub_title,
+                :slogan,
+                :url,
+                :content,                            
+                :template_id,
+                :meta_keywords,
+                :meta_author,
+                :meta_description,
+                :type,
+                :tags,
+                :featured,
+                :parent_id,
+                :sort,
+                :sitemap_include,
+                :public_facing,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by
+            )";
+            
+        let this->query_update = "
+            UPDATE content SET 
+                type=:type,
+                status=:status,
+                name=:name,
+                template_id=:template_id,
+                url=:url,
+                title=:title,
+                sub_title=:sub_title,
+                slogan=:slogan,
+                content=:content,
+                meta_keywords=:meta_keywords,
+                meta_author=:meta_author,
+                meta_description=:meta_description,
+                featured=:featured,
+                sitemap_include=:sitemap_include,
+                public_facing=:public_facing,
+                tags=:tags,
+                parent_id=:parent_id,
+                sort=:sort,
+                updated_by=:updated_by,
+                updated_at=NOW() 
+            WHERE id=:id";
+
+        let this->query_children = "
+            SELECT
+                content.*,
+                templates.file AS template 
+            FROM content 
+            JOIN templates ON templates.id=content.template_id 
+            WHERE content.parent_id=:parent_id AND content.status='live' AND content.deleted_at IS NULL
+            ORDER BY content.created_at DESC, content.name";
+
+        let this->query_images = "
+            SELECT 
+                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
+                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
+            FROM files 
+            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL AND visible=1
+            ORDER BY sort ASC";
+        
+        let this->query_old_urls = "SELECT * FROM old_urls WHERE content_id=:id AND deleted_at IS NULL";
+
+        let this->query_parent = "
+            SELECT
+                content.*,
+                templates.file AS template 
+            FROM content 
+            JOIN templates ON templates.id=content.template_id 
+            WHERE 
+                content.id=:id AND 
+                content.status='live' AND 
+                content.public_facing=1 AND 
+                content.deleted_at IS NULL";
+
+        let this->query_stacks = "
+            SELECT
+                content_stacks.*,
+                templates.file AS template,
+                IF(
+                    files.filename IS NOT NULL, 
+                    CONCAT('" . this->files->folder . "', files.filename),
+                    ''
+                ) AS image,
+                IF(
+                    files.filename IS NOT NULL,
+                    CONCAT('" . this->files->folder . "thumb-', files.filename),
+                    ''
+                ) AS thumbnail 
+            FROM content_stacks 
+            LEFT JOIN templates ON
+                templates.id = content_stacks.template_id AND templates.deleted_at IS NULL 
+            LEFT JOIN files ON
+                files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
+            WHERE 
+                content_id=:id AND 
+                content_stack_id IS NULL
+            ORDER BY sort ASC";
     }
 
-    public function add(string path)
+    public function add(path)
     {
-        var html, data, model, path = "";
+        var html, data, model;
         
         let html = this->titles->page(
             "Create the " . str_replace("-", " ", this->type),
@@ -100,53 +251,7 @@ class Content extends Controller
                     let data = this->setData(data);
 
                     let status = this->database->execute(
-                        "INSERT INTO content 
-                            (id,
-                            status,
-                            name,
-                            title,
-                            sub_title,
-                            slogan,
-                            url,
-                            content,
-                            template_id,
-                            meta_keywords,
-                            meta_author,
-                            meta_description,
-                            type,
-                            tags,
-                            featured,
-                            parent_id,
-                            sort,
-                            sitemap_include,
-                            created_at,
-                            created_by,
-                            updated_at,
-                            updated_by) 
-                        VALUES 
-                            (
-                            :id,
-                            :status,
-                            :name,
-                            :title,
-                            :sub_title,
-                            :slogan,
-                            :url,
-                            :content,                            
-                            :template_id,
-                            :meta_keywords,
-                            :meta_author,
-                            :meta_description,
-                            :type,
-                            :tags,
-                            :featured,
-                            :parent_id,
-                            :sort,
-                            :sitemap_include,
-                            NOW(),
-                            :created_by,
-                            NOW(),
-                            :updated_by)",
+                        this->query_insert,
                         data
                     );
 
@@ -283,12 +388,18 @@ class Content extends Controller
         }
     }
 
-    public function edit(string path)
+    public function deleteStack(path, string id)
+    {
+        this->triggerDelete("content_stacks", path, id);
+    }
+
+    public function edit(path)
     {
         var html = "", model, data = [];
                 
         let data["id"] = this->getPageId(path);
         let data["type"] = this->type;
+
         let model = this->database->get("
             SELECT content.*
             FROM content 
@@ -331,10 +442,17 @@ class Content extends Controller
                 }
             }
 
-            if (isset(_POST["delete_stack"])) {
-                if (!empty(_POST["delete_stack"])) {
+            if (isset(_POST["stack_delete"])) {
+                if (!empty(_POST["stack_delete"])) {
                     let path = path . "?scroll=stack-tab";
-                    this->triggerDelete("content_stacks", path, reset(_POST["delete_stack"]));
+                    this->deleteStack(path, reset(_POST["stack_delete"]));
+                }
+            }
+
+            if (isset(_POST["stack_recover"])) {
+                if (!empty(_POST["stack_recover"])) {
+                    let path = path . "?scroll=stack-tab";
+                    this->recoverStack(path, reset(_POST["stack_recover"]));
                 }
             }
 
@@ -376,27 +494,7 @@ class Content extends Controller
                 }
 
                 let status = this->database->execute(
-                    "UPDATE content SET 
-                        type=:type,
-                        status=:status,
-                        name=:name,
-                        title=:title,
-                        sub_title=:sub_title,
-                        slogan=:slogan,
-                        url=:url,
-                        template_id=:template_id,
-                        content=:content,
-                        meta_keywords=:meta_keywords,
-                        meta_author=:meta_author,
-                        meta_description=:meta_description,
-                        updated_at=NOW(),
-                        updated_by=:updated_by,
-                        tags=:tags,
-                        featured=:featured,
-                        parent_id=:parent_id,
-                        sort=:sort,
-                        sitemap_include=:sitemap_include
-                    WHERE id=:id",
+                    this->query_update,
                     data
                 );
             
@@ -418,35 +516,21 @@ class Content extends Controller
         }
         
         let model->images = this->database->all(
-            "SELECT 
-                *,
-                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "', filename), '') AS image,
-                IF(filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', filename), '') AS thumbnail 
-            FROM files 
-            WHERE resource_id=:resource_id AND resource='content-image' AND deleted_at IS NULL
-            ORDER BY sort ASC",
+            this->query_images,
             [
                 "resource_id": model->id
             ]
         );
 
-        let model->stacks = this->database->all("
-            SELECT
-                content_stacks.*,
-                files.id AS image_id,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "', files.filename), '') AS image,
-                IF(files.filename IS NOT NULL, CONCAT('" . this->files->folder . "thumb-', files.filename), '') AS thumbnail 
-            FROM content_stacks 
-            LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL
-            WHERE content_id=:id AND content_stacks.deleted_at IS NULL AND content_stack_id IS NULL
-            ORDER BY sort ASC",
+        let model->stacks = this->database->all(
+            this->query_stacks,
             [
                 "id": model->id
             ]
         );
 
         let model->old_urls = this->database->all(
-            "SELECT * FROM old_urls WHERE content_id=:id AND deleted_at IS NULL",
+            this->query_old_urls,
             [
                 "id": model->id
             ]
@@ -458,7 +542,7 @@ class Content extends Controller
         return html;
     }
 
-    public function index(string path)
+    public function index(path)
     {
         var html;       
         
@@ -512,6 +596,11 @@ class Content extends Controller
         );
     }
 
+    public function recoverStack(path, string id)
+    {
+        this->triggerRecover("content_stacks", path, id);
+    }
+
     public function render(model, mode = "add")
     {
         var html;
@@ -550,7 +639,7 @@ class Content extends Controller
                                                 true,
                                                 model->url,
                                                 false,
-                                                "If you leave it blank I'll auto-generate a URL for you") .
+                                                "If you leave it blank I'll auto-generate a URL for you") .                                            
                                         "</div>
                                     </div>
                                 </div>
@@ -669,7 +758,7 @@ class Content extends Controller
         return html;
     }
 
-    public function renderList(string path)
+    public function renderList(path)
     {
         var data = [], query;
 
@@ -756,7 +845,7 @@ class Content extends Controller
         if (count(model->stacks)) {
             for key, item in model->stacks {
                 let html .= "
-                <div id='" . this->createSlug(item->name) . "-stack' class='dd-box'>
+                <div id='" . this->createSlug(item->name) . "-stack' class='dd-box" . (item->deleted_at ? " dd-deleted" : "") . "'>
                     <div class='dd-box-title dd-flex'>
                         <div class='dd-col'>" . item->name . "</div>
                         <div class='dd-col-auto'>" .
@@ -766,11 +855,10 @@ class Content extends Controller
                                 "Add to the " . item->name . " stack",
                                 "add"
                             ) .
-                            this->buttons->delete(
-                                item->id,
-                                "delete-stack-" . item->id,
-                                "delete_stack[]",
-                                "Delete the stack"
+                            (
+                                item->deleted_at ?
+                                this->buttons->recover(item->id, "stack-recover-" . item->id, "stack_recover[]", "Recover the stack item") :
+                                this->buttons->delete(item->id, "stack-delete-" . item->id, "stack_delete[]", "Delete the stack item")
                             ) .
                         "</div>
                     </div>
@@ -785,14 +873,14 @@ class Content extends Controller
                         LEFT JOIN files ON files.resource_id = content_stacks.id AND files.deleted_at IS NULL 
                         WHERE content_stack_id='" . item->id . "' AND content_stacks.deleted_at IS NULL
                         ORDER BY sort ASC");
-                    let html .= this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name) .
-                                this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title) .
-                                this->inputs->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title) .
-                                this->inputs->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content) . 
-                                this->inputs->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags) . 
-                                this->inputs->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item) . 
-                                this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort) .
-                                this->stackTemplatesSelect(item->template_id, "stack_template[" . item->id . "]") . 
+                    let html .= this->inputs->text("Name", "stack_name[" . item->id . "]", "The name of the stack", true, item->name, (item->deleted_at ? true : false)) .
+                                this->inputs->text("Title", "stack_title[" . item->id . "]", "The title of the stack", false, item->title, (item->deleted_at ? true : false)) .
+                                this->inputs->text("Sub title", "stack_sub_title[" . item->id . "]", "The sub title for the stack", false, item->sub_title, (item->deleted_at ? true : false)) .
+                                this->inputs->wysiwyg("Content", "stack_content[" . item->id . "]", "The stack content", false, item->content, (item->deleted_at ? true : false)) . 
+                                this->inputs->tags("Tags", "stack_tags[" . item->id . "]", "Tag the content stack", false, item->tags, (item->deleted_at ? true : false)) . 
+                                this->inputs->image("Image", "stack_image[" . item->id . "]", "Upload an image here", false, item, (item->deleted_at ? true : false)) . 
+                                this->inputs->number("Sort", "stack_sort[" . item->id . "]", "Sort the stack item", false, item->sort, (item->deleted_at ? true : false)) .
+                                this->stackTemplatesSelect(item->template_id, "stack_template[" . item->id . "]", (item->deleted_at ? true : false)) . 
                                 "<h3 class='dd-mt-5 dd-mb-0'>Stack items</h3>";
                                 for key_stack, item_stack in item->stacks {
                                     let html .= "
@@ -803,18 +891,18 @@ class Content extends Controller
                                                 this->buttons->delete(
                                                     item_stack->id, 
                                                     "delete-stack-" . item_stack->id,
-                                                    "delete_stack[]",
+                                                    "stack_delete[]",
                                                     "Delete the stack item"
                                                 ) .
                                             "</div>
                                         </div>
                                         <div class='dd-stack-body'>" .
-                                            this->inputs->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name) .
-                                            this->inputs->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title) .
-                                            this->inputs->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title) .
-                                            this->inputs->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content) . 
-                                            this->inputs->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack) . 
-                                            this->inputs->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort) .
+                                            this->inputs->text("Name", "sub_stack_name[" . item_stack->id . "]", "The name of the stack", true, item_stack->name, (item_stack->deleted_at ? true : false)) .
+                                            this->inputs->text("Title", "sub_stack_title[" . item_stack->id . "]", "The title of the stack", false, item_stack->title, (item_stack->deleted_at ? true : false)) .
+                                            this->inputs->text("Sub title", "sub_stack_sub_title[" . item_stack->id . "]", "The sub title for the stack", false, item_stack->sub_title, (item_stack->deleted_at ? true : false)) .
+                                            this->inputs->wysiwyg("Content", "sub_stack_content[" . item_stack->id . "]", "The stack content", false, item_stack->content, (item_stack->deleted_at ? true : false)) . 
+                                            this->inputs->image("Image", "sub_stack_image[" . item_stack->id . "]", "Upload an image here", false, item_stack, (item_stack->deleted_at ? true : false)) . 
+                                            this->inputs->number("Sort", "sub_stack_sort[" . item_stack->id . "]", "Sort the stack item", false, item_stack->sort, (item_stack->deleted_at ? true : false)) .
                                         "</div>
                                     </div>";
                                 }
@@ -845,7 +933,6 @@ class Content extends Controller
                             "back",
                             "Go back to the list"
                         ) .
-                        this->buttons->save() . 
                         this->buttons->generic(
                             this->global_url . "/add",
                             "",
@@ -853,14 +940,15 @@ class Content extends Controller
                             "Create a new " . str_replace("-", " ", this->type)
                         );
         if (mode == "edit") {
-            let html .= this->buttons->view(model->url);
             if (model->deleted_at) {
                 let html .= this->buttons->recover(model->id);
             } else {
                 let html .= this->buttons->delete(model->id);
             }
+            let html .= this->buttons->view(model->url);
         }
-        let html .= "</div>
+        let html .=     this->buttons->save() . 
+                    "</div>
                 </div>
             </li>
             <li class='dd-nav-item' role='presentation'>
@@ -995,58 +1083,70 @@ class Content extends Controller
         return html;
     }
 
-    public function setContentData(array data)
+    public function setContentData(array data, user_id = null, model = null)
     {
-        var date;
-        let date = new Dates();
+        var result;
 
-        let data["status"] = isset(_POST["status"]) ? "live" : "offline";
+        let data["status"] = isset(_POST["status"]) ? "live" : (model ? model->status : "offline");
+
+        let data["public_facing"] = 0;
+        if (isset(_POST["public_facing"]) || data["status"] == "live") {
+            let data["public_facing"] = 1;
+        }
+
         let data["name"] = _POST["name"];
-        let data["title"] = _POST["title"];
-        let data["sub_title"] = _POST["sub_title"];
-        let data["slogan"] = _POST["slogan"];
 
-        if (empty(_POST["url"])) {
-            let data["url"] = "/" . this->createSlug(!empty(_POST["title"]) ? _POST["title"] : _POST["name"]);
+        if (!isset(_POST["template_id"])) {
+            if (!empty(model)) {
+                let data["template_id"] = model->template_id;
+            } else {
+                let result = this->database->get("SELECT id FROM templates WHERE is_default=1");
+                if (empty(result)) {
+                    throw new Exception(
+                        "No default template found, either set a template_id or set a default template"
+                    );
+                }
+                let data["template_id"] = result->id;
+            }
+        } else {
+            let data["template_id"] = _POST["template_id"];
+        }
+
+        if (!isset(_POST["url"]) || empty(_POST["url"])) {
+            if (!empty(model) && !empty(model->url)) {
+                let data["url"] = model->url;
+                
+            } else {
+                let data["url"] = 
+                    "/" . this->createSlug(isset(_POST["title"]) ? _POST["title"] : _POST["name"]);
+            }
         } else {
             let data["url"] = this->cleanUrl(_POST["url"]);
         }
 
         this->validUrl(data);
 
-        let data["content"] = this->cleanContent(_POST["content"]);
-        let data["template_id"] = _POST["template_id"];
-        let data["meta_keywords"] = _POST["meta_keywords"];
-        let data["meta_author"] = _POST["meta_author"];
-        let data["meta_description"] = this->cleanContent(_POST["meta_description"]);
-        let data["featured"] = isset(_POST["featured"]) ? 1 : 0;
-        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : 0;
-        let data["tags"] = this->inputs->isTagify(_POST["tags"]);
-        let data["updated_by"] = this->database->getUserId();
-
+        let data["title"] = isset(_POST["title"]) ? _POST["title"] : (model ? model->title : null);
+        let data["sub_title"] = isset(_POST["sub_title"]) ? _POST["sub_title"] : (model ? model->sub_title : null);
+        let data["slogan"] = isset(_POST["slogan"]) ? _POST["slogan"] : (model ? model->slogan : null);
+        let data["content"] = (isset(_POST["content"]) ? this->cleanContent(_POST["content"]) : (model ? model->content : null)); 
+        let data["meta_keywords"] = (isset(_POST["meta_keywords"]) ?_POST["meta_keywords"] : (model ? model->meta_keywords : null));
+        let data["meta_author"] = (isset(_POST["meta_author"]) ? _POST["meta_author"] : (model ? model->meta_author : null));
+        let data["meta_description"] = (isset(_POST["meta_description"]) ? this->cleanContent(_POST["meta_description"]) : (model ? model->meta_description : null));
+        
+        let data["featured"] = isset(_POST["featured"]) ? 1 : (model ? model->featured : 0);
+        let data["sitemap_include"] = isset(_POST["sitemap_include"]) ? 1 : (model ? model->sitemap_include : 0);
+        let data["tags"] = (isset(_POST["tags"]) ? this->inputs->isTagify(_POST["tags"]) : (model ? model->tags : null));
+        let data["parent_id"] = isset(_POST["parent_id"]) ? _POST["parent_id"] : (model ? model->parent_id : null);
+        let data["sort"] = isset(_POST["sort"]) ? intval(_POST["sort"]) : (model ? model->sort : 0);
+        let data["updated_by"] = (user_id ? user_id : this->database->getUserId());
+        
         return data;
     }
 
-    private function setData(array data)
+    public function setData(array data, user_id = null, model = null)
     {   
-        let data = this->setContentData(data);
-
-        /*let data["event_on"] = null;                    
-        let data["event_length"] = isset(_POST["event_length"]) ? _POST["event_length"] : null;
-        let data["author"] = isset(_POST["author"]) ? _POST["author"] : null;
-        let data["company_name"] = isset(_POST["company_name"]) ? _POST["company_name"] : null;*/
-        let data["parent_id"] = _POST["parent_id"];
-        let data["sort"] = intval(_POST["sort"]);
-/*
-        if (isset(_POST["event_on"])) {
-            if (!isset(_POST["event_time"])) {
-                let _POST["event_time"] = "00:00";
-            } elseif (empty(_POST["event_time"])) {
-                let _POST["event_time"] = "00:00";
-            }
-            let data["event_on"] = this->database->toDate(_POST["event_on"] . " " . _POST["event_time"] . ":00");
-        }*/
-
+        let data = this->setContentData(data, user_id, model);
         return data;
     }
 
@@ -1135,7 +1235,7 @@ class Content extends Controller
         return html;
     }
 
-    public function stackTemplatesSelect(selected = null, string id = "template_id")
+    public function stackTemplatesSelect(selected = null, string id = "template_id", bool disabled = false)
     {
         var select = [], data;
         let data = this->database->all("
@@ -1162,7 +1262,8 @@ class Content extends Controller
             "The stack's template",
             select,
             true,
-            selected
+            selected,
+            disabled
         );
     }
 
@@ -1231,7 +1332,7 @@ class Content extends Controller
         }
     }
 
-    public function updateStacks()
+    public function updateStacks(model = null, user_id = null)
     {
         if (!isset(_POST["stack_name"])) {
             return;
@@ -1251,7 +1352,9 @@ class Content extends Controller
             ];
 
             if (empty(val)) {
-                throw new ValidationException("Missing name for stack");
+                throw new ValidationException(
+                    "Missing name for stack"
+                );
             }
 
             let data["name"] = val;
@@ -1382,7 +1485,7 @@ class Content extends Controller
                 "id": data["id"]
             ]
         )) {
-            throw new Exception("URL already taken by another piece of content");
+            throw new Exception("URL, " . data["url"] . ",  already taken by another piece of content");
         }
     }
 }

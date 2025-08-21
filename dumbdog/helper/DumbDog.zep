@@ -2,8 +2,8 @@
  * Dumb Dog helper
  *
  * @package     DumbDog\Helper\DumbDog
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 
@@ -301,7 +301,7 @@ class DumbDog
             countries.name,
             countries.is_default 
         FROM countries";
-        let where = " WHERE countries.deleted_at IS NULL AND countries.status = 'active'";
+        let where = " WHERE countries.deleted_at IS NULL AND countries.status = 'live'";
 
         if (count(filters)) {
             var key, value;
@@ -337,7 +337,7 @@ class DumbDog
             currencies.is_default,
             currencies.symbol
         FROM currencies";
-        let where = " WHERE currencies.deleted_at IS NULL AND currencies.status = 'active'";
+        let where = " WHERE currencies.deleted_at IS NULL AND currencies.status = 'live'";
 
         if (count(filters)) {
             var key, value;

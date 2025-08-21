@@ -2,18 +2,19 @@
  * Dumb Dog controller helper
  *
  * @package     DumbDog\Controllers\Controller
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
- 
 */
+
 namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Database;
 use DumbDog\Controllers\Notes;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
+use DumbDog\Exceptions\SaveException;
 use DumbDog\Exceptions\ValidationException;
 use DumbDog\Ui\Gfx\Titles;
 
@@ -26,6 +27,12 @@ class Controller
 
     public global_url = "";
     public routes = [];
+    public required = ["name"];
+
+    public valid_dir = [
+        "ASC",
+        "DESC"
+    ];
 
     public function __construct()
     {
@@ -81,6 +88,24 @@ class Controller
         );
     }
 
+    public function clearDefault(string table, string user_id)
+    {
+        var status = false;
+        let status = this->database->execute(
+            "UPDATE " . table . " SET `is_default`=0, updated_at=NOW(), updated_by=:updated_by",
+            [
+                "updated_by": user_id
+            ]
+        );
+
+        if (!is_bool(status)) {
+            throw new SaveException(
+                "Failed to update the default on " . str_replace("_", " ", table),
+                400
+            );
+        }
+    }
+
     public function consoleLogError(message)
     {
         return "<script type='text/javascript'>
@@ -96,8 +121,17 @@ class Controller
         return str_replace(
             [" "],
             "-",
-            str_replace([",", "=", "&", "?", "#", ":", ";", "/", "//", "\\", "\\\\", "’"], "", strtolower(value))
+            str_replace(
+                [",", "=", "&", "?", "#", ":", ";", "/", "//", "\\", "\\\\", "’"],
+                "",
+                strtolower(value)
+            )
         );
+    }
+
+    public function createTags(tags)
+    {
+        return tags;
     }
 
     public function deletedState(string message)
@@ -114,7 +148,7 @@ class Controller
         return null;
     }
 
-    public function getPageId(string path)
+    public function getPageId(path)
     {
         var splits;
 
@@ -185,7 +219,7 @@ class Controller
         }
     }
 
-    public function tags(string path, string table, string type = "")
+    public function tags(path, string table, string type = "")
     {
         var database, data, html = "";
 
@@ -243,13 +277,13 @@ class Controller
         return data;
     }
 
-    public function triggerDelete(string table, string path, string id = "")
+    public function triggerDelete(string table, path, string id = "", user_id = "", redirect = true)
     {
         var data = [], status = false;
 
         if (this->cfg->save_mode == true) {
             let data["id"] = id ? id : this->getPageId(path);
-            let data["updated_by"] = this->getUserId();
+            let data["updated_by"] = user_id ? user_id : this->getUserId();
             let status = this->database->execute("
                 UPDATE " . table . " 
                 SET 
@@ -266,7 +300,7 @@ class Controller
 
         if (!is_bool(status)) {
             throw new Exception("Failed to delete the entry");
-        } else {
+        } elseif (redirect) {
             if (strpos(path, "?") !== false) {
                 let path = path . "&deleted=true";
             } else {
@@ -274,15 +308,17 @@ class Controller
             }
             this->redirect(path);
         }
+
+        return status;
     }
 
-    public function triggerRecover(string table, string path, string id = "")
+    public function triggerRecover(string table, path, string id = "", user_id = "", redirect = true)
     {
         var data = [], status = false;
 
         if (this->cfg->save_mode == true) {
             let data["id"] = id ? id : this->getPageId(path);
-            let data["updated_by"] = this->getUserId();
+            let data["updated_by"] = user_id ? user_id : this->getUserId();
             let status = this->database->execute("
                 UPDATE " . table . " 
                 SET 
@@ -299,7 +335,7 @@ class Controller
 
         if (!is_bool(status)) {
             throw new Exception("Failed to recover the entry");
-        } else {
+        } elseif(redirect) {
             if (strpos(path, "?") !== false) {
                 let path = path . "&recovered=true";
             } else {
@@ -307,6 +343,8 @@ class Controller
             }
             this->redirect(path);
         }
+
+        return status;
     }
 
     public function validate(array data, array checks)

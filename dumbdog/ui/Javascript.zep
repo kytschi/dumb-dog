@@ -2,8 +2,8 @@
  * Dumb Dog javascript builder
  *
  * @package     DumbDog\Ui\Javascript
- * @author 		Mike Welsh
- * @copyright   2024 Mike Welsh
+ * @author 		Mike Welsh (hello@kytschi.com)
+ * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
 */
@@ -132,6 +132,20 @@ class Javascript
                     }
                     $($(target).data('inline-popup-close')).hide();
                 });
+
+                $('#dd-calendar-month select').on('change', function() {
+                    $('#dd-calendar-month select option:selected').each(function() {
+                        if ($(this).val() != '00-00') {
+                            var date = new Date($(this).val());
+                            var month = date.getMonth() + 1;
+                            if (month < 10) {
+                                month = '0' + month;
+                            }
+                            window.location.href=window.location.href.split('?')[0] + '?date=' + date.getFullYear() + '-' + month
+                        }
+                    });
+                });
+                
             });
             </script>";
     }
