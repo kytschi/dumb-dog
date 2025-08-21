@@ -59,11 +59,15 @@ class Buttons
     }
 
     public function delete(
-        string entry,
+        entry,
         string id = "delete",
         string name = "delete",
         string title = "Delete the entry"
     ) {
+        if (empty(entry)) {
+            return "";
+        }
+
         return "<button
             type='button'
             class='dd-button'
@@ -138,8 +142,16 @@ class Buttons
         "</a>";
     }
 
-    public function recover(string entry, string id = "recover", string name = "recover", string title = "Recover the entry")
-    {
+    public function recover(
+        entry, 
+        string id = "recover", 
+        string name = "recover", 
+        string title = "Recover the entry"
+    ) {
+        if (empty(entry)) {
+            return "";
+        }
+
         return "<button
             type='button'
             class='dd-button'

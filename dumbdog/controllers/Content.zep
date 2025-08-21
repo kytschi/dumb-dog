@@ -399,6 +399,7 @@ class Content extends Controller
                 
         let data["id"] = this->getPageId(path);
         let data["type"] = this->type;
+
         let model = this->database->get("
             SELECT content.*
             FROM content 

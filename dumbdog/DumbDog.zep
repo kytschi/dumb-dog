@@ -629,7 +629,8 @@ class DumbDog
         if (!check) {
             echo "Running Dumb Dog migrations\n";
         }
-        let migration = shell_exec("ls *.sql");
+
+        let migration = shell_exec("ls ../migrations/*.sql");
         if (empty(migration)) {
             return;
         }

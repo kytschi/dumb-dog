@@ -69,6 +69,74 @@ class Messages extends Content
         ]
     ];
 
+    public query_read;
+    public query_unread;
+
+    public function __globals()
+    {
+        parent::__globals();
+
+        let this->query = "
+            SELECT
+                contacts.*,
+                messages.* 
+            FROM messages 
+            JOIN contacts ON contacts.id = messages.contact_id 
+            WHERE messages.id=:id";
+
+        let this->query_list = "
+            SELECT
+                contacts.*,
+                messages.*
+            FROM messages
+            JOIN contacts ON contacts.id = messages.contact_id 
+            WHERE messages.id IS NOT NULL";
+        
+        let this->query_insert = "
+            INSERT INTO messages 
+            (
+                id,
+                contact_id,
+                subject,
+                message,
+                type,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by
+            ) 
+            VALUES 
+            (
+                :id,
+                :contact_id,
+                :subject,
+                :message,
+                :type,
+                NOW(),
+                :created_by,
+                NOW(),
+                :updated_by
+            )";
+
+        let this->query_read = "
+            UPDATE
+                messages
+            SET 
+                status='read',
+                updated_at=NOW(),
+                updated_by=:updated_by 
+            WHERE id=:id";
+        
+        let this->query_unread = "
+            UPDATE
+                messages
+            SET 
+                status='unread',
+                updated_at=NOW(),
+                updated_by=:updated_by 
+            WHERE id=:id";
+    }
+
     public function convertToGroupsLead(path)
     {
         this->convertToLead(path);
@@ -142,12 +210,7 @@ class Messages extends Content
         
         let data["id"] = this->getPageId(path);
         let model = this->database->get(
-            "SELECT
-                contacts.*,
-                messages.* 
-            FROM messages 
-            JOIN contacts ON contacts.id = messages.contact_id 
-            WHERE messages.id=:id",
+            this->query,
             data
         );
 
@@ -195,10 +258,24 @@ class Messages extends Content
                                         <label>From</label>
                                         <span class='dd-form-control'>" .
                                             model->full_name .
-                                            (model->company ? " @" . model->company : "") . 
-                                            "&nbsp;&lt;<a href='mailto:" . model->email . "'>" . model->email . "</a>" .
-                                            (model->phone ? " | <a href='tel:" . model->phone . "'>". model->phone . "</a>" : "") . 
-                                            "&gt;" . 
+                                        "</span>
+                                    </div>
+                                    <div class='dd-input-group'>
+                                        <label>Email</label>
+                                        <span class='dd-form-control'>" .
+                                            "&nbsp;&lt;<a href='mailto:" . model->email . "'>" . model->email . "</a>&gt;" . 
+                                        "</span>
+                                    </div>
+                                    <div class='dd-input-group'>
+                                        <label>Phone</label>
+                                        <span class='dd-form-control'>" .
+                                            (model->phone ? " | <a href='tel:" . model->phone . "'>". model->phone . "</a>" : "N/A") . 
+                                        "</span>
+                                    </div>
+                                    <div class='dd-input-group'>
+                                        <label>Company</label>
+                                        <span class='dd-form-control'>" .
+                                            (model->company ? " @" . model->company : "N/A") . 
                                         "</span>
                                     </div>
                                     <div class='dd-input-group'>
@@ -237,13 +314,7 @@ class Messages extends Content
                 try {
                     let data["updated_by"] = this->database->getUserId();
                     let status = this->database->execute(
-                        "UPDATE
-                            messages
-                        SET 
-                            status='read',
-                            updated_at=NOW(),
-                            updated_by=:updated_by 
-                        WHERE id=:id",
+                        this->query_read,
                         data
                     );
                     
@@ -284,13 +355,7 @@ class Messages extends Content
     {
         var data = [], query;
 
-        let query = "
-            SELECT
-                contacts.*,
-                messages.*
-            FROM messages
-            JOIN contacts ON contacts.id = messages.contact_id 
-            WHERE messages.id IS NOT NULL";
+        let query = this->query_list;
         if (isset(_POST["q"])) {
             let query .= " AND messages.subject LIKE :query";
             let data["query"] = "%" . _POST["q"] . "%";
@@ -440,37 +505,16 @@ class Messages extends Content
         }
 
         try {
+            let save = this->setData(data);
             let save["contact_id"] = (new Contacts())->save(data);
-            let save["subject"] = data["subject"];
-            let save["message"] = data["message"];
-            let save["type"] = data["type"];
             let save["created_by"] = this->database->getUserId();
-            let save["updated_by"] = this->database->getUserId();
+            let save["id"] =  this->database->uuid();
 
             let save = this->database->encrypt(this->encrypt, save);
 
             let status = this->database->execute(
-                "INSERT INTO messages 
-                    (id,
-                    contact_id,
-                    subject,
-                    message,
-                    type,
-                    created_at,
-                    created_by,
-                    updated_at,
-                    updated_by) 
-                VALUES 
-                    (UUID(),
-                    :contact_id,
-                    :subject,
-                    :message,
-                    :type,
-                    NOW(),
-                    :created_by,
-                    NOW(),
-                    :updated_by)",
-                    save
+                this->query_insert,
+                save
             );
 
             if (!is_bool(status)) {
@@ -481,5 +525,16 @@ class Messages extends Content
         } catch \Exception, err {
             throw err;
         }
+    }
+
+    public function setData(array data, user_id = null, model = null)
+    {
+        let data["subject"] = isset(_POST["subject"]) ? _POST["subject"] : data["subject"];
+        let data["message"] = isset(_POST["message"]) ? _POST["message"] : data["message"];
+        let data["type"] = isset(_POST["type"]) ? _POST["type"] : data["type"];
+
+        let data["updated_by"] = user_id ? user_id : this->database->getUserId();
+
+        return data;
     }
 }
