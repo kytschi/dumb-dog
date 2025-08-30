@@ -22,7 +22,6 @@ class Controller
 {   
     protected cfg;
     protected libs;
-    //protected notes;
     public database;
 
     public global_url = "";
@@ -40,8 +39,6 @@ class Controller
         let this->libs = constant("LIBS");
         let this->database = new Database();
         let this->global_url = this->cfg->dumb_dog_url . this->global_url;
-
-        //let this->notes = new Notes();
 
         this->__globals();
     }

@@ -153,8 +153,6 @@ class Leads extends Contacts
                         let data["contact_id"] = contact_id;
                         
                         let data = this->setLeadData(data, this->database->getUserId());
-
-                        var_dump(data);
                     
                         let status = this->database->execute(
                             this->query_insert,
