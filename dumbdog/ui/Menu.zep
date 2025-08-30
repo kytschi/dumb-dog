@@ -6,8 +6,8 @@
  * @copyright   2025 Mike Welsh
  * @version     0.0.1
  *
- 
 */
+
 namespace DumbDog\Ui;
 
 use DumbDog\Controllers\Controller;
@@ -16,10 +16,12 @@ use DumbDog\Ui\Gfx\Icons;
 class Menu
 {
     protected cfg;
+    protected icons;
 
     public function __construct()
     {
         let this->cfg = constant("CFG");
+        let this->icons = new Icons();
     }
 
     public function build()
@@ -64,15 +66,9 @@ class Menu
                             placeholder='Search...'>
                     </div>
                     
-                    <a>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                            <path d='M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901'/>
-                        </svg>
-                    </a>
-                    <a href='" . this->cfg->dumb_dog_url . "/messages'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                            <path d='M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z'/>
-                        </svg>";
+                    <a>" . this->icons->dashboard() . "</a>
+                    <a href='" . this->cfg->dumb_dog_url . "/messages'>"
+                        . this->icons->messages();
         let total = controller->database->get(
             "SELECT 
                 count(id) AS total 
@@ -84,10 +80,21 @@ class Menu
             echo "<span>" . total->total . "</span>";
         }
         echo "      </a>
+                    <a href='" . this->cfg->dumb_dog_url . "/notes'>
+                    " . this->icons->notes();
+        let total = controller->database->get(
+            "SELECT count(id) AS total FROM notes 
+            WHERE user_id=:user_id AND resource_id IS NULL AND deleted_at IS NULL",
+            [
+                "user_id": controller->getUserId()
+            ]
+        );
+        if (total->total) {
+            echo "<span>" . total->total . "</span>";
+        }
+        echo "      </a>
                     <a href='" . this->cfg->dumb_dog_url . "/appointments'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'>
-                            <path d='M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M9.5 7h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5m3 0h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5M2 10.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5'/>
-                        </svg>";
+                        " . this->icons->appointments();
         let total = controller->database->get(
             "SELECT 
                 count(id) AS total
@@ -116,10 +123,9 @@ class Menu
 
     public function quickmenu()
     {
-        var controller, icons, total, indicator = false;
+        var controller, total, indicator = false;
 
         let controller = new Controller();
-        let icons = new Icons();
     
         echo "<div id='dd-quick-menu' style='display: none;'>
             <div class='dd-container'>
@@ -136,14 +142,14 @@ class Menu
                     </div>
                     <div class='dd-col-auto'>
                         <button type='button' onclick='showQuickMenu()' class='dd-button-blank'>" .
-                            icons->cancel() .
+                            this->icons->cancel() .
                         "</button>
                     </div>
                 </div>
                 <div id='dd-apps'>
                     <a href='" . this->cfg->dumb_dog_url . "' title='Go to the dashboard' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->dashboard() .
+                            this->icons->dashboard() .
                             "<label>Dashboard</label>
                         </div>
                     </a>";
@@ -158,7 +164,7 @@ class Menu
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/messages' title='Manage the messages' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->messages() .
+                            this->icons->messages() .
                             "<label>Messages</label>" . 
                             (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
                         "</div>
@@ -181,47 +187,68 @@ class Menu
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/appointments' title='Go to the appointments' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->appointments() .
+                            this->icons->appointments() .
                             "<label>Appointments</label>" . 
                             (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
                         "</div>
                     </a>";
                 }
+                let total = controller->database->get(
+                    "SELECT count(id) AS total FROM notes 
+                    WHERE user_id=:user_id AND resource_id IS NULL AND deleted_at IS NULL",
+                    [
+                        "user_id": controller->getUserId()
+                    ]
+                );
+                if (total) {
+                    let total = total->total;
+                    if (total) {
+                        let indicator = true;
+                    }
+                }
+                echo "
+                <a href='" . this->cfg->dumb_dog_url . "/notes' title='Go to my notes' class='dd-box'>
+                    <div class='dd-box-body'>" . 
+                        this->icons->notes() .
+                        "<label>Notes</label>" . 
+                        (total ? "<span class='dd-icon-indicator'>" . total . "</span>" : "") .
+                    "</div>
+                </a>";
                 if (this->cfg->apps->cms) {
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/pages' title='Managing the pages' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->pages() .
+                            this->icons->pages() .
                             "<label>Pages</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/blog-posts' title='Managing the blog' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->blog() .
+                            this->icons->blog() .
                             "<label>Blog</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/menus' title='Managing the menus' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->menus() .
+                            this->icons->menus() .
                             "<label>Menus</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/content-stacks' title='Managing the content stacks' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->contentStacks() .
+                            this->icons->contentStacks() .
                             "<label>Content stacks</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/socials' title='Managing the social media links' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->socialmedia() .
+                            this->icons->socialmedia() .
                             "<label>Social media</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/reviews' title='Managing the reviews' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->reviews() .
+                            this->icons->reviews() .
                             "<label>Reviews</label>
                         </div>
                     </a>";
@@ -230,25 +257,25 @@ class Menu
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/products' title='Managing the products' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->products() .
+                            this->icons->products() .
                             "<label>Products</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/currencies' title='Manage the currencies' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->currencies() .
+                            this->icons->currencies() .
                             "<label>Currencies</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/taxes' title='Manage the taxes' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->taxes() .
+                            this->icons->taxes() .
                             "<label>Taxes</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/payment-gateways' title='Manage the payment gateways' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->paymentGateways() .
+                            this->icons->paymentGateways() .
                             "<label>Payment gateways</label>
                         </div>
                     </a>";
@@ -257,7 +284,7 @@ class Menu
                     echo "
                     <a href='" . this->cfg->dumb_dog_url . "/leads' title='Manage the leads' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->leads() .
+                            this->icons->leads() .
                             "<label>Leads</label>
                         </div>
                     </a>";
@@ -265,25 +292,25 @@ class Menu
                 echo "
                     <a href='" . this->cfg->dumb_dog_url . "/api-apps' title='Go to the API apps' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->apiapps() .
+                            this->icons->apiapps() .
                             "<label>API Apps</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/settings' title='Site wide settings' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->settings() .
+                            this->icons->settings() .
                             "<label>Settings</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/users' title='System users' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->users() .
+                            this->icons->users() .
                             "<label>Users</label>
                         </div>
                     </a>
                     <a href='" . this->cfg->dumb_dog_url . "/give-up' title='Log me out' class='dd-box'>
                         <div class='dd-box-body'>" . 
-                            icons->logout() .
+                            this->icons->logout() .
                             "<label>Logout</label>
                         </div>
                     </a>
@@ -292,7 +319,7 @@ class Menu
         </div>
         <div id='dd-quick-menu-button' onclick='showQuickMenu()'>
             <div class='dd-round dd-icon-dumbdog'>" .
-                icons->dumbdog() .
+                this->icons->dumbdog() .
                 (indicator ? "<span class='dd-icon-indicator'></span>" : "") .
             "</div>
         </div>";

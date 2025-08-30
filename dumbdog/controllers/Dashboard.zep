@@ -51,6 +51,23 @@ class Dashboard extends Controller
                 title='Messages'>" .
                 icons->messages() .
                 (model ? "<span class='dd-icon-indicator'>" . model . "</span>" : "") .
+            "</a>";
+
+        let model = this->database->get(
+            "SELECT count(id) AS total FROM notes WHERE user_id=:user_id AND deleted_at IS NULL",
+            [
+                "user_id": this->database->getUserId()
+            ]
+        );
+        let model = model->total;
+
+        let html .= "
+            <a 
+                href='" . this->cfg->dumb_dog_url  . "/notes' 
+                class='dd-link dd-round'
+                title='Notes'>" .
+                icons->notes() .
+                (model ? "<span class='dd-icon-indicator'>" . model . "</span>" : "") .
             "</a>
         </div>";
 

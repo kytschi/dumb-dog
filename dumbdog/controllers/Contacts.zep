@@ -74,7 +74,10 @@ class Contacts extends Content
             );
 
             if (!is_bool(status)) {
-                throw new SaveException("Failed to save the contact", status);
+                throw new SaveException(
+                    "Failed to save the contact",
+                    status
+                );
             }
 
             return data["id"];

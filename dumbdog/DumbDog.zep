@@ -29,6 +29,7 @@ use DumbDog\Controllers\Groups;
 use DumbDog\Controllers\Leads;
 use DumbDog\Controllers\Menus;
 use DumbDog\Controllers\Messages;
+use DumbDog\Controllers\Notes;
 use DumbDog\Controllers\PaymentGateways;
 use DumbDog\Controllers\Products;
 use DumbDog\Controllers\ProductCategories;
@@ -193,6 +194,7 @@ class DumbDog
             "Leads": new Leads(),
             "Menus": new Menus(),
             "Messages": new Messages(),
+            "Notes": new Notes(),
             "Pages": new Content(),
             "PageCategories": new ContentCategories(),
             "PaymentGateways": new PaymentGateways(),

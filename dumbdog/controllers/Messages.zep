@@ -25,11 +25,16 @@ class Messages extends Content
         "first_name",
         "last_name",
         "email",
-        "phone",
-        "website",
-        "position"
+        "phone"
     ];
-    public encrypt = ["subject", "message"];
+    public encrypt = [
+        "subject",
+        "message",
+        "first_name",
+        "last_name",
+        "email",
+        "phone"];
+
     public global_url = "/messages";
     public list = [
         "created_at|date",

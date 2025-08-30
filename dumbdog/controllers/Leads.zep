@@ -12,6 +12,7 @@ namespace DumbDog\Controllers;
 
 use DumbDog\Controllers\Contacts;
 use DumbDog\Controllers\Messages;
+use DumbDog\Controllers\Notes;
 use DumbDog\Exceptions\Exception;
 use DumbDog\Exceptions\NotFoundException;
 use DumbDog\Exceptions\SaveException;
@@ -24,8 +25,8 @@ class Leads extends Contacts
     public list = [
         "icon|ranking",
         "full_name|with_tags",
-        "email|decrypt",
-        "phone|decrypt",
+        "email",
+        "phone",
         "owner"
     ];
 
@@ -131,7 +132,7 @@ class Leads extends Contacts
 
     public function add(path)
     {
-        var html, data, status = false;
+        var html, data, status = false, contact_id, err;
         
         let html = this->titles->page("Create a lead", "leads");
 
@@ -143,36 +144,51 @@ class Leads extends Contacts
                     let html .= this->missingRequired();
                 } else {
                     let data["id"] = this->database->uuid();
-                    let data["user_id"] = this->database->getUserId();
+                    let data["created_by"] = this->database->getUserId();
 
-                    let data["contact_id"] = this->saveContact(this->setData(data));
+                    try {
+                        let contact_id = this->saveContact(this->setData(data));
 
-                    let data = this->setData(data);
+                        let data["id"] = this->database->uuid();
+                        let data["contact_id"] = contact_id;
+                        
+                        let data = this->setLeadData(data, this->database->getUserId());
+
+                        var_dump(data);
                     
-                    let status = this->database->execute(
-                        this->query_insert,
-                        data
-                    );
+                        let status = this->database->execute(
+                            this->query_insert,
+                            data
+                        );
 
-                    if (!is_bool(status)) {
-                        let html .= this->saveFailed("Failed to save the menu");
-                        let html .= this->consoleLogError(status);
-                    } else {
-                        this->redirect(this->global_url . "?saved=true");
+                        if (!is_bool(status)) {
+                            let html .= this->saveFailed("Failed to save the lead");
+                            let html .= this->consoleLogError(status);
+                        } else {
+                            this->redirect(this->global_url . "?saved=true");
+                        }
+                    } catch Exception, err {
+                        throw new SaveException(
+                            "Failed to save the lead",
+                            err->getCode(),
+                            err->getMessage()
+                        );
                     }
                 }
             }
         }
 
         if (isset(_GET["saved"])) {
-            let html .= this->saveSuccess("Menu has been saved");
+            let html .= this->saveSuccess("Lead has been saved");
         }
 
         var model;
         let model = new \stdClass();
         let model->deleted_at = null;
         let model->ranking = "ok";
-        let model->user_id= "";
+        let model->user_id = "";
+        let model->status = "live";
+        let model->first_name = "";
 
         let html .= this->render(model);
 
@@ -239,7 +255,9 @@ class Leads extends Contacts
 
     public function edit(path)
     {
-        var html, model, data = [], err, status = false;
+        var html, model, data = [], err, status = false, notes;
+
+        let notes = new Notes();
 
         let data["id"] = this->getPageId(path);
         let model = this->database->get(
@@ -284,7 +302,7 @@ class Leads extends Contacts
             if (!this->validate(_POST, this->required)) {
                 let html .= this->missingRequired();
             } else {
-                this->notes->actions(model->id);
+                notes->actions(model->id);
 
                 this->updateContact(
                     [
@@ -316,7 +334,7 @@ class Leads extends Contacts
                 }
 
                 if (!is_bool(status)) {
-                    let html .= this->saveFailed("Failed to save the menu");
+                    let html .= this->saveFailed("Failed to save the lead");
                     let html .= this->consoleLogError(status);
                 } else {
                     try {
@@ -338,7 +356,9 @@ class Leads extends Contacts
 
     public function render(model, mode = "add")
     {
-        var html;
+        var html, notes;
+
+        let notes = new Notes();
 
         let html = "
         <form method='post' enctype='multipart/form-data'>";
@@ -457,24 +477,53 @@ class Leads extends Contacts
                                 <div class='dd-box-body'>
                                     <div class='dd-row'>
                                     <div class='dd-col-12'>" . 
-                                            this->inputs->toggle("Live", "status", false, (model->status=="live" ? 1 : 0)) . 
+                                            this->inputs->toggle(
+                                                "Live",
+                                                "status",
+                                                false,
+                                                (model->status == "live" ? 1 : 0)
+                                            ) . 
                                         "</div>
                                         <div class='dd-col-12'>" . 
                                             this->userSelect(model->user_id) .
                                         "</div>
                                         <div class='dd-col-6'>" .
-                                            this->inputs->text("First name", "first_name", "Set their first name", true, model->first_name) .
+                                            this->inputs->text(
+                                                "First name",
+                                                "first_name",
+                                                "Set their first name",
+                                                true,
+                                                model->first_name
+                                            ) .
                                         "</div>
                                         <div class='dd-col-6'>" .
-                                            this->inputs->text("Last name", "last_name", "Set their last name", false, model->last_name) .
+                                            this->inputs->text(
+                                                "Last name",
+                                                "last_name",
+                                                "Set their last name",
+                                                false,
+                                                model->last_name
+                                            ) .
                                         "</div>
                                     </div> 
                                     <div class='dd-row'>
                                         <div class='dd-col-6'>" .
-                                            this->inputs->text("Email", "email", "Set their email", false, model->email) .
+                                            this->inputs->text(
+                                                "Email",
+                                                "email",
+                                                "Set their email",
+                                                false,
+                                                model->email
+                                            ) .
                                         "</div>
                                         <div class='dd-col-6'>" .
-                                            this->inputs->text("Phone", "phone", "Set their phone", false, model->phone) .
+                                            this->inputs->text(
+                                                "Phone",
+                                                "phone",
+                                                "Set their phone",
+                                                false,
+                                                model->phone
+                                            ) .
                                         "</div>
                                     </div> 
                                     <div class='dd-row'>
@@ -489,11 +538,29 @@ class Leads extends Contacts
                                             ) .
                                         "</div>
                                         <div class='dd-col-6'>" .
-                                            this->inputs->text("Position", "position", "What is their position?", false, model->position) .
+                                            this->inputs->text(
+                                                "Position",
+                                                "position",
+                                                "What is their position?",
+                                                false,
+                                                model->position
+                                            ) .
                                         "</div>
                                     </div>" . 
-                                    this->inputs->text("Website", "website", "Do they have a website?", false, model->website) .
-                                    this->inputs->tags("Tags", "tags", "Tag the lead", false, model->tags) . 
+                                    this->inputs->text(
+                                        "Website",
+                                        "website",
+                                        "Do they have a website?",
+                                        false,
+                                        model->website
+                                    ) .
+                                    this->inputs->tags(
+                                        "Tags",
+                                        "tags",
+                                        "Tag the lead",
+                                        false,
+                                        model->tags
+                                    ) . 
                                 "</div>
                             </div>
                         </div>
@@ -501,12 +568,12 @@ class Leads extends Contacts
 
         if (mode == "edit") {
             let html .= this->renderMessages(model->id);
-            let html .= this->notes->render(model->id);
+            let html .= notes->render(model->id, null, "add");
         }
 
-        let html .= "</div>" .
-            this->renderSidebar(model, mode) .
-            "</div>
+        let html .= "</div>" . this->renderSidebar(model, mode) .
+                "
+            </div>
         </form>";
 
         return html;
